@@ -19,7 +19,7 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanFrameBufferInstance.h"
 #include "VulkanHelpers.h"
-#include "base/ASLTypes.h"
+#include "risingleaf_shared/base/ASLTypes.h"
 
 
 void VulkanObjects::VulkanSwapChainInstance::Create(const VulkanCommandPool *command_pool, const uint32_t width, const uint32_t height)

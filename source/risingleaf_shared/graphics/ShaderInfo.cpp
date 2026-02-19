@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #include "ShaderInfo.h"
 
@@ -19,13 +20,9 @@
 
 #include "graphics_layer.h"
 
-ShaderInfo::ShaderInfo()
-= default;
+ShaderInfo::ShaderInfo() = default;
 
-void ShaderInfo::SetInputSize(const size_t size)
-{
-  VertexSize = size;
-}
+void ShaderInfo::SetInputSize(const size_t size) { VertexSize = size; }
 
 void ShaderInfo::AddInput(GraphicsTypes::ShaderType type, size_t offset, size_t location)
 {
@@ -34,18 +31,15 @@ void ShaderInfo::AddInput(GraphicsTypes::ShaderType type, size_t offset, size_t 
 
 void ShaderInfo::AddUniformVariable(GraphicsTypes::ShaderType type)
 {
-  UniformBufferEntry &entry  = SpecificUniformBuffer.emplace_back(type);
-  entry.Alignment            = graphics_layer::GetAlignmentOfType(type);
-  SpecificUniformBufferSize  = (SpecificUniformBufferSize + entry.Alignment - 1) & ~(entry.Alignment - 1);
-  entry.Offset               = SpecificUniformBufferSize;
-  entry.Size                 = graphics_layer::GetSizeOfType(entry.Type);
+  UniformBufferEntry &entry = SpecificUniformBuffer.emplace_back(type);
+  entry.Alignment           = graphics_layer::GetAlignmentOfType(type);
+  SpecificUniformBufferSize = (SpecificUniformBufferSize + entry.Alignment - 1) & ~(entry.Alignment - 1);
+  entry.Offset              = SpecificUniformBufferSize;
+  entry.Size                = graphics_layer::GetSizeOfType(entry.Type);
   SpecificUniformBufferSize += asl::max(entry.Size, entry.Alignment);
 }
 
-void ShaderInfo::AddTexture(std::string_view name)
-{
-  Textures.emplace_back(name);
-}
+void ShaderInfo::AddTexture(std::string_view name) { Textures.emplace_back(name); }
 
 void ShaderInfo::CopyUniformEntryToBuffer(unsigned char *destination, const void *data, const size_t index) const
 {
@@ -66,14 +60,7 @@ void ShaderInfo::Init()
 
     CommonUniformBufferSize = 0;
 
-    CommonUniformBuffer.emplace_back( GraphicsTypes::ShaderType::MAT4   );  // view
-    CommonUniformBuffer.emplace_back( GraphicsTypes::ShaderType::MAT4   );  // projection
-    CommonUniformBuffer.emplace_back( GraphicsTypes::ShaderType::MAT4   );  // inverse view
-    CommonUniformBuffer.emplace_back( GraphicsTypes::ShaderType::MAT4   );  // inverse projection
-    CommonUniformBuffer.emplace_back( GraphicsTypes::ShaderType::FLOAT3 );  // view position
-    CommonUniformBuffer.emplace_back( GraphicsTypes::ShaderType::FLOAT3 );  // light direction
-    CommonUniformBuffer.emplace_back( GraphicsTypes::ShaderType::FLOAT  );  // near
-    CommonUniformBuffer.emplace_back( GraphicsTypes::ShaderType::FLOAT  );  // far
+    CommonUniformBuffer.emplace_back(GraphicsTypes::ShaderType::FLOAT2); // scale
 
     for(auto &entry : CommonUniformBuffer)
     {
@@ -93,18 +80,9 @@ void ShaderInfo::Init()
 }
 
 
-
 void ShaderInfo::CopyCommonUniformDataToBuffer(unsigned char *destination, const CommonUniformBufferData &data)
 {
   auto it = CommonUniformBuffer.begin();
-  memcpy(destination + it->Offset, &data.view,              it->Size); ++it;
-  memcpy(destination + it->Offset, &data.proj,              it->Size); ++it;
-  memcpy(destination + it->Offset, &data.inverseView,       it->Size); ++it;
-  memcpy(destination + it->Offset, &data.inverseProjection, it->Size); ++it;
-  memcpy(destination + it->Offset, &data.near,              it->Size); ++it;
-  memcpy(destination + it->Offset, &data.far,               it->Size);
+  memcpy(destination + it->Offset, &data.scale, it->Size);
+  ++it;
 }
-
-
-
-

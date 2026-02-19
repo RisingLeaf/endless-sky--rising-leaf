@@ -18,8 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../Point.h"
 #include "../Swizzle.h"
 
-#include <cstdint>
-
+#include "risingleaf_shared/math/graphics_math/gm.h"
 #include "../risingleaf_shared/graphics/graphics_layer.h"
 
 class Sprite;

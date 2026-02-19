@@ -446,7 +446,8 @@ target_sources(EndlessSkyLib PRIVATE
 	text/WrappedText.h
 )
 
-target_link_libraries(EndlessSkyLib PRIVATE risingleaf_shared)
+target_include_directories(EndlessSkyLib PRIVATE ./)
+target_link_libraries(EndlessSkyLib PUBLIC risingleaf_shared)
 
 if(WIN32)
 	target_sources(EndlessSkyLib PRIVATE

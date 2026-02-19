@@ -437,8 +437,8 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 
 			Audio::Step(isFastForward);
 
-			graphics_layer::StartDraw(Screen::Width(), Screen::Height());
-			graphics_layer::StartMainRenderPass();
+		  GameWindow::GetInstance()->StartDraw(Screen::Width(), Screen::Height());
+			GameWindow::GetInstance()->StartMainRenderPass();
 
 			// Events in this frame may have cleared out the menu, in which case
 			// we should draw the game panels instead:
@@ -450,8 +450,8 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 			else if(isFastForward)
 				SpriteShader::Draw(SpriteSet::Get("ui/fast forward"), Screen::TopLeft() + Point(10., 10.));
 
-			graphics_layer::EndRenderPass();
-			graphics_layer::EndDraw(Screen::Width(), Screen::Height());
+			GameWindow::GetInstance()->EndRenderPass();
+			GameWindow::GetInstance()->EndDraw(Screen::Width(), Screen::Height());
 			GameWindow::Step();
 
 			// Lock the game loop to 60 FPS.

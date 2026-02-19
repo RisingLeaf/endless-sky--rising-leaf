@@ -18,7 +18,7 @@
 
 #include <vector>
 
-#include "math/graphics_math/gm.h"
+#include "risingleaf_shared/math/graphics_math/gm.h"
 
 namespace GraphicsTypes
 {
@@ -44,14 +44,7 @@ public:
 
   struct CommonUniformBufferData
   {
-    gm::mat4 view;
-    gm::mat4 proj;
-    gm::mat4 inverseView;
-    gm::mat4 inverseProjection;
-    gm::vec3 view_pos;
-    gm::vec3 light_dir;
-    float     near;
-    float     far;
+    gm::vec2 scale;
   };
 
 private:

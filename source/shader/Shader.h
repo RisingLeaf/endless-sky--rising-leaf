@@ -17,7 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <memory>
 
 #include "../risingleaf_shared/graphics/ShaderInfo.h"
-#include "graphics/graphics_toplevel_defines.h"
+#include "../risingleaf_shared/graphics/graphics_toplevel_defines.h"
 
 
 namespace File {

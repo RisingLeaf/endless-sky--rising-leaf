@@ -21,8 +21,8 @@
 #include <string>
 #include <typeinfo>
 
-#include "base/ASLTypes.h"
-#include "base/concepts.h"
+#include "risingleaf_shared/base/ASLTypes.h"
+#include "risingleaf_shared/base/concepts.h"
 
 namespace gm
 {

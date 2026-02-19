@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <string>
 
-#include "graphics/graphics_toplevel_defines.h"
+#include "risingleaf_shared/graphics/graphics_toplevel_defines.h"
 
 // This class is a collection of global functions for handling SDL_Windows.
 class GameWindow {

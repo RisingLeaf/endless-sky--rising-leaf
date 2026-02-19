@@ -219,6 +219,7 @@ endif()
 
 # Link with the library dependencies.
 target_link_libraries(EndlessSky PRIVATE ExternalLibraries EndlessSkyLib $<TARGET_NAME_IF_EXISTS:SDL3::SDL3main>)
+target_include_directories(EndlessSky PRIVATE source)
 
 # Compile Shaders:
 include_directories(shaders)

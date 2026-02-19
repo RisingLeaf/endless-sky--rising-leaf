@@ -77,6 +77,7 @@ add_library(${LIB_NAME} STATIC ${SHARED_SOURCES})
 
 target_include_directories(${LIB_NAME} PUBLIC
         ../
+        ./
 )
 
 target_include_directories(${LIB_NAME} PUBLIC ./)
@@ -105,7 +106,7 @@ if (NOT ASTROLATIVE_BUILD_SYSTEM STREQUAL "wasm")
     endif ()
 
     target_include_directories(${LIB_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
-    target_link_libraries(${LIB_NAME} PUBLIC freetype ${Vulkan_LIBRARY_DIRS} luajit)
+    target_link_libraries(${LIB_NAME} PUBLIC freetype ${Vulkan_LIBRARY_DIRS})
 endif ()
 
 if (ASTROLATIVE_BUILD_SYSTEM STREQUAL "apple")
