@@ -1,0 +1,66 @@
+u_in vec2 start;
+u_in vec2 end;
+u_in float width;
+u_in int cap;
+u_in vec4 startColor;
+u_in vec4 endColor;
+
+v_in vec2 vert;
+v_out vec2 pos;
+v_out vec4 color;
+
+VS_BEGIN
+	// Construct a rectangle around the line that can accommodate a line of width "width".
+	vec2 unit = normalize(spec.end - spec.start);
+	// The vertex will originate from the start or endpoint of the line, depending on the input vertex data.
+	vec2 origin = vert.y > 0.0 ? spec.start : spec.end;
+	color = vert.y > 0.0 ? spec.startColor : spec.endColor;
+	// Pad the width by 1 so the SDFs have enough space to naturally anti-alias.
+	float widthOffset = spec.width + 1.;
+	// If the cap is rounded, offset along the unit vector by the width, as the cap is circular with radius
+	// "width" from the start/endpoints. This is also padded by 1 to allow for anti-aliasing.
+	float capOffset = (spec.cap == 1) ? widthOffset : 1.;
+	// The vertex position is the originating position plus an offset away from the line.
+	// The offset is a combination of a perpendicular offset of widthOffset and a normal offset of capOffset
+	// that is flipped into a different direction for each vertex, resulting in a rectangle that tightly
+	// covers the bounds of the line.
+	pos = origin + vec2(unit.y, -unit.x) * vert.x * widthOffset - unit * capOffset * vert.y;
+	// Transform the vertex position into es coordinates, so it can easily be consumed by the fragment shader,
+	// which has access to the start/end points of the line in es' coordinate system.
+	gl_Position     = vec4(pos / glob.scale, 0, 1);
+	gl_Position.y   = -gl_Position.y;
+	gl_Position.xy *= 2.0;
+VS_END
+
+// From https://iquilezles.org/articles/distfunctions2d/ - functions to get the distance from a point to a shape.
+float sdSegment(vec2 p, vec2 a, vec2 b)
+{
+	vec2 ab = b - a;
+	vec2 ap = p - a;
+	float h = clamp(dot(ap, ab) / dot(ab, ab), 0.0, 1.0);
+	return length(ap - h * ab);
+}
+
+float sdOrientedBox(vec2 p, vec2 a, vec2 b, float th)
+{
+	float l = length(b - a);
+	vec2 d = (b - a) / l;
+	vec2 q = (p - (a + b) * 0.5);
+	q = mat2(d.x, -d.y, d.y, d.x) * q;
+	q = abs(q) - vec2(l, th) * 0.5;
+	return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0);
+}
+
+FS_BEGIN
+	float dist;
+	if (spec.cap == 1) {
+		// Rounded caps can shortcut to a segment sdf.
+		// Segment sdf only provides a distance from the line itself so we manually subtract it from the width.
+		dist = spec.width - sdSegment(pos, spec.start, spec.end);
+	} else {
+		// Subtract from 1 here to add some AA.
+		dist = 1. - sdOrientedBox(pos, spec.start, spec.end, spec.width);
+	}
+	float alpha = clamp(dist, 0.0, 1.0);
+	out_color = color * alpha;
+FS_END

@@ -1,0 +1,31 @@
+u_in vec2  position;
+u_in float radius;
+u_in float width;
+u_in float angle;
+u_in float startAngle;
+u_in float dash;
+u_in vec4  color;
+
+v_in  vec2 vert;
+v_out vec2 coord;
+
+VS_BEGIN
+	coord        = (spec.radius + spec.width) * vert;
+	gl_Position  = vec4((coord + spec.position) * glob.scale, 0.f, 1.f);
+VS_END
+
+const float pi = 3.1415926535897932384626433832795;
+
+FS_BEGIN
+	float arc = mod(atan(coord.x, coord.y) + pi + spec.startAngle, 2.f * pi);
+	float arcFalloff = 1.f - min(2.f * pi - arc, arc - spec.angle) * spec.radius;
+	if(spec.dash != 0.f)
+	{
+		arc = mod(arc, spec.dash);
+		arcFalloff = min(arcFalloff, min(arc, spec.dash - arc) * spec.radius);
+	}
+	float len = length(coord);
+	float lenFalloff = spec.width - abs(len - spec.radius);
+	float alpha = clamp(min(arcFalloff, lenFalloff), 0.f, 1.f);
+	out_color = spec.color * alpha;
+FS_END

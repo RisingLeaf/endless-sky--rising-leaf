@@ -1,0 +1,24 @@
+u_in vec2 center;
+u_in vec2 angle;
+u_in vec2 size;
+u_in float offset;
+u_in vec4 color;
+
+v_in  vec2 vert;
+v_out vec2 coord;
+
+VS_BEGIN
+	coord = vert * spec.size.x;
+	vec2 base = spec.center + spec.angle * (spec.offset - spec.size.y * (vert.x + vert.y));
+	vec2 wing = vec2(spec.angle.y, -spec.angle.x) * (spec.size.x * .5 * (vert.x - vert.y));
+	gl_Position = vec4((base + wing) * glob.scale, 0, 1);
+VS_END
+
+FS_BEGIN
+	float height = (coord.x + coord.y) / spec.size.x;
+	float taper = height * height * height;
+	taper *= taper * .5 * spec.size.x;
+	float alpha = clamp(.8 * min(coord.x, coord.y) - taper, 0.f, 1.f);
+	alpha *= clamp(1.8 * (1. - height), 0.f, 1.f);
+	out_color = spec.color * alpha;
+FS_END

@@ -1,0 +1,22 @@
+u_in mat2 rotate;
+u_in vec2 translate;
+u_in float elongation;
+u_in float brightness;
+
+v_in  vec2 offset;
+v_in  float size;
+v_in  float corner;
+v_out float fragmentAlpha;
+v_out vec2  coord;
+
+VS_BEGIN
+	fragmentAlpha = spec.brightness * (4. / (4. + spec.elongation)) * size * .2 + .05;
+	coord = vec2(sin(corner), cos(corner));
+	vec2 elongated = vec2(coord.x * size, coord.y * (size + spec.elongation));
+	gl_Position = vec4((spec.rotate * elongated + spec.translate + offset) * glob.scale, 0, 1);
+VS_END
+
+FS_BEGIN
+	float alpha = fragmentAlpha * (1. - abs(coord.x) - abs(coord.y));
+	out_color = vec4(1, 1, 1, 1) * alpha;
+FS_END

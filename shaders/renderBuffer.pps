@@ -1,0 +1,36 @@
+u_in vec2 size;
+u_in vec2 position;
+u_in vec2 srcposition;
+u_in vec2 srcscale;
+u_in vec4 fade;
+
+v_in  vec2 vert;
+v_out vec2 tpos;
+v_out vec2 vpos;
+
+VS_BEGIN
+	gl_Position = vec4((spec.position + vert * spec.size) * glob.scale, 0, 1);
+	// Convert from vertex to texture coordinates.
+	vpos = vert + vec2(.5, .5);
+	vec2 tsize = spec.size * spec.srcscale;
+	vec2 tsrc  = spec.srcposition * spec.srcscale;
+	tpos = vpos * tsize + tsrc;
+	// Negative is up.
+	tpos.y = 1.0 - tpos.y;
+VS_END
+
+in_texture 2d tex;
+
+FS_BEGIN
+	float epsilon = .001;
+	float weightTop    = clamp((vpos.y + epsilon) / (spec.fade[0] + epsilon), 0.0, 1.0);
+	float weightBottom = clamp(((1.0 - vpos.y) + epsilon) / (spec.fade[1] + epsilon), 0.0, 1.0);
+	float weightLeft   = clamp((vpos.x + epsilon) / (spec.fade[2] + epsilon), 0.0, 1.0);
+	float weightRight  = clamp(((1.0 - vpos.x) + epsilon) / (spec.fade[3] + epsilon), 0.0, 1.0);
+	float weight = min(min(min(weightTop, weightBottom), weightLeft), weightRight);
+	if(tpos.x > 0.0 && tpos.y > 0.0 &&
+	   tpos.x < 1.0 && tpos.y < 1.0)
+		out_color = texture(tex, tpos) * weight;
+	else
+		discard;
+FS_END

@@ -1,0 +1,74 @@
+u_in vec2  position;
+u_in mat2  transform;
+u_in vec2  blur;
+u_in float clip;
+
+u_in float frame;
+u_in float frameCount;
+u_in mat4  swizzleMatrix;
+u_in int   useSwizzle;
+u_in float alpha;
+u_in int   useSwizzleMask;
+
+v_in  vec2 vert;
+v_out vec2 fragTexCoord;
+
+VS_BEGIN
+	vec2 blurOff = 2.f * vec2(vert.x * abs(spec.blur.x), vert.y * abs(spec.blur.y));
+	gl_Position = vec4((spec.transform * (vert + blurOff) + spec.position) * glob.scale, 0, 1);
+	vec2 texCoord = vert + vec2(.5, .5);
+	fragTexCoord = vec2(texCoord.x, min(spec.clip, texCoord.y)) + blurOff;
+VS_END
+
+in_texture 2darray tex;
+in_texture 2darray swizzleMask;
+
+const int range = 5;
+
+FS_BEGIN
+	float first  = floor(spec.frame);
+	float second = mod(ceil(spec.frame), spec.frameCount);
+	float fade   = spec.frame - first;
+
+	vec2 blur = spec.blur;
+
+	vec4 color;
+	if(blur.x == 0.f && blur.y == 0.f)
+	{
+		if(fade != 0.f)
+			color = mix(
+				texture(tex, vec3(fragTexCoord, first)),
+				texture(tex, vec3(fragTexCoord, second)), fade);
+		else
+			color = texture(tex, vec3(fragTexCoord, first));
+	}
+	else
+	{
+		color = vec4(0., 0., 0., 0.);
+		const float divisor = float(range * (range + 2) + 1);
+		for(int i = -range; i <= range; ++i)
+		{
+			float scaleW = float(range + 1 - abs(i)) / divisor;
+			vec2 coord = fragTexCoord + (blur * float(i)) / float(range);
+			if(fade != 0.f)
+				color += scaleW * mix(
+					texture(tex, vec3(coord, first)),
+					texture(tex, vec3(coord, second)), fade);
+			else
+				color += scaleW * texture(tex, vec3(coord, first));
+		}
+	}
+
+	if(spec.useSwizzle > 0)
+	{
+		vec4 swizzleColor = color * spec.swizzleMatrix;
+		if(spec.useSwizzleMask > 0)
+		{
+			float factor = texture(swizzleMask, vec3(fragTexCoord, first)).r;
+			color = color * factor + swizzleColor * (1.0 - factor);
+		}
+		else
+			color = swizzleColor;
+	}
+	out_color = color * spec.alpha;
+FS_END

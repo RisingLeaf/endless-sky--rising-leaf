@@ -1,0 +1,51 @@
+u_in vec2  position;
+u_in mat2  transform;
+u_in float frame;
+u_in float frameCount;
+u_in vec4  color;
+u_in vec2  off;
+
+v_in  vec2 vert;
+v_in  vec2 vertTexCoord;
+v_out vec2 fragTexCoord;
+
+VS_BEGIN
+	fragTexCoord = vertTexCoord;
+	gl_Position  = vec4((spec.transform * vert + spec.position) * glob.scale, 0, 1);
+VS_END
+
+in_texture 2darray tex;
+
+const vec4 weight = vec4(.4, .4, .4, 1.);
+
+float Sobel(float layer, vec2 tex_coord)
+{
+	float sum = 0.f;
+	for(int dy = -1; dy <= 1; ++dy)
+	{
+		for(int dx = -1; dx <= 1; ++dx)
+		{
+			vec2 center = tex_coord + .618034 * spec.off * vec2(dx, dy);
+			float nw = dot(texture(tex, vec3(center + vec2(-spec.off.x, -spec.off.y), layer)), weight);
+			float ne = dot(texture(tex, vec3(center + vec2( spec.off.x, -spec.off.y), layer)), weight);
+			float sw = dot(texture(tex, vec3(center + vec2(-spec.off.x,  spec.off.y), layer)), weight);
+			float se = dot(texture(tex, vec3(center + vec2( spec.off.x,  spec.off.y), layer)), weight);
+			float h = nw + sw - ne - se + 2.f * (
+				dot(texture(tex, vec3(center + vec2(-spec.off.x, 0.f), layer)), weight)
+				- dot(texture(tex, vec3(center + vec2( spec.off.x, 0.f), layer)), weight));
+			float v = nw + ne - sw - se + 2.f * (
+				dot(texture(tex, vec3(center + vec2(0.f, -spec.off.y), layer)), weight)
+				- dot(texture(tex, vec3(center + vec2(0.f,  spec.off.y), layer)), weight));
+			sum += h * h + v * v;
+		}
+	}
+	return sum;
+}
+
+FS_BEGIN
+	float first  = floor(spec.frame);
+	float second = mod(ceil(spec.frame), spec.frameCount);
+	float fade   = spec.frame - first;
+	float sum    = mix(Sobel(first, fragTexCoord), Sobel(second, fragTexCoord), fade);
+	out_color    = spec.color * sqrt(sum / 180.f);
+FS_END

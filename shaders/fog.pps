@@ -1,0 +1,16 @@
+u_in vec2 corner;
+u_in vec2 dimensions;
+
+v_in  vec2 vert;
+v_out vec2 fragTexCoord;
+
+VS_BEGIN
+	gl_Position = vec4(spec.corner + vert * spec.dimensions, 0, 1);
+	fragTexCoord = vert;
+VS_END
+
+in_texture 2d tex;
+
+FS_BEGIN
+    out_color = vec4(0, 0, 0, texture(tex, fragTexCoord).r);
+FS_END

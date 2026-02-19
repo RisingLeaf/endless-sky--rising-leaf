@@ -1,0 +1,13 @@
+u_in vec2 center;
+u_in vec2 size;
+u_in vec4 color;
+
+v_in vec2 vert;
+
+VS_BEGIN
+	gl_Position = vec4((spec.center + vert * spec.size) * glob.scale, 0, 1);
+VS_END
+
+FS_BEGIN
+	out_color = spec.color;
+FS_END
