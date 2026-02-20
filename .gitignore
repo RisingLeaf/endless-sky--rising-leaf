@@ -75,3 +75,5 @@ CMakeUserPresets.json
 
 # static code analysis
 /.scannerwork
+
+cmake-build*

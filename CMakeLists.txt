@@ -1,78 +1,36 @@
 cmake_minimum_required(VERSION 3.19...4.0)
 
 include(CMakeDependentOption)
-cmake_dependent_option(ES_GLES "Build the game with OpenGL ES" OFF UNIX OFF)
 cmake_dependent_option(ES_STEAM "Build the game for the Steam Linux runtime" OFF UNIX OFF)
 cmake_dependent_option(ES_CREATE_BUNDLE "Create a Bundle instead of an executable. Not suitable for development purposes." OFF APPLE OFF)
 
-# Support Debug and Release configurations.
 set(CMAKE_CONFIGURATION_TYPES "Debug" "Release" CACHE STRING "" FORCE)
 
-# Use C++20 without any compiler specific extensions.
 set(CMAKE_CXX_STANDARD 23 CACHE STRING "")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-# We don't use modules, so avoid using unrecognised compiler-specific commands that cmake produces when they are enabled.
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
-# Use LTO for Release builds only.
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
-# On Linux use relative RPATH.
 set(CMAKE_BUILD_RPATH_USE_ORIGIN ON)
 
-# Various helpful options for IDEs.
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT EndlessSky)
-set(CMAKE_VS_JUST_MY_CODE_DEBUGGING ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 
 project("Endless Sky" VERSION 0.10.17
 	DESCRIPTION "Space exploration, trading, and combat game."
 	HOMEPAGE_URL https://endless-sky.github.io/
 	LANGUAGES CXX)
 
-# Find the needed library dependencies.
-find_package(SDL3 CONFIG REQUIRED)
-find_package(libavif REQUIRED)
-if(NOT APPLE)
-	find_package(GLEW REQUIRED)
-endif()
-
-# Only very new versions of OpenAL provide a config package, so try to find it manually.
-find_package(OpenAL CONFIG QUIET)
-if(NOT OpenAL_FOUND)
-	find_library(OPENAL openal REQUIRED)
-	add_library(OpenAL UNKNOWN IMPORTED)
-	add_library(OpenAL::OpenAL ALIAS OpenAL)
-	set_target_properties(OpenAL PROPERTIES IMPORTED_LOCATION "${OPENAL}")
-endif()
-
-# FLAC's config is missing find_dependency(Threads), so include it here.
+add_subdirectory(dependencies/SDL3)
+add_subdirectory(dependencies/libavif)
+add_subdirectory(dependencies/openal-soft)
 find_package(Threads REQUIRED)
-include_directories(dependencies/flac)
+add_subdirectory(dependencies/flac)
 
-# Find the zip-reading component of zlib.
-find_package(ZLIB REQUIRED)
+add_subdirectory(dependencies/miniz)
 
-if(CMAKE_VERSION VERSION_LESS 3.31)
-	find_package(PkgConfig REQUIRED PkgConfig PkgConf)
-	pkg_check_modules(MINIZIP REQUIRED minizip)
-else()
-	cmake_pkg_config(EXTRACT minizip REQUIRED)
-	set(MINIZIP_LIBRARIES "minizip")
-endif()
-
-# Find the MinGW runtime DLLs.
 if(MINGW AND WIN32)
-	# On Windows copy the MinGW runtime DLLs to the output folder as well.
-	# This is to avoid the situation where a user has other MinGW runtime DLLs
-	# in their PATH that are incompatible with the MinGW used to compile ES.
 	get_filename_component(PARENT_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
 	get_filename_component(MINGW_RUNTIME_DIR "${PARENT_DIR}" DIRECTORY)
 
-	# MinGW doesn't have seh exceptions support for 32-bit Windows unfortunately,
-	# and requires libgcc_s_dw2-1.dll instead of libgcc_s_seh-1.dll. There's no
-	# perfect way to figure out which one to copy, so we simply copy both.
-	# The executable will choose the correct DLL anyways.
 	foreach(lib "stdc++-6" "winpthread-1" "gcc_s_seh-1" "gcc_s_dw2-1")
 		file(GLOB_RECURSE FILE_PATH "${MINGW_RUNTIME_DIR}/lib${lib}.dll")
 		if(FILE_PATH)
@@ -81,33 +39,18 @@ if(MINGW AND WIN32)
 	endforeach()
 endif()
 
-# Add the library target.
 add_subdirectory(source)
 
-# Create an interface library that contains common libraries for the game and unit tests.
 add_library(ExternalLibraries INTERFACE)
 target_link_libraries(EndlessSkyLib PUBLIC ExternalLibraries)
 
-# Enable sanitizers on debug builds, depending on platform support.
-if(NOT WIN32)
-	set(SANITIZER_OPTS "-g" "-fsanitize=address,undefined,pointer-compare,pointer-subtract,unreachable,builtin,integer-divide-by-zero,vla-bound,null,return,signed-integer-overflow,bounds,alignment,bool,enum,pointer-overflow")
-	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-		list(APPEND SANITIZER_OPTS "-fno-omit-frame-pointer" "-fsanitize=leak,vptr")
-	endif()
-endif()
-target_compile_options(EndlessSkyLib PUBLIC $<$<CONFIG:Debug>:${SANITIZER_OPTS}>)
-target_link_options(EndlessSkyLib PUBLIC $<$<CONFIG:Debug>:${SANITIZER_OPTS}>)
+target_link_libraries(ExternalLibraries INTERFACE SDL3::SDL3 avif flacapp miniz)
 
-# The 'mingw32' lib needs to be linked first.
+
 if(MINGW)
 	target_link_libraries(ExternalLibraries INTERFACE mingw32)
 endif()
 
-# Link with the general libraries.
-target_link_libraries(ExternalLibraries INTERFACE SDL3::SDL3 avif
-	OpenAL::OpenAL ${MINIZIP_LIBRARIES} flac "$<IF:$<CONFIG:Debug>,${LIBMAD_LIB_DEBUG},${LIBMAD_LIB_RELEASE}>")
-
-# Link the needed OS-specific dependencies, if any.
 if(WIN32)
 	target_link_libraries(ExternalLibraries INTERFACE rpcrt4 Winmm)
 elseif(ES_LINK_LIBATOMIC)
@@ -118,47 +61,16 @@ endif()
 
 # Link with the UUID library, which is different for each OS.
 if(UNIX)
-	if(APPLE)
-		find_library(UUID_LIB NAMES System PATHS /lib /usr/lib /usr/local/lib)
-		find_path(UUID_INCLUDE uuid/uuid.h /usr/local/include /usr/include)
-		target_link_libraries(ExternalLibraries INTERFACE "${UUID_LIB}")
-		target_include_directories(ExternalLibraries INTERFACE "${UUID_INCLUDE}")
-	else()
-		find_library(UUID_LIB uuid)
-		target_link_libraries(ExternalLibraries INTERFACE "${UUID_LIB}")
-	endif()
+	find_library(UUID_LIB uuid)
+	target_link_libraries(ExternalLibraries INTERFACE "${UUID_LIB}")
+	message("uuid:${UUID_LIB}")
 endif()
 
-# Link with OpenGL or OpenGL ES.
-if(ES_GLES)
-	find_package(OpenGL REQUIRED OpenGL EGL)
-	target_link_libraries(ExternalLibraries INTERFACE OpenGL::OpenGL OpenGL::EGL)
-	target_compile_definitions(EndlessSkyLib PUBLIC ES_GLES)
-else()
-	# The Steam runtime can't rely on GLVND being available, so link against the legacy interface.
-	if(ES_STEAM)
-		set(OpenGL_GL_PREFERENCE "LEGACY")
-	endif()
-
-	find_package(OpenGL REQUIRED)
-	target_link_libraries(ExternalLibraries INTERFACE OpenGL::GL)
-
-	if(APPLE)
-		# Apple deprecated OpenGL in MacOS 10.14, but we don't care.
-		target_compile_definitions(EndlessSkyLib PUBLIC GL_SILENCE_DEPRECATION)
-	else()
-		# GLEW is only needed on Linux and Windows.
-		target_link_libraries(ExternalLibraries INTERFACE GLEW::glew)
-	endif()
-endif()
-
-# Setup for the testing frameworks.
 include(CTest)
 if(BUILD_TESTING)
 	add_subdirectory(tests)
 endif()
 
-# Create game target.
 if(APPLE AND ES_CREATE_BUNDLE)
 	add_executable(EndlessSky MACOSX_BUNDLE source/main.cpp)
 
@@ -180,7 +92,6 @@ if(APPLE AND ES_CREATE_BUNDLE)
 		endforeach()
 	endforeach()
 
-	# Create the icns file, required for the bundle icon.
 	add_custom_command(
 		OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/icons/endless-sky.icns"
 		COMMAND iconutil -c icns -o icons/endless-sky.icns icons/endless-sky.iconset
@@ -191,13 +102,11 @@ if(APPLE AND ES_CREATE_BUNDLE)
 			icons/endless-sky.iconset/icon_512x512.png icons/endless-sky.iconset/icon_512x512@2x.png
 		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}" VERBATIM)
 
-	# Now do the same to standalone files.
 	foreach(file "license.txt" "keys.txt" "credits.txt" "copyright" "changelog" "icons/endless-sky.icns")
 		target_sources(EndlessSky PRIVATE ${file})
 		set_source_files_properties(${file} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources/")
 	endforeach()
 
-	# Add plist to bundle.
 	set_target_properties(EndlessSky PROPERTIES
 		MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_LIST_DIR}/resources/EndlessSky-Info.plist"
 		XCODE_ATTRIBUTE_ASSETCATALOG_COMPILER_APPICON_NAME endless-sky)
@@ -217,14 +126,10 @@ else()
 	set_target_properties(EndlessSky PROPERTIES OUTPUT_NAME "endless-sky")
 endif()
 
-# Link with the library dependencies.
-target_link_libraries(EndlessSky PRIVATE ExternalLibraries EndlessSkyLib $<TARGET_NAME_IF_EXISTS:SDL3::SDL3main>)
-target_include_directories(EndlessSky PRIVATE source)
+target_link_libraries(EndlessSky PRIVATE ExternalLibraries EndlessSkyLib)
 
-# Compile Shaders:
-include_directories(shaders)
+add_subdirectory(shaders)
 
-# Copy the MinGW runtime DLLs if necessary.
 if(MINGW AND WIN32)
 	foreach(FILE_PATH ${MINGW_RUNTIME})
 		add_custom_command(TARGET EndlessSky POST_BUILD
@@ -236,14 +141,11 @@ if(MINGW AND WIN32)
 	endforeach()
 endif()
 
-# Installation configurations.
 if(APPLE)
 	install(TARGETS EndlessSky CONFIGURATIONS Release BUNDLE DESTINATION .)
 elseif(WIN32)
-	# Install the binary.
 	install(TARGETS EndlessSky CONFIGURATIONS Release RUNTIME DESTINATION .)
 
-	# Install the resource files.
 	install(DIRECTORY data DESTINATION .)
 	install(DIRECTORY images DESTINATION .)
 	install(DIRECTORY shaders DESTINATION .)
@@ -254,7 +156,6 @@ elseif(WIN32)
 	install(FILES changelog DESTINATION .)
 	install(FILES license.txt DESTINATION .)
 
-	# NSIS installer configuration.
 	set(CPACK_PACKAGE_VENDOR "Endless Sky")
 	set(CPACK_PACKAGE_INSTALL_DIRECTORY "Endless Sky")
 	set(CPACK_GENERATOR "NSIS")
@@ -268,27 +169,21 @@ elseif(WIN32)
 	set(CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP "${CMAKE_CURRENT_SOURCE_DIR}\\\\installer\\\\welcome.bmp")
 	set(CPACK_NSIS_MUI_HEADERIMAGE "${CMAKE_CURRENT_SOURCE_DIR}\\\\installer\\\\header.bmp")
 	set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS
-		# Clear the previous contents of the installation directory to prevent data conflicts.
 		"RMDir /r $INSTDIR")
 	include(CPack)
 elseif(UNIX)
-	# Install the binary.
 	install(TARGETS EndlessSky CONFIGURATIONS Release RUNTIME DESTINATION games)
 
-	# Install the desktop file.
 	install(FILES io.github.endless_sky.endless_sky.desktop DESTINATION share/applications)
 
-	# Install app center metadata.
 	install(FILES io.github.endless_sky.endless_sky.appdata.xml DESTINATION share/metainfo)
 
-	# Install icons, keeping track of all the paths.
 	# Most Ubuntu apps supply 16, 22, 24, 32, 48, and 256, and sometimes others.
 	foreach(size "16x16" "22x22" "24x24" "32x32" "48x48" "128x128" "256x256" "512x512")
 		install(FILES "icons/icon_${size}.png" DESTINATION "share/icons/hicolor/${size}/apps"
 			RENAME endless-sky.png)
 	endforeach()
 
-	# Gzip and install man file.
 	add_custom_command(
 		OUTPUT endless-sky.6.gz
 		COMMAND gzip -c endless-sky.6 > ${CMAKE_CURRENT_BINARY_DIR}/endless-sky.6.gz
@@ -298,7 +193,6 @@ elseif(UNIX)
 	target_sources(EndlessSky PRIVATE endless-sky.6.gz)
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/endless-sky.6.gz DESTINATION share/man/man6)
 
-	# Install the resource files.
 	install(DIRECTORY data DESTINATION share/games/endless-sky)
 	install(DIRECTORY images DESTINATION share/games/endless-sky)
 	install(DIRECTORY shaders DESTINATION share/games/endless-sky)
@@ -309,9 +203,3 @@ elseif(UNIX)
 	install(FILES changelog DESTINATION share/doc/endless-sky)
 	install(FILES license.txt DESTINATION share/doc/endless-sky)
 endif()
-
-# Create symlink to compile_commands.json from build/ so it's LSP-discoverable.
-execute_process(
-	COMMAND ${CMAKE_COMMAND} -E create_symlink
-	${CMAKE_BINARY_DIR}/compile_commands.json
-	${CMAKE_CURRENT_SOURCE_DIR}/build/compile_commands.json)
