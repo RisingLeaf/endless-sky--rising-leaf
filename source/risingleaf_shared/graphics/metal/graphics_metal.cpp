@@ -27,10 +27,11 @@
 #include "graphics/ShaderInfo.h"
 #include "system/File.h"
 #include "system/Log.h"
-#include "system/Window.h"
 
 #include <memory>
 #include <mutex>
+
+#include "GameWindow.h"
 
 
 namespace graphics_metal
@@ -460,14 +461,14 @@ namespace graphics_metal
   }
 } // namespace graphics_metal
 
-graphics_metal::MetalGraphicsInstance::MetalGraphicsInstance(Window &window)
+graphics_metal::MetalGraphicsInstance::MetalGraphicsInstance(int width, int height)
 {
   ShaderInfo::Init();
 
-  Device = static_cast<MTL::Device *>(swift_retrieve_metal_device());
+  Device = MTL::CreateSystemDefaultDevice();
 
-  int width, height;
-  window.GetSize(width, height);
+  View = SDL_Metal_CreateView(GameWindow::GetWindow());
+  Layer = reinterpret_cast<CA::MetalLayer *>(SDL_Metal_GetLayer(View));
 
   CurrentDrawable = nullptr;
 
@@ -818,13 +819,12 @@ void graphics_metal::MetalGraphicsInstance::Resize(const int width, const int he
   graphics_metal::Resize(this, width, height);
 }
 
-bool graphics_metal::MetalGraphicsInstance::StartDraw(Window &)
+bool graphics_metal::MetalGraphicsInstance::StartDraw(int width, int height)
 {
-
   // This moves to StartMain
-  auto           *next_drawable = static_cast<CA::MetalDrawable *>(swift_retrieve_next_drawable());
+  auto           *next_drawable = Layer->nextDrawable();
   std::lock_guard guard(DrawableMutex);
-  if(next_drawable && DrawableAvailable)
+  if(next_drawable)// && DrawableAvailable)
   {
     CurrentDrawable   = next_drawable;
     DrawableAvailable = false;
@@ -1057,12 +1057,12 @@ void graphics_metal::MetalGraphicsInstance::EndRenderPass()
   current_encoder = nullptr;
 }
 
-void graphics_metal::MetalGraphicsInstance::EndDraw(Window &)
+void graphics_metal::MetalGraphicsInstance::EndDraw(int width, int height)
 {
   if(CurrentDrawable)
   {
     current_buffer->presentDrawable(CurrentDrawable);
-    swift_msg_draw_finished();
+    //swift_msg_draw_finished();
   }
   CurrentDrawable = nullptr;
   current_buffer->commit();

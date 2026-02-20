@@ -20,6 +20,8 @@
 #include <mutex>
 #include <vector>
 
+#include <SDL3/SDL_metal.h>
+
 #include "graphics/graphics_toplevel_defines.h"
 
 namespace File
@@ -39,6 +41,7 @@ namespace MTL
 namespace CA
 {
   class MetalDrawable;
+  class MetalLayer;
 }
 
 namespace graphics_metal
@@ -49,6 +52,8 @@ namespace graphics_metal
   class MetalGraphicsInstance final : public GraphicsTypes::GraphicsInstance
   {
     MTL::Device       *Device            = nullptr;
+    SDL_MetalView      View;
+    CA::MetalLayer    *Layer             = nullptr;
     CA::MetalDrawable *CurrentDrawable   = nullptr;
     MTL::CommandQueue *MetalCommandQueue = nullptr;
 
@@ -69,7 +74,7 @@ namespace graphics_metal
     friend const MTL::RenderPipelineState *GetPipelineForState(const MetalGraphicsInstance *instance, const MetalPipelineState &state);
 
   public:
-    explicit MetalGraphicsInstance(class Window &window);
+    explicit MetalGraphicsInstance(int width, int height);
 
     void CreateShader(std::unique_ptr<GraphicsTypes::ShaderInstance> &shader_instance, const ShaderInfo &shader_info, const std::vector<File::ShaderString> &shader_code) const override;
 
@@ -89,7 +94,7 @@ namespace graphics_metal
 
     void Resize(int width, int height) override;
 
-    bool StartDraw(Window &window) override;
+    bool StartDraw(int width, int height) override;
 
     void SetState(const GraphicsTypes::RenderState &state) const override;
 
@@ -112,7 +117,7 @@ namespace graphics_metal
     void StartMainRenderPass() override;
     void EndRenderPass() override;
 
-    void EndDraw(Window &window) override;
+    void EndDraw(int width, int height) override;
 
     void Wait() override;
     ~MetalGraphicsInstance() override;

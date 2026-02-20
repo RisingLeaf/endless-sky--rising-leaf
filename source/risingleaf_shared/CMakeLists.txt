@@ -76,47 +76,41 @@ endif ()
 add_library(${LIB_NAME} STATIC ${SHARED_SOURCES})
 
 target_include_directories(${LIB_NAME} PUBLIC
+        ./
         ../
 )
 
-target_include_directories(${LIB_NAME} PUBLIC ./)
 
-if (ASTROLATIVE_BUILD_SYSTEM STREQUAL "apple")
-    target_include_directories(${LIB_NAME} PRIVATE external/metal-cpp/)
-    target_include_directories(${LIB_NAME} PRIVATE external/metal-cpp-extensions/)
-elseif (ASTROLATIVE_BUILD_SYSTEM STREQUAL "wasm")
-    target_compile_definitions(${LIB_NAME} PUBLIC ASL_BUILD_WASM)
+if (APPLE)
+    target_include_directories(${LIB_NAME} PRIVATE ./external/metal-cpp/)
+    target_include_directories(${LIB_NAME} PRIVATE ./external/metal-cpp-extensions/)
 else ()
     find_package(Vulkan REQUIRED)
 endif ()
 
 
-if (NOT ASTROLATIVE_BUILD_SYSTEM STREQUAL "wasm")
-    include(FetchContent)
-    FetchContent_Declare(
-            freetype
-            GIT_REPOSITORY https://gitlab.freedesktop.org/freetype/freetype.git
-            GIT_TAG VER-2-14-1
-    )
-    FetchContent_MakeAvailable(freetype)
+include(FetchContent)
+FetchContent_Declare(
+        freetype
+        GIT_REPOSITORY https://gitlab.freedesktop.org/freetype/freetype.git
+        GIT_TAG VER-2-14-1
+)
+FetchContent_MakeAvailable(freetype)
 
-    if (NOT ASTROLATIVE_BUILD_SYSTEM STREQUAL "apple")
-        find_package(Vulkan REQUIRED)
-    endif ()
-
-    target_include_directories(${LIB_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
-    target_link_libraries(${LIB_NAME} PUBLIC freetype ${Vulkan_LIBRARY_DIRS} luajit)
+if (NOT APPLE)
+    find_package(Vulkan REQUIRED)
 endif ()
 
-if (ASTROLATIVE_BUILD_SYSTEM STREQUAL "apple")
+target_include_directories(${LIB_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
+target_link_libraries(${LIB_NAME} PUBLIC freetype ${Vulkan_LIBRARY_DIRS} SDL3::SDL3)
+
+if (APPLE)
     target_link_libraries(${LIB_NAME} PRIVATE
             "-framework Foundation"
             "-framework Metal"
             "-framework QuartzCore"
             "-framework MetalKit"
     )
-elseif (ASTROLATIVE_BUILD_SYSTEM STREQUAL "wasm")
-    target_include_directories(${LIB_NAME} PUBLIC "${EMSCRIPTEN_SYSROOT}/include/freetype2/")
 else ()
     target_link_libraries(${LIB_NAME} PRIVATE Vulkan::Vulkan)
 endif ()

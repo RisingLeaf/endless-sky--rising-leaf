@@ -7,7 +7,7 @@ list(LENGTH GLSL_SOURCE_FILES shader_count)
 list(JOIN   GLSL_SOURCE_FILES "\n   " shader_out_string)
 message(STATUS "Found ${shader_count} shaders:\n   ${shader_out_string}")
 
-if(ASTROLATIVE_BUILD_SYSTEM STREQUAL "apple")
+if(APPLE)
     foreach(GLSL ${GLSL_SOURCE_FILES})
         get_filename_component(GLSL_NAME ${GLSL} NAME_WLE)
         get_filename_component(GLSL_EXTENSION ${GLSL} EXT)
