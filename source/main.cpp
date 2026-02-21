@@ -54,9 +54,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <map>
 
 #include <cassert>
-#include <future>
 #include <exception>
+#include <future>
 #include <string>
+#include <thread>
 
 #ifdef _WIN32
 #define STRICT

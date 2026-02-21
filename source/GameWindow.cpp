@@ -146,7 +146,12 @@ bool GameWindow::Init(bool headless)
   }
 
   // Settings that must be declared before the window creation.
+#ifndef __APPLE__
   Uint32 flags = SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+#else
+  Uint32 flags = SDL_WINDOW_METAL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
+#endif
+
 
   if(Preferences::ScreenModeSetting() == "fullscreen") flags |= SDL_WINDOW_FULLSCREEN;
   else if(Preferences::Has("maximized")) flags |= SDL_WINDOW_MAXIMIZED;

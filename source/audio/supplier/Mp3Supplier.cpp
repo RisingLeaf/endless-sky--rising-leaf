@@ -15,7 +15,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Mp3Supplier.h"
 
-#include <mad.h>
+#define MA_IMPLEMENTATION
+#include <miniaudio.h>
 
 #include <array>
 #include <cmath>
@@ -25,110 +26,69 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 
-
-Mp3Supplier::Mp3Supplier(shared_ptr<iostream> data, bool looping)
-	: AsyncAudioSupplier(std::move(data), looping)
-{
-}
-
+Mp3Supplier::Mp3Supplier(shared_ptr<iostream> data, bool looping) : AsyncAudioSupplier(std::move(data), looping) {}
 
 
 void Mp3Supplier::Decode()
 {
-	// This vector will store the input from the file.
-	array<unsigned char, INPUT_CHUNK> input{};
-	vector<sample_t> samples;
-	// Objects for MP3 decoding:
-	mad_stream stream;
-	mad_frame frame;
-	mad_synth synth;
+  std::vector<sample_t> samples;
+  ma_decoder decoder;
 
-	// Initialize the decoder.
-	mad_stream_init(&stream);
-	mad_frame_init(&frame);
-	mad_synth_init(&synth);
+  ma_decoder_config config = ma_decoder_config_init(
+      ma_format_s16,  // match sample_t if int16_t
+      0,              // auto channels
+      0               // auto sample rate
+  );
 
-	// Loop until we are done.
-	while(true)
-	{
-		// If the "next" buffer has filled up, wait until it is retrieved.
-		// Generally try to queue up two chunks worth of samples in it, just
-		// in case NextChunk() gets called twice in rapid succession.
-		AwaitBufferSpace();
-		// Check if we're done.
-		if(done)
-		{
-			PadBuffer();
-			break;
-		}
+  if (ma_decoder_init(OnRead, nullptr, this, &config, &decoder) != MA_SUCCESS)
+    return;
 
-		// See if any input data is left undecoded in the stream. Typically
-		// this is because the last block of input contained a fraction of a
-		// full MP3 frame.
-		size_t remainder = 0;
-		if(stream.next_frame && stream.next_frame < stream.bufend)
-			remainder = stream.bufend - stream.next_frame;
-		if(remainder)
-			memcpy(input.data(), stream.next_frame, remainder);
+  constexpr ma_uint64 framesPerChunk = 4096;
+  std::vector<ma_int16> pcmBuffer(framesPerChunk * 2); // 2 = max stereo
 
-		// Now, read a chunk of data from the file.
-		size_t read = ReadInput(reinterpret_cast<char *>(input.data() + remainder), INPUT_CHUNK - remainder);
+  while (true)
+  {
+    AwaitBufferSpace();
 
-		// If there is nothing to decode, return to the top of this loop.
-		if(!(read + remainder))
-		{
-			if(done)
-			{
-				AddBufferData(samples);
-				break;
-			}
-			continue;
-		}
+    if (done)
+    {
+      PadBuffer();
+      break;
+    }
 
-		// Hand the input to the stream decoder.
-		mad_stream_buffer(&stream, &input.front(), read + remainder);
+    ma_uint64 framesRead = 0;
+    ma_result result = ma_decoder_read_pcm_frames(
+        &decoder,
+        pcmBuffer.data(),
+        framesPerChunk,
+        &framesRead
+    );
 
-		// Loop through the decoded result for that input block.
-		while(true)
-		{
-			// Decode the next frame, and check if there is an error.
-			if(mad_frame_decode(&frame, &stream))
-			{
-				// For recoverable errors, keep going.
-				if(MAD_RECOVERABLE(stream.error))
-					continue;
-				else
-					break;
-			}
-			// Convert the decoded audio into a PCM signal.
-			mad_synth_frame(&synth, &frame);
+    if (result == MA_AT_END || framesRead == 0)
+    {
+      AddBufferData(samples);
+      break;
+    }
 
-			// If the source is mono, read both output channels from the left input.
-			// Otherwise, read two separate input channels.
-			mad_fixed_t *channels[2] = {
-				synth.pcm.samples[0],
-				synth.pcm.samples[synth.pcm.channels > 1]
-			};
+    size_t totalSamples = framesRead * decoder.outputChannels;
+    samples.insert(samples.end(), pcmBuffer.begin(), pcmBuffer.begin() + totalSamples);
 
-			// We'll alternate what channel we read from each time through the loop.
-			bool channel = false;
-			for(unsigned i = 0; i < 2 * synth.pcm.length; ++i)
-			{
-				// Read the next sample from the next channel.
-				mad_fixed_t sample = *channels[channel]++;
-				channel = !channel;
+    AddBufferData(samples);
+    samples.clear();
+  }
 
-				// Clip and scale the sample to 16 bits.
-				sample += (1L << (MAD_F_FRACBITS - 16));
-				sample = max(-MAD_F_ONE, min(MAD_F_ONE - 1, sample));
-				samples.emplace_back(sample >> (MAD_F_FRACBITS + 1 - 16));
-			}
-		}
-		AddBufferData(samples);
-	}
+  ma_decoder_uninit(&decoder);
+}
 
-	// Clean up.
-	mad_synth_finish(&synth);
-	mad_frame_finish(&frame);
-	mad_stream_finish(&stream);
+ma_result Mp3Supplier::OnRead(ma_decoder *pDecoder, void *pBufferOut, size_t bytesToRead, size_t *pBytesRead)
+{
+  Mp3Supplier *self = reinterpret_cast<Mp3Supplier *>(pDecoder->pUserData);
+
+  size_t read = self->ReadInput(reinterpret_cast<char *>(pBufferOut), bytesToRead);
+
+  if(pBytesRead) *pBytesRead = read;
+
+  if(read == 0) return MA_AT_END;
+
+  return MA_SUCCESS;
 }

@@ -15,7 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include <minizip/unzip.h>
+#include <miniz.h>
 
 #include <filesystem>
 #include <mutex>
@@ -39,29 +39,29 @@ public:
 	/// @param recursive List all files in the subtree, rather than just the top level.
 	/// @param directories Whether to list only directories instead of only regular files.
 	std::vector<std::filesystem::path> ListFiles(const std::filesystem::path &directory, bool recursive,
-		bool directories) const;
+		bool directories);
 
 	/// Checks whether the given file or directory exists in the zip.
 	/// @param filePath The complete file path, including the zip's path.
-	bool Exists(const std::filesystem::path &filePath) const;
+	bool Exists(const std::filesystem::path &filePath);
 
 	/// Reads a frp, from the zip.
 	/// @param filePath The complete file path, including the zip's path.
-	std::string ReadFile(const std::filesystem::path &filePath) const;
+	std::string ReadFile(const std::filesystem::path &filePath);
 
 
 private:
 	/// Translates a global filesystem path to a relative path within the zip file.
 	/// @param path The complete file path, including the zip's path.
-	std::filesystem::path GetPathInZip(const std::filesystem::path &path) const;
+	std::filesystem::path GetPathInZip(const std::filesystem::path &path);
 	/// Translates an in-zip relative path to a global filesystem path.
 	/// @param path The in-zip path, without the zip's own path.
-	std::filesystem::path GetGlobalPath(const std::filesystem::path &path) const;
+	std::filesystem::path GetGlobalPath(const std::filesystem::path &path);
 
 
 private:
 	/// The zip handle
-	unzFile zipFile = nullptr;
+	mz_zip_archive zipFile;
 	/// The path of the zip file in the filesystem
 	std::filesystem::path basePath;
 	/// The name of the top-level directory inside the zip, or an empty string if it doesn't have such a directory

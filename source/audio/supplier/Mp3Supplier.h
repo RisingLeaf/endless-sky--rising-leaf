@@ -16,7 +16,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "AsyncAudioSupplier.h"
-
+#include "miniaudio.h"
 
 
 /// Streams audio from an MP3 file.
@@ -28,4 +28,10 @@ public:
 private:
 	/// This is the entry point for the decoding thread.
 	void Decode() override;
+
+  static ma_result OnRead(
+    ma_decoder* pDecoder,
+    void* pBufferOut,
+    size_t bytesToRead,
+    size_t* pBytesRead);
 };

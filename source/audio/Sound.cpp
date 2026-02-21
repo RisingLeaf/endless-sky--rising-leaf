@@ -19,7 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../Logger.h"
 #include "supplier/WavSupplier.h"
 
-#include <cstdint>
+#include <iostream>
 
 using namespace std;
 

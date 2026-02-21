@@ -19,11 +19,13 @@ project("Endless Sky" VERSION 0.10.17
 
 add_subdirectory(dependencies/SDL3)
 add_subdirectory(dependencies/libavif)
+add_subdirectory(dependencies/libjpeg-turbo)
 add_subdirectory(dependencies/openal-soft)
 find_package(Threads REQUIRED)
 add_subdirectory(dependencies/flac)
 
 add_subdirectory(dependencies/miniz)
+add_subdirectory(dependencies/miniaudio)
 
 if(MINGW AND WIN32)
 	get_filename_component(PARENT_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
@@ -42,7 +44,7 @@ add_subdirectory(source)
 add_library(ExternalLibraries INTERFACE)
 target_link_libraries(EndlessSkyLib PUBLIC ExternalLibraries)
 
-target_link_libraries(ExternalLibraries INTERFACE SDL3::SDL3 avif flacapp miniz)
+target_link_libraries(ExternalLibraries INTERFACE SDL3::SDL3 avif FLAC::FLAC++ miniz OpenAL miniaudio libjpeg_turbo)
 
 
 if(MINGW)
@@ -57,11 +59,10 @@ else()
 	target_link_libraries(ExternalLibraries INTERFACE pthread)
 endif()
 
-# Link with the UUID library, which is different for each OS.
-if(UNIX)
-	find_library(UUID_LIB uuid)
+if(APPLE)
+else()
+	find_library(UUID_LIB uuid REQUIRED)
 	target_link_libraries(ExternalLibraries INTERFACE "${UUID_LIB}")
-	message("uuid:${UUID_LIB}")
 endif()
 
 include(CTest)

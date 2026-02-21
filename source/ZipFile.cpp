@@ -19,6 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <functional>
 #include <numeric>
+#include <ranges>
 
 using namespace std;
 
@@ -27,8 +28,7 @@ using namespace std;
 ZipFile::ZipFile(const filesystem::path &zipPath)
 	: basePath(zipPath)
 {
-	zipFile = unzOpen(basePath.string().c_str());
-	if(!zipFile)
+	if(!mz_zip_reader_init_file(&zipFile, basePath.string().c_str(), 0))
 		throw runtime_error("Failed to open ZIP file" + zipPath.generic_string());
 
 	// Check whether this zip has a single top-level directory (such as high-dpi.zip/high-dpi)
@@ -48,83 +48,66 @@ ZipFile::ZipFile(const filesystem::path &zipPath)
 
 ZipFile::~ZipFile()
 {
-	if(zipFile)
-	{
-		unzClose(zipFile);
-	}
+	mz_zip_reader_end(&zipFile);
 }
 
 
 
-vector<filesystem::path> ZipFile::ListFiles(const filesystem::path &directory, bool recursive, bool directories) const
+vector<filesystem::path> ZipFile::ListFiles(const filesystem::path &directory, bool recursive, bool directories)
 {
 	filesystem::path relative = GetPathInZip(directory);
 	vector<filesystem::path> fileList;
 
-	if(unzGoToFirstFile(zipFile) != UNZ_OK)
-		throw runtime_error("Failed to go to first file in ZIP");
-	do {
-		char filename[256];
-		unz_file_info fileInfo;
-		unzGetCurrentFileInfo(zipFile, &fileInfo, filename, sizeof(filename), NULL, 0, NULL, 0);
-
-		filesystem::path zipEntry = filename;
-		bool isDirectory = string(filename).back() == '/';
-		bool isValidSubtree = Files::IsParent(relative, zipEntry);
-		bool isRecursive = distance(zipEntry.begin(), zipEntry.end()) == distance(relative.begin(), relative.end()) + 1;
-
-		if(isValidSubtree && isDirectory == directories && (!isRecursive || recursive))
-			fileList.push_back(GetGlobalPath(zipEntry));
-	} while(unzGoToNextFile(zipFile) == UNZ_OK);
+  mz_uint count = mz_zip_reader_get_num_files(&zipFile);
+  for(mz_uint i = 0; i < count; i++)
+  {
+    mz_zip_archive_file_stat file_stat;
+    if(!mz_zip_reader_file_stat(&zipFile, i, &file_stat))
+      continue;
+    filesystem::path zipEntry = file_stat.m_filename;
+    bool isValidSubtree = Files::IsParent(relative, zipEntry);
+    bool isRecursive = distance(zipEntry.begin(), zipEntry.end()) == distance(relative.begin(), relative.end()) + 1;
+    if(isValidSubtree && file_stat.m_is_directory == directories && (!isRecursive || recursive))
+      fileList.push_back(GetGlobalPath(zipEntry));
+  }
 
 	return fileList;
 }
 
 
 
-bool ZipFile::Exists(const filesystem::path &filePath) const
+bool ZipFile::Exists(const filesystem::path &filePath)
 {
 	filesystem::path relative = GetPathInZip(filePath);
 	string name = relative.generic_string();
 
-	return unzLocateFile(zipFile, name.c_str(), 0) == UNZ_OK ||
-			unzLocateFile(zipFile, (name + "/").c_str(), 0) == UNZ_OK;
+  return mz_zip_reader_locate_file(&zipFile, name.c_str(), nullptr, 0) > 0
+    || mz_zip_reader_locate_file(&zipFile, name.c_str(), nullptr, 0) > 0;
 }
 
 
 
-string ZipFile::ReadFile(const filesystem::path &filePath) const
+string ZipFile::ReadFile(const filesystem::path &filePath)
 {
-	filesystem::path relative = GetPathInZip(filePath);
+	const filesystem::path relative = GetPathInZip(filePath);
 
-	if(unzLocateFile(zipFile, relative.generic_string().c_str(), 0) != UNZ_OK)
+  const int index = mz_zip_reader_locate_file(&zipFile, relative.generic_string().c_str(), nullptr, 0);
+	if(index < 0)
 		return {};
 
-	if(unzOpenCurrentFile(zipFile) != UNZ_OK)
-		return {};
+  mz_zip_archive_file_stat file_stat;
+  if(!mz_zip_reader_file_stat(&zipFile, index, &file_stat) || file_stat.m_uncomp_size == 0) return "";
 
-	unz_file_info64 info;
-
-	info.uncompressed_size = 0;
-	unzGetCurrentFileInfo64(zipFile, &info, nullptr, 0, nullptr, 0, nullptr, 0);
-
-	char buffer[8192];
-	string contents;
-	int bytesRead = 0;
-	while((bytesRead = unzReadCurrentFile(zipFile, buffer, sizeof(buffer))) > 0)
-		contents.append(buffer, bytesRead);
-
-	unzCloseCurrentFile(zipFile);
-
-	if(bytesRead < 0)
-		return {};
-
+  const auto buffer = new char[file_stat.m_uncomp_size];
+  mz_zip_reader_extract_to_mem(&zipFile, index, buffer, file_stat.m_uncomp_size, 0);
+  string contents = buffer;
+  delete[] buffer;
 	return contents;
 }
 
 
 
-filesystem::path ZipFile::GetPathInZip(const filesystem::path &path) const
+filesystem::path ZipFile::GetPathInZip(const filesystem::path &path)
 {
 	filesystem::path relative = path.lexically_relative(basePath);
 	if(!topLevelDirectory.empty())
@@ -134,7 +117,7 @@ filesystem::path ZipFile::GetPathInZip(const filesystem::path &path) const
 
 
 
-filesystem::path ZipFile::GetGlobalPath(const filesystem::path &path) const
+filesystem::path ZipFile::GetGlobalPath(const filesystem::path &path)
 {
 	if(path.empty())
 		return path;
