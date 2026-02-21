@@ -36,6 +36,7 @@ void OutlineShader::Init()
 {
 	auto &info = shader.GetInfo();
 
+  info.SetInputSize(4 * sizeof(float));
 	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0,                 0);
 	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 2 * sizeof(float), 1);
 
@@ -45,6 +46,8 @@ void OutlineShader::Init()
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4);
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
+
+  info.AddTexture("tex");
 
 	shader.Create(*GameData::Shaders().Find("outline"));
 

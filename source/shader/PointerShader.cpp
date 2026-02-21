@@ -35,6 +35,7 @@ namespace {
 void PointerShader::Init() {
 	auto &info = shader.GetInfo();
 
+  info.SetInputSize(2 * sizeof(float));
 	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
 
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);

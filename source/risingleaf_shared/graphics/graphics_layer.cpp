@@ -64,7 +64,7 @@ size_t graphics_layer::GetAlignmentOfType(const GraphicsTypes::ShaderType type)
   case GraphicsTypes::ShaderType::FLOAT3:
   case GraphicsTypes::ShaderType::FLOAT4: return 16;
 #if !defined(ASL_BUILD_WASM)
-  case GraphicsTypes::ShaderType::MAT2: return 8;
+  case GraphicsTypes::ShaderType::MAT2: return 16;
 #else
   case GraphicsTypes::ShaderType::MAT2:
 #endif
@@ -196,9 +196,7 @@ namespace graphics_layer
   void ObjectHandle::Draw(const GraphicsTypes::PrimitiveType prim_type) const
   {
     Instance->BindVertexBuffer(VertexBuffer.get());
-
-    if(IndexBuffer) Instance->DrawIndexed(Size, IndexBuffer.get(), prim_type);
-    else Instance->DrawIndexed(Size, nullptr, prim_type);
+    Instance->DrawIndexed(Size, IndexBuffer.get(), prim_type);
   }
 
   TextureHandle::TextureHandle(const GraphicsTypes::GraphicsInstance *instance, const std::string_view path, const bool bpd,

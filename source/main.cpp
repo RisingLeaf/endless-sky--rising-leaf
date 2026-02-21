@@ -439,6 +439,11 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 		  {
 		    GameWindow::GetInstance()->StartMainRenderPass();
 
+		    SpriteShader::Bind();
+		    ShaderInfo::CommonUniformBufferData cm_data;
+		    cm_data.scale = {-2.f / Screen::Width(), -2.f / Screen::Height()};
+		    GameWindow::GetInstance()->SetCommonUniforms(cm_data);
+
 		    // Events in this frame may have cleared out the menu, in which case
 		    // we should draw the game panels instead:
 		    (menuPanels.IsEmpty() ? gamePanels : menuPanels).DrawAll();

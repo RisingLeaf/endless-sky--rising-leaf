@@ -51,13 +51,9 @@ for line in shader_code.split("\n"):
     else:
         new_shader_code += line + "\n"
 
-new_shader_code = new_shader_code.replace("//!COMMON_DATA", common_data_code)
-
 has_vert_shader = new_shader_code.find("VS_BEGIN") != -1
 has_frag_shader = new_shader_code.find("FS_BEGIN") != -1
 has_comp_shader = new_shader_code.find("CS_BEGIN") != -1
-
-
 
 ubo_vars     = []
 v_in_vars    = []
@@ -126,7 +122,7 @@ for line in new_shader_code.split("\n"):
 
 spec_struct = ""
 if len(ubo_vars) > 0:
-    spec_struct = "layout(set = 1, binding = 0) uniform SpecUBO {\n"
+    spec_struct = "layout(set = 1, binding = 0, std140) uniform SpecUBO {\n"
     for var in ubo_vars:
         spec_struct += f"  {var[0]} {var[1]};\n"
     spec_struct += "} spec;\n"
@@ -152,7 +148,7 @@ for var in v_out_vars:
 textures_input_layout = ""
 texture_counter       = 0
 for tex in textures:
-    textures_input_layout += f"layout(set = 3, binding = {texture_counter}) uniform {get_texture_type(tex[0])} {tex[1]};\n"
+    textures_input_layout += f"layout(set = 2, binding = {texture_counter}) uniform {get_texture_type(tex[0])} {tex[1]};\n"
     texture_counter += 1
 
 ##### CREATE VS_BEGIN replacement
@@ -202,6 +198,7 @@ header += f"#define PASS_UBO\n"
 header += f"#define constant\n"
 header += f"#define fmod(x, y) mod(x, y)\n"
 header += f"#define M_PI 3.1415926535897932384626433832795\n"
+header += "\n" + common_data_code
 
 texture_counter = 0
 header += spec_struct

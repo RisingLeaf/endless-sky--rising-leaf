@@ -33,6 +33,7 @@ namespace {
 void BatchShader::Init()
 {
 	auto &info = shader.GetInfo();
+  info.SetInputSize(6 * sizeof(float));
 	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0,                 0); // vert
 	info.AddInput(GraphicsTypes::ShaderType::FLOAT3, 2 * sizeof(float), 1); // texCoord
 	info.AddInput(GraphicsTypes::ShaderType::FLOAT,  5 * sizeof(float), 2); // alpha

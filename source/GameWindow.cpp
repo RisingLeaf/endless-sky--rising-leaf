@@ -20,7 +20,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <SDL3/SDL.h>
 
-#include <pthread/pthread.h>
 #include <sstream>
 #include <string>
 

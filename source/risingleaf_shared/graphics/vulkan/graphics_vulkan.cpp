@@ -91,7 +91,7 @@ namespace graphics_vulkan
       vkUpdateDescriptorSets(graphics_instance->Device->GetDevice(), 1, &descriptor_write, 0, nullptr);
     }
 
-    vkCmdBindDescriptorSets(graphics_instance->CommandBuffers[graphics_instance->Device->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS, graphics_instance->State.Shader->GetPipelineLayout(), set,
+    vkCmdBindDescriptorSets(graphics_instance->CommandBuffers[graphics_instance->Device->GetCurrentFrame()], VK_PIPELINE_BIND_POINT_GRAPHICS, current_shader_instance->GetPipelineLayout(), set,
                             1, &descriptor_set, 0, nullptr);
   }
 
