@@ -14,11 +14,10 @@ VS_BEGIN
 	gl_Position  = vec4((coord + spec.position) * glob.scale, 0.f, 1.f);
 VS_END
 
-const float pi = 3.1415926535897932384626433832795;
 
 FS_BEGIN
-	float arc = mod(atan(coord.x, coord.y) + pi + spec.startAngle, 2.f * pi);
-	float arcFalloff = 1.f - min(2.f * pi - arc, arc - spec.angle) * spec.radius;
+	float arc = mod(atan(coord.x, coord.y) + M_PI + spec.startAngle, 2.f * M_PI);
+	float arcFalloff = 1.f - min(2.f * M_PI - arc, arc - spec.angle) * spec.radius;
 	if(spec.dash != 0.f)
 	{
 		arc = mod(arc, spec.dash);

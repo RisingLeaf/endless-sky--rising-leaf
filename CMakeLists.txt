@@ -12,6 +12,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 set(CMAKE_BUILD_RPATH_USE_ORIGIN ON)
 
+#add_compile_options(-fsanitize=address)
+#add_link_options(-fsanitize=address)
+
 project("Endless Sky" VERSION 0.10.17
 	DESCRIPTION "Space exploration, trading, and combat game."
 	HOMEPAGE_URL https://endless-sky.github.io/
@@ -20,6 +23,7 @@ project("Endless Sky" VERSION 0.10.17
 add_subdirectory(dependencies/SDL3)
 add_subdirectory(dependencies/libavif)
 add_subdirectory(dependencies/libjpeg-turbo)
+add_subdirectory(dependencies/libpng)
 add_subdirectory(dependencies/openal-soft)
 find_package(Threads REQUIRED)
 add_subdirectory(dependencies/flac)
@@ -44,7 +48,7 @@ add_subdirectory(source)
 add_library(ExternalLibraries INTERFACE)
 target_link_libraries(EndlessSkyLib PUBLIC ExternalLibraries)
 
-target_link_libraries(ExternalLibraries INTERFACE SDL3::SDL3 avif FLAC::FLAC++ miniz OpenAL miniaudio libjpeg_turbo)
+target_link_libraries(ExternalLibraries INTERFACE SDL3::SDL3 avif FLAC::FLAC++ miniz OpenAL miniaudio libjpeg_turbo Threads::Threads png_static)
 
 
 if(MINGW)
@@ -128,6 +132,7 @@ endif()
 target_link_libraries(EndlessSky PRIVATE ExternalLibraries EndlessSkyLib)
 
 add_subdirectory(shaders)
+add_dependencies(EndlessSky Shaders)
 
 if(MINGW AND WIN32)
 	foreach(FILE_PATH ${MINGW_RUNTIME})

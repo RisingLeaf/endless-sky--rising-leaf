@@ -21,14 +21,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <avif/avif.h>
 #include <jpeglib.h>
+#include <png.h>
 
 #include <cmath>
 #include <memory>
 #include <set>
 #include <stdexcept>
 #include <vector>
-
-#include "external/stb_image.h"
+#include <iostream>
 
 using namespace std;
 
@@ -45,6 +45,7 @@ namespace {
 	}();
 	const set<string> IMAGE_SEQUENCE_EXTENSIONS = AVIF_EXTENSIONS;
 
+	bool ReadPNG(const filesystem::path &path, ImageBuffer &buffer, int frame);
 	bool ReadJPG(const filesystem::path &path, ImageBuffer &buffer, int frame);
 	int ReadAVIF(const filesystem::path &path, ImageBuffer &buffer, int frame, bool alphaPreMultiplied);
 	void Premultiply(ImageBuffer &buffer, int frame, BlendingMode additive);
@@ -194,11 +195,7 @@ int ImageBuffer::Read(const ImageFileData &data, int frame)
 
 	int loaded;
 	if(isPNG)
-	{
-	  int channels;
-	  pixels = reinterpret_cast<uint32_t *>(stbi_load(data.path.c_str(), &width, &height, &channels, 4));
-	  loaded = pixels ? 1 : 0;
-	}
+		loaded = ReadPNG(data.path, *this, frame);
 	else if(isJPG)
 		loaded = ReadJPG(data.path, *this, frame);
 	else
@@ -218,6 +215,109 @@ int ImageBuffer::Read(const ImageFileData &data, int frame)
 
 
 namespace {
+	void ReadPNGInput(png_structp pngStruct, png_bytep outBytes, png_size_t byteCountToRead)
+	{
+		static_cast<iostream *>(png_get_io_ptr(pngStruct))->read(reinterpret_cast<char *>(outBytes), byteCountToRead);
+	}
+
+	bool ReadPNG(const filesystem::path &path, ImageBuffer &buffer, int frame)
+	{
+		// Open the file, and make sure it really is a PNG.
+		shared_ptr<iostream> file = Files::Open(path.string());
+		if(!file)
+			return false;
+
+		// Set up libpng.
+		png_struct *png = png_create_read_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+		if(!png)
+			return false;
+
+		png_info *info = png_create_info_struct(png);
+		if(!info)
+		{
+			png_destroy_read_struct(&png, nullptr, nullptr);
+			return false;
+		}
+
+		if(setjmp(png_jmpbuf(png)))
+		{
+			png_destroy_read_struct(&png, &info, nullptr);
+			return false;
+		}
+
+		png_set_read_fn(png, file.get(), ReadPNGInput);
+		png_set_sig_bytes(png, 0);
+
+		png_read_info(png, info);
+		int width = png_get_image_width(png, info);
+		int height = png_get_image_height(png, info);
+		// If the buffer is not yet allocated, allocate it.
+		try {
+			buffer.Allocate(width, height);
+		}
+		catch(const bad_alloc &)
+		{
+			png_destroy_read_struct(&png, &info, nullptr);
+			const string message = "Failed to allocate contiguous memory for \"" + path.string() + "\"";
+			Logger::LogError(message);
+			throw runtime_error(message);
+		}
+		// Make sure this frame's dimensions are valid.
+		if(!width || !height || width != buffer.Width() || height != buffer.Height())
+		{
+			png_destroy_read_struct(&png, &info, nullptr);
+			string message = "Skipped processing \"" + path.string() + "\":\n\tAll image frames must have equal ";
+			if(width && width != buffer.Width())
+				Logger::LogError(message + "width: expected " + to_string(buffer.Width()) + " but was " + to_string(width));
+			if(height && height != buffer.Height())
+				Logger::LogError(message + "height: expected " + to_string(buffer.Height()) + " but was " + to_string(height));
+			return false;
+		}
+
+		// Adjust settings to make sure the result will be an RGBA file.
+		int colorType = png_get_color_type(png, info);
+		int bitDepth = png_get_bit_depth(png, info);
+
+		if(colorType == PNG_COLOR_TYPE_PALETTE)
+			png_set_palette_to_rgb(png);
+		if(png_get_valid(png, info, PNG_INFO_tRNS))
+			png_set_tRNS_to_alpha(png);
+		if(colorType == PNG_COLOR_TYPE_GRAY && bitDepth < 8)
+			png_set_expand_gray_1_2_4_to_8(png);
+		if(bitDepth == 16)
+		{
+#if PNG_LIBPNG_VER >= 10504
+			png_set_scale_16(png);
+#else
+			png_set_strip_16(png);
+#endif
+		}
+		if(bitDepth < 8)
+			png_set_packing(png);
+		if(colorType == PNG_COLOR_TYPE_PALETTE || colorType == PNG_COLOR_TYPE_RGB
+				|| colorType == PNG_COLOR_TYPE_GRAY)
+			png_set_add_alpha(png, 0xFFFF, PNG_FILLER_AFTER);
+		if(colorType == PNG_COLOR_TYPE_GRAY || colorType == PNG_COLOR_TYPE_GRAY_ALPHA)
+			png_set_gray_to_rgb(png);
+		// Let libpng handle any interlaced image decoding.
+		png_set_interlace_handling(png);
+		png_read_update_info(png, info);
+
+		// Read the file.
+		vector<png_byte *> rows(height, nullptr);
+		for(int y = 0; y < height; ++y)
+			rows[y] = reinterpret_cast<png_byte *>(buffer.Begin(y, frame));
+
+		png_read_image(png, &rows.front());
+
+		// Clean up. The file will be closed automatically.
+		png_destroy_read_struct(&png, &info, nullptr);
+
+		return true;
+	}
+
+
+
 	bool ReadJPG(const filesystem::path &path, ImageBuffer &buffer, int frame)
 	{
 		string data = Files::Read(path);

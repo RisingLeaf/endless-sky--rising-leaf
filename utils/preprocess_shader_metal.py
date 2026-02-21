@@ -47,8 +47,6 @@ for line in shader_code.split("\n"):
     else:
         new_shader_code += line + "\n"
 
-new_shader_code = new_shader_code.replace("//!COMMON_DATA", common_data_code)
-
 ubo_vars      = []
 v_in_vars     = []
 v_out_vars    = []
@@ -222,6 +220,7 @@ header += "\n"
 header += "//Math functions\n"
 header += "template<typename A, typename B> A atan(A x, B y) { return atan2(x, y); }\n"
 header += "template<typename A> A fwidth(A x) { return abs(dfdx(x)) + abs(dfdy(x)); }\n"
+header += "int mod(int x, int y) { return x % y; }\n"
 header += "#define M_PI 3.1415926535897932384626433832795\n"
 header += "\n"
 header += "//Texture read\n"
@@ -259,6 +258,8 @@ header += f"#define USE_UBO constant const CmUBO *in_glob, constant const SpecUB
 header += f"#define PASS_UBO in_glob, in_spec,\n"
 header += f"typedef texture2d<float> sampler2D;\n"
 header += f"typedef texture2d_array<float> sampler2DArray;\n"
+
+header += "\n" + common_data_code
 
 ## Final assembly
 new_shader_code = header + new_shader_code + "\n"

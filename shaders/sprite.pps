@@ -23,7 +23,7 @@ VS_END
 in_texture 2darray tex;
 in_texture 2darray swizzleMask;
 
-const int range = 5;
+constant const int range = 5;
 
 FS_BEGIN
 	float first  = floor(spec.frame);

@@ -16,8 +16,8 @@ if(APPLE)
         add_custom_command(
                 OUTPUT ${SPIRV}.ps
                 COMMAND
-                ${CMAKE_SOURCE_DIR}/tools/preprocess_shader_metal.py ${CMAKE_SOURCE_DIR}/shaders/common_uniform_data.metal ${CMAKE_SOURCE_DIR}/shaders/ ${GLSL} ${SPIRV}
-                DEPENDS ${GLSL} ${CMAKE_SOURCE_DIR}/tools/preprocess_shader_metal.py)
+                ${CMAKE_SOURCE_DIR}/utils/preprocess_shader_metal.py ${CMAKE_SOURCE_DIR}/shaders/common_uniform_data.metal ${CMAKE_SOURCE_DIR}/shaders/ ${GLSL} ${SPIRV}
+                DEPENDS ${GLSL} ${CMAKE_SOURCE_DIR}/utils/preprocess_shader_metal.py)
         list(APPEND PRE_PROCESSED_FILES ${SPIRV}.ps)
     endforeach(GLSL)
 
@@ -32,8 +32,8 @@ else ()
         add_custom_command(
                 OUTPUT ${SPIRV}.vert.spv ${SPIRV}.frag.spv
                 COMMAND
-                ${CMAKE_SOURCE_DIR}/tools/preprocess_shader.py ${Vulkan_GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/shaders/common_uniform_data.glsl ${CMAKE_SOURCE_DIR}/shaders/ ${GLSL} ${PRE_PROCESSED}
-                DEPENDS ${GLSL} ${CMAKE_SOURCE_DIR}/tools/preprocess_shader.py)
+                ${CMAKE_SOURCE_DIR}/utils/preprocess_shader.py ${Vulkan_GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/shaders/common_uniform_data.glsl ${CMAKE_SOURCE_DIR}/shaders/ ${GLSL} ${PRE_PROCESSED}
+                DEPENDS ${GLSL} ${CMAKE_SOURCE_DIR}/utils/preprocess_shader.py)
         list(APPEND SPIRV_BINARY_FILES ${SPIRV}.vert.spv)
         list(APPEND SPIRV_BINARY_FILES ${SPIRV}.frag.spv)
     endforeach(GLSL)

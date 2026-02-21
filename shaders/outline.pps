@@ -16,9 +16,9 @@ VS_END
 
 in_texture 2darray tex;
 
-const vec4 weight = vec4(.4, .4, .4, 1.);
+constant const vec4 weight = vec4(.4, .4, .4, 1.);
 
-float Sobel(float layer, vec2 tex_coord)
+float Sobel(USE_UBO USE_TEXTURES float layer, vec2 tex_coord)
 {
 	float sum = 0.f;
 	for(int dy = -1; dy <= 1; ++dy)
@@ -46,6 +46,6 @@ FS_BEGIN
 	float first  = floor(spec.frame);
 	float second = mod(ceil(spec.frame), spec.frameCount);
 	float fade   = spec.frame - first;
-	float sum    = mix(Sobel(first, fragTexCoord), Sobel(second, fragTexCoord), fade);
+	float sum    = mix(Sobel(PASS_UBO PASS_TEXTURES first, fragTexCoord), Sobel(PASS_UBO PASS_TEXTURES second, fragTexCoord), fade);
 	out_color    = spec.color * sqrt(sum / 180.f);
 FS_END

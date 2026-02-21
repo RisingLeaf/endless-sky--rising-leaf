@@ -77,3 +77,4 @@ CMakeUserPresets.json
 /.scannerwork
 
 cmake-build*
+shaders/compilation/*

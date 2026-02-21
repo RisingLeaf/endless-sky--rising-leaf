@@ -225,13 +225,10 @@ int main(int argc, char *argv[])
 		TimerResolutionGuard windowsTimerGuard;
 #endif
 
-		graphics_layer::Init(Screen::Width(), Screen::Height());
 		if(!isTesting || debugMode)
 		{
-			GameData::LoadShaders();
-
-			// Show something other than a blank window.
-			GameWindow::Step();
+	    GameData::LoadShaders();
+      GameWindow::Step();
 		}
 
 		Audio::Init(GameData::Sources());
@@ -438,21 +435,23 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 
 			Audio::Step(isFastForward);
 
-		  GameWindow::GetInstance()->StartDraw(Screen::Width(), Screen::Height());
-			GameWindow::GetInstance()->StartMainRenderPass();
+		  if(GameWindow::GetInstance()->StartDraw(Screen::Width(), Screen::Height()))
+		  {
+		    GameWindow::GetInstance()->StartMainRenderPass();
 
-			// Events in this frame may have cleared out the menu, in which case
-			// we should draw the game panels instead:
-			(menuPanels.IsEmpty() ? gamePanels : menuPanels).DrawAll();
+		    // Events in this frame may have cleared out the menu, in which case
+		    // we should draw the game panels instead:
+		    (menuPanels.IsEmpty() ? gamePanels : menuPanels).DrawAll();
 
-			MainPanel *mainPanel = static_cast<MainPanel *>(gamePanels.Root().get());
-			if(mainPanel && mainPanel->GetEngine().IsPaused())
-				SpriteShader::Draw(SpriteSet::Get("ui/paused"), Screen::TopLeft() + Point(10., 10.));
-			else if(isFastForward)
-				SpriteShader::Draw(SpriteSet::Get("ui/fast forward"), Screen::TopLeft() + Point(10., 10.));
+		    MainPanel *mainPanel = static_cast<MainPanel *>(gamePanels.Root().get());
+		    if(mainPanel && mainPanel->GetEngine().IsPaused())
+		      SpriteShader::Draw(SpriteSet::Get("ui/paused"), Screen::TopLeft() + Point(10., 10.));
+		    else if(isFastForward)
+		      SpriteShader::Draw(SpriteSet::Get("ui/fast forward"), Screen::TopLeft() + Point(10., 10.));
 
-			GameWindow::GetInstance()->EndRenderPass();
-			GameWindow::GetInstance()->EndDraw(Screen::Width(), Screen::Height());
+		    GameWindow::GetInstance()->EndRenderPass();
+		    GameWindow::GetInstance()->EndDraw(Screen::Width(), Screen::Height());
+		  }
 			GameWindow::Step();
 
 			// Lock the game loop to 60 FPS.

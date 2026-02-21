@@ -288,20 +288,15 @@ void GameData::LoadSettings()
 
 void GameData::LoadShaders()
 {
-	// The found shader files. The first element is the vertex shader,
-	// the second is the fragment shader.
-	for(const filesystem::path &source : sources)
-	{
-		const filesystem::path base = source / "shaders" / "compiled";
-		if(Files::Exists(base))
-			for(const filesystem::path &shaderFile : Files::RecursiveList(base))
-			{
-				if (shaderFile.extension() == ".ps") {
-					string name = (shaderFile.parent_path() / shaderFile.stem()).lexically_relative(base).generic_string();
-					*objects.shaders.Get(name) = File::ReadShader(shaderFile.c_str());
-				}
+	const filesystem::path base = Files::Resources() / "shaders" / "compilation";
+	if(Files::Exists(base))
+		for(const filesystem::path &shaderFile : Files::RecursiveList(base))
+		{
+			if (shaderFile.extension() == ".ps") {
+				string name = shaderFile.stem().generic_string();
+				*objects.shaders.Get(name) = File::ReadShader(shaderFile.c_str());
 			}
-	}
+		}
 
 	FillShader::Init();
 	FogShader::Init();

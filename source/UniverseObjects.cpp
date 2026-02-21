@@ -345,6 +345,7 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 	const set<const Planet *> *visitedPlanets = &player.VisitedPlanets();
 	for(const DataNode &node : data)
 	{
+	  if(node.Tokens().empty()) continue;
 		const string &key = node.Token(0);
 		bool hasValue = node.Size() >= 2;
 		if(key == "color" && node.Size() >= 5)

@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <SDL3/SDL.h>
 
-#include <cstring>
+#include <pthread/pthread.h>
 #include <sstream>
 #include <string>
 
@@ -101,7 +101,8 @@ bool GameWindow::Init(bool headless)
 #endif
 
   // This needs to be called before any other SDL commands.
-  if(!SDL_Init(SDL_INIT_VIDEO))
+  const bool sdl_init = SDL_Init(SDL_INIT_VIDEO);
+  if(!sdl_init)
   {
     checkSDLerror();
     return false;
@@ -126,6 +127,8 @@ bool GameWindow::Init(bool headless)
     Logger::LogError("Warning: low monitor frame rate detected (" + to_string(mode->refresh_rate) +
                      ")."
                      " The game will run more slowly.");
+
+  SDL_free(ids);
 
   // Make the window just slightly smaller than the monitor resolution.
   const int maxWidth  = mode->w;

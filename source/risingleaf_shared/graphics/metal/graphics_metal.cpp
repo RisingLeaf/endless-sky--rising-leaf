@@ -469,6 +469,7 @@ graphics_metal::MetalGraphicsInstance::MetalGraphicsInstance(int width, int heig
 
   View = SDL_Metal_CreateView(GameWindow::GetWindow());
   Layer = reinterpret_cast<CA::MetalLayer *>(SDL_Metal_GetLayer(View));
+  Layer->setDevice(Device);
 
   CurrentDrawable = nullptr;
 

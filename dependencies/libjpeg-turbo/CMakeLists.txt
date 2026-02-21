@@ -8,6 +8,7 @@ ExternalProject_Add(
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/libjpeg_install
         -DENABLE_SHARED=OFF
         -DENABLE_STATIC=ON
+        -DCMAKE_POSITION_INDEPENDENT_CODE=ON
         INSTALL_DIR ${CMAKE_BINARY_DIR}/libjpeg_install
 )
 
@@ -18,5 +19,4 @@ set_target_properties(libjpeg_turbo PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/libjpeg_install/include"
 )
 
-# Make your target depend on the external project build
 add_dependencies(libjpeg_turbo libjpeg_turbo_ext)
