@@ -130,7 +130,7 @@ void SpriteShader::Add(const Item &item, bool withBlur)
     use_swizzle_mask = !item.swizzle->OverrideMask() && item.swizzleMask;
   }
 
-  graphics_layer::TextureList texture_list(GraphicsTypes::UBOBindPoint::Specific);
+  graphics_layer::TextureList texture_list;
   texture_list.AddTexture(item.texture, 0, false);
   if(item.swizzleMask) texture_list.AddTexture(item.swizzleMask, 1, false);
   else texture_list.AddTexture(dummy_tex.GetTexture(), 1, false);

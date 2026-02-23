@@ -17,7 +17,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "text/FontSet.h"
 #include "GameData.h"
-#include "shader/PointerShader.h"
 #include "Preferences.h"
 #include "RenderBuffer.h"
 #include "ScrollBar.h"
@@ -127,27 +126,34 @@ int TextArea::GetLongestLineWidth()
 
 
 
+void TextArea::PreDraw()
+{
+  if(!buffer)
+    buffer = make_unique<RenderBuffer>(size);
+
+  Validate(scrollHeightIncludesTrailingBreak);
+  if(!bufferIsValid || !scroll.IsAnimationDone())
+  {
+    scroll.Step();
+
+    auto target = buffer->SetTarget();
+    Point topLeft(buffer->Left(), buffer->Top() - scroll.AnimatedValue());
+    wrappedText.Draw(topLeft, color);
+    target.Deactivate();
+
+    buffer->SetFadePadding(
+      scroll.IsScrollAtMin() ? 0 : 20,
+      scroll.IsScrollAtMax() ? 0 : 20
+    );
+    bufferIsValid = true;
+  }
+}
+
+
+
+
 void TextArea::Draw()
 {
-	if(!buffer)
-		buffer = make_unique<RenderBuffer>(size);
-
-	Validate(scrollHeightIncludesTrailingBreak);
-	if(!bufferIsValid || !scroll.IsAnimationDone())
-	{
-		scroll.Step();
-
-		auto target = buffer->SetTarget();
-		Point topLeft(buffer->Left(), buffer->Top() - scroll.AnimatedValue());
-		wrappedText.Draw(topLeft, color);
-		target.Deactivate();
-
-		buffer->SetFadePadding(
-			scroll.IsScrollAtMin() ? 0 : 20,
-			scroll.IsScrollAtMax() ? 0 : 20
-		);
-		bufferIsValid = true;
-	}
 	buffer->Draw(position);
 
 	const Point UP{0, -1};

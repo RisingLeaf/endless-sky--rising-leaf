@@ -81,14 +81,14 @@ def resolve_texture_line(to_list, identifier, in_line):
 
 def get_texture_type(in_type):
     if   in_type == "2d":
-        return "texture2d<float>"
+        return "sampled_texture2d<float>"
     elif in_type == "2darray":
-        return "texture2d_array<float>"
+        return "sampled_texture2d_array<float>"
     elif in_type == "3d":
-        return "texture3d<float>"
+        return "sampled_texture3d<float>"
     else:
         print(f"ERROR: unknown texture type: {in_type}, defaulting to 2d")
-        return "texture2d<float>"
+        return "sampled_texture2d<float>"
 
 pruned_code = ""
 
@@ -133,7 +133,7 @@ vs_begin_replacement += "vertex OutVert vertexShader("\
                         "constant const SpecUBO *in_spec [[buffer(3)]]"
 texture_counter = 0
 for tex in textures:
-    vs_begin_replacement += f",\n    {get_texture_type(tex[0])} {tex[1]} [[texture({texture_counter})]]"
+    vs_begin_replacement += f",\n    constant {get_texture_type(tex[0])} *{tex[1]} [[buffer({4 + texture_counter})]]"
     texture_counter += 1
 
 vs_begin_replacement += ")"\
@@ -168,8 +168,8 @@ texture_counter  = 0
 f_texture_use_define  = ""
 f_texture_pass_define = ""
 for tex in textures:
-    fs_begin_replacement  += f",\n    {get_texture_type(tex[0])} {tex[1]} [[texture({texture_counter})]]"
-    f_texture_use_define  += f"{get_texture_type(tex[0])} {tex[1]} [[texture({texture_counter})]], "
+    fs_begin_replacement  += f",\n    constant {get_texture_type(tex[0])} *{tex[1]} [[buffer({4 + texture_counter})]]"
+    f_texture_use_define  += f"constant {get_texture_type(tex[0])} *{tex[1]} [[buffer({texture_counter})]], "
     f_texture_pass_define += f"{tex[1]}, "
     texture_counter      += 1
 fs_begin_replacement     += ")\n{\n"
@@ -223,26 +223,26 @@ header += "template<typename A> A fwidth(A x) { return abs(dfdx(x)) + abs(dfdy(x
 header += "int mod(int x, int y) { return x % y; }\n"
 header += "#define M_PI 3.1415926535897932384626433832795\n"
 header += "\n"
+header += "//Texture stuff\n"
+header += "template<typename T> struct sampled_texture2d{       texture2d<T>       texture [[id(0)]]; sampler tex_sampler [[id(1)]]; };\n"
+header += "template<typename T> struct sampled_texture2d_array{ texture2d_array<T> texture [[id(0)]]; sampler tex_sampler [[id(1)]]; };\n"
+header += "template<typename T> struct sampled_texture3d{       texture3d<T>       texture [[id(0)]]; sampler tex_sampler [[id(1)]]; };\n"
 header += "//Texture read\n"
-header += "float4 texture(texture2d<float> tex, float2 point)\n"
+header += "float4 texture(constant sampled_texture2d<float> *tex, float2 point)\n"
 header += "{\n"
-header += "  constexpr sampler textureSampler (mag_filter::linear, min_filter::linear, mip_filter::linear, address::repeat);\n"
-header += "  return tex.sample(textureSampler, float2(point.x, point.y));\n"
+header += "  return tex->texture.sample(tex->tex_sampler, float2(point.x, point.y));\n"
 header += "}\n"
-header += "float4 textureLod(texture2d<float> tex, float2 point, float lod)\n"
+header += "float4 textureLod(constant sampled_texture2d<float> *tex, float2 point, float lod)\n"
 header += "{\n"
-header += "  constexpr sampler textureSampler (mag_filter::linear, min_filter::linear, mip_filter::linear, address::repeat);\n"
-header += "  return tex.sample(textureSampler, float2(point.x, point.y), level(lod));\n"
+header += "  return tex->texture.sample(tex->tex_sampler, float2(point.x, point.y), level(lod));\n"
 header += "}\n"
-header += "float4 texture(texture2d_array<float> tex, float3 point)\n"
+header += "float4 texture(constant sampled_texture2d_array<float> *tex, float3 point)\n"
 header += "{\n"
-header += "  constexpr sampler textureSampler (mag_filter::linear, min_filter::linear, mip_filter::linear, address::repeat);\n"
-header += "  return tex.sample(textureSampler, float2(point.x, point.y), point.z);\n"
+header += "  return tex->texture.sample(tex->tex_sampler, float2(point.x, point.y), point.z);\n"
 header += "}\n"
-header += "float4 texture(texture3d<float> tex, float3 point)\n"
+header += "float4 texture(constant sampled_texture3d<float> *tex, float3 point)\n"
 header += "{\n"
-header += "  constexpr sampler textureSampler (mag_filter::linear, min_filter::linear, mip_filter::linear, address::repeat);\n"
-header += "  return tex.sample(textureSampler, point);\n"
+header += "  return tex->texture.sample(tex->tex_sampler, point);\n"
 header += "}\n"
 header += "\n"
 header += "//Texture write\n"
@@ -256,8 +256,8 @@ header += f"#define USE_TEXTURES {f_texture_use_define}\n"
 header += f"#define PASS_TEXTURES {f_texture_pass_define}\n"
 header += f"#define USE_UBO constant const CmUBO *in_glob, constant const SpecUBO *in_spec,\n"
 header += f"#define PASS_UBO in_glob, in_spec,\n"
-header += f"typedef texture2d<float> sampler2D;\n"
-header += f"typedef texture2d_array<float> sampler2DArray;\n"
+header += f"typedef const constant sampled_texture2d<float>* sampler2D;\n"
+header += f"typedef const constant sampled_texture2d_array<float>* sampler2DArray;\n"
 
 header += "\n" + common_data_code
 

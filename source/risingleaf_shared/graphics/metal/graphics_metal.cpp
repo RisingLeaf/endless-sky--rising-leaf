@@ -655,7 +655,7 @@ void graphics_metal::MetalGraphicsInstance::CreateTexture(std::unique_ptr<Graphi
     i++;
   }
 
-  if(!in_data.empty())
+  if(!in_data.empty() && texture_info.MipLevels > 1)
   {
     const auto blit_cmd = MetalCommandQueue->commandBuffer();
     const auto blit_enc = blit_cmd->blitCommandEncoder();
@@ -805,6 +805,9 @@ void graphics_metal::MetalGraphicsInstance::CreateMipMaps(const GraphicsTypes::T
 {
   if(!texture_instance) return;
   const auto metal_texture_instance = reinterpret_cast<const MetalTextureInstance *>(texture_instance);
+
+  if(texture_instance->GetInfo().MipLevels <= 1) return;
+
   const auto blit_cmd               = MetalCommandQueue->commandBuffer();
   const auto blit_enc               = blit_cmd->blitCommandEncoder();
 
@@ -836,6 +839,7 @@ bool graphics_metal::MetalGraphicsInstance::StartDraw(int width, int height)
     return false;
   }
 
+  Resize(CurrentDrawable->texture()->width(), CurrentDrawable->texture()->height());
   UpdateRenderPassDescriptor(this);
 
   // This returns a CommandBufferInstance

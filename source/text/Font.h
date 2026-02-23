@@ -21,6 +21,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <functional>
 #include <string>
 
+#include "graphics/graphics_layer.h"
+
 class Color;
 class DisplayText;
 class ImageBuffer;
@@ -76,13 +78,12 @@ private:
 
 private:
 	Shader shader = Shader("font shader");
-	uint texture = 0;
+  graphics_layer::TextureHandle texture;
 
 	int height = 0;
 	int space = 0;
 	mutable int screenWidth = 0;
 	mutable int screenHeight = 0;
-	mutable float scale[2]{0.f, 0.f};
 	float glyphWidth = 0.f;
 	float glyphHeight = 0.f;
 

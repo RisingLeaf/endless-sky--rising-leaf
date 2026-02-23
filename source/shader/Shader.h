@@ -33,6 +33,7 @@ public:
 	explicit Shader(const std::string_view name) noexcept : Name(name) {}
 
 	ShaderInfo &GetInfo() { return Info; }
+	const ShaderInfo &GetInfo() const { return Info; }
 
 	void Create(const std::vector<File::ShaderString> &shader_code);
 	void Bind() const;

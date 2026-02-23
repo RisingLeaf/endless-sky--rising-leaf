@@ -49,7 +49,9 @@ public:
 	bool Handle(const SDL_Event &event);
 
 	// Step all the panels forward (advance animations, move objects, etc.).
-	void StepAll();
+  void StepAll();
+  // PreDraw all the panels.
+  void PreDrawAll();
 	// Draw all the panels.
 	void DrawAll();
 

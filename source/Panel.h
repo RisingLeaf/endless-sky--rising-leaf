@@ -53,6 +53,9 @@ public:
 	// Move the state of this panel forward one game step.
 	virtual void Step();
 
+  // PreDraw this panel (framebuffers etc.)
+  virtual void PreDraw() {};
+
 	// Draw this panel.
 	virtual void Draw() = 0;
 
@@ -148,6 +151,7 @@ private:
 	bool DoRelease(int x, int y, MouseButton button);
 	bool DoScroll(double dx, double dy);
 
+  void DoPreDraw();
 	void DoDraw();
 
 	void DoResize();

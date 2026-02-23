@@ -25,7 +25,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 // This class is a collection of global functions for handling SDL_Windows.
 class GameWindow {
 public:
-	static class SDL_Window* GetWindow();
+	static struct SDL_Window* GetWindow();
 	static GraphicsTypes::GraphicsInstance *GetInstance();
 	static std::string SDLVersions();
 	static bool Init(bool headless);

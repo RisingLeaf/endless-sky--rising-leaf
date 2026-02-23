@@ -63,8 +63,8 @@ size_t graphics_layer::GetAlignmentOfType(const GraphicsTypes::ShaderType type)
   case GraphicsTypes::ShaderType::FLOAT2: return 8;
   case GraphicsTypes::ShaderType::FLOAT3:
   case GraphicsTypes::ShaderType::FLOAT4: return 16;
-#if !defined(ASL_BUILD_WASM)
-  case GraphicsTypes::ShaderType::MAT2: return 16;
+#if defined(__APPLE__)
+  case GraphicsTypes::ShaderType::MAT2: return 8;
 #else
   case GraphicsTypes::ShaderType::MAT2:
 #endif

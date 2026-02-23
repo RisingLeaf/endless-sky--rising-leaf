@@ -217,10 +217,9 @@ namespace graphics_layer
     };
     std::vector<TexEntry> Textures;
 
-    GraphicsTypes::UBOBindPoint BindPoint;
 
   public:
-    explicit TextureList(const GraphicsTypes::UBOBindPoint bind_point) : BindPoint(bind_point) {}
+    TextureList() = default;
 
     void AddTexture(const GraphicsTypes::TextureInstance *tex, unsigned int id, bool vertex);
 

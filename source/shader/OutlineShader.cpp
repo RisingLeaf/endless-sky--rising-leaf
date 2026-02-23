@@ -93,7 +93,7 @@ void OutlineShader::Draw(const Sprite *sprite, const Point &pos, const Point &si
 
 	GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
 
-	graphics_layer::TextureList texture_list(GraphicsTypes::UBOBindPoint::Specific);
+	graphics_layer::TextureList texture_list;
 	texture_list.AddTexture(sprite->Texture(unit.Length() * Screen::Zoom() > 50.).GetTexture(), 0, false);
 	texture_list.Bind(GameWindow::GetInstance());
 

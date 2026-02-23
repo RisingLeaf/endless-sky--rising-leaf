@@ -177,7 +177,7 @@ void FogShader::Draw(const Point &center, double zoom, const PlayerInfo &player)
 
 	shader.Bind();
 
-	graphics_layer::TextureList texture_list(GraphicsTypes::UBOBindPoint::Specific);
+	graphics_layer::TextureList texture_list;
 	texture_list.AddTexture(texture.GetTexture(), 0, false);
 	texture_list.Bind(GameWindow::GetInstance());
 

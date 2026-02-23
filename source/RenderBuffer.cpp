@@ -154,7 +154,7 @@ void RenderBuffer::Draw(const Point &position, const Point &clipsize, const Poin
 
   GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
 
-	graphics_layer::TextureList texture_list(GraphicsTypes::UBOBindPoint::Specific);
+	graphics_layer::TextureList texture_list;
 	texture_list.AddTexture(FrameBuffer.GetTexture(), 0, false);
 	texture_list.Bind(GameWindow::GetInstance());
 

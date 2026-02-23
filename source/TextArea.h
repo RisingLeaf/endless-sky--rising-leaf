@@ -52,6 +52,7 @@ public:
 
 
 protected:
+	virtual void PreDraw() override;
 	virtual void Draw() override;
 	virtual bool Click(int x, int y, MouseButton button, int clicks) override;
 	virtual bool Release(int x, int y, MouseButton button) override;

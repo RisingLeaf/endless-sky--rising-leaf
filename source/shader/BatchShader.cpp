@@ -60,7 +60,7 @@ void BatchShader::Add(const Sprite *sprite, const bool isHighDPI, const vector<f
 	if(data.empty())
 		return;
 
-	graphics_layer::TextureList texture_list(GraphicsTypes::UBOBindPoint::Specific);
+	graphics_layer::TextureList texture_list;
 	texture_list.AddTexture(sprite->Texture(isHighDPI).GetTexture(), 0, false);
 	texture_list.Bind(GameWindow::GetInstance());
 

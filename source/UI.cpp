@@ -103,6 +103,21 @@ void UI::StepAll()
 
 
 
+// PreDraw all the panels.
+void UI::PreDrawAll()
+{
+  // Find the topmost full-screen panel. Nothing below that needs to be drawn.
+  vector<shared_ptr<Panel>>::const_iterator it = stack.end();
+  while(it != stack.begin())
+    if((*--it)->IsFullScreen())
+      break;
+
+  for( ; it != stack.end(); ++it)
+    (*it)->DoPreDraw();
+}
+
+
+
 // Draw all the panels.
 void UI::DrawAll()
 {

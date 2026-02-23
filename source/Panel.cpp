@@ -265,6 +265,15 @@ bool Panel::DoScroll(double dx, double dy)
 
 
 
+void Panel::DoPreDraw()
+{
+  PreDraw();
+  for(auto &child : children)
+    child->DoPreDraw();
+}
+
+
+
 void Panel::DoDraw()
 {
 	Draw();
