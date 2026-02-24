@@ -19,7 +19,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../GameData.h"
 #include "../Point.h"
 #include "../Preferences.h"
-#include "../Screen.h"
 #include "../image/ImageBuffer.h"
 #include "../image/ImageFileData.h"
 #include "Alignment.h"
@@ -212,7 +211,7 @@ void Font::CalculateAdvances(ImageBuffer &image)
     {
       int       maxD       = 0;
       int       glyphWidth = 0;
-      uint32_t *begin      = image.Pixels();
+      uint32_t *begin      = image.Begin(0, 0);
       for(int y = 0; y < height; ++y)
       {
         // Find the last non-empty pixel in the previous glyph.

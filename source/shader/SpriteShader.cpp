@@ -57,10 +57,10 @@ void SpriteShader::Init()
 
   square = graphics_layer::ObjectHandle(GameWindow::GetInstance(), 4, 2 * sizeof(float), vertexData, {});
 
-  constexpr asl::uint8 dummy_tex_raw[] = {125, 0, 255, 255};
+  asl::uint8 dummy_tex_raw[] = {125, 0, 255, 255};
 
   dummy_tex = graphics_layer::TextureHandle(GameWindow::GetInstance(),
-                                            dummy_tex_raw,
+                                            {dummy_tex_raw},
                                             1,
                                             1,
                                             1,

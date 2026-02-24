@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef GRAPHICS_LAYER_H
 #define GRAPHICS_LAYER_H
@@ -46,7 +47,11 @@ namespace graphics_layer
     std::unique_ptr<GraphicsTypes::RenderBufferInstance> frame_buffer;
 
   public:
-    frame_buffer_handle(GraphicsTypes::GraphicsInstance *instance, uint32_t width, uint32_t height, GraphicsTypes::RenderBufferType type, uint32_t samples);
+    frame_buffer_handle(GraphicsTypes::GraphicsInstance *instance,
+                        uint32_t                         width,
+                        uint32_t                         height,
+                        GraphicsTypes::RenderBufferType  type,
+                        uint32_t                         samples);
     ~frame_buffer_handle();
 
     frame_buffer_handle(const frame_buffer_handle &other)                = delete;
@@ -75,11 +80,16 @@ namespace graphics_layer
 
   public:
     ObjectHandle() = default;
-    ObjectHandle(const GraphicsTypes::GraphicsInstance *instance, size_t size, size_t type_size, const void *in_data, const std::vector<uint32_t> &indices);
+    ObjectHandle(const GraphicsTypes::GraphicsInstance *instance,
+                 size_t                                 size,
+                 size_t                                 type_size,
+                 const void                            *in_data,
+                 const std::vector<uint32_t>           &indices);
     ~ObjectHandle();
 
     ObjectHandle(const ObjectHandle &other) = delete;
-    ObjectHandle(ObjectHandle &&other) noexcept : Instance(other.Instance), VertexBufferSize(other.VertexBufferSize), Size(other.Size)
+    ObjectHandle(ObjectHandle &&other) noexcept :
+      Instance(other.Instance), VertexBufferSize(other.VertexBufferSize), Size(other.Size)
     {
       this->VertexBuffer.swap(other.VertexBuffer);
       this->IndexBuffer.swap(other.IndexBuffer);
@@ -113,11 +123,16 @@ namespace graphics_layer
 
   public:
     RotatingObjectBuffer() = default;
-    RotatingObjectBuffer(const GraphicsTypes::GraphicsInstance *instance, size_t size, size_t type_size, const void *in_data, const std::vector<uint32_t> &indices);
+    RotatingObjectBuffer(const GraphicsTypes::GraphicsInstance *instance,
+                         size_t                                 size,
+                         size_t                                 type_size,
+                         const void                            *in_data,
+                         const std::vector<uint32_t>           &indices);
     ~RotatingObjectBuffer();
 
     RotatingObjectBuffer(const RotatingObjectBuffer &other) = delete;
-    RotatingObjectBuffer(RotatingObjectBuffer &&other) noexcept : Instance(other.Instance), VertexBufferSize(other.VertexBufferSize), Size(other.Size)
+    RotatingObjectBuffer(RotatingObjectBuffer &&other) noexcept :
+      Instance(other.Instance), VertexBufferSize(other.VertexBufferSize), Size(other.Size)
     {
       VertexBuffers.swap(other.VertexBuffers);
       IndexBuffers.swap(other.IndexBuffers);
@@ -149,7 +164,7 @@ namespace graphics_layer
   public:
     TextureHandle() = default;
     TextureHandle(const GraphicsTypes::GraphicsInstance *instance,
-                  const void                            *data,
+                  const std::vector<void *>             &data,
                   int                                    width,
                   int                                    height,
                   int                                    depth,
