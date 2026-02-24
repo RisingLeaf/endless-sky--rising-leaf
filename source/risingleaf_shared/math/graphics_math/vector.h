@@ -168,7 +168,7 @@ namespace gm
 
     [[nodiscard]] std::string to_string() const
     {
-      std::string out = "vec<" + std::to_string(Dimension) + "," + typeid(Type).name() + ">(";
+      std::string out = "vec<" + std::to_string(Dimension) + "," + "?" + ">(";
       for(asl::uint32 i = 0; i < Dimension; i++)
       {
         out += std::to_string(Values[i]);

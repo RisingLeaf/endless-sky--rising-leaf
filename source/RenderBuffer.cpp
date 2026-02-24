@@ -48,6 +48,8 @@ void RenderBuffer::Init()
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4);
 
+  info.AddTexture("tex");
+
 	shader.Create(*GameData::Shaders().Find("renderBuffer"));
 
 	constexpr float vertexData[] = {

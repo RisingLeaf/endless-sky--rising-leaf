@@ -66,7 +66,7 @@ size_t graphics_layer::GetAlignmentOfType(const GraphicsTypes::ShaderType type)
 #if defined(__APPLE__)
   case GraphicsTypes::ShaderType::MAT2: return 8;
 #else
-  case GraphicsTypes::ShaderType::MAT2:
+  case GraphicsTypes::ShaderType::MAT2: return 8;
 #endif
   case GraphicsTypes::ShaderType::MAT3:
   case GraphicsTypes::ShaderType::MAT4: return 16;

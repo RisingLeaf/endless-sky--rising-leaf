@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANTEXTURE_H
 #define VULKANTEXTURE_H
@@ -21,8 +22,8 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include "graphics/graphics_toplevel_defines.h"
 #include "external/vk_mem_alloc.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 
 namespace VulkanObjects
@@ -68,7 +69,11 @@ namespace VulkanObjects
     void SetLayout(VkCommandBuffer cmd, VkImageLayout dest) const;
     void ExternalSetLayout(const VkImageLayout dest) const { Layout = dest; }
 
-    void Upload(VkCommandBuffer cmd, const std::vector<const void *> &data, uint32_t start_layer = 0, uint32_t end_layer = 0, uint32_t mip_level = 0) const;
+    void Upload(VkCommandBuffer                  cmd,
+                const void                      *data,
+                uint32_t                         start_layer = 0,
+                uint32_t                         end_layer   = 0,
+                uint32_t                         mip_level   = 0) const;
 
     void CreateMipMaps(VkCommandBuffer cmd) const;
 
@@ -84,7 +89,12 @@ namespace VulkanObjects
     const VulkanDeviceInstance *Device;
 
   public:
-    VulkanViewInstance(const VulkanDeviceInstance *device, VkImage image, GraphicsTypes::ImageFormat format, GraphicsTypes::TextureType type, uint32_t layers, uint32_t mip_levels);
+    VulkanViewInstance(const VulkanDeviceInstance *device,
+                       VkImage                     image,
+                       GraphicsTypes::ImageFormat  format,
+                       GraphicsTypes::TextureType  type,
+                       uint32_t                    layers,
+                       uint32_t                    mip_levels);
 
     ~VulkanViewInstance();
 
@@ -103,7 +113,10 @@ namespace VulkanObjects
     const VulkanDeviceInstance *Device;
 
   public:
-    VulkanSamplerInstance(const VulkanDeviceInstance *device, uint32_t mip_levels, GraphicsTypes::TextureAddressMode address_mode, GraphicsTypes::TextureFilter filter);
+    VulkanSamplerInstance(const VulkanDeviceInstance       *device,
+                          uint32_t                          mip_levels,
+                          GraphicsTypes::TextureAddressMode address_mode,
+                          GraphicsTypes::TextureFilter      filter);
 
     ~VulkanSamplerInstance();
 
@@ -127,7 +140,7 @@ namespace VulkanObjects
   public:
     VulkanTextureInstance(const VulkanDeviceInstance       *device,
                           VkCommandBuffer                   cmd,
-                          const std::vector<const void *>  &data,
+                          const void                       *data,
                           const GraphicsTypes::TextureInfo &info);
 
     VulkanTextureInstance(const VulkanDeviceInstance       *device,
@@ -143,8 +156,14 @@ namespace VulkanObjects
     VulkanTextureInstance &operator=(const VulkanTextureInstance &other)     = delete;
     VulkanTextureInstance &operator=(VulkanTextureInstance &&other) noexcept = delete;
 
-    [[nodiscard]] const VulkanImageInstance   *GetImage() const { return ImageLink.has_value() ? ImageLink.value() : Image.get(); }
-    [[nodiscard]] const VulkanViewInstance    *GetView() const { return ViewLink.has_value() ? ViewLink.value() : View.get(); }
+    [[nodiscard]] const VulkanImageInstance *GetImage() const
+    {
+      return ImageLink.has_value() ? ImageLink.value() : Image.get();
+    }
+    [[nodiscard]] const VulkanViewInstance *GetView() const
+    {
+      return ViewLink.has_value() ? ViewLink.value() : View.get();
+    }
     [[nodiscard]] const VulkanSamplerInstance *GetSampler() const { return Sampler.get(); }
   };
 } // namespace VulkanObjects

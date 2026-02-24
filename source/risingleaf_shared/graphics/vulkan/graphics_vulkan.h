@@ -69,6 +69,7 @@ namespace graphics_vulkan
   {
     VkPipeline Pipeline;
     size_t     Count;
+    size_t     Start = 0;
   };
 
   struct DynamicDrawCall
@@ -115,7 +116,7 @@ namespace graphics_vulkan
   public:
     explicit VulkanGraphicsInstance(int width, int height);
 
-    void CreateShader(std::unique_ptr<GraphicsTypes::ShaderInstance> &shader_instance, const ShaderInfo &shader_info, const std::vector<File::ShaderString> &shader_code) const override;
+    void CreateShader(std::unique_ptr<GraphicsTypes::ShaderInstance> &shader_instance, const ShaderInfo &shader_info, const std::vector<File::ShaderString> &shader_code, std::string_view name) const override;
 
     void CreateBuffer(std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance, GraphicsTypes::BufferType type, size_t buffer_size) const override;
     void CreateBuffer(std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance, GraphicsTypes::BufferType type, size_t buffer_size, const void *data) const override;
@@ -123,7 +124,7 @@ namespace graphics_vulkan
     // Copies lhs into rhs.
     void CopyBuffer(GraphicsTypes::BufferInstance *buffer_instance_rhs, GraphicsTypes::BufferInstance *buffer_instance_lhs) const override;
 
-    void CreateTexture(std::unique_ptr<GraphicsTypes::TextureInstance> &texture_instance, const GraphicsTypes::TextureInfo &texture_info, const std::vector<const void *> &in_data) const override;
+    void CreateTexture(std::unique_ptr<GraphicsTypes::TextureInstance> &texture_instance, const GraphicsTypes::TextureInfo &texture_info, const void *in_data) const override;
 
     void CreateRenderBuffer(std::unique_ptr<GraphicsTypes::RenderBufferInstance> &render_buffer_instance, const GraphicsTypes::FrameBufferInfo &create_info) const override;
 
@@ -144,11 +145,11 @@ namespace graphics_vulkan
     void SetColorState(bool state) const override;
 
     void BindShader(const GraphicsTypes::ShaderInstance *shader_instance) const override;
-    void BindBufferDynamic(std::vector<unsigned char> &data, GraphicsTypes::UBOBindPoint bind_point) const override;
+    void BindBufferDynamic(const std::vector<unsigned char> &data, GraphicsTypes::UBOBindPoint bind_point) const override;
 
     void BindTextures(const GraphicsTypes::TextureInstance *const*texture_instance, int count, int set) const override;
     void BindVertexBuffer(GraphicsTypes::BufferInstance *buffer_instance) const override;
-    void DrawIndexed(size_t count, const GraphicsTypes::BufferInstance *buffer_instance, GraphicsTypes::PrimitiveType prim_type) const override;
+    void DrawIndexed(size_t start, size_t count, const GraphicsTypes::BufferInstance *buffer_instance, GraphicsTypes::PrimitiveType prim_type) const override;
     void DrawDynamic(size_t count, size_t type_size, const void *data, GraphicsTypes::PrimitiveType prim_type) const override;
 
     void BindRenderBuffer(GraphicsTypes::RenderBufferInstance *render_buffer_instance) const override;

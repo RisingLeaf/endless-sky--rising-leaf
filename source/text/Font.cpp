@@ -27,6 +27,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 
 #include "GameWindow.h"
 #include "graphics/graphics_layer.h"
@@ -205,7 +206,7 @@ void Font::CalculateAdvances(ImageBuffer &image)
   // advance[previous * GLYPHS + next] is the x advance for each glyph pair.
   // There is no advance if the previous value is 0, i.e. we are at the very
   // start of a string.
-  memset(advance, 0, GLYPHS * sizeof(advance[0]));
+  std::memset(advance, 0, GLYPHS * sizeof(advance[0]));
   for(int previous = 1; previous < GLYPHS; ++previous)
     for(int next = 0; next < GLYPHS; ++next)
     {

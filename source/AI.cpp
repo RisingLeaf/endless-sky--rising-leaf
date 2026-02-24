@@ -2736,7 +2736,7 @@ void AI::KeepStation(const Ship &ship, Command &command, const Body &target)
 	if(abs(targetAngle) > 180.)
 		targetAngle += (targetAngle < 0. ? 360. : -360.);
 	// Avoid "turn jitter" when position & velocity are well-matched.
-	bool changedDirection = (signbit(ship.Commands().Turn()) != signbit(targetAngle));
+	bool changedDirection = (std::signbit(ship.Commands().Turn()) != std::signbit(targetAngle));
 	double targetTurn = abs(targetAngle / turn);
 	double lastTurn = abs(ship.Commands().Turn());
 	if(lastTurn && (changedDirection || (lastTurn < 1. && targetTurn > lastTurn)))

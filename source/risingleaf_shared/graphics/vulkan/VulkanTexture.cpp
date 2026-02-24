@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #include "VulkanTexture.h"
 
@@ -35,7 +36,14 @@ VulkanObjects::VulkanImageInstance::VulkanImageInstance(const VulkanDeviceInstan
                                                         const uint32_t                     layers,
                                                         const uint32_t                     mip_levels,
                                                         VkImage                            image) :
-  Device(device), Format(format), Width(width), Height(height), Depth(depth), Layers(layers), MipLevels(mip_levels), Owning(!image)
+  Device(device),
+  Format(format),
+  Width(width),
+  Height(height),
+  Depth(depth),
+  Layers(layers),
+  MipLevels(mip_levels),
+  Owning(!image)
 {
   // In case you just want to store the vulkan object
   if(image)
@@ -44,12 +52,16 @@ VulkanObjects::VulkanImageInstance::VulkanImageInstance(const VulkanDeviceInstan
     return;
   }
 
-  const auto create_info = VulkanBootstrap::GetImageCreate(type, format, target, samples, width, height, depth, layers, mip_levels);
+  const auto create_info =
+      VulkanBootstrap::GetImageCreate(type, format, target, samples, width, height, depth, layers, mip_levels);
 
   VmaAllocationCreateInfo allocation_create_info{};
   allocation_create_info.usage = VMA_MEMORY_USAGE_AUTO;
 
-  VulkanHelpers::VK_CHECK_RESULT(vmaCreateImage(Device->GetAllocator(), &create_info, &allocation_create_info, &Image, &Memory, nullptr), __LINE__, __FILE__);
+  VulkanHelpers::VK_CHECK_RESULT(
+      vmaCreateImage(Device->GetAllocator(), &create_info, &allocation_create_info, &Image, &Memory, nullptr),
+      __LINE__,
+      __FILE__);
 }
 
 VulkanObjects::VulkanImageInstance::~VulkanImageInstance()
@@ -61,8 +73,13 @@ void VulkanObjects::VulkanImageInstance::SetLayout(VkCommandBuffer cmd, const Vk
 {
   if(Layout == dest) return;
 
-  auto barrier =
-      VulkanBootstrap::GetImageMemoryBarrierWithoutAccess(Image, Format == GraphicsTypes::ImageFormat::DEPTH ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT, Layout, dest, Layers, MipLevels);
+  auto barrier = VulkanBootstrap::GetImageMemoryBarrierWithoutAccess(
+      Image,
+      Format == GraphicsTypes::ImageFormat::DEPTH ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT,
+      Layout,
+      dest,
+      Layers,
+      MipLevels);
 
   const auto old_layout_info = VulkanTranslate::GetVkLayoutInfo(Layout);
   const auto new_layout_info = VulkanTranslate::GetVkLayoutInfo(dest);
@@ -75,15 +92,20 @@ void VulkanObjects::VulkanImageInstance::SetLayout(VkCommandBuffer cmd, const Vk
   Layout = dest;
 }
 
-void VulkanObjects::VulkanImageInstance::Upload(VkCommandBuffer cmd, const std::vector<const void *> &data, const uint32_t start_layer, const uint32_t end_layer, const uint32_t mip_level) const
+void VulkanObjects::VulkanImageInstance::Upload(VkCommandBuffer cmd,
+                                                const void     *data,
+                                                const uint32_t  start_layer,
+                                                const uint32_t  end_layer,
+                                                const uint32_t  mip_level) const
 {
-  assert(end_layer >= start_layer && data.size() == end_layer - start_layer + 1 && end_layer < Layers && mip_level < MipLevels && "Invalid input");
+  assert(end_layer >= start_layer && mip_level < MipLevels && "Invalid input");
 
   const auto old_layout = Layout;
 
   SetLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
-  const size_t layer_size = Width * Height * VulkanTranslate::GetComponentsOfFormat(Format) * VulkanTranslate::GetByteCountOfFormat(Format);
+  const size_t layer_size =
+      Width * Height * VulkanTranslate::GetComponentsOfFormat(Format) * VulkanTranslate::GetByteCountOfFormat(Format);
   const size_t image_size = layer_size * (end_layer - start_layer + 1);
 
   const VulkanBufferInstance buffer(Device, GraphicsTypes::BufferType::TEXTURE, image_size);
@@ -91,12 +113,18 @@ void VulkanObjects::VulkanImageInstance::Upload(VkCommandBuffer cmd, const std::
   void *to_data;
 
   buffer.Map(&to_data);
-  for(size_t i = 0; i < data.size(); i++)
-    memcpy(static_cast<unsigned char *>(to_data) + i * layer_size, data[i], layer_size);
+  for(size_t i = start_layer; i < end_layer; i++)
+    memcpy(static_cast<unsigned char *>(to_data) + i * layer_size, static_cast<const unsigned char *>(data) + i * layer_size, layer_size);
   buffer.UnMap();
 
-  const VkBufferImageCopy region = VulkanBootstrap::GetSimpleBufferImageCopyRegion(Format == GraphicsTypes::ImageFormat::DEPTH ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT, Width, Height,
-                                                                                   Depth, start_layer, end_layer, mip_level);
+  const VkBufferImageCopy region = VulkanBootstrap::GetSimpleBufferImageCopyRegion(
+      Format == GraphicsTypes::ImageFormat::DEPTH ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT,
+      Width,
+      Height,
+      Depth,
+      start_layer,
+      end_layer,
+      mip_level);
 
   vkCmdCopyBufferToImage(cmd, buffer.Get(), Image, VK_IMAGE_LAYOUT_GENERAL, 1, &region);
 
@@ -110,10 +138,13 @@ void VulkanObjects::VulkanImageInstance::CreateMipMaps(VkCommandBuffer cmd) cons
   SetLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
   VkFormatProperties format_properties;
-  vkGetPhysicalDeviceFormatProperties(Device->GetPhysicalDevice(), VulkanTranslate::GetVkFormat(Format), &format_properties);
+  vkGetPhysicalDeviceFormatProperties(Device->GetPhysicalDevice(),
+                                      VulkanTranslate::GetVkFormat(Format),
+                                      &format_properties);
 
   // TODO: need proper handling here
-  if(!(format_properties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT)) throw std::runtime_error("texture image format does not support linear blitting!");
+  if(!(format_properties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
+    throw std::runtime_error("texture image format does not support linear blitting!");
 
   auto mip_width  = static_cast<int32_t>(Width);
   auto mip_height = static_cast<int32_t>(Height);
@@ -129,7 +160,9 @@ void VulkanObjects::VulkanImageInstance::CreateMipMaps(VkCommandBuffer cmd) cons
     blit.srcSubresource.baseArrayLayer = 0;
     blit.srcSubresource.layerCount     = Layers;
     blit.dstOffsets[0]                 = {0, 0, 0};
-    blit.dstOffsets[1]                 = VkOffset3D(mip_width > 1 ? mip_width / 2 : 1, mip_height > 1 ? mip_height / 2 : 1, mip_depth > 1 ? mip_depth / 2 : 1);
+    blit.dstOffsets[1]                 = VkOffset3D(mip_width > 1 ? mip_width / 2 : 1,
+                                    mip_height > 1 ? mip_height / 2 : 1,
+                                    mip_depth > 1 ? mip_depth / 2 : 1);
     blit.dstSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
     blit.dstSubresource.mipLevel       = i;
     blit.dstSubresource.baseArrayLayer = 0;
@@ -144,20 +177,26 @@ void VulkanObjects::VulkanImageInstance::CreateMipMaps(VkCommandBuffer cmd) cons
 }
 
 
-VulkanObjects::VulkanViewInstance::VulkanViewInstance(
-    const VulkanDeviceInstance *device, VkImage image, const GraphicsTypes::ImageFormat format, const GraphicsTypes::TextureType type, const uint32_t layers, const uint32_t mip_levels) :
+VulkanObjects::VulkanViewInstance::VulkanViewInstance(const VulkanDeviceInstance      *device,
+                                                      VkImage                          image,
+                                                      const GraphicsTypes::ImageFormat format,
+                                                      const GraphicsTypes::TextureType type,
+                                                      const uint32_t                   layers,
+                                                      const uint32_t                   mip_levels) :
   Device(device)
 {
-  const auto create_info =
-      VulkanBootstrap::GetimageViewCreate(image, format == GraphicsTypes::ImageFormat::DEPTH ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT, type, format, layers, mip_levels);
+  const auto create_info = VulkanBootstrap::GetimageViewCreate(
+      image,
+      format == GraphicsTypes::ImageFormat::DEPTH ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT,
+      type,
+      format,
+      layers,
+      mip_levels);
 
   vkCreateImageView(Device->GetDevice(), &create_info, nullptr, &View);
 }
 
-VulkanObjects::VulkanViewInstance::~VulkanViewInstance()
-{
-  Device->QueueImageViewForDeletion(View);
-}
+VulkanObjects::VulkanViewInstance::~VulkanViewInstance() { Device->QueueImageViewForDeletion(View); }
 
 
 VulkanObjects::VulkanSamplerInstance::VulkanSamplerInstance(const VulkanDeviceInstance             *device,
@@ -166,28 +205,40 @@ VulkanObjects::VulkanSamplerInstance::VulkanSamplerInstance(const VulkanDeviceIn
                                                             const GraphicsTypes::TextureFilter      filter) :
   Device(device)
 {
-  const auto create_info = VulkanBootstrap::GetSamplerCreate(Device->GetProperties().limits.maxSamplerAnisotropy, static_cast<float>(mip_levels), address_mode, filter);
+  const auto create_info = VulkanBootstrap::GetSamplerCreate(Device->GetProperties().limits.maxSamplerAnisotropy,
+                                                             static_cast<float>(mip_levels),
+                                                             address_mode,
+                                                             filter);
 
   vkCreateSampler(Device->GetDevice(), &create_info, nullptr, &Sampler);
 }
 
-VulkanObjects::VulkanSamplerInstance::~VulkanSamplerInstance()
+VulkanObjects::VulkanSamplerInstance::~VulkanSamplerInstance() { Device->QueueSamplerForDeletion(Sampler); }
+
+
+VulkanObjects::VulkanTextureInstance::VulkanTextureInstance(const VulkanDeviceInstance       *device,
+                                                            VkCommandBuffer                   cmd,
+                                                            const void                       *data,
+                                                            const GraphicsTypes::TextureInfo &info)
 {
-  Device->QueueSamplerForDeletion(Sampler);
-}
+  Info  = info;
+  Image = std::make_unique<VulkanImageInstance>(device,
+                                                Info.Type,
+                                                Info.Format,
+                                                Info.Target,
+                                                Info.Samples,
+                                                Info.Width,
+                                                Info.Height,
+                                                Info.Depth,
+                                                Info.Layers,
+                                                Info.MipLevels);
 
-
-VulkanObjects::VulkanTextureInstance::VulkanTextureInstance(const VulkanDeviceInstance *device, VkCommandBuffer cmd, const std::vector<const void *> &data, const GraphicsTypes::TextureInfo &info)
-{
-  Info = info;
-  assert(data.size() <= Info.Layers && "input data not matching layer count");
-  Image = std::make_unique<VulkanImageInstance>(device, Info.Type, Info.Format, Info.Target, Info.Samples, Info.Width, Info.Height, Info.Depth, Info.Layers, Info.MipLevels);
-
-  if(!data.empty()) Image->Upload(cmd, data, 0, data.size() - 1, 0);
+  if(data) Image->Upload(cmd, data, 0, Info.Layers, 0);
 
   Image->SetLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-  View    = std::make_unique<VulkanViewInstance>(device, Image->Get(), Info.Format, Info.Type, Info.Layers, Info.MipLevels);
+  View =
+      std::make_unique<VulkanViewInstance>(device, Image->Get(), Info.Format, Info.Type, Info.Layers, Info.MipLevels);
   Sampler = std::make_unique<VulkanSamplerInstance>(device, Info.MipLevels, Info.AddressMode, Info.Filter);
 }
 
@@ -196,10 +247,10 @@ VulkanObjects::VulkanTextureInstance::VulkanTextureInstance(const VulkanDeviceIn
                                                             const VulkanViewInstance         *view,
                                                             const GraphicsTypes::TextureInfo &info)
 {
-  Info = info;
-  ImageLink    = image;
-  ViewLink     = view;
-  Sampler      = std::make_unique<VulkanSamplerInstance>(device, Info.MipLevels, Info.AddressMode, Info.Filter);
+  Info      = info;
+  ImageLink = image;
+  ViewLink  = view;
+  Sampler   = std::make_unique<VulkanSamplerInstance>(device, Info.MipLevels, Info.AddressMode, Info.Filter);
 }
 
 void VulkanObjects::VulkanTextureInstance::SetLayout(VkCommandBuffer cmd, const VkImageLayout layout) const

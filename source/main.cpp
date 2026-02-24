@@ -138,7 +138,6 @@ int main(int argc, char *argv[])
   const bool isTesting = !testToRunName.empty();
   try
   {
-
     // Load plugin preferences before game data if any.
     Plugins::LoadSettings();
 

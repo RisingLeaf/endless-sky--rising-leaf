@@ -15,13 +15,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#ifdef __SSE3__
-#include <pmmintrin.h>
-#elif defined(__SSE2__)
-#include <xmmintrin.h>
-#endif
-
-
 
 // Class representing a 2D point with functions for a variety of std::vector operations.
 // A Point can represent either a location or a std::vector (e.g. a velocity, or a
@@ -86,24 +79,8 @@ public:
 
 
 private:
-#ifdef __SSE2__
-	// Private constructor, using a std::vector.
-	explicit Point(const __m128d &v);
-
-
-private:
-	struct PointInternal {
-		double x;
-		double y;
-	};
-	union {
-		__m128d v;
-		PointInternal val;
-	};
-#else
 	double x;
 	double y;
-#endif
 };
 
 
@@ -111,42 +88,26 @@ private:
 // Inline accessor functions, for speed:
 inline double &Point::X()
 {
-#ifdef __SSE2__
-	return val.x;
-#else
 	return x;
-#endif
 }
 
 
 
 inline const double &Point::X() const noexcept
 {
-#ifdef __SSE2__
-	return val.x;
-#else
 	return x;
-#endif
 }
 
 
 
 inline double &Point::Y()
 {
-#ifdef __SSE2__
-	return val.y;
-#else
 	return y;
-#endif
 }
 
 
 
 inline const double &Point::Y() const noexcept
 {
-#ifdef __SSE2__
-	return val.y;
-#else
 	return y;
-#endif
 }
