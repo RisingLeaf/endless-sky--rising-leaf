@@ -18,6 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cstdint>
 #include <set>
 #include <string>
+#include <vector>
 
 class ImageFileData;
 
@@ -56,8 +57,8 @@ public:
 	int Height() const;
 	int Frames() const;
 
-	const uint32_t *Pixels() const;
-	uint32_t *Pixels();
+  const std::vector<void *> &Pixels() const;
+	std::vector<void *> &Pixels();
 
 	const uint32_t *Begin(int y, int frame = 0) const;
 	uint32_t *Begin(int y, int frame = 0);
@@ -76,5 +77,5 @@ private:
 	int width;
 	int height;
 	int frames;
-	uint32_t *pixels;
+	std::vector<void *> pixels;
 };

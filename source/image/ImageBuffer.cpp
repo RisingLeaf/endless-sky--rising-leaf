@@ -33,17 +33,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	const set<string> PNG_EXTENSIONS{".png"};
-	const set<string> JPG_EXTENSIONS{".jpg", ".jpeg", ".jpe"};
-	const set<string> AVIF_EXTENSIONS{".avif", ".avifs"};
-	const set<string> IMAGE_EXTENSIONS = []()
+	set<string> PNG_EXTENSIONS{".png"};
+	set<string> JPG_EXTENSIONS{".jpg", ".jpeg", ".jpe"};
+	set<string> AVIF_EXTENSIONS{".avif", ".avifs"};
+  set<string> IMAGE_EXTENSIONS = []()
 	{
 		set<string> extensions(PNG_EXTENSIONS);
 		extensions.insert(JPG_EXTENSIONS.begin(), JPG_EXTENSIONS.end());
 		extensions.insert(AVIF_EXTENSIONS.begin(), AVIF_EXTENSIONS.end());
 		return extensions;
 	}();
-	const set<string> IMAGE_SEQUENCE_EXTENSIONS = AVIF_EXTENSIONS;
+  set<string> &IMAGE_SEQUENCE_EXTENSIONS = AVIF_EXTENSIONS;
 
 	bool ReadPNG(const filesystem::path &path, ImageBuffer &buffer, int frame);
 	bool ReadJPG(const filesystem::path &path, ImageBuffer &buffer, int frame);
@@ -68,7 +68,7 @@ const set<string> &ImageBuffer::ImageSequenceExtensions()
 
 
 ImageBuffer::ImageBuffer(int frames)
-	: width(0), height(0), frames(frames), pixels(nullptr)
+	: width(0), height(0), frames(frames)
 {
 }
 
@@ -82,10 +82,11 @@ ImageBuffer::~ImageBuffer()
 
 
 // Set the number of frames. This must be called before allocating.
-void ImageBuffer::Clear(int frames)
+void ImageBuffer::Clear(const int frames)
 {
-	delete [] pixels;
-	pixels = nullptr;
+  for (void *pix : pixels)
+    delete [] static_cast<uint32_t *>(pix);
+  pixels.clear();
 	this->frames = frames;
 }
 
@@ -97,10 +98,12 @@ void ImageBuffer::Allocate(int width, int height)
 {
 	// Do nothing if the buffer is already allocated or if any of the dimensions
 	// is set to zero.
-	if(pixels || !width || !height || !frames)
+	if(!pixels.empty() || !width || !height || !frames)
 		return;
 
-	pixels = new uint32_t[width * height * frames];
+  pixels.resize(frames);
+  for (void *pix : pixels)
+    pix = new uint32_t[width * height];
 	this->width = width;
 	this->height = height;
 }
@@ -128,30 +131,30 @@ int ImageBuffer::Frames() const
 
 
 
-const uint32_t *ImageBuffer::Pixels() const
+const std::vector<void *> &ImageBuffer::Pixels() const
 {
 	return pixels;
 }
 
 
 
-uint32_t *ImageBuffer::Pixels()
+std::vector<void *> &ImageBuffer::Pixels()
 {
 	return pixels;
 }
 
 
 
-const uint32_t *ImageBuffer::Begin(int y, int frame) const
+const uint32_t *ImageBuffer::Begin(const int y, const int frame) const
 {
-	return pixels + width * (y + height * frame);
+	return static_cast<uint32_t *>(pixels[frame]) + width * (y + height);
 }
 
 
 
-uint32_t *ImageBuffer::Begin(int y, int frame)
+uint32_t *ImageBuffer::Begin(const int y, const int frame)
 {
-	return pixels + width * (y + height * frame);
+  return static_cast<uint32_t *>(pixels[frame]) + width * (y + height);
 }
 
 
@@ -161,21 +164,24 @@ void ImageBuffer::ShrinkToHalfSize()
 	ImageBuffer result(frames);
 	result.Allocate(width / 2, height / 2);
 
-	unsigned char *begin = reinterpret_cast<unsigned char *>(pixels);
-	unsigned char *out = reinterpret_cast<unsigned char *>(result.pixels);
 	// Loop through every line of every frame of the buffer.
-	for(int y = 0; y < result.height * frames; ++y)
-	{
-		unsigned char *aIt = begin + (4 * width) * (2 * y);
-		unsigned char *aEnd = aIt + 4 * 2 * result.width;
-		unsigned char *bIt = begin + (4 * width) * (2 * y + 1);
-		for( ; aIt != aEnd; aIt += 4, bIt += 4)
-		{
-			for(int channel = 0; channel < 4; ++channel, ++aIt, ++bIt, ++out)
-				*out = (static_cast<unsigned>(aIt[0]) + static_cast<unsigned>(bIt[0])
-					+ static_cast<unsigned>(aIt[4]) + static_cast<unsigned>(bIt[4]) + 2) / 4;
-		}
-	}
+  for(int i = 0; i  < frames; i++)
+  {
+    unsigned char *pix = static_cast<unsigned char *>(pixels[i]);
+    unsigned char *out = static_cast<unsigned char *>(result.pixels[i]);
+    for(int y = 0; y < result.height; ++y)
+    {
+      unsigned char *aIt = pix + (4 * width) * (2 * y);
+      unsigned char *aEnd = aIt + 4 * 2 * result.width;
+      unsigned char *bIt = pix + (4 * width) * (2 * y + 1);
+      for( ; aIt != aEnd; aIt += 4, bIt += 4)
+      {
+        for(int channel = 0; channel < 4; ++channel, ++aIt, ++bIt, ++out)
+          *out = (static_cast<unsigned>(aIt[0]) + static_cast<unsigned>(bIt[0])
+            + static_cast<unsigned>(aIt[4]) + static_cast<unsigned>(bIt[4]) + 2) / 4;
+      }
+    }
+  }
 	swap(width, result.width);
 	swap(height, result.height);
 	swap(pixels, result.pixels);
@@ -183,7 +189,7 @@ void ImageBuffer::ShrinkToHalfSize()
 
 
 
-int ImageBuffer::Read(const ImageFileData &data, int frame)
+int ImageBuffer::Read(const ImageFileData &data, const int frame)
 {
 	// First, make sure this is a supported file.
 	bool isPNG = PNG_EXTENSIONS.contains(data.extension);

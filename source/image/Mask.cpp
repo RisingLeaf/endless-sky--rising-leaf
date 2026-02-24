@@ -32,7 +32,7 @@ namespace {
 		const int width = image.Width();
 		const int height = image.Height();
 		const int numPixels = width * height;
-		const uint32_t *begin = image.Pixels() + frame * numPixels;
+		const uint32_t *begin = image.Begin(0, frame);
 		auto LogError = [width, height, fileName](string reason)
 		{
 			Logger::LogError("Unable to create mask for " + to_string(width) + "x" + to_string(height)

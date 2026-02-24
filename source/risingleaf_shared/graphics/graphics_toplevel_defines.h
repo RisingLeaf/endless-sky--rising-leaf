@@ -375,7 +375,7 @@ namespace GraphicsTypes
     // Copies lhs into rhs.
     virtual void CopyBuffer(BufferInstance *buffer_instance_rhs, BufferInstance *buffer_instance_lhs) const = 0;
 
-    virtual void CreateTexture(std::unique_ptr<TextureInstance> &texture_instance, const TextureInfo &texture_info, const std::vector<const void *> &in_data) const = 0;
+    virtual void CreateTexture(std::unique_ptr<TextureInstance> &texture_instance, const TextureInfo &texture_info, const void * const * in_data) const = 0;
 
     virtual void CreateRenderBuffer(std::unique_ptr<RenderBufferInstance> &render_buffer_instance, const FrameBufferInfo &create_info) const = 0;
     virtual const TextureInstance *GetRenderBufferTexture(RenderBufferInstance *render_buffer_instance) const                                                                                   = 0;

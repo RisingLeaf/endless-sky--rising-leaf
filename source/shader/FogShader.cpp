@@ -160,17 +160,17 @@ void FogShader::Draw(const Point &center, double zoom, const PlayerInfo &player)
 		// away, then it transitions somewhat quickly.
 		for(unsigned char &value : buffer)
 			value = max(0, min(LIMIT, (value - 60) * 4));
-		const void *data = &buffer.front();
+	  void *data = &buffer.front();
 
 		// Set up the OpenGL texture if it doesn't exist yet.
 		if(sizeChanged)
 		{
-			texture = graphics_layer::TextureHandle(GameWindow::GetInstance(), data, columns, rows, 1, GraphicsTypes::TextureType::TYPE_2D, GraphicsTypes::ImageFormat::R, GraphicsTypes::TextureTarget::READ);
+			texture = graphics_layer::TextureHandle(GameWindow::GetInstance(), {data}, columns, rows, 1, GraphicsTypes::TextureType::TYPE_2D, GraphicsTypes::ImageFormat::R, GraphicsTypes::TextureTarget::READ);
 		}
 		else
 		{
 			// TODO: Replace instead
-			texture = graphics_layer::TextureHandle(GameWindow::GetInstance(), data, columns, rows, 1, GraphicsTypes::TextureType::TYPE_2D, GraphicsTypes::ImageFormat::R, GraphicsTypes::TextureTarget::READ);
+			texture = graphics_layer::TextureHandle(GameWindow::GetInstance(), {data}, columns, rows, 1, GraphicsTypes::TextureType::TYPE_2D, GraphicsTypes::ImageFormat::R, GraphicsTypes::TextureTarget::READ);
 		}
 	}
 
