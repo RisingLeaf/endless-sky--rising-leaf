@@ -16,11 +16,11 @@ VS_END
 
 
 FS_BEGIN
-	float arc = mod(atan(coord.x, coord.y) + M_PI + spec.startAngle, 2.f * M_PI);
+	float arc = fmod(atan(coord.x, coord.y) + M_PI + spec.startAngle, 2.f * M_PI);
 	float arcFalloff = 1.f - min(2.f * M_PI - arc, arc - spec.angle) * spec.radius;
 	if(spec.dash != 0.f)
 	{
-		arc = mod(arc, spec.dash);
+		arc = fmod(arc, spec.dash);
 		arcFalloff = min(arcFalloff, min(arc, spec.dash - arc) * spec.radius);
 	}
 	float len = length(coord);

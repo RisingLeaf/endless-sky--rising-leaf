@@ -110,11 +110,11 @@ namespace graphics_metal
     void SetColorState(bool state) const override;
 
     void BindShader(const GraphicsTypes::ShaderInstance *shader_instance) const override;
-    void BindBufferDynamic(std::vector<unsigned char> &data, GraphicsTypes::UBOBindPoint bind_point) const override;
+    void BindBufferDynamic(const std::vector<unsigned char> &data, GraphicsTypes::UBOBindPoint bind_point) const override;
 
     void BindTextures(const GraphicsTypes::TextureInstance *const *texture_instance, int count, int set) const override;
     void BindVertexBuffer(GraphicsTypes::BufferInstance *buffer_instance) const override;
-    void DrawIndexed(size_t count, const GraphicsTypes::BufferInstance *buffer_instance, GraphicsTypes::PrimitiveType prim_type) const override;
+    void DrawIndexed(size_t start, size_t count, const GraphicsTypes::BufferInstance *buffer_instance, GraphicsTypes::PrimitiveType prim_type) const override;
     void DrawDynamic(size_t count, size_t type_size, const void *data, GraphicsTypes::PrimitiveType prim_type) const override;
 
     void BindRenderBuffer(GraphicsTypes::RenderBufferInstance *render_buffer_instance) const override;

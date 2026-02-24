@@ -193,10 +193,10 @@ namespace graphics_layer
 
   ObjectHandle::~ObjectHandle() = default;
 
-  void ObjectHandle::Draw(const GraphicsTypes::PrimitiveType prim_type) const
+  void ObjectHandle::Draw(const GraphicsTypes::PrimitiveType prim_type, int start, int end) const
   {
     Instance->BindVertexBuffer(VertexBuffer.get());
-    Instance->DrawIndexed(Size, IndexBuffer.get(), prim_type);
+    Instance->DrawIndexed(start, end > 0 ? end : Size, IndexBuffer.get(), prim_type);
   }
 
   TextureHandle::TextureHandle(const GraphicsTypes::GraphicsInstance *instance,

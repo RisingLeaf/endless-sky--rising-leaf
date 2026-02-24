@@ -57,8 +57,8 @@ public:
 	int Height() const;
 	int Frames() const;
 
-  const std::vector<void *> &Pixels() const;
-	std::vector<void *> &Pixels();
+  const uint32_t *Pixels() const;
+	uint32_t *Pixels();
 
 	const uint32_t *Begin(int y, int frame = 0) const;
 	uint32_t *Begin(int y, int frame = 0);
@@ -77,5 +77,5 @@ private:
 	int width;
 	int height;
 	int frames;
-	std::vector<void *> pixels;
+  uint32_t *pixels;
 };

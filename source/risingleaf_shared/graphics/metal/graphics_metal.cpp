@@ -940,7 +940,7 @@ void graphics_metal::MetalGraphicsInstance::SetCommonUniforms(const ShaderInfo::
 
 void graphics_metal::MetalGraphicsInstance::SetColorState(const bool state) const { current_state.color = state; }
 
-void graphics_metal::MetalGraphicsInstance::BindBufferDynamic(std::vector<unsigned char>       &data,
+void graphics_metal::MetalGraphicsInstance::BindBufferDynamic(const std::vector<unsigned char>       &data,
                                                               const GraphicsTypes::UBOBindPoint bind_point) const
 {
   switch(bind_point)
@@ -988,7 +988,8 @@ void graphics_metal::MetalGraphicsInstance::BindVertexBuffer(GraphicsTypes::Buff
   current_encoder->setVertexBuffer(metal_buffer_instance->Buffer, 0, 0);
 }
 
-void graphics_metal::MetalGraphicsInstance::DrawIndexed(const size_t                         count,
+void graphics_metal::MetalGraphicsInstance::DrawIndexed(const size_t                         start,
+                                                        const size_t                         count,
                                                         const GraphicsTypes::BufferInstance *buffer_instance,
                                                         const GraphicsTypes::PrimitiveType   prim_type) const
 {
@@ -1043,7 +1044,7 @@ void graphics_metal::MetalGraphicsInstance::DrawIndexed(const size_t            
   }
   else
   {
-    current_encoder->drawPrimitives(mtl_prim_type, static_cast<NS::UInteger>(0), count);
+    current_encoder->drawPrimitives(mtl_prim_type, start, count);
   }
 }
 
@@ -1163,9 +1164,10 @@ void graphics_metal::MetalGraphicsInstance::EndDraw(int, int)
     current_buffer->presentDrawable(CurrentDrawable);
     // swift_msg_draw_finished();
   }
-  CurrentDrawable = nullptr;
   current_buffer->commit();
   current_buffer = nullptr;
+  CurrentDrawable->release();
+  CurrentDrawable = nullptr;
 }
 
 void graphics_metal::MetalGraphicsInstance::Wait() {}

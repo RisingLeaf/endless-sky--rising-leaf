@@ -106,7 +106,7 @@ namespace graphics_layer
       return *this;
     }
 
-    void Draw(GraphicsTypes::PrimitiveType prim_type) const;
+    void Draw(GraphicsTypes::PrimitiveType prim_type, int start = 0, int end = -1) const;
   };
 
   class RotatingObjectBuffer
@@ -164,7 +164,7 @@ namespace graphics_layer
   public:
     TextureHandle() = default;
     TextureHandle(const GraphicsTypes::GraphicsInstance *instance,
-                  const std::vector<void *>             &data,
+                  const void *                           data,
                   int                                    width,
                   int                                    height,
                   int                                    depth,

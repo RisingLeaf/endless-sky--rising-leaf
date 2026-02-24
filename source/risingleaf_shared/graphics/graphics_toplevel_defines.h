@@ -398,11 +398,11 @@ namespace GraphicsTypes
     virtual void SetColorState(bool state) const                                          = 0;
 
     virtual void BindShader(const ShaderInstance *shader_instance) const                                  = 0;
-    virtual void BindBufferDynamic(std::vector<unsigned char> &data, UBOBindPoint bind_point) const = 0;
+    virtual void BindBufferDynamic(const std::vector<unsigned char> &data, UBOBindPoint bind_point) const = 0;
 
     virtual void BindTextures(const TextureInstance *const*texture_instance, int count, int set) const = 0;
     virtual void BindVertexBuffer(BufferInstance *buffer_instance) const                                                     = 0;
-    virtual void DrawIndexed(size_t count, const BufferInstance *buffer_instance, PrimitiveType prim_type) const             = 0;
+    virtual void DrawIndexed(size_t start, size_t count, const BufferInstance *buffer_instance, PrimitiveType prim_type) const             = 0;
     virtual void DrawDynamic(size_t count, size_t type_size, const void *data,    PrimitiveType prim_type) const             = 0;
 
     virtual void BindRenderBuffer(RenderBufferInstance *render_buffer_instance) const = 0;

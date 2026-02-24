@@ -203,7 +203,7 @@ void StarField::Draw(const Point &blur, const System *system) const
       // farthest out zoom they are too small to draw well.
       unit /= pow(zoom, .75);
 
-      const auto baseZoom   = static_cast<float>(2. * zoom);
+      const auto baseZoom   = static_cast<float>(zoom);
       const float rotate[4]  = {static_cast<float>(unit.Y()),
                                 static_cast<float>(-unit.X()),
                                 static_cast<float>(unit.X()),
@@ -236,13 +236,14 @@ void StarField::Draw(const Point &blur, const System *system) const
         {
           Point       off          = Point(gx, gy) - pos;
           const float translate[2] = {static_cast<float>(off.X()), static_cast<float>(off.Y())};
-          info.CopyUniformEntryToBuffer(data_cp.data(), translate, 3);
+          info.CopyUniformEntryToBuffer(data_cp.data(), translate, 2);
+
+          GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
 
           const int index = (gx & widthMod) / TILE_SIZE + ((gy & widthMod) / TILE_SIZE) * tileCols;
           const int first = tileIndex[index];
-          const int count = (tileIndex[index + 1] - first) * density / layers;
-          vertices.Draw(GraphicsTypes::PrimitiveType::TRIANGLES);
-          // glDrawArrays(GL_TRIANGLES, 6 * (first + (pass - 1) * count), 6 * (count / pass));
+          const int count = static_cast<int>((tileIndex[index + 1] - first) * density / layers);
+          vertices.Draw(GraphicsTypes::PrimitiveType::TRIANGLES, 6 * (first + (pass - 1) * count), 6 * (count / pass));
         }
       }
     }

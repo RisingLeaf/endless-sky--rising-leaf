@@ -66,7 +66,7 @@ void Sprite::AddFrames(ImageBuffer &buffer, bool is2x, bool noReduction)
   }
 
   // Only non-empty buffers need to be added to the sprite.
-  if(!buffer.Pixels().empty()) AddBuffer(buffer, texture[is2x], noReduction);
+  if(buffer.Pixels()) AddBuffer(buffer, texture[is2x], noReduction);
 }
 
 
@@ -74,7 +74,7 @@ void Sprite::AddFrames(ImageBuffer &buffer, bool is2x, bool noReduction)
 void Sprite::AddSwizzleMaskFrames(ImageBuffer &buffer, bool is2x, bool noReduction)
 {
   // Do nothing if the buffer is empty.
-  if(buffer.Pixels().empty()) return;
+  if(!buffer.Pixels()) return;
 
   AddBuffer(buffer, swizzleMask[is2x], noReduction);
 }
