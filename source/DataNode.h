@@ -41,7 +41,7 @@ public:
 
 	// Get the number of tokens in this node.
 	int Size() const noexcept;
-	// Get all the tokens in this node as an iterable vector.
+	// Get all the tokens in this node as an iterable std::vector.
 	const std::vector<std::string> &Tokens() const noexcept;
 	// Add tokens to the node.
 	void AddToken(const std::string &token);

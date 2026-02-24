@@ -19,7 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 
-using namespace std;
+
 
 
 
@@ -58,7 +58,7 @@ void Bitset::Clear() noexcept
 // Whether the given bitset has any bits that are also set in this bitset.
 bool Bitset::Intersects(const Bitset &other) const noexcept
 {
-	const auto size = min(bits.size(), other.bits.size());
+	const auto size = std::min(bits.size(), other.bits.size());
 	for(size_t i = 0; i < size; ++i)
 		if(bits[i] & other.bits[i])
 			return true;
@@ -118,7 +118,7 @@ bool Bitset::None() const noexcept
 // Fills the current bitset with the bits of other.
 void Bitset::UpdateWith(const Bitset &other)
 {
-	const auto size = min(bits.size(), other.bits.size());
+	const auto size = std::min(bits.size(), other.bits.size());
 	for(size_t i = 0; i < size; ++i)
 		bits[i] = other.bits[i];
 }

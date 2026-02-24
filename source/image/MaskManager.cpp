@@ -18,24 +18,24 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../Logger.h"
 #include "Sprite.h"
 
-using namespace std;
+
 
 namespace {
 	const Point DEFAULT = Point(1., 1.);
-	map<const Sprite *, bool> warned;
+	std::map<const Sprite *, bool> warned;
 
-	string PrintScale(Point s)
+	std::string PrintScale(Point s)
 	{
-		return to_string(100. * s.X()) + "x" + to_string(100. * s.Y()) + "%";
+		return std::to_string(100. * s.X()) + "x" + std::to_string(100. * s.Y()) + "%";
 	}
 }
 
 
 
 // Move the given masks at 1x scale into the manager's storage.
-void MaskManager::SetMasks(const Sprite *sprite, vector<Mask> &&masks)
+void MaskManager::SetMasks(const Sprite *sprite, std::vector<Mask> &&masks)
 {
-	lock_guard<mutex> lock(spriteMutex);
+	std::lock_guard<std::mutex> lock(spriteMutex);
 	auto &scales = spriteMasks[sprite];
 	auto it = scales.find(DEFAULT);
 	if(it != scales.end())
@@ -49,11 +49,11 @@ void MaskManager::SetMasks(const Sprite *sprite, vector<Mask> &&masks)
 // Add a scale that the given sprite needs to have a mask for.
 void MaskManager::RegisterScale(const Sprite *sprite, Point scale)
 {
-	lock_guard<mutex> lock(spriteMutex);
+	std::lock_guard<std::mutex> lock(spriteMutex);
 	auto &scales = spriteMasks[sprite];
 	auto lb = scales.lower_bound(scale);
 	if(lb == scales.end() || lb->first != scale)
-		scales.emplace_hint(lb, scale, vector<Mask>{});
+		scales.emplace_hint(lb, scale, std::vector<Mask>{});
 	else if(!lb->second.empty())
 		Logger::LogError("Collision mask for sprite \"" + sprite->Name() + "\" at scale "
 			+ PrintScale(scale) + " was already generated.");
@@ -91,13 +91,13 @@ void MaskManager::ScaleMasks()
 
 // Get the masks for the given sprite at the given scale. If a
 // sprite has no masks, an empty mask is returned.
-const vector<Mask> &MaskManager::GetMasks(const Sprite *sprite, Point scale) const
+const std::vector<Mask> &MaskManager::GetMasks(const Sprite *sprite, Point scale) const
 {
-	static const vector<Mask> EMPTY;
+	static const std::vector<Mask> EMPTY;
 	const auto scalesIt = spriteMasks.find(sprite);
 	if(scalesIt == spriteMasks.end())
 	{
-		if(warned.insert(make_pair(sprite, true)).second)
+		if(warned.insert(std::make_pair(sprite, true)).second)
 			Logger::LogError("Warning: sprite \"" + sprite->Name() + "\": no collision masks found.");
 		return EMPTY;
 	}
@@ -108,9 +108,9 @@ const vector<Mask> &MaskManager::GetMasks(const Sprite *sprite, Point scale) con
 		return maskIt->second;
 
 	// Shouldn't happen, but just in case, print some details about the scales for this sprite (once).
-	if(warned.insert(make_pair(sprite, true)).second)
+	if(warned.insert(std::make_pair(sprite, true)).second)
 	{
-		string warning = "Warning: sprite \"" + sprite->Name() + "\": collision mask not found.";
+		std::string warning = "Warning: sprite \"" + sprite->Name() + "\": collision mask not found.";
 		if(scales.empty()) warning += " (No scaled masks.)";
 		else if(maskIt != scales.end()) warning += " (No masks for scale " + PrintScale(scale) + ".)";
 		else

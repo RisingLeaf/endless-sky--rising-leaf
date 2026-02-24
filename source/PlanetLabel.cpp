@@ -34,7 +34,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <vector>
 
-using namespace std;
+
 
 namespace {
 	// Label offset angles, in order of preference (non-negative only).
@@ -71,7 +71,7 @@ namespace {
 
 
 
-PlanetLabel::PlanetLabel(const vector<PlanetLabel> &labels, const System &system, const StellarObject &object)
+PlanetLabel::PlanetLabel(const std::vector<PlanetLabel> &labels, const System &system, const StellarObject &object)
 	: object(&object)
 {
 	UpdateData(labels, system);
@@ -79,7 +79,7 @@ PlanetLabel::PlanetLabel(const vector<PlanetLabel> &labels, const System &system
 
 
 
-void PlanetLabel::Update(const Point &center, const double zoom, const vector<PlanetLabel> &labels,
+void PlanetLabel::Update(const Point &center, const double zoom, const std::vector<PlanetLabel> &labels,
 	const System &system)
 {
 	drawCenter = center;
@@ -99,7 +99,7 @@ void PlanetLabel::Draw() const
 		return;
 
 	// Fade label as we get farther from the center of the screen.
-	const Color labelColor = color.Additive(min(.5, .6 - offset * .001) * objectDistanceAlpha);
+	const Color labelColor = color.Additive(std::min(.5, .6 - offset * .001) * objectDistanceAlpha);
 
 	// The angle of the outer ring should be reduced by just enough that the
 	// circumference is reduced by GAP pixels.
@@ -133,7 +133,7 @@ void PlanetLabel::Draw() const
 
 
 
-void PlanetLabel::UpdateData(const vector<PlanetLabel> &labels, const System &system)
+void PlanetLabel::UpdateData(const std::vector<PlanetLabel> &labels, const System &system)
 {
 	bool reposition = false;
 	const Planet &planet = *object->GetPlanet();
@@ -144,7 +144,7 @@ void PlanetLabel::UpdateData(const vector<PlanetLabel> &labels, const System &sy
 		color = *planet.GetWormhole()->GetLinkColor();
 	else if(planet.GetGovernment())
 	{
-		string newGovernment = "(" + planet.GetGovernment()->DisplayName() + ")";
+		std::string newGovernment = "(" + planet.GetGovernment()->DisplayName() + ")";
 		if(newGovernment != government)
 			reposition = true;
 		government = newGovernment;
@@ -154,7 +154,7 @@ void PlanetLabel::UpdateData(const vector<PlanetLabel> &labels, const System &sy
 	}
 	else
 	{
-		string newGovernment = "(No government)";
+		std::string newGovernment = "(No government)";
 		if(newGovernment != government)
 			reposition = true;
 		color = Color(.3f);
@@ -166,13 +166,13 @@ void PlanetLabel::UpdateData(const vector<PlanetLabel> &labels, const System &sy
 	// Figure out how big the label is.
 	const Font &font = FontSet::Get(14);
 	const Font &bigFont = FontSet::Get(18);
-	const double labelWidth = max(bigFont.Width(name), font.Width(government));
+	const double labelWidth = std::max(bigFont.Width(name), font.Width(government));
 	const double nameHeight = bigFont.Height();
 	const double labelHeight = nameHeight + (government.empty() ? 0. : 1. + font.Height());
 	const Point labelDimensions = {labelWidth + BORDER * 2., labelHeight + BORDER * 2.};
 
 	// Try to find a label direction that is not overlapping under any zoom.
-	const vector<double> &allZooms = Preferences::Zooms();
+	const std::vector<double> &allZooms = Preferences::Zooms();
 	for(const double angle : LINE_ANGLES)
 	{
 		SetBoundingBox(labelDimensions, angle);
@@ -223,7 +223,7 @@ Rectangle PlanetLabel::GetBoundingBox(const double zoom) const
 
 // Check if the label for the given stellar object overlaps
 // with any existing label or any other stellar object in the system.
-bool PlanetLabel::HasOverlaps(const vector<PlanetLabel> &labels, const System &system,
+bool PlanetLabel::HasOverlaps(const std::vector<PlanetLabel> &labels, const System &system,
 		const StellarObject &object, const double zoom) const
 {
 	const Rectangle boundingBox = GetBoundingBox(zoom);

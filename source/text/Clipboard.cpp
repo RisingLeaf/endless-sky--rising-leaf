@@ -17,14 +17,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <SDL3/SDL_clipboard.h>
 
-using namespace std;
+
 
 
 
 // Handle keys used for clipboard operations on inputBuffer. Return false if the keys
 // don't have any functionality assigned to them. Optionally, size limit of the input buffer
 // and a set of forbidden characters can be provided.
-bool Clipboard::KeyDown(string &inputBuffer, SDL_Keycode key, Uint16 mod, size_t maxSize, const string &forbidden)
+bool Clipboard::KeyDown(std::string &inputBuffer, SDL_Keycode key, Uint16 mod, size_t maxSize, const std::string &forbidden)
 {
 	if(!(mod & SDL_KMOD_CTRL))
 		return false;
@@ -47,7 +47,7 @@ bool Clipboard::KeyDown(string &inputBuffer, SDL_Keycode key, Uint16 mod, size_t
 
 
 // Replace the current contents with the provided string.
-void Clipboard::Set(const string &text)
+void Clipboard::Set(const std::string &text)
 {
 	SDL_SetClipboardText(text.c_str());
 }
@@ -55,16 +55,16 @@ void Clipboard::Set(const string &text)
 
 
 // Get the current clipboard contents, excluding characters we don't want.
-string Clipboard::Get(size_t maxSize, const string &forbidden)
+std::string Clipboard::Get(size_t maxSize, const std::string &forbidden)
 {
 	if(!SDL_HasClipboardText())
 		return {};
 
-	string clipboardString;
+	std::string clipboardString;
 	char *clipboardBuffer = SDL_GetClipboardText();
 	size_t i = 0;
 	for(char *c = clipboardBuffer; *c && i < maxSize; ++c, ++i)
-		if(*c >= ' ' && *c <= '~' && forbidden.find(*c) == string::npos)
+		if(*c >= ' ' && *c <= '~' && forbidden.find(*c) == std::string::npos)
 			clipboardString += *c;
 	SDL_free(clipboardBuffer);
 	return clipboardString;

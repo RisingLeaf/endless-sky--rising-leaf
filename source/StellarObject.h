@@ -71,7 +71,7 @@ public:
 	bool IsStation() const;
 	// Check if this is a moon.
 	bool IsMoon() const;
-	// Get this object's parent index (in the System's vector of objects).
+	// Get this object's parent index (in the System's std::vector of objects).
 	int Parent() const;
 	// This object's system hazards.
 	const std::vector<RandomEvent<Hazard>> &Hazards() const;

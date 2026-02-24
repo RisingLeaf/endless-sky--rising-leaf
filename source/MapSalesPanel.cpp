@@ -44,7 +44,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 const double MapSalesPanel::ICON_HEIGHT = 90.;
 const double MapSalesPanel::PAD = 8.;
@@ -84,7 +84,7 @@ void MapSalesPanel::Draw()
 
 	// Adjust the scroll amount if for some reason the display has changed so
 	// that no items are visible.
-	scroll = min(0., max(-maxScroll, scroll));
+	scroll = std::min(0., std::max(-maxScroll, scroll));
 
 	DrawKey();
 	DrawPanel();
@@ -103,7 +103,7 @@ bool MapSalesPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 	else if(key == SDLK_PAGEUP || key == SDLK_PAGEDOWN)
 	{
 		scroll += static_cast<double>((Screen::Height() - 100) * ((key == SDLK_PAGEUP) - (key == SDLK_PAGEDOWN)));
-		scroll = min(0., max(-maxScroll, scroll));
+		scroll = std::min(0., std::max(-maxScroll, scroll));
 	}
 	else if(key == SDLK_HOME)
 		scroll = 0;
@@ -206,7 +206,7 @@ bool MapSalesPanel::Hover(int x, int y)
 bool MapSalesPanel::Drag(double dx, double dy)
 {
 	if(isDragging)
-		scroll = min(0., max(-maxScroll, scroll + dy));
+		scroll = std::min(0., std::max(-maxScroll, scroll + dy));
 	else
 		return MapPanel::Drag(dx, dy);
 
@@ -218,7 +218,7 @@ bool MapSalesPanel::Drag(double dx, double dy)
 bool MapSalesPanel::Scroll(double dx, double dy)
 {
 	if(isDragging)
-		scroll = min(0., max(-maxScroll, scroll + dy * 2.5 * Preferences::ScrollSpeed()));
+		scroll = std::min(0., std::max(-maxScroll, scroll + dy * 2.5 * Preferences::ScrollSpeed()));
 	else
 		return MapPanel::Scroll(dx, dy);
 
@@ -300,11 +300,11 @@ void MapSalesPanel::DrawInfo() const
 
 		const ItemInfoDisplay &selectedInfo = SelectedInfo();
 		const ItemInfoDisplay &compareInfo = CompareInfo();
-		int height = max<int>(selectedInfo.AttributesHeight(), box->Height());
+		int height = std::max<int>(selectedInfo.AttributesHeight(), box->Height());
 		int width = selectedInfo.PanelWidth();
 		if(compare >= 0)
 		{
-			height = max(height, compareInfo.AttributesHeight());
+			height = std::max(height, compareInfo.AttributesHeight());
 			width += box->Width() + compareInfo.PanelWidth();
 		}
 
@@ -344,7 +344,7 @@ void MapSalesPanel::DrawInfo() const
 
 
 
-bool MapSalesPanel::DrawHeader(Point &corner, const string &category)
+bool MapSalesPanel::DrawHeader(Point &corner, const std::string &category)
 {
 	bool hide = collapsed.contains(category);
 	if(!hidPrevious)
@@ -370,7 +370,7 @@ void MapSalesPanel::DrawSprite(const Point &corner, const Sprite *sprite, const 
 	if(sprite)
 	{
 		Point iconOffset(.5 * ICON_HEIGHT, .5 * ICON_HEIGHT);
-		double scale = min(.5, min((ICON_HEIGHT - 2.) / sprite->Height(), (ICON_HEIGHT - 2.) / sprite->Width()));
+		double scale = std::min(.5, std::min((ICON_HEIGHT - 2.) / sprite->Height(), (ICON_HEIGHT - 2.) / sprite->Width()));
 
 		// No swizzle was specified, so default to the player swizzle.
 		if(!swizzle)
@@ -382,8 +382,8 @@ void MapSalesPanel::DrawSprite(const Point &corner, const Sprite *sprite, const 
 
 
 void MapSalesPanel::Draw(Point &corner, const Sprite *sprite, const Swizzle *swizzle, bool isForSale,
-		bool isSelected, const string &name, const string &variantName,
-		const string &price, const string &info, const string &storage)
+		bool isSelected, const std::string &name, const std::string &variantName,
+		const std::string &price, const std::string &info, const std::string &storage)
 {
 	const Font &font = FontSet::Get(14);
 	const Color &selectionColor = *GameData::Colors().Get("item selected");
@@ -430,7 +430,7 @@ void MapSalesPanel::Draw(Point &corner, const Sprite *sprite, const Swizzle *swi
 
 
 
-void MapSalesPanel::DoFind(const string &text)
+void MapSalesPanel::DoFind(const std::string &text)
 {
 	int index = FindItem(text);
 	if(index >= 0 && index < static_cast<int>(zones.size()))
@@ -457,7 +457,7 @@ void MapSalesPanel::ScrollTo(int index)
 
 
 
-void MapSalesPanel::ClickCategory(const string &name)
+void MapSalesPanel::ClickCategory(const std::string &name)
 {
 	bool isHidden = collapsed.contains(name);
 	if(SDL_GetModState() & SDL_KMOD_SHIFT)

@@ -22,10 +22,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 namespace {
-	const string DEFAULT_WORMHOLE_COLOR = "map wormhole";
+	const std::string DEFAULT_WORMHOLE_COLOR = "map wormhole";
 }
 
 
@@ -59,10 +59,10 @@ void Wormhole::Load(const DataNode &node)
 		}
 
 		// Get the key and value (if any).
-		const string &key = child.Token((add || remove) ? 1 : 0);
+		const std::string &key = child.Token((add || remove) ? 1 : 0);
 		int valueIndex = (add || remove) ? 2 : 1;
 		bool hasValue = (child.Size() > valueIndex);
-		const string &value = child.Token(hasValue ? valueIndex : 0);
+		const std::string &value = child.Token(hasValue ? valueIndex : 0);
 
 		// Check for conditions that require clearing this key's current value.
 		// "remove <key>" means to clear the key's previous contents.
@@ -164,7 +164,7 @@ const Planet *Wormhole::GetPlanet() const
 
 
 
-const string &Wormhole::DisplayName() const
+const std::string &Wormhole::DisplayName() const
 {
 	return displayName;
 }
@@ -214,7 +214,7 @@ const System &Wormhole::WormholeDestination(const System &from) const
 
 
 
-const unordered_map<const System *, const System *> &Wormhole::Links() const
+const std::unordered_map<const System *, const System *> &Wormhole::Links() const
 {
 	return links;
 }

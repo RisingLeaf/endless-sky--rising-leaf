@@ -19,7 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 
 
@@ -34,29 +34,29 @@ void Gamerules::Load(const DataNode &node)
 			continue;
 		}
 
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 
 		if(key == "universal ramscoop")
 			universalRamscoop = child.BoolValue(1);
 		else if(key == "person spawn period")
-			personSpawnPeriod = max<int>(1, child.Value(1));
+			personSpawnPeriod = std::max<int>(1, child.Value(1));
 		else if(key == "no person spawn weight")
-			noPersonSpawnWeight = max<int>(0, child.Value(1));
+			noPersonSpawnWeight = std::max<int>(0, child.Value(1));
 		else if(key == "npc max mining time")
-			npcMaxMiningTime = max<int>(0, child.Value(1));
+			npcMaxMiningTime = std::max<int>(0, child.Value(1));
 		else if(key == "universal frugal threshold")
-			universalFrugalThreshold = min<double>(1., max<double>(0., child.Value(1)));
+			universalFrugalThreshold = std::min<double>(1., std::max<double>(0., child.Value(1)));
 		else if(key == "depreciation min")
-			depreciationMin = min<double>(1., max<double>(0., child.Value(1)));
+			depreciationMin = std::min<double>(1., std::max<double>(0., child.Value(1)));
 		else if(key == "depreciation daily")
-			depreciationDaily = min<double>(1., max<double>(0., child.Value(1)));
+			depreciationDaily = std::min<double>(1., std::max<double>(0., child.Value(1)));
 		else if(key == "depreciation grace period")
-			depreciationGracePeriod = max<int>(0, child.Value(1));
+			depreciationGracePeriod = std::max<int>(0, child.Value(1));
 		else if(key == "depreciation max age")
-			depreciationMaxAge = max<int>(0, child.Value(1));
+			depreciationMaxAge = std::max<int>(0, child.Value(1));
 		else if(key == "disabled fighters avoid projectiles")
 		{
-			const string &value = child.Token(1);
+			const std::string &value = child.Token(1);
 			if(value == "all")
 				fighterHitPolicy = FighterDodgePolicy::ALL;
 			else if(value == "none")
@@ -67,7 +67,7 @@ void Gamerules::Load(const DataNode &node)
 				child.PrintTrace("Skipping unrecognized value for gamerule:");
 		}
 		else if(key == "system departure min")
-			systemDepartureMin = max<double>(0., child.Value(1));
+			systemDepartureMin = std::max<double>(0., child.Value(1));
 		else if(key == "system arrival min")
 		{
 			if(child.Token(1) == "unset")
@@ -76,7 +76,7 @@ void Gamerules::Load(const DataNode &node)
 				systemArrivalMin = child.Value(1);
 		}
 		else if(key == "fleet multiplier")
-			fleetMultiplier = max<double>(0., child.Value(1));
+			fleetMultiplier = std::max<double>(0., child.Value(1));
 		else
 			miscRules[key] = child.IsNumber(1) ? child.Value(1) : child.BoolValue(1);
 	}
@@ -84,7 +84,7 @@ void Gamerules::Load(const DataNode &node)
 
 
 
-int Gamerules::GetValue(const string &rule) const
+int Gamerules::GetValue(const std::string &rule) const
 {
 	if(rule == "universal ramscoop")
 		return universalRamscoop;
@@ -198,7 +198,7 @@ double Gamerules::SystemDepartureMin() const
 
 
 
-optional<double> Gamerules::SystemArrivalMin() const
+std::optional<double> Gamerules::SystemArrivalMin() const
 {
 	return systemArrivalMin;
 }

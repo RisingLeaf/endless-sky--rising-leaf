@@ -60,7 +60,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <vector>
 
-using namespace std;
+
 
 namespace {
 	// Commodity comparison arrow min/max sizes
@@ -69,7 +69,7 @@ namespace {
 
 	// Convert the angle between two vectors into a sortable angle, i.e. an angle
 	// plus a length that is used as a tie-breaker.
-	pair<double, double> SortAngle(const Point &reference, const Point &point)
+	std::pair<double, double> SortAngle(const Point &reference, const Point &point)
 	{
 		// Rotate the given point by the reference amount.
 		Point rotated(reference.Dot(point), reference.Cross(point));
@@ -80,15 +80,15 @@ namespace {
 		// comes at the reference angle rather than directly opposite it.
 		double angle = atan2(-rotated.Y(), -rotated.X());
 
-		// Special case: collinear with the reference vector. If the point is
-		// a longer vector than the reference, it's the very best angle.
+		// Special case: collinear with the reference std::vector. If the point is
+		// a longer std::vector than the reference, it's the very best angle.
 		// Otherwise, it is the very worst angle. (Note: this also is applied if
 		// the angle is opposite (angle == 0) but then it's a no-op.)
 		if(!rotated.Y())
 			angle = copysign(angle, rotated.X() - reference.Dot(reference));
 
 		// Return the angle, plus the length as a tie-breaker.
-		return make_pair(angle, length);
+		return std::make_pair(angle, length);
 	}
 }
 
@@ -225,7 +225,7 @@ bool MapDetailPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command
 		// Clear the selected planet, if any.
 		selectedPlanet = nullptr;
 		scroll.Set(0);
-		vector<const System *> &plan = player.TravelPlan();
+		std::vector<const System *> &plan = player.TravelPlan();
 		// If a system is selected that is not at the end of the travel plan, then the player selected it
 		// by either using the Find function, or by ctrl+clicking on it. If the player then hits jump while this
 		// other system is selected, it should be added to the travel plan.
@@ -254,13 +254,13 @@ bool MapDetailPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command
 		// Depending on whether the flagship has a jump drive, the possible links
 		// we can travel along are different:
 		bool hasJumpDrive = player.Flagship()->JumpNavigation().HasJumpDrive();
-		const set<const System *> &links = hasJumpDrive
+		const std::set<const System *> &links = hasJumpDrive
 			? source->JumpNeighbors(player.Flagship()->JumpNavigation().JumpRange()) : source->Links();
 
 		// For each link we can travel from this system, check whether the link
 		// is closer to the current angle (while still being larger) than any
 		// link we have seen so far.
-		auto bestAngle = make_pair(4., 0.);
+		auto bestAngle = std::make_pair(4., 0.);
 		for(const System *it : links)
 		{
 			// Skip the currently selected link, if any, and non valid system links. Also skip links to
@@ -273,7 +273,7 @@ bool MapDetailPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command
 			if(!(hasJumpDrive || player.CanView(*it) || player.CanView(*source)))
 				continue;
 
-			// Generate a sortable angle with vector length as a tiebreaker.
+			// Generate a sortable angle with std::vector length as a tiebreaker.
 			// Otherwise if two systems are in exactly the same direction it is
 			// not well defined which one comes first.
 			auto angle = SortAngle(previousUnit, it->Position() - here);
@@ -291,7 +291,7 @@ bool MapDetailPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command
 	}
 	else if((key == SDLK_DELETE || key == SDLK_BACKSPACE) && player.HasTravelPlan())
 	{
-		vector<const System *> &plan = player.TravelPlan();
+		std::vector<const System *> &plan = player.TravelPlan();
 		plan.erase(plan.begin());
 		Select(plan.empty() ? player.GetSystem() : plan.front());
 	}
@@ -464,7 +464,7 @@ bool MapDetailPanel::Click(int x, int y, MouseButton button, int clicks)
 		Point click = Point(x, y);
 		selectedPlanet = nullptr;
 		const double planetCardHeight = MapPlanetCard::Height();
-		double distance = numeric_limits<double>::infinity();
+		double distance = std::numeric_limits<double>::infinity();
 		for(const auto &it : planets)
 		{
 			double d = click.Distance(it.second);
@@ -507,7 +507,7 @@ void MapDetailPanel::Resize()
 
 void MapDetailPanel::InitTextArea()
 {
-	description = make_shared<TextArea>();
+	description = std::make_shared<TextArea>();
 	description->SetFont(FontSet::Get(14));
 	description->SetColor(*GameData::Colors().Get("medium"));
 	description->SetAlignment(Alignment::JUSTIFIED);
@@ -531,7 +531,7 @@ void MapDetailPanel::ResizeTextArea()
 
 void MapDetailPanel::GeneratePlanetCards(const System &system)
 {
-	set<const Planet *> shown;
+	std::set<const Planet *> shown;
 
 	planetCards.clear();
 	scroll.Set(0);
@@ -567,7 +567,7 @@ void MapDetailPanel::DrawKey()
 	Point headerOff(-5., -.5 * font.Height());
 	Point textOff(10., -.5 * font.Height());
 
-	static const string HEADER[] = {
+	static const std::string HEADER[] = {
 		"Trade prices:",
 		"Ships for sale:",
 		"Outfits for sale:",
@@ -578,7 +578,7 @@ void MapDetailPanel::DrawKey()
 		"Danger level:",
 		"" // Temporary blank tile for the starry map mode.
 	};
-	const string &header = HEADER[-min(0, max(-8, commodity))];
+	const std::string &header = HEADER[-std::min(0, std::max(-8, commodity))];
 	font.Draw(header, pos + headerOff, medium);
 	pos.Y() += 20.;
 
@@ -586,7 +586,7 @@ void MapDetailPanel::DrawKey()
 	{
 		// Each system is colored by the selected commodity's price. Draw
 		// four distinct colors and the price each color represents.
-		const vector<Trade::Commodity> &commodities = GameData::Commodities();
+		const std::vector<Trade::Commodity> &commodities = GameData::Commodities();
 		const auto &range = commodities[commodity];
 		if(static_cast<unsigned>(commodity) >= commodities.size())
 			return;
@@ -595,14 +595,14 @@ void MapDetailPanel::DrawKey()
 		{
 			RingShader::Draw(pos, OUTER, INNER, MapColor(i * (2. / 3.) - 1.));
 			int price = range.low + ((range.high - range.low) * i) / 3;
-			font.Draw(to_string(price), pos + textOff, dim);
+			font.Draw(std::to_string(price), pos + textOff, dim);
 			pos.Y() += 20.;
 		}
 	}
 	else if(commodity >= SHOW_OUTFITTER)
 	{
 		// Each system is colored by the number of outfits for sale.
-		static const string LABEL[2][4] = {
+		static const std::string LABEL[2][4] = {
 			{"10+", "5", "1", "None"},
 			{"60+", "30", "1", "None"}};
 		static const double VALUE[4] = {1., .5, 0., -1.};
@@ -616,7 +616,7 @@ void MapDetailPanel::DrawKey()
 	}
 	else if(commodity == SHOW_VISITED)
 	{
-		static const string LABEL[3] = {
+		static const std::string LABEL[3] = {
 			"All planets",
 			"Some",
 			"None"
@@ -632,19 +632,19 @@ void MapDetailPanel::DrawKey()
 	{
 		// Each system is colored by the government of the system. Only the
 		// four largest visible governments are labeled in the legend.
-		vector<pair<double, const Government *>> distances;
+		std::vector<std::pair<double, const Government *>> distances;
 		for(const auto &it : closeGovernments)
 		{
 			if(!it.first)
 				continue;
 			distances.emplace_back(it.second, it.first);
 		}
-		sort(distances.begin(), distances.end());
+		std::sort(distances.begin(), distances.end());
 		int drawn = 0;
-		vector<pair<string, Color>> alreadyDisplayed;
+		std::vector<std::pair<std::string, Color>> alreadyDisplayed;
 		for(const auto &it : distances)
 		{
-			const string &displayName = it.second->DisplayName();
+			const std::string &displayName = it.second->DisplayName();
 			const Color &displayColor = it.second->GetColor();
 			auto foundIt = find(alreadyDisplayed.begin(), alreadyDisplayed.end(),
 					make_pair(displayName, displayColor));
@@ -686,12 +686,12 @@ void MapDetailPanel::DrawKey()
 	}
 	else if(commodity == SHOW_DANGER)
 	{
-		RingShader::Draw(pos, OUTER, INNER, DangerColor(numeric_limits<double>::quiet_NaN()));
+		RingShader::Draw(pos, OUTER, INNER, DangerColor(std::numeric_limits<double>::quiet_NaN()));
 		font.Draw("None", pos + textOff, dim);
 		pos.Y() += 20.;
 		// Each system is colored in accordance with its danger to the player,
 		// including threats from any "raid fleet" presence.
-		static const string labels[4] = {"Minimal", "Low", "Moderate", "High"};
+		static const std::string labels[4] = {"Minimal", "Low", "Moderate", "High"};
 		for(int i = 0; i < 4; ++i)
 		{
 			RingShader::Draw(pos, OUTER, INNER, DangerColor(i / 3.));
@@ -740,8 +740,8 @@ void MapDetailPanel::DrawInfo()
 	bool canView = player.CanView(*selectedSystem);
 
 	// Draw the panel for the planets. If the system was not visited, no planets will be shown.
-	const double minimumSize = max(minPlanetPanelHeight, Screen::Height() - bottomGovY - systemSprite->Height());
-	planetPanelHeight = canView ? min(min(minimumSize, maxPlanetPanelHeight),
+	const double minimumSize = std::max(minPlanetPanelHeight, Screen::Height() - bottomGovY - systemSprite->Height());
+	planetPanelHeight = canView ? std::min(std::min(minimumSize, maxPlanetPanelHeight),
 		(planetCards.size()) * planetCardHeight) : 0.;
 	Point size(planetWidth, planetPanelHeight);
 	// This needs to fill from the start of the screen.
@@ -797,17 +797,17 @@ void MapDetailPanel::DrawInfo()
 
 	const Font &font = FontSet::Get(14);
 	const Sprite *alertSprite = SpriteSet::Get(commodity == SHOW_DANGER ? "ui/red alert" : "ui/red alert grayed");
-	const float alertScale = min<float>(1.f, min<double>(textMargin,
-		font.Height()) / max(alertSprite->Width(), alertSprite->Height()));
+	const float alertScale = std::min<float>(1.f, std::min<double>(textMargin,
+		font.Height()) / std::max(alertSprite->Width(), alertSprite->Height()));
 	SpriteShader::Draw(alertSprite, uiPoint + Point(-textMargin / 2., -7. + font.Height() / 2.), alertScale);
 
-	string systemName = player.KnowsName(*selectedSystem) ?
+	std::string systemName = player.KnowsName(*selectedSystem) ?
 		selectedSystem->DisplayName() : "Unexplored System";
 	const auto alignLeft = Layout(145, Truncate::BACK);
 	font.Draw({systemName, alignLeft}, uiPoint + Point(0., -7.), medium);
 
 	governmentY = uiPoint.Y() + textMargin;
-	string gov = canView ? selectedSystem->GetGovernment()->DisplayName() : "Unknown Government";
+	std::string gov = canView ? selectedSystem->GetGovernment()->DisplayName() : "Unknown Government";
 	font.Draw({gov, alignLeft}, uiPoint + Point(0., 13.), (commodity == SHOW_GOVERNMENT) ? medium : dim);
 	if(commodity == SHOW_GOVERNMENT)
 		PointerShader::Draw(uiPoint + Point(0., 20.), Point(1., 0.),
@@ -878,7 +878,7 @@ void MapDetailPanel::DrawInfo()
 
 		font.Draw(commodity.name, uiPoint, color);
 
-		string price;
+		std::string price;
 		if(canView && otherIsInhabited)
 		{
 			value = selectedSystem->Trade(commodity.name);
@@ -886,7 +886,7 @@ void MapDetailPanel::DrawInfo()
 			if(!value)
 				price = "----";
 			else if(noCompare || player.GetSystem() == selectedSystem || !localValue)
-				price = to_string(value);
+				price = std::to_string(value);
 			else
 			{
 				value -= localValue;
@@ -894,7 +894,7 @@ void MapDetailPanel::DrawInfo()
 					price += "(";
 				if(value > 0)
 					price += '+';
-				price += to_string(value);
+				price += std::to_string(value);
 				if(Preferences::Has("Show parenthesis"))
 					price += ")";
 			}
@@ -988,7 +988,7 @@ void MapDetailPanel::DrawOrbits()
 			distance += selectedSystem->Objects()[activeParent].Distance();
 			activeParent = selectedSystem->Objects()[activeParent].Parent();
 		}
-		maxDistance = max(maxDistance, distance);
+		maxDistance = std::max(maxDistance, distance);
 	}
 	// 2400 -> 120.
 	scale = .03;
@@ -1048,7 +1048,7 @@ void MapDetailPanel::DrawOrbits()
 		const float *rgb = inaccessible ? Radar::GetColor(Radar::INACTIVE).Get()
 			: Radar::GetColor(object.RadarType(player.Flagship())).Get();
 		// Darken and saturate the color, and make it opaque.
-		Color color(max(0.f, rgb[0] * 1.2f - .2f), max(0.f, rgb[1] * 1.2f - .2f), max(0.f, rgb[2] * 1.2f - .2f), 1.f);
+		Color color(std::max(0.f, rgb[0] * 1.2f - .2f), std::max(0.f, rgb[1] * 1.2f - .2f), std::max(0.f, rgb[2] * 1.2f - .2f), 1.f);
 		RingShader::Draw(pos, object.Radius() * scale + 1., 0.f, color);
 	}
 
@@ -1085,7 +1085,7 @@ void MapDetailPanel::DrawOrbits()
 				habitColor[6]);
 
 	// Draw the name of the selected planet.
-	const string &name = selectedPlanet ? selectedPlanet->DisplayName() : selectedSystem->DisplayName();
+	const std::string &name = selectedPlanet ? selectedPlanet->DisplayName() : selectedSystem->DisplayName();
 	Point namePos(Screen::Right() - 190., Screen::Top() + 7.);
 	font.Draw({name, {180, Alignment::CENTER, Truncate::BACK}},
 		namePos, *GameData::Colors().Get("medium"));

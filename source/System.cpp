@@ -31,7 +31,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
+
 
 namespace {
 	// Dynamic economy parameters: how much of its production each system keeps
@@ -48,7 +48,7 @@ const double System::DEFAULT_NEIGHBOR_DISTANCE = 100.;
 
 
 
-System::Asteroid::Asteroid(const string &name, int count, double energy)
+System::Asteroid::Asteroid(const std::string &name, int count, double energy)
 	: name(name), count(count), energy(energy)
 {
 }
@@ -62,7 +62,7 @@ System::Asteroid::Asteroid(const Minable *type, int count, double energy)
 
 
 
-const string &System::Asteroid::Name() const
+const std::string &System::Asteroid::Name() const
 {
 	return name;
 }
@@ -100,7 +100,7 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 
 	// For the following keys, if this data node defines a new value for that
 	// key, the old values should be cleared (unless using the "add" keyword).
-	set<string> shouldOverwrite = {"asteroids", "attributes", "belt", "fleet", "link", "object", "hazard"};
+	std::set<std::string> shouldOverwrite = {"asteroids", "attributes", "belt", "fleet", "link", "object", "hazard"};
 
 	for(const DataNode &child : node)
 	{
@@ -114,10 +114,10 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 		}
 
 		// Get the key and value (if any).
-		const string &key = child.Token((add || remove) ? 1 : 0);
+		const std::string &key = child.Token((add || remove) ? 1 : 0);
 		int valueIndex = (add || remove) ? 2 : 1;
 		bool hasValue = (child.Size() > valueIndex);
-		const string &value = child.Token(hasValue ? valueIndex : 0);
+		const std::string &value = child.Token(hasValue ? valueIndex : 0);
 
 		// Check for conditions that require clearing this key's current value.
 		// "remove <key>" means to clear the key's previous contents.
@@ -206,7 +206,7 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 		{
 			for(const DataNode &grand : child)
 			{
-				const string &key = grand.Token(0);
+				const std::string &key = grand.Token(0);
 				bool hasValue = grand.Size() >= 2;
 				if(key == "universal" && hasValue)
 					universalRamscoop = grand.BoolValue(1);
@@ -259,8 +259,8 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 			else if(child.Size() > valueIndex + 2)
 				asteroids.emplace_back(value, child.Value(valueIndex + 1), child.Value(valueIndex + 2));
 			else
-				child.PrintTrace("Error: expected " + to_string(valueIndex + 3)
-					+ " tokens. Found " + to_string(child.Size()) + ":");
+				child.PrintTrace("Error: expected " + std::to_string(valueIndex + 3)
+					+ " tokens. Found " + std::to_string(child.Size()) + ":");
 		}
 		else if(key == "minables")
 		{
@@ -277,8 +277,8 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 			else if(child.Size() > valueIndex + 2)
 				asteroids.emplace_back(type, child.Value(valueIndex + 1), child.Value(valueIndex + 2));
 			else
-				child.PrintTrace("Error: expected " + to_string(valueIndex + 3)
-					+ " tokens. Found " + to_string(child.Size()) + ":");
+				child.PrintTrace("Error: expected " + std::to_string(valueIndex + 3)
+					+ " tokens. Found " + std::to_string(child.Size()) + ":");
 		}
 		else if(key == "fleet")
 		{
@@ -321,7 +321,7 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 				erase(belts, radius);
 			else
 			{
-				int weight = (child.Size() >= valueIndex + 2) ? max<int>(1, child.Value(valueIndex + 1)) : 1;
+				int weight = (child.Size() >= valueIndex + 2) ? std::max<int>(1, child.Value(valueIndex + 1)) : 1;
 				belts.emplace_back(weight, radius);
 			}
 		}
@@ -391,7 +391,7 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 		else if(key == "habitable")
 			habitable = child.Value(valueIndex);
 		else if(key == "jump range")
-			jumpRange = max(0., child.Value(valueIndex));
+			jumpRange = std::max(0., child.Value(valueIndex));
 		else if(key == "haze")
 			haze = SpriteSet::Get(value);
 		else if(key == "starfield density")
@@ -407,7 +407,7 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 			}
 			for(const DataNode &grand : child)
 			{
-				const string &type = grand.Token(0);
+				const std::string &type = grand.Token(0);
 				bool grandHasValue = grand.Size() >= 2;
 				if(type == "link" && grandHasValue)
 					extraHyperArrivalDistance = grand.Value(1);
@@ -426,7 +426,7 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 			}
 			for(const DataNode &grand : child)
 			{
-				const string &type = grand.Token(0);
+				const std::string &type = grand.Token(0);
 				bool grandHasValue = grand.Size() >= 2;
 				if(type == "link" && grandHasValue)
 					hyperDepartureDistance = grand.Value(1);
@@ -437,7 +437,7 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 			}
 		}
 		else if(key == "invisible fence" && hasValue)
-			invisibleFenceRadius = max(0., child.Value(1));
+			invisibleFenceRadius = std::max(0., child.Value(1));
 		else
 			child.PrintTrace("Skipping unrecognized attribute:");
 	}
@@ -452,14 +452,14 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 		while(root->parent >= 0)
 			root = &objects[root->parent];
 
-		static const string STAR = "You cannot land on a star!";
-		static const string HOTPLANET = "This planet is too hot to land on.";
-		static const string COLDPLANET = "This planet is too cold to land on.";
-		static const string UNINHABITEDPLANET = "This planet doesn't have anywhere you can land.";
-		static const string HOTMOON = "This moon is too hot to land on.";
-		static const string COLDMOON = "This moon is too cold to land on.";
-		static const string UNINHABITEDMOON = "This moon doesn't have anywhere you can land.";
-		static const string STATION = "This station cannot be docked with.";
+		static const std::string STAR = "You cannot land on a star!";
+		static const std::string HOTPLANET = "This planet is too hot to land on.";
+		static const std::string COLDPLANET = "This planet is too cold to land on.";
+		static const std::string UNINHABITEDPLANET = "This planet doesn't have anywhere you can land.";
+		static const std::string HOTMOON = "This moon is too hot to land on.";
+		static const std::string COLDMOON = "This moon is too cold to land on.";
+		static const std::string UNINHABITEDMOON = "This moon doesn't have anywhere you can land.";
+		static const std::string STATION = "This station cannot be docked with.";
 
 		double fraction = root->distance / habitable;
 		if(object.IsStar())
@@ -501,7 +501,7 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 // Update any information about the system that may have changed due to events,
 // or because the game was started, e.g. neighbors, solar wind and power, or
 // if the system is inhabited.
-void System::UpdateSystem(const Set<System> &systems, const set<double> &neighborDistances)
+void System::UpdateSystem(const Set<System> &systems, const std::set<double> &neighborDistances)
 {
 	accessibleLinks.clear();
 	neighbors.clear();
@@ -557,10 +557,10 @@ void System::UpdateSystem(const Set<System> &systems, const set<double> &neighbo
 		attributes.insert("uninhabited");
 
 	// Calculate the smallest arrival period of a fleet (or 0 if no fleets arrive)
-	minimumFleetPeriod = numeric_limits<int>::max();
+	minimumFleetPeriod = std::numeric_limits<int>::max();
 	for(auto &event : fleets)
-		minimumFleetPeriod = min<int>(minimumFleetPeriod, event.Period());
-	if(minimumFleetPeriod == numeric_limits<int>::max())
+		minimumFleetPeriod = std::min<int>(minimumFleetPeriod, event.Period());
+	if(minimumFleetPeriod == std::numeric_limits<int>::max())
 		minimumFleetPeriod = 0;
 }
 
@@ -593,14 +593,14 @@ bool System::IsValid() const
 
 
 
-const string &System::TrueName() const
+const std::string &System::TrueName() const
 {
 	return trueName;
 }
 
 
 
-void System::SetTrueName(const string &name)
+void System::SetTrueName(const std::string &name)
 {
 	trueName = name;
 	if(displayName.empty())
@@ -610,7 +610,7 @@ void System::SetTrueName(const string &name)
 
 
 // Get this system's display name.
-const string &System::DisplayName() const
+const std::string &System::DisplayName() const
 {
 	return displayName;
 }
@@ -635,7 +635,7 @@ const Government *System::GetGovernment() const
 
 
 // Get this system's map icons.
-const vector<const Sprite *> &System::GetMapIcons() const
+const std::vector<const Sprite *> &System::GetMapIcons() const
 {
 	return mapIcons;
 }
@@ -643,7 +643,7 @@ const vector<const Sprite *> &System::GetMapIcons() const
 
 
 // Get the name of the ambient audio to play in this system.
-const string &System::MusicName() const
+const std::string &System::MusicName() const
 {
 	return music;
 }
@@ -651,7 +651,7 @@ const string &System::MusicName() const
 
 
 // Get the list of "attributes" of the planet.
-const set<string> &System::Attributes() const
+const std::set<std::string> &System::Attributes() const
 {
 	return attributes;
 }
@@ -659,7 +659,7 @@ const set<string> &System::Attributes() const
 
 
 // Get a list of systems you can travel to through hyperspace from here.
-const set<const System *> &System::Links() const
+const std::set<const System *> &System::Links() const
 {
 	return accessibleLinks;
 }
@@ -670,9 +670,9 @@ const set<const System *> &System::Links() const
 // jump distance, whether or not there is a direct hyperspace link to them.
 // If this system has its own jump range, then it will always return the
 // systems within that jump range instead of the jump range given.
-const set<const System *> &System::JumpNeighbors(double neighborDistance) const
+const std::set<const System *> &System::JumpNeighbors(double neighborDistance) const
 {
-	static const set<const System *> EMPTY;
+	static const std::set<const System *> EMPTY;
 	const auto it = neighbors.find(jumpRange ? jumpRange : neighborDistance);
 	return it == neighbors.end() ? EMPTY : it->second;
 }
@@ -723,7 +723,7 @@ System::SolarGeneration System::GetSolarGeneration(const Point &shipPosition,
 		generation.energy += power * shipCollection * scale;
 		generation.heat += power * shipCollectionHeat * scale;
 	}
-	generation.fuel = max(0., generation.fuel);
+	generation.fuel = std::max(0., generation.fuel);
 	return generation;
 }
 
@@ -732,9 +732,9 @@ System::SolarGeneration System::GetSolarGeneration(const Point &shipPosition,
 // Additional travel distance to target for ships entering through hyperspace.
 double System::ExtraHyperArrivalDistance() const
 {
-	const optional<double> arrivalGamerule = GameData::GetGamerules().SystemArrivalMin();
+	const std::optional<double> arrivalGamerule = GameData::GetGamerules().SystemArrivalMin();
 	if(arrivalGamerule.has_value())
-		return max(extraHyperArrivalDistance, *arrivalGamerule);
+		return std::max(extraHyperArrivalDistance, *arrivalGamerule);
 	return extraHyperArrivalDistance;
 }
 
@@ -743,9 +743,9 @@ double System::ExtraHyperArrivalDistance() const
 // Additional travel distance to target for ships entering using a jumpdrive.
 double System::ExtraJumpArrivalDistance() const
 {
-	const optional<double> arrivalGamerule = GameData::GetGamerules().SystemArrivalMin();
+	const std::optional<double> arrivalGamerule = GameData::GetGamerules().SystemArrivalMin();
 	if(arrivalGamerule.has_value())
-		return max(extraJumpArrivalDistance, *arrivalGamerule);
+		return std::max(extraJumpArrivalDistance, *arrivalGamerule);
 	return extraJumpArrivalDistance;
 }
 
@@ -753,23 +753,23 @@ double System::ExtraJumpArrivalDistance() const
 
 double System::JumpDepartureDistance() const
 {
-	return max(jumpDepartureDistance, GameData::GetGamerules().SystemDepartureMin());
+	return std::max(jumpDepartureDistance, GameData::GetGamerules().SystemDepartureMin());
 }
 
 
 
 double System::HyperDepartureDistance() const
 {
-	return max(hyperDepartureDistance, GameData::GetGamerules().SystemDepartureMin());
+	return std::max(hyperDepartureDistance, GameData::GetGamerules().SystemDepartureMin());
 }
 
 
 
 // Get a list of systems you can "see" from here, whether or not there is a
 // direct hyperspace link to them.
-const set<const System *> &System::VisibleNeighbors() const
+const std::set<const System *> &System::VisibleNeighbors() const
 {
-	static const set<const System *> EMPTY;
+	static const std::set<const System *> EMPTY;
 	const auto it = neighbors.find(DEFAULT_NEIGHBOR_DISTANCE);
 	return it == neighbors.end() ? EMPTY : it->second;
 }
@@ -788,7 +788,7 @@ void System::SetDate(const Date &date)
 		object.angle = Angle(now * object.speed + object.offset);
 		object.position = object.angle.Unit() * object.distance;
 
-		// Because of the order of the vector, the parent's position has always
+		// Because of the order of the std::vector, the parent's position has always
 		// been updated before this loop reaches any of its children, so:
 		if(object.parent >= 0)
 			object.position += objects[object.parent].position;
@@ -804,7 +804,7 @@ void System::SetDate(const Date &date)
 
 
 // Get the stellar object locations on the most recently set date.
-const vector<StellarObject> &System::Objects() const
+const std::vector<StellarObject> &System::Objects() const
 {
 	return objects;
 }
@@ -924,7 +924,7 @@ bool System::HasOutfitter() const
 
 
 // Get the specification of how many asteroids of each type there are.
-const vector<System::Asteroid> &System::Asteroids() const
+const std::vector<System::Asteroid> &System::Asteroids() const
 {
 	return asteroids;
 }
@@ -932,7 +932,7 @@ const vector<System::Asteroid> &System::Asteroids() const
 
 
 // Get a list of all unique payload outfits from minables in this system.
-const set<const Outfit *> &System::Payloads() const
+const std::set<const Outfit *> &System::Payloads() const
 {
 	return payloads;
 }
@@ -948,7 +948,7 @@ const Sprite *System::Haze() const
 
 
 // Get the price of the given commodity in this system.
-int System::Trade(const string &commodity) const
+int System::Trade(const std::string &commodity) const
 {
 	auto it = trade.find(commodity);
 	return (it == trade.end()) ? 0 : it->second.price;
@@ -977,7 +977,7 @@ void System::StepEconomy()
 
 
 
-void System::SetSupply(const string &commodity, double tons)
+void System::SetSupply(const std::string &commodity, double tons)
 {
 	auto it = trade.find(commodity);
 	if(it == trade.end())
@@ -989,7 +989,7 @@ void System::SetSupply(const string &commodity, double tons)
 
 
 
-double System::Supply(const string &commodity) const
+double System::Supply(const std::string &commodity) const
 {
 	auto it = trade.find(commodity);
 	return (it == trade.end()) ? 0 : it->second.supply;
@@ -997,7 +997,7 @@ double System::Supply(const string &commodity) const
 
 
 
-double System::Exports(const string &commodity) const
+double System::Exports(const std::string &commodity) const
 {
 	auto it = trade.find(commodity);
 	return (it == trade.end()) ? 0 : it->second.exports;
@@ -1006,7 +1006,7 @@ double System::Exports(const string &commodity) const
 
 
 // Get the probabilities of various fleets entering this system.
-const vector<RandomEvent<Fleet>> &System::Fleets() const
+const std::vector<RandomEvent<Fleet>> &System::Fleets() const
 {
 	return fleets;
 }
@@ -1014,7 +1014,7 @@ const vector<RandomEvent<Fleet>> &System::Fleets() const
 
 
 // Get the probabilities of various hazards in this system.
-const vector<RandomEvent<Hazard>> &System::Hazards() const
+const std::vector<RandomEvent<Hazard>> &System::Hazards() const
 {
 	return hazards;
 }
@@ -1044,9 +1044,9 @@ int System::MinimumFleetPeriod() const
 
 
 
-const vector<RaidFleet> &System::RaidFleets() const
+const std::vector<RaidFleet> &System::RaidFleets() const
 {
-	static const vector<RaidFleet> EMPTY;
+	static const std::vector<RaidFleet> EMPTY;
 	// If the system defines its own raid fleets then those are used in lieu of the government's fleets.
 	return noRaids ? EMPTY : ((raidFleets.empty() && government) ? government->RaidFleets() : raidFleets);
 }
@@ -1071,7 +1071,7 @@ void System::LoadObject(const DataNode &node, Set<Planet> &planets,
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(key == "hazard" && child.Size() >= 3)
 			object.hazards.emplace_back(GameData::Hazards().Get(child.Token(1)), child.Value(2),
 				child, playerConditions);
@@ -1086,7 +1086,7 @@ void System::LoadObject(const DataNode &node, Set<Planet> &planets,
 
 void System::LoadObjectHelper(const DataNode &node, StellarObject &object, bool removing) const
 {
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	bool hasValue = node.Size() >= 2;
 	if(key == "sprite" && hasValue)
 	{
@@ -1127,7 +1127,7 @@ void System::LoadObjectHelper(const DataNode &node, StellarObject &object, bool 
 // close enough to see or to reach via jump drive.
 void System::UpdateNeighbors(const Set<System> &systems, double distance)
 {
-	set<const System *> &neighborSet = neighbors[distance];
+	std::set<const System *> &neighborSet = neighbors[distance];
 
 	// Every accessible star system that is linked to this one is automatically a neighbor,
 	// even if it is farther away than the maximum distance.

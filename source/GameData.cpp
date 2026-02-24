@@ -75,7 +75,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "risingleaf_shared/system/File.h"
 
-using namespace std;
+
 
 namespace {
 	UniverseObjects objects;
@@ -94,14 +94,14 @@ namespace {
 
 	StarField background;
 
-	vector<filesystem::path> sources;
-	map<const Sprite *, shared_ptr<ImageSet>> deferred;
-	map<const Sprite *, int> preloaded;
+	std::vector<std::filesystem::path> sources;
+	std::map<const Sprite *, std::shared_ptr<ImageSet>> deferred;
+	std::map<const Sprite *, int> preloaded;
 
 	MaskManager maskManager;
 
 	const Government *playerGovernment = nullptr;
-	map<const System *, map<string, int>> purchases;
+	std::map<const System *, std::map<std::string, int>> purchases;
 
 	ConditionsStore globalConditions;
 
@@ -113,17 +113,17 @@ namespace {
 	std::atomic<int> totalSprites = 0;
 
 	// List of image sets that are waiting to be uploaded to the GPU.
-	mutex imageQueueMutex;
-	queue<shared_ptr<ImageSet>> imageQueue;
+	std::mutex imageQueueMutex;
+	std::queue<std::shared_ptr<ImageSet>> imageQueue;
 
 	// Loads a sprite and queues it for upload to the GPU.
-	void LoadSprite(TaskQueue &queue, const shared_ptr<ImageSet> &image)
+	void LoadSprite(TaskQueue &queue, const std::shared_ptr<ImageSet> &image)
 	{
 		queue.Run([image] { image->Load(); },
 			[image] { image->Upload(SpriteSet::Modify(image->Name()), !preventSpriteUpload); });
 	}
 
-	void LoadSpriteQueued(TaskQueue &queue, const shared_ptr<ImageSet> &image);
+	void LoadSpriteQueued(TaskQueue &queue, const std::shared_ptr<ImageSet> &image);
 	// Loads a sprite from the image queue, recursively.
 	void LoadSpriteQueued(TaskQueue &queue)
 	{
@@ -138,7 +138,7 @@ namespace {
 
 	// Loads a sprite from the given image, with progress tracking.
 	// Recursively loads the next image in the queue, if any.
-	void LoadSpriteQueued(TaskQueue &queue, const shared_ptr<ImageSet> &image)
+	void LoadSpriteQueued(TaskQueue &queue, const std::shared_ptr<ImageSet> &image)
 	{
 		queue.Run([image] { image->Load(); },
 			[image, &queue]
@@ -147,12 +147,12 @@ namespace {
 				++spritesLoaded;
 
 				// Start loading the next image in the queue, if any.
-				lock_guard lock(imageQueueMutex);
+				std::lock_guard lock(imageQueueMutex);
 				LoadSpriteQueued(queue);
 			});
 	}
 
-	void LoadPlugin(TaskQueue &queue, const filesystem::path &path)
+	void LoadPlugin(TaskQueue &queue, const std::filesystem::path &path)
 	{
 		const auto *plugin = Plugins::Load(path);
 		if(!plugin)
@@ -165,18 +165,18 @@ namespace {
 		auto icon = make_shared<ImageSet>(plugin->name);
 
 		// Try adding all the possible icon variants.
-		for(const string &extension : ImageBuffer::ImageExtensions())
+		for(const std::string &extension : ImageBuffer::ImageExtensions())
 		{
-			filesystem::path iconPath = path / ("icon" + extension);
+			std::filesystem::path iconPath = path / ("icon" + extension);
 			if(Files::Exists(iconPath))
 			{
 				icon->Add(iconPath);
 				break;
 			}
 		}
-		for(const string &extension : ImageBuffer::ImageExtensions())
+		for(const std::string &extension : ImageBuffer::ImageExtensions())
 		{
-			filesystem::path iconPath = path / ("icon@2x" + extension);
+			std::filesystem::path iconPath = path / ("icon@2x" + extension);
 			if(Files::Exists(iconPath))
 			{
 				icon->Add(iconPath);
@@ -194,7 +194,7 @@ namespace {
 
 
 
-shared_future<void> GameData::BeginLoad(TaskQueue &queue, const PlayerInfo &player,
+std::shared_future<void> GameData::BeginLoad(TaskQueue &queue, const PlayerInfo &player,
 		bool onlyLoadData, bool debugMode, bool preventUpload)
 {
 	preventSpriteUpload = preventUpload;
@@ -208,7 +208,7 @@ shared_future<void> GameData::BeginLoad(TaskQueue &queue, const PlayerInfo &play
 			// Now, read all the images in all the path directories. For each unique
 			// name, only remember one instance, letting things on the higher priority
 			// paths override the default images.
-			map<string, shared_ptr<ImageSet>> images = FindImages();
+			std::map<std::string, std::shared_ptr<ImageSet>> images = FindImages();
 
 			// From the name, strip out any frame number, plus the extension.
 			for(auto &it : images)
@@ -224,7 +224,7 @@ shared_future<void> GameData::BeginLoad(TaskQueue &queue, const PlayerInfo &play
 					deferred[SpriteSet::Get(it.first)] = std::move(it.second);
 				else
 				{
-					lock_guard lock(imageQueueMutex);
+					std::lock_guard lock(imageQueueMutex);
 					imageQueue.push(std::move(std::move(it.second)));
 					++totalSprites;
 				}
@@ -234,7 +234,7 @@ shared_future<void> GameData::BeginLoad(TaskQueue &queue, const PlayerInfo &play
 			// Launch the tasks to actually load the images, making sure not to exceed the amount
 			// of tasks the main thread can handle in a single frame to limit peak memory usage.
 			{
-				lock_guard lock(imageQueueMutex);
+				std::lock_guard lock(imageQueueMutex);
 				for(int i = 0; i < TaskQueue::MAX_SYNC_TASKS; ++i)
 					LoadSpriteQueued(queue);
 			}
@@ -288,12 +288,12 @@ void GameData::LoadSettings()
 
 void GameData::LoadShaders()
 {
-	const filesystem::path base = Files::Resources() / "shaders" / "compilation";
+	const std::filesystem::path base = Files::Resources() / "shaders" / "compilation";
 	if(Files::Exists(base))
-		for(const filesystem::path &shaderFile : Files::RecursiveList(base))
+		for(const std::filesystem::path &shaderFile : Files::RecursiveList(base))
 		{
 			if (shaderFile.extension() == ".ps") {
-				string name = shaderFile.stem().generic_string();
+				std::string name = shaderFile.stem().generic_string();
 				*objects.shaders.Get(name) = File::ReadShader(shaderFile.c_str());
 			}
 		}
@@ -326,7 +326,7 @@ double GameData::GetProgress()
 		else
 			spriteProgress = static_cast<double>(spritesLoaded) / totalSprites;
 	}
-	return min({spriteProgress, Audio::GetProgress(), objects.GetProgress()});
+	return std::min({spriteProgress, Audio::GetProgress(), objects.GetProgress()});
 }
 
 
@@ -350,10 +350,10 @@ void GameData::Preload(TaskQueue &queue, const Sprite *sprite)
 	// If this sprite is one of the currently loaded ones, there is no need to
 	// load it again. But, make note of the fact that it is the most recently
 	// asked-for sprite.
-	map<const Sprite *, int>::iterator pit = preloaded.find(sprite);
+	std::map<const Sprite *, int>::iterator pit = preloaded.find(sprite);
 	if(pit != preloaded.end())
 	{
-		for(pair<const Sprite * const, int> &it : preloaded)
+		for(std::pair<const Sprite * const, int> &it : preloaded)
 			if(it.second < pit->second)
 				++it.second;
 
@@ -386,7 +386,7 @@ void GameData::Preload(TaskQueue &queue, const Sprite *sprite)
 
 
 // Get the list of resource sources (i.e. plugin folders).
-const vector<filesystem::path> &GameData::Sources()
+const std::vector<std::filesystem::path> &GameData::Sources()
 {
 	return sources;
 }
@@ -437,10 +437,10 @@ void GameData::ReadEconomy(const DataNode &node)
 	if(!node.Size() || node.Token(0) != "economy")
 		return;
 
-	vector<string> headings;
+	std::vector<std::string> headings;
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(key == "purchases")
 		{
 			for(const DataNode &grand : child)
@@ -458,7 +458,7 @@ void GameData::ReadEconomy(const DataNode &node)
 			System &system = *objects.systems.Get(key);
 
 			int index = 0;
-			for(const string &commodity : headings)
+			for(const std::string &commodity : headings)
 				system.SetSupply(commodity, child.Value(++index));
 		}
 	}
@@ -476,7 +476,7 @@ void GameData::WriteEconomy(DataWriter &out)
 		{
 			out.Write("purchases");
 			out.BeginChild();
-			using Purchase = pair<const System *const, map<string, int>>;
+			using Purchase = std::pair<const System *const, std::map<std::string, int>>;
 			WriteSorted(purchases,
 				[](const Purchase *lhs, const Purchase *rhs)
 					{ return lhs->first->TrueName() < rhs->first->TrueName(); },
@@ -550,7 +550,7 @@ void GameData::StepEconomy()
 
 
 
-void GameData::AddPurchase(const System &system, const string &commodity, int tons)
+void GameData::AddPurchase(const System &system, const std::string &commodity, int tons)
 {
 	if(tons < 0)
 		purchases[&system][commodity] += tons;
@@ -593,9 +593,9 @@ void GameData::ResetPersons()
 
 
 // Mark all persons in the given list as dead.
-void GameData::DestroyPersons(vector<string> &names)
+void GameData::DestroyPersons(std::vector<std::string> &names)
 {
-	for(const string &name : names)
+	for(const std::string &name : names)
 		objects.persons.Get(name)->Destroy();
 }
 
@@ -818,21 +818,21 @@ Politics &GameData::GetPolitics()
 
 
 
-const vector<StartConditions> &GameData::StartOptions()
+const std::vector<StartConditions> &GameData::StartOptions()
 {
 	return objects.startConditions;
 }
 
 
 
-const vector<Trade::Commodity> &GameData::Commodities()
+const std::vector<Trade::Commodity> &GameData::Commodities()
 {
 	return objects.trade.Commodities();
 }
 
 
 
-const vector<Trade::Commodity> &GameData::SpecialCommodities()
+const std::vector<Trade::Commodity> &GameData::SpecialCommodities()
 {
 	return objects.trade.SpecialCommodities();
 }
@@ -847,9 +847,9 @@ bool GameData::HasLandingMessage(const Sprite *sprite)
 
 
 
-const string &GameData::LandingMessage(const Sprite *sprite)
+const std::string &GameData::LandingMessage(const Sprite *sprite)
 {
-	static const string EMPTY;
+	static const std::string EMPTY;
 	auto it = objects.landingMessages.find(sprite);
 	return (it == objects.landingMessages.end() ? EMPTY : it->second);
 }
@@ -883,14 +883,14 @@ const Sprite *GameData::StarIcon(const Sprite *sprite)
 
 
 // Strings for combat rating levels, etc.
-const string &GameData::Rating(const string &type, int level)
+const std::string &GameData::Rating(const std::string &type, int level)
 {
-	static const string EMPTY;
+	static const std::string EMPTY;
 	auto it = objects.ratings.find(type);
 	if(it == objects.ratings.end() || it->second.empty())
 		return EMPTY;
 
-	level = max(0, min<int>(it->second.size() - 1, level));
+	level = std::max(0, std::min<int>(it->second.size() - 1, level));
 	return it->second[level];
 }
 
@@ -939,9 +939,9 @@ void GameData::SetHaze(const Sprite *sprite, bool allowAnimation)
 
 
 
-const string &GameData::Tooltip(const string &label)
+const std::string &GameData::Tooltip(const std::string &label)
 {
-	static const string EMPTY;
+	static const std::string EMPTY;
 	auto it = objects.tooltips.find(label);
 	// Special case: the "cost" and "sells for" labels include the percentage of
 	// the full price, so they will not match exactly.
@@ -954,16 +954,16 @@ const string &GameData::Tooltip(const string &label)
 
 
 
-string GameData::HelpMessage(const string &name)
+std::string GameData::HelpMessage(const std::string &name)
 {
-	static const string EMPTY;
+	static const std::string EMPTY;
 	auto it = objects.helpMessages.find(name);
 	return Command::ReplaceNamesWithKeys(it == objects.helpMessages.end() ? EMPTY : it->second);
 }
 
 
 
-const map<string, string> &GameData::HelpTemplates()
+const std::map<std::string, std::string> &GameData::HelpTemplates()
 {
 	return objects.helpMessages;
 }
@@ -996,7 +996,7 @@ void GameData::LoadSources(TaskQueue &queue)
 	sources.clear();
 	sources.push_back(Files::Resources());
 
-	vector<filesystem::path> globalPlugins = Files::ListDirectories(Files::GlobalPlugins());
+	std::vector<std::filesystem::path> globalPlugins = Files::ListDirectories(Files::GlobalPlugins());
 	for(const auto &path : globalPlugins)
 		if(Plugins::IsPlugin(path))
 			LoadPlugin(queue, path);
@@ -1006,7 +1006,7 @@ void GameData::LoadSources(TaskQueue &queue)
 		if(path.extension() == ".zip" && Plugins::IsPlugin(path))
 			LoadPlugin(queue, path);
 
-	vector<filesystem::path> localPlugins = Files::ListDirectories(Files::UserPlugins());
+	std::vector<std::filesystem::path> localPlugins = Files::ListDirectories(Files::UserPlugins());
 	for(const auto &path : localPlugins)
 		if(Plugins::IsPlugin(path))
 			LoadPlugin(queue, path);
@@ -1018,22 +1018,22 @@ void GameData::LoadSources(TaskQueue &queue)
 
 
 
-map<string, shared_ptr<ImageSet>> GameData::FindImages()
+std::map<std::string, std::shared_ptr<ImageSet>> GameData::FindImages()
 {
-	map<string, shared_ptr<ImageSet>> images;
+	std::map<std::string, std::shared_ptr<ImageSet>> images;
 	for(const auto &source : sources)
 	{
 		// All names will only include the portion of the path that comes after
 		// this directory prefix.
-		filesystem::path directoryPath = source / "images";
+		std::filesystem::path directoryPath = source / "images";
 
-		vector<filesystem::path> imageFiles = Files::RecursiveList(directoryPath);
+		std::vector<std::filesystem::path> imageFiles = Files::RecursiveList(directoryPath);
 		for(auto &path : imageFiles)
 			if(ImageSet::IsImage(path))
 			{
 				ImageFileData data(path, directoryPath);
 
-				shared_ptr<ImageSet> &imageSet = images[data.name];
+				std::shared_ptr<ImageSet> &imageSet = images[data.name];
 				if(!imageSet)
 					imageSet.reset(new ImageSet(data.name));
 				imageSet->Add(std::move(data));

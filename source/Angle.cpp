@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cstdlib>
 #include <vector>
 
-using namespace std;
+
 
 namespace {
 	// Suppose you want to be able to turn 360 degrees in one second. Then you are
@@ -35,9 +35,9 @@ namespace {
 	constexpr double DEG_TO_STEP = STEPS / 360.;
 	constexpr double STEP_TO_RAD = PI / (STEPS / 2);
 
-	vector<Point> InitUnitCache()
+	std::vector<Point> InitUnitCache()
 	{
-		vector<Point> cache;
+		std::vector<Point> cache;
 		cache.reserve(STEPS);
 		for(int i = 0; i < STEPS; ++i)
 		{
@@ -51,7 +51,7 @@ namespace {
 		return cache;
 	}
 
-	const vector<Point> unitCache = InitUnitCache();
+	const std::vector<Point> unitCache = InitUnitCache();
 }
 
 
@@ -87,7 +87,7 @@ Angle::Angle(const double degrees) noexcept
 
 
 
-// Construct an angle pointing in the direction of the given vector.
+// Construct an angle pointing in the direction of the given std::vector.
 Angle::Angle(const Point &point) noexcept
 	: Angle(TO_DEG * atan2(point.X(), -point.Y()))
 {
@@ -152,7 +152,7 @@ bool Angle::operator!=(const Angle &other) const
 
 
 
-// Get a unit vector in the direction of this angle.
+// Get a unit std::vector in the direction of this angle.
 Point Angle::Unit() const
 {
 	return unitCache[angle];

@@ -15,7 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Color.h"
 
-using namespace std;
+
 
 
 
@@ -73,21 +73,21 @@ bool Color::IsLoaded() const
 
 
 
-void Color::SetTrueName(const string &name)
+void Color::SetTrueName(const std::string &name)
 {
 	this->trueName = name;
 }
 
 
 
-const string &Color::TrueName() const
+const std::string &Color::TrueName() const
 {
 	return trueName;
 }
 
 
 
-// Get a float vector representing this color, for use by OpenGL.
+// Get a float std::vector representing this color, for use by OpenGL.
 const float *Color::Get() const
 {
 	return color;

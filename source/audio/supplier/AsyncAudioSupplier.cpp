@@ -19,15 +19,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <thread>
 #include <utility>
 
-using namespace std;
 
 
 
-AsyncAudioSupplier::AsyncAudioSupplier(shared_ptr<iostream> data, bool looping)
+
+AsyncAudioSupplier::AsyncAudioSupplier(std::shared_ptr<std::iostream> data, bool looping)
 	: looping(looping), data(std::move(data))
 {
 	// Don't start the thread until this object is fully constructed.
-	audioThread = thread(&AsyncAudioSupplier::Decode, this);
+	audioThread = std::thread(&AsyncAudioSupplier::Decode, this);
 }
 
 
@@ -36,7 +36,7 @@ AsyncAudioSupplier::~AsyncAudioSupplier()
 {
 	// Tell the decoding thread to stop.
 	{
-		lock_guard<mutex> lock(bufferMutex);
+		std::lock_guard<std::mutex> lock(bufferMutex);
 		done = true;
 	}
 	bufferCondition.notify_all();
@@ -50,7 +50,7 @@ size_t AsyncAudioSupplier::MaxChunks() const
 	if(done && buffer.size() < OUTPUT_CHUNK)
 		return 0;
 
-	return max(static_cast<size_t>(2), AvailableChunks());
+	return std::max(static_cast<size_t>(2), AvailableChunks());
 }
 
 
@@ -61,35 +61,35 @@ size_t AsyncAudioSupplier::AvailableChunks() const
 }
 
 
-vector<AudioSupplier::sample_t> AsyncAudioSupplier::NextDataChunk()
+std::vector<AudioSupplier::sample_t> AsyncAudioSupplier::NextDataChunk()
 {
 	if(AvailableChunks())
 	{
-		lock_guard<mutex> lock(bufferMutex);
+		std::lock_guard<std::mutex> lock(bufferMutex);
 
-		vector<sample_t> temp{buffer.begin(), buffer.begin() + OUTPUT_CHUNK};
+		std::vector<sample_t> temp{buffer.begin(), buffer.begin() + OUTPUT_CHUNK};
 		buffer.erase(buffer.begin(), buffer.begin() + OUTPUT_CHUNK);
 		bufferCondition.notify_all();
 		return temp;
 	}
 	else
-		return vector<sample_t>(OUTPUT_CHUNK);
+		return std::vector<sample_t>(OUTPUT_CHUNK);
 }
 
 
 
 void AsyncAudioSupplier::AwaitBufferSpace()
 {
-	unique_lock<mutex> lock(bufferMutex);
+	std::unique_lock<std::mutex> lock(bufferMutex);
 	while(!done && buffer.size() > (BUFFER_CHUNK_SIZE - 1) * OUTPUT_CHUNK)
 		bufferCondition.wait(lock);
 }
 
 
 
-void AsyncAudioSupplier::AddBufferData(vector<sample_t> &samples)
+void AsyncAudioSupplier::AddBufferData(std::vector<sample_t> &samples)
 {
-	lock_guard<mutex> lock(bufferMutex);
+	std::lock_guard<std::mutex> lock(bufferMutex);
 	buffer.insert(buffer.end(), samples.begin(), samples.end());
 	samples.clear();
 	if(done)
@@ -117,7 +117,7 @@ size_t AsyncAudioSupplier::ReadInput(char *output, size_t bytesToRead)
 	if(data->eof() && looping)
 	{
 		data->clear();
-		data->seekg(0, iostream::beg);
+		data->seekg(0, std::iostream::beg);
 	}
 	else if(data->eof())
 		done = true;

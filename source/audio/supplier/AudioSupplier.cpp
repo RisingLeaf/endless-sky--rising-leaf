@@ -15,7 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "AudioSupplier.h"
 
-using namespace std;
+
 
 
 
@@ -53,7 +53,7 @@ void AudioSupplier::NextChunk(ALuint buffer, bool spatial)
 {
 	if(AvailableChunks())
 	{
-		vector<sample_t> samples = NextDataChunk();
+		std::vector<sample_t> samples = NextDataChunk();
 		// Spatial audio is mono, but we get stereo data by default.
 		// (This difference is due to a limitation in OpenAL.)
 		if(spatial)
@@ -73,6 +73,6 @@ void AudioSupplier::NextChunk(ALuint buffer, bool spatial)
 
 void AudioSupplier::SetSilence(ALuint buffer, size_t samples)
 {
-	vector<sample_t> data(samples);
+	std::vector<sample_t> data(samples);
 	alBufferData(buffer, FORMAT, data.data(), sizeof(sample_t) * samples, SAMPLE_RATE);
 }

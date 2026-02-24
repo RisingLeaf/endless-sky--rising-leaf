@@ -28,17 +28,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <vector>
 
-using namespace std;
+
 
 namespace {
-	// Retrieve vector of pointers to the outfits, sorted descending by size.
-	vector<const Outfit *> OrderOutfitsBySize(const map<const Outfit *, int> &outfits)
+	// Retrieve std::vector of pointers to the outfits, sorted descending by size.
+	std::vector<const Outfit *> OrderOutfitsBySize(const std::map<const Outfit *, int> &outfits)
 	{
-		vector<const Outfit *> sortedOutfits;
+		std::vector<const Outfit *> sortedOutfits;
 		for(const auto &it : outfits)
 			sortedOutfits.emplace_back(it.first);
 
-		sort(sortedOutfits.begin(), sortedOutfits.end(),
+		std::sort(sortedOutfits.begin(), sortedOutfits.end(),
 			[](const Outfit *lhs, const Outfit *rhs)
 			{
 				return lhs->Mass() > rhs->Mass();
@@ -71,7 +71,7 @@ void CargoHold::Load(const DataNode &node)
 	// Cargo is stored as name / amount pairs in two lists: commodities and outfits.
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(key == "commodities")
 		{
 			for(const DataNode &grand : child)
@@ -304,9 +304,9 @@ int CargoHold::Passengers() const
 
 
 // Normal cargo:
-int CargoHold::Get(const string &commodity) const
+int CargoHold::Get(const std::string &commodity) const
 {
-	map<string, int>::const_iterator it = commodities.find(commodity);
+	std::map<std::string, int>::const_iterator it = commodities.find(commodity);
 	return (it == commodities.end() ? 0 : it->second);
 }
 
@@ -315,7 +315,7 @@ int CargoHold::Get(const string &commodity) const
 // Spare outfits (including plunder and mined materials):
 int CargoHold::Get(const Outfit *outfit) const
 {
-	map<const Outfit *, int>::const_iterator it = outfits.find(outfit);
+	std::map<const Outfit *, int>::const_iterator it = outfits.find(outfit);
 	return (it == outfits.end() ? 0 : it->second);
 }
 
@@ -324,7 +324,7 @@ int CargoHold::Get(const Outfit *outfit) const
 // Mission cargo:
 int CargoHold::Get(const Mission *mission) const
 {
-	map<const Mission *, int>::const_iterator it = missionCargo.find(mission);
+	std::map<const Mission *, int>::const_iterator it = missionCargo.find(mission);
 	return (it == missionCargo.end() ? 0 : it->second);
 }
 
@@ -333,14 +333,14 @@ int CargoHold::Get(const Mission *mission) const
 // Check how many passengers for the given mission are being carried.
 int CargoHold::GetPassengers(const Mission *mission) const
 {
-	map<const Mission *, int>::const_iterator it = passengers.find(mission);
+	std::map<const Mission *, int>::const_iterator it = passengers.find(mission);
 	return (it == passengers.end() ? 0 : it->second);
 }
 
 
 
 // Access the commodities map directly.
-const map<string, int> &CargoHold::Commodities() const
+const std::map<std::string, int> &CargoHold::Commodities() const
 {
 	return commodities;
 }
@@ -348,7 +348,7 @@ const map<string, int> &CargoHold::Commodities() const
 
 
 // Access the outfits map directly.
-const map<const Outfit *, int> &CargoHold::Outfits() const
+const std::map<const Outfit *, int> &CargoHold::Outfits() const
 {
 	return outfits;
 }
@@ -356,7 +356,7 @@ const map<const Outfit *, int> &CargoHold::Outfits() const
 
 
 // Access the mission cargo map directly.
-const map<const Mission *, int> &CargoHold::MissionCargo() const
+const std::map<const Mission *, int> &CargoHold::MissionCargo() const
 {
 	return missionCargo;
 }
@@ -364,7 +364,7 @@ const map<const Mission *, int> &CargoHold::MissionCargo() const
 
 
 // Access the mission passenger map directly.
-const map<const Mission *, int> &CargoHold::PassengerList() const
+const std::map<const Mission *, int> &CargoHold::PassengerList() const
 {
 	return passengers;
 }
@@ -372,7 +372,7 @@ const map<const Mission *, int> &CargoHold::PassengerList() const
 
 
 // Transfer ordinary commodities from one cargo hold to another.
-int CargoHold::Transfer(const string &commodity, int amount, CargoHold &to)
+int CargoHold::Transfer(const std::string &commodity, int amount, CargoHold &to)
 {
 	if(!amount)
 		return 0;
@@ -421,9 +421,9 @@ int CargoHold::Transfer(const Mission *mission, int amount, CargoHold &to)
 	int existing = Get(mission);
 	if(amount && !existing)
 		return 0;
-	amount = min(amount, existing);
+	amount = std::min(amount, existing);
 	if(to.size >= 0)
-		amount = max(0, min(amount, to.Free()));
+		amount = std::max(0, std::min(amount, to.Free()));
 	// Don't transfer 0 tons unless that's all that exists.
 	if(existing && !amount)
 		return 0;
@@ -444,9 +444,9 @@ int CargoHold::TransferPassengers(const Mission *mission, int amount, CargoHold 
 		return -to.TransferPassengers(mission, -amount, *this);
 
 	// Check if the destination cargo hold has a limit on the number of bunks.
-	amount = min(amount, GetPassengers(mission));
+	amount = std::min(amount, GetPassengers(mission));
 	if(to.bunks >= 0)
-		amount = max(0, min(amount, to.BunksFree()));
+		amount = std::max(0, std::min(amount, to.BunksFree()));
 
 	if(amount)
 	{
@@ -477,7 +477,7 @@ void CargoHold::TransferAll(CargoHold &to, bool transferPassengers)
 		else
 			++mit;
 	}
-	const vector<const Outfit *> outfitOrder = OrderOutfitsBySize(outfits);
+	const std::vector<const Outfit *> outfitOrder = OrderOutfitsBySize(outfits);
 	for(const auto &outfit : outfitOrder)
 		Transfer(outfit, outfits[outfit], to);
 	for(const auto &it : commodities)
@@ -487,14 +487,14 @@ void CargoHold::TransferAll(CargoHold &to, bool transferPassengers)
 
 
 // Add the given amount of the given commodity.
-int CargoHold::Add(const string &commodity, int amount)
+int CargoHold::Add(const std::string &commodity, int amount)
 {
 	if(amount < 0)
 		return -Remove(commodity, -amount);
 
 	// If this cargo hold has a size limit, apply it.
 	if(size >= 0)
-		amount = max(0, min(amount, Free()));
+		amount = std::max(0, std::min(amount, Free()));
 	commodities[commodity] += amount;
 	return amount;
 }
@@ -510,7 +510,7 @@ int CargoHold::Add(const Outfit *outfit, int amount)
 	// If the outfit has mass and this cargo hold has a size limit, apply it.
 	double mass = outfit->Mass();
 	if(size >= 0 && mass > 0.)
-		amount = max(0, min(amount, static_cast<int>(FreePrecise() / mass)));
+		amount = std::max(0, std::min(amount, static_cast<int>(FreePrecise() / mass)));
 	outfits[outfit] += amount;
 	return amount;
 }
@@ -518,12 +518,12 @@ int CargoHold::Add(const Outfit *outfit, int amount)
 
 
 // Remove the given amount of the given commodity.
-int CargoHold::Remove(const string &commodity, int amount)
+int CargoHold::Remove(const std::string &commodity, int amount)
 {
 	if(amount < 0)
 		return Add(commodity, -amount);
 
-	amount = min(amount, commodities[commodity]);
+	amount = std::min(amount, commodities[commodity]);
 	commodities[commodity] -= amount;
 	return amount;
 }
@@ -536,7 +536,7 @@ int CargoHold::Remove(const Outfit *outfit, int amount)
 	if(amount < 0)
 		return Add(outfit, -amount);
 
-	amount = min(amount, outfits[outfit]);
+	amount = std::min(amount, outfits[outfit]);
 	outfits[outfit] -= amount;
 	return amount;
 }
@@ -585,7 +585,7 @@ int64_t CargoHold::Value(const System *system) const
 // be charged for any illegal outfits plus the sum of the fines for all
 // missions. If the returned value is negative, you are carrying something so
 // bad that it warrants a death sentence.
-pair<int, const Conversation *> CargoHold::IllegalCargoFine(const Government *government) const
+std::pair<int, const Conversation *> CargoHold::IllegalCargoFine(const Government *government) const
 {
 	int totalFine = 0;
 	// Carrying an illegal outfit is only half as bad as having it equipped.
@@ -604,7 +604,7 @@ pair<int, const Conversation *> CargoHold::IllegalCargoFine(const Government *go
 		int fine = government->Fines(it.first);
 		if(fine < 0)
 			return {fine, nullptr};
-		totalFine = max(totalFine, fine / 2);
+		totalFine = std::max(totalFine, fine / 2);
 	}
 
 	// Fines for illegal mission cargo and passengers are added together to
@@ -649,7 +649,7 @@ int CargoHold::IllegalCargoAmount() const
 	// Find any illegal outfits inside the cargo hold.
 	for(const auto &it : outfits)
 		if(it.first->Get("illegal") || it.first->Get("atrocity") > 0.)
-			count += it.second * max(0., it.first->Mass() + it.first->Get("scan brightness"));
+			count += it.second * std::max(0., it.first->Mass() + it.first->Get("scan brightness"));
 
 	// Find any illegal mission cargo.
 	for(const auto &it : missionCargo)

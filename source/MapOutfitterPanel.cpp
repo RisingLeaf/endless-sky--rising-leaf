@@ -35,7 +35,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <limits>
 #include <set>
 
-using namespace std;
+
 
 
 
@@ -85,13 +85,13 @@ const ItemInfoDisplay &MapOutfitterPanel::CompareInfo() const
 
 
 
-const string &MapOutfitterPanel::KeyLabel(int index) const
+const std::string &MapOutfitterPanel::KeyLabel(int index) const
 {
-	static const string MINE = "Mine this here";
+	static const std::string MINE = "Mine this here";
 	if(index == 2 && selected && selected->Get("minable") > 0.)
 		return MINE;
 
-	static const string LABEL[4] = {
+	static const std::string LABEL[4] = {
 		"Has no outfitter",
 		"Has outfitter",
 		"Sells this outfit",
@@ -132,15 +132,15 @@ void MapOutfitterPanel::Compare(int index)
 double MapOutfitterPanel::SystemValue(const System *system) const
 {
 	if(!system || !player.CanView(*system))
-		return numeric_limits<double>::quiet_NaN();
+		return std::numeric_limits<double>::quiet_NaN();
 
-	auto it = player.Harvested().lower_bound(pair<const System *, const Outfit *>(system, nullptr));
+	auto it = player.Harvested().lower_bound(std::pair<const System *, const Outfit *>(system, nullptr));
 	for( ; it != player.Harvested().end() && it->first == system; ++it)
 		if(it->second == selected)
 			return 1.;
 
 	if(!system->IsInhabited(player.Flagship()))
-		return numeric_limits<double>::quiet_NaN();
+		return std::numeric_limits<double>::quiet_NaN();
 
 	// Visiting a system is sufficient to know what ports are available on its planets.
 	double value = -1.;
@@ -162,7 +162,7 @@ double MapOutfitterPanel::SystemValue(const System *system) const
 
 
 
-int MapOutfitterPanel::FindItem(const string &text) const
+int MapOutfitterPanel::FindItem(const std::string &text) const
 {
 	int bestIndex = 9999;
 	int bestItem = -1;
@@ -190,7 +190,7 @@ void MapOutfitterPanel::DrawItems()
 	Point corner = Screen::TopLeft() + Point(0, scroll);
 	for(const auto &cat : categories)
 	{
-		const string &category = cat.Name();
+		const std::string &category = cat.Name();
 		auto it = catalog.find(category);
 		if(it == catalog.end())
 			continue;
@@ -199,12 +199,12 @@ void MapOutfitterPanel::DrawItems()
 		if(DrawHeader(corner, category))
 			continue;
 
-		for(const string &name : it->second)
+		for(const std::string &name : it->second)
 		{
 			const Outfit *outfit = GameData::Outfits().Get(name);
-			string price = Format::CreditString(outfit->Cost());
+			std::string price = Format::CreditString(outfit->Cost());
 
-			string info;
+			std::string info;
 			if(outfit->Get("minable") > 0.)
 				info = "(Mined from asteroids)";
 			else if(outfit->Get("installable") < 0.)
@@ -255,7 +255,7 @@ void MapOutfitterPanel::DrawItems()
 			if(!storedInSystem && onlyShowStorageHere)
 				continue;
 
-			const string storage_details =
+			const std::string storage_details =
 				onlyShowSoldHere || storedInSystem == 0
 				? ""
 				: storedInSystem == 1
@@ -274,7 +274,7 @@ void MapOutfitterPanel::DrawItems()
 void MapOutfitterPanel::Init()
 {
 	catalog.clear();
-	set<const Outfit *> seen;
+	std::set<const Outfit *> seen;
 
 	// Add all outfits sold by outfitters of planets from viewable systems.
 	for(auto &&it : GameData::Planets())

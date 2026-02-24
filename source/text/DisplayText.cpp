@@ -15,7 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "DisplayText.h"
 
-using namespace std;
+
 
 
 
@@ -26,14 +26,14 @@ DisplayText::DisplayText(const char *text, Layout layout)
 
 
 
-DisplayText::DisplayText(const string &text, Layout layout)
+DisplayText::DisplayText(const std::string &text, Layout layout)
 	: layout(layout), text(text)
 {
 }
 
 
 
-const string &DisplayText::GetText() const noexcept
+const std::string &DisplayText::GetText() const noexcept
 {
 	return text;
 }

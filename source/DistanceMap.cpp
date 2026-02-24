@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "System.h"
 #include "Wormhole.h"
 
-using namespace std;
+
 
 
 
@@ -117,9 +117,9 @@ int DistanceMap::Days(const System &target) const
 
 
 // Get a set containing all the systems.
-set<const System *> DistanceMap::Systems() const
+std::set<const System *> DistanceMap::Systems() const
 {
-	set<const System *> systems;
+	std::set<const System *> systems;
 	for(const auto &it : route)
 		systems.insert(it.first);
 	return systems;
@@ -128,9 +128,9 @@ set<const System *> DistanceMap::Systems() const
 
 
 // Get the planned route from center to this system.
-vector<const System *> DistanceMap::Plan(const System &target) const
+std::vector<const System *> DistanceMap::Plan(const System &target) const
 {
-	vector<const System *> plan;
+	std::vector<const System *> plan;
 	if(!HasRoute(target))
 		return plan;
 

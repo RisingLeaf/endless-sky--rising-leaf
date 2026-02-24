@@ -29,7 +29,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <cstdlib>
 
-using namespace std;
+
 
 namespace {
 	constexpr double WRAP = 4096.;
@@ -58,7 +58,7 @@ void AsteroidField::Clear()
 
 
 // Add a new asteroid to the list, using the sprite with the given name.
-void AsteroidField::Add(const string &name, int count, double energy)
+void AsteroidField::Add(const std::string &name, int count, double energy)
 {
 	const Sprite *sprite = SpriteSet::Get("asteroid/" + name + "/spin");
 	for(int i = 0; i < count; ++i)
@@ -84,7 +84,7 @@ void AsteroidField::Add(const Minable *minable, int count, double energy, const 
 
 
 // Move all the asteroids forward one step.
-void AsteroidField::Step(vector<Visual> &visuals, list<shared_ptr<Flotsam>> &flotsam, int step)
+void AsteroidField::Step(std::vector<Visual> &visuals, std::list<std::shared_ptr<Flotsam>> &flotsam, int step)
 {
 	asteroidCollisions.Clear(step);
 	for(Asteroid &asteroid : asteroids)
@@ -118,14 +118,14 @@ void AsteroidField::Draw(DrawList &draw, const Point &center, double zoom) const
 {
 	for(const Asteroid &asteroid : asteroids)
 		asteroid.Draw(draw, center, zoom);
-	for(const shared_ptr<Minable> &minable : minables)
+	for(const std::shared_ptr<Minable> &minable : minables)
 		draw.Add(*minable);
 }
 
 
 
 // Check if the given projectile collides with any asteroids. This excludes minables.
-void AsteroidField::CollideAsteroids(const Projectile &projectile, vector<Collision> &result) const
+void AsteroidField::CollideAsteroids(const Projectile &projectile, std::vector<Collision> &result) const
 {
 	// Check for collisions with ordinary asteroids, which are tiled.
 	// Rather than tiling the collision set, tile the projectile.
@@ -133,7 +133,7 @@ void AsteroidField::CollideAsteroids(const Projectile &projectile, vector<Collis
 	Point to = from + projectile.Velocity();
 
 	// Map the projectile to a position within the wrap square.
-	Point minimum = Point(min(from.X(), to.X()), min(from.Y(), to.Y()));
+	const auto minimum = Point(std::min(from.X(), to.X()), std::min(from.Y(), to.Y()));
 	Point maximum = from + to - minimum;
 	Point grid = WRAP * Point(floor(maximum.X() / WRAP), floor(maximum.Y() / WRAP));
 	from -= grid;
@@ -155,7 +155,7 @@ void AsteroidField::CollideAsteroids(const Projectile &projectile, vector<Collis
 
 
 // Check if the given projectile collides with any minables.
-void AsteroidField::CollideMinables(const Projectile &projectile, vector<Collision> &result) const
+void AsteroidField::CollideMinables(const Projectile &projectile, std::vector<Collision> &result) const
 {
 	minableCollisions.Line(projectile, result);
 }
@@ -163,7 +163,7 @@ void AsteroidField::CollideMinables(const Projectile &projectile, vector<Collisi
 
 
 // Get a list of minables affected by an explosion with blast radius.
-void AsteroidField::MinablesCollisionsCircle(const Point &center, double radius, vector<Body *> &result) const
+void AsteroidField::MinablesCollisionsCircle(const Point &center, double radius, std::vector<Body *> &result) const
 {
 	minableCollisions.Circle(center, radius, result);
 }
@@ -171,7 +171,7 @@ void AsteroidField::MinablesCollisionsCircle(const Point &center, double radius,
 
 
 // Get the list of minable asteroids.
-const list<shared_ptr<Minable>> &AsteroidField::Minables() const
+const std::list<std::shared_ptr<Minable>> &AsteroidField::Minables() const
 {
 	return minables;
 }

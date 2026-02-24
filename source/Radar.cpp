@@ -22,7 +22,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cmath>
 
-using namespace std;
+
 
 const int Radar::PLAYER = 0;
 const int Radar::FRIENDLY = 1;
@@ -62,7 +62,7 @@ void Radar::Add(int type, Point position, double outer, double inner)
 
 
 
-// Add a pointer, pointing in the direction of the given vector.
+// Add a pointer, pointing in the direction of the given std::vector.
 void Radar::AddPointer(int type, const Point &position)
 {
 	pointers.emplace_back(GetColor(type), position.Unit());
@@ -136,7 +136,7 @@ void Radar::Draw(const Point &center, double scale, double radius, double pointe
 
 const Color &Radar::GetColor(int type)
 {
-	static const vector<Color> color = {
+	static const std::vector<Color> color = {
 		*GameData::Colors().Get("radar player"),
 		*GameData::Colors().Get("radar friendly"),
 		*GameData::Colors().Get("radar unfriendly"),

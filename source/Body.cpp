@@ -28,7 +28,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
+
 
 
 
@@ -134,7 +134,7 @@ const Mask &Body::GetMask(int step) const
 	if(!sprite || current < 0)
 		return EMPTY;
 
-	const vector<Mask> &masks = GameData::GetMaskManager().GetMasks(sprite, Scale());
+	const std::vector<Mask> &masks = GameData::GetMaskManager().GetMasks(sprite, Scale());
 
 	// Assume that if a masks array exists, it has the right number of frames.
 	return masks.empty() ? EMPTY : masks[current % masks.size()];
@@ -173,7 +173,7 @@ const Angle &Body::Facing() const
 
 
 
-// Unit vector in the direction this body is facing. This represents the scale
+// Unit std::vector in the direction this body is facing. This represents the scale
 // and transform that should be applied to the sprite before drawing it.
 Point Body::Unit() const
 {
@@ -185,7 +185,7 @@ Point Body::Unit() const
 // Zoom factor. This controls how big the sprite should be drawn.
 double Body::Zoom() const
 {
-	return max(zoom, 0.f);
+	return std::max(zoom, 0.f);
 }
 
 
@@ -227,7 +227,7 @@ void Body::LoadSprite(const DataNode &node)
 	// to do that unless it is repeating endlessly.
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "frame rate" && hasValue && child.Value(1) >= 0.)
 			frameRate = child.Value(1) / 60.;
@@ -269,7 +269,7 @@ void Body::LoadSprite(const DataNode &node)
 
 
 // Save the sprite specification, including all animation attributes.
-void Body::SaveSprite(DataWriter &out, const string &tag) const
+void Body::SaveSprite(DataWriter &out, const std::string &tag) const
 {
 	if(!sprite)
 		return;
@@ -328,7 +328,7 @@ double Body::DistanceAlpha(const Point &drawCenter) const
 	if(!distanceInvisible)
 		return 1.;
 	double distance = (drawCenter - position).Length();
-	return clamp<double>((distance - distanceInvisible) / (distanceVisible - distanceInvisible), 0., 1.);
+	return std::clamp<double>((distance - distanceInvisible) / (distanceVisible - distanceInvisible), 0., 1.);
 }
 
 
@@ -456,7 +456,7 @@ void Body::SetStep(int step) const
 
 	// Figure out what fraction of the way in between frames we are. Avoid any
 	// possible floating-point glitches that might result in a negative frame.
-	frame = max(0.f, frameRate * step + frameOffset);
+	frame = std::max(0.f, frameRate * step + frameOffset);
 	// If repeating, wrap the frame index by the total cycle time.
 	if(repeat)
 		frame = fmod(frame, cycle);
@@ -466,7 +466,7 @@ void Body::SetStep(int step) const
 		// If not repeating, frame should never go higher than the index of the
 		// final frame.
 		if(!repeat)
-			frame = min(frame, lastFrame);
+			frame = std::min(frame, lastFrame);
 		else if(frame >= frames)
 		{
 			// If we're in the delay portion of the loop, set the frame to 0.
@@ -478,6 +478,6 @@ void Body::SetStep(int step) const
 		// In rewind mode, once you get to the last frame, count backwards.
 		// Regardless of whether we're repeating, if the frame count gets to
 		// be less than 0, clamp it to 0.
-		frame = max(0.f, lastFrame * 2.f - frame);
+		frame = std::max(0.f, lastFrame * 2.f - frame);
 	}
 }

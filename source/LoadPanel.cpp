@@ -45,13 +45,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <stdexcept>
 #include <utility>
 
-using namespace std;
+
 
 namespace {
 	// Extract the date from this pilot's most recent save.
-	string FileDate(const filesystem::path &filename)
+	std::string FileDate(const std::filesystem::path &filename)
 	{
-		string date = "0000-00-00";
+		std::string date = "0000-00-00";
 		DataFile file(filename);
 		for(const DataNode &node : file)
 			if(node.Token(0) == "date")
@@ -124,7 +124,7 @@ void LoadPanel::Draw()
 		info.SetCondition("pilot selected");
 	if(!player.IsDead() && player.IsLoaded() && !selectedPilot.empty())
 		info.SetCondition("pilot alive");
-	if(selectedFile.find('~') != string::npos)
+	if(selectedFile.find('~') != std::string::npos)
 		info.SetCondition("snapshot selected");
 	if(loadedInfo.IsLoaded())
 		info.SetCondition("pilot loaded");
@@ -160,10 +160,10 @@ void LoadPanel::Draw()
 			const Point textPoint(drawPoint.X() + hTextPad, zone.Center().Y() - font.Height() / 2);
 			bool isHighlighted = (it.first == selectedPilot || (hasHover && zone.Contains(hoverPoint)));
 
-			double alpha = min((drawPoint.Y() - (top - fadeOut)) * .1,
+			double alpha = std::min((drawPoint.Y() - (top - fadeOut)) * .1,
 					(bottom - fadeOut - drawPoint.Y()) * .1);
-			alpha = max(alpha, 0.);
-			alpha = min(alpha, 1.);
+			alpha = std::max(alpha, 0.);
+			alpha = std::min(alpha, 1.);
 
 			if(it.first == selectedPilot)
 				FillShader::Fill(zone, Color(.1 * alpha, 0.));
@@ -192,7 +192,7 @@ void LoadPanel::Draw()
 			if(drawPoint.Y() > bottom - fadeOut)
 				continue;
 
-			const string &file = it.first;
+			const std::string &file = it.first;
 			Rectangle zone(drawPoint + Point(snapshotBox.Width() / 2., 10.), Point(snapshotBox.Width(), 20.));
 			const Point textPoint(drawPoint.X() + hTextPad, zone.Center().Y() - font.Height() / 2);
 			bool isHovering = (hasHover && zone.Contains(hoverPoint));
@@ -208,15 +208,15 @@ void LoadPanel::Draw()
 				}
 			}
 
-			double alpha = min((drawPoint.Y() - (top - fadeOut)) * .1,
+			double alpha = std::min((drawPoint.Y() - (top - fadeOut)) * .1,
 					(bottom - fadeOut - drawPoint.Y()) * .1);
-			alpha = max(alpha, 0.);
-			alpha = min(alpha, 1.);
+			alpha = std::max(alpha, 0.);
+			alpha = std::min(alpha, 1.);
 
 			if(file == selectedFile)
 				FillShader::Fill(zone, Color(.1 * alpha, 0.));
 			size_t pos = file.find('~') + 1;
-			const string name = file.substr(pos, file.size() - 4 - pos);
+			const std::string name = file.substr(pos, file.size() - 4 - pos);
 			const int textWidth = snapshotBox.Width() - 2. * hTextPad;
 			font.Draw({name, {textWidth, Truncate::BACK}}, textPoint, Color((isHighlighted ? .7 : .5) * alpha, 0.));
 		}
@@ -255,7 +255,7 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 			"Are you sure you want to delete the selected pilot, \"" + loadedInfo.Name()
 				+ "\", and all their saved games?\n\n(This will permanently delete the pilot data.)\n"
 				+ "Confirm the name of the pilot you want to delete.",
-				[this](const string &pilot) { return pilot == loadedInfo.Name(); }));
+				[this](const std::string &pilot) { return pilot == loadedInfo.Name(); }));
 	}
 	else if(key == 'a' && !player.IsDead() && player.IsLoaded())
 	{
@@ -265,7 +265,7 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 
 		sound = UI::UISound::NONE;
 		nameToConfirm.clear();
-		filesystem::path lastSave = Files::Saves() / it->second.front().first;
+		std::filesystem::path lastSave = Files::Saves() / it->second.front().first;
 		GetUI()->Push(new Dialog(this, &LoadPanel::SnapshotCallback,
 			"Enter a name for this snapshot, or use the most recent save's date:",
 			FileDate(lastSave)));
@@ -273,7 +273,7 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 	else if(key == 'R' && !selectedFile.empty())
 	{
 		sound = UI::UISound::NONE;
-		string fileName = selectedFile.substr(selectedFile.rfind('/') + 1);
+		std::string fileName = selectedFile.substr(selectedFile.rfind('/') + 1);
 		if(!(fileName == selectedPilot + ".txt"))
 			GetUI()->Push(new Dialog(this, &LoadPanel::DeleteSave,
 				"Are you sure you want to delete the selected saved game file, \""
@@ -282,7 +282,7 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 	else if((key == 'l' || key == 'e') && !selectedPilot.empty())
 	{
 		// Is the selected file a snapshot or the pilot's main file?
-		string fileName = selectedFile.substr(selectedFile.rfind('/') + 1);
+		std::string fileName = selectedFile.substr(selectedFile.rfind('/') + 1);
 		if(fileName == selectedPilot + ".txt")
 			LoadCallback();
 		else
@@ -329,7 +329,7 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 				if(it == files.begin())
 				{
 					it = files.end();
-					sideScroll = max(0., 20. * files.size() - 280.);
+					sideScroll = std::max(0., 20. * files.size() - 280.);
 				}
 				--it;
 			}
@@ -365,7 +365,7 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 				if(it == pit->second.begin())
 				{
 					it = pit->second.end();
-					centerScroll = max(0., 20. * pit->second.size() - 280.);
+					centerScroll = std::max(0., 20. * pit->second.size() - 280.);
 				}
 				--it;
 			}
@@ -460,9 +460,9 @@ bool LoadPanel::Drag(double dx, double dy)
 {
 	auto it = files.find(selectedPilot);
 	if(sideHasFocus)
-		sideScroll = max(0., min(20. * files.size() - 280., sideScroll - dy));
+		sideScroll = std::max(0., std::min(20. * files.size() - 280., sideScroll - dy));
 	else if(!selectedPilot.empty() && it != files.end())
-		centerScroll = max(0., min(20. * it->second.size() - 280., centerScroll - dy));
+		centerScroll = std::max(0., std::min(20. * it->second.size() - 280., centerScroll - dy));
 	return true;
 }
 
@@ -479,36 +479,36 @@ void LoadPanel::UpdateLists()
 {
 	files.clear();
 
-	vector<filesystem::path> fileList = Files::List(Files::Saves());
+	std::vector<std::filesystem::path> fileList = Files::List(Files::Saves());
 	for(const auto &path : fileList)
 	{
 		// Skip any files that aren't text files.
 		if(path.extension() != ".txt")
 			continue;
 
-		string fileName = Files::Name(path);
+		std::string fileName = Files::Name(path);
 		// The file name is either "Pilot Name.txt" or "Pilot Name~SnapshotTitle.txt".
 		size_t pos = fileName.find('~');
-		const bool isSnapshot = (pos != string::npos);
+		const bool isSnapshot = (pos != std::string::npos);
 		if(!isSnapshot)
 			pos = fileName.size() - 4;
 
-		string pilotName = fileName.substr(0, pos);
+		std::string pilotName = fileName.substr(0, pos);
 		auto &savesList = files[pilotName];
 		savesList.emplace_back(fileName, Files::Timestamp(path));
 		// Ensure that the main save for this pilot, not a snapshot, is first in the list.
 		if(!isSnapshot)
-			swap(savesList.front(), savesList.back());
+			std::swap(savesList.front(), savesList.back());
 	}
 
 	for(auto &it : files)
 	{
 		// Don't include the first item in the sort if this pilot has a non-snapshot save.
 		auto start = it.second.begin();
-		if(start->first.find('~') == string::npos)
+		if(start->first.find('~') == std::string::npos)
 			++start;
 		sort(start, it.second.end(),
-			[](const pair<string, filesystem::file_time_type> &a, const pair<string, filesystem::file_time_type> &b) -> bool
+			[](const std::pair<std::string, std::filesystem::file_time_type> &a, const std::pair<std::string, std::filesystem::file_time_type> &b) -> bool
 			{
 				return a.second > b.second || (a.second == b.second && a.first < b.first);
 			}
@@ -534,19 +534,19 @@ void LoadPanel::UpdateLists()
 
 
 // Snapshot name callback.
-void LoadPanel::SnapshotCallback(const string &name)
+void LoadPanel::SnapshotCallback(const std::string &name)
 {
 	auto it = files.find(selectedPilot);
 	if(it == files.end() || it->second.empty() || it->second.front().first.size() < 4)
 		return;
 
-	filesystem::path from = Files::Saves() / it->second.front().first;
-	string suffix = name.empty() ? FileDate(from) : name;
-	string extension = "~" + suffix + ".txt";
+	std::filesystem::path from = Files::Saves() / it->second.front().first;
+	std::string suffix = name.empty() ? FileDate(from) : name;
+	std::string extension = "~" + suffix + ".txt";
 
 	// If a file with this name already exists, make sure the player
 	// actually wants to overwrite it.
-	filesystem::path to = from.parent_path() / (from.stem().string() + extension);
+	std::filesystem::path to = from.parent_path() / (from.stem().string() + extension);
 	if(Files::Exists(to) && suffix != nameToConfirm)
 	{
 		nameToConfirm = suffix;
@@ -560,7 +560,7 @@ void LoadPanel::SnapshotCallback(const string &name)
 
 
 // This name is the one to be used, even if it already exists.
-void LoadPanel::WriteSnapshot(const filesystem::path &sourceFile, const filesystem::path &snapshotName)
+void LoadPanel::WriteSnapshot(const std::filesystem::path &sourceFile, const std::filesystem::path &snapshotName)
 {
 	// Copy the autosave to a new, named file.
 	if(Files::Copy(sourceFile, snapshotName))
@@ -598,7 +598,7 @@ void LoadPanel::LoadCallback()
 
 
 
-void LoadPanel::DeletePilot(const string &)
+void LoadPanel::DeletePilot(const std::string &)
 {
 	loadedInfo.Clear();
 	if(selectedPilot == player.Identifier())
@@ -610,7 +610,7 @@ void LoadPanel::DeletePilot(const string &)
 	bool failed = false;
 	for(const auto &fit : it->second)
 	{
-		filesystem::path path = Files::Saves() / fit.first;
+		std::filesystem::path path = Files::Saves() / fit.first;
 		Files::Delete(path);
 		failed |= Files::Exists(path);
 	}
@@ -628,8 +628,8 @@ void LoadPanel::DeletePilot(const string &)
 void LoadPanel::DeleteSave()
 {
 	loadedInfo.Clear();
-	string pilot = selectedPilot;
-	filesystem::path path = Files::Saves() / selectedFile;
+	std::string pilot = selectedPilot;
+	std::filesystem::path path = Files::Saves() / selectedFile;
 	Files::Delete(path);
 	if(Files::Exists(path))
 		GetUI()->Push(new Dialog("Deleting snapshot file failed."));

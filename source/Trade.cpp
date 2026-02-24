@@ -19,7 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 
 
@@ -27,11 +27,11 @@ void Trade::Load(const DataNode &node)
 {
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(key == "commodity" && child.Size() >= 2)
 		{
 			bool isSpecial = (child.Size() < 4);
-			vector<Commodity> &list = (isSpecial ? specialCommodities : commodities);
+			std::vector<Commodity> &list = (isSpecial ? specialCommodities : commodities);
 			auto it = list.begin();
 			for( ; it != list.end(); ++it)
 				if(it->name == child.Token(1))
@@ -57,14 +57,14 @@ void Trade::Load(const DataNode &node)
 
 
 
-const vector<Trade::Commodity> &Trade::Commodities() const
+const std::vector<Trade::Commodity> &Trade::Commodities() const
 {
 	return commodities;
 }
 
 
 
-const vector<Trade::Commodity> &Trade::SpecialCommodities() const
+const std::vector<Trade::Commodity> &Trade::SpecialCommodities() const
 {
 	return specialCommodities;
 }

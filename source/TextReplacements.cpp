@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <set>
 
-using namespace std;
+
 
 
 
@@ -28,9 +28,9 @@ using namespace std;
 void TextReplacements::Load(const DataNode &node, const ConditionsStore *playerConditions)
 {
 	// Check for reserved keys. Only some hardcoded replacement keys are
-	// reserved, as these ones are done on the fly after all other replacements
+	// reserved, as these are done on the fly after all other replacements
 	// have been done.
-	const set<string> reserved = {"<first>", "<last>", "<ship>", "<model>", "<flagship>", "<flagship model>"};
+	const std::set<std::string> reserved = {"<first>", "<last>", "<ship>", "<model>", "<flagship>", "<flagship model>"};
 
 	for(const DataNode &child : node)
 	{
@@ -40,7 +40,7 @@ void TextReplacements::Load(const DataNode &node, const ConditionsStore *playerC
 			continue;
 		}
 
-		string key = child.Token(0);
+		std::string key = child.Token(0);
 		if(key.empty())
 		{
 			child.PrintTrace("Error: Cannot replace the empty string:");
@@ -83,13 +83,13 @@ void TextReplacements::Revert(TextReplacements &other)
 // Add new text replacements to the given map after evaluating all possible replacements.
 // This text replacement will overwrite the value of any existing keys in the given map
 // if the map and this TextReplacements share a key.
-void TextReplacements::Substitutions(map<string, string> &subs) const
+void TextReplacements::Substitutions(std::map<std::string, std::string> &subs) const
 {
 	for(const auto &sub : substitutions)
 	{
-		const string &key = sub.first;
+		const std::string &key = sub.first;
 		const ConditionSet &toSub = sub.second.first;
-		const string &replacement = sub.second.second;
+		const std::string &replacement = sub.second.second;
 		if(toSub.Test())
 			subs[key] = replacement;
 	}

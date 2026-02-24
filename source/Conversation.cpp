@@ -22,11 +22,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "image/Sprite.h"
 #include "image/SpriteSet.h"
 
-using namespace std;
+
 
 namespace {
 	// Lookup table for matching special tokens to enumeration values.
-	map<string, int> TOKEN_INDEX = {
+	std::map<std::string, int> TOKEN_INDEX = {
 		{"accept", Conversation::ACCEPT},
 		{"decline", Conversation::DECLINE},
 		{"defer", Conversation::DEFER},
@@ -39,20 +39,20 @@ namespace {
 
 	// Get the index of the given special string. 0 means it is "goto", a number
 	// less than 0 means it is an outcome, and 1 means no match.
-	int TokenIndex(const string &token)
+	int TokenIndex(const std::string &token)
 	{
 		auto it = TOKEN_INDEX.find(token);
 		return (it == TOKEN_INDEX.end() ? 0 : it->second);
 	}
 
 	// Map an index back to a string, for saving the conversation to a file.
-	string TokenName(int index)
+	std::string TokenName(int index)
 	{
 		for(const auto &it : TOKEN_INDEX)
 			if(it.second == index)
 				return it.first;
 
-		return to_string(index);
+		return std::to_string(index);
 	}
 
 	// Write a "goto" or endpoint.
@@ -109,7 +109,7 @@ void Conversation::Load(const DataNode &node, const ConditionsStore *playerCondi
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "scene" && hasValue)
 		{
@@ -294,7 +294,7 @@ void Conversation::Save(DataWriter &out) const
 			for(const auto &it : node.elements)
 			{
 				// Break the text up into paragraphs.
-				for(const string &line : Format::Split(it.text, "\n"))
+				for(const std::string &line : Format::Split(it.text, "\n"))
 				{
 					out.Write(line);
 					// If the conditions are the same, output them for each
@@ -363,13 +363,13 @@ bool Conversation::IsValidIntro() const noexcept
 
 
 // Check if the actions in this conversation are valid.
-string Conversation::Validate() const
+std::string Conversation::Validate() const
 {
 	for(const Node &node : nodes)
 	{
 		if(!node.actions.IsEmpty())
 		{
-			string reason = node.actions.Validate();
+			std::string reason = node.actions.Validate();
 			if(!reason.empty())
 				return "conversation action " + std::move(reason);
 		}
@@ -381,7 +381,7 @@ string Conversation::Validate() const
 
 // Do text replacement throughout this conversation, and instantiate any
 // potential actions.
-Conversation Conversation::Instantiate(map<string, string> &subs, int jumps, int payload) const
+Conversation Conversation::Instantiate(std::map<std::string, std::string> &subs, int jumps, int payload) const
 {
 	Conversation result = *this;
 	for(Node &node : result.nodes)
@@ -502,9 +502,9 @@ const GameAction &Conversation::GetAction(int node) const
 
 
 // Get the text of the given element of the given node.
-const string &Conversation::Text(int node, int element) const
+const std::string &Conversation::Text(int node, int element) const
 {
-	static const string empty;
+	static const std::string empty;
 
 	if(!NodeIsValid(node) || !ElementIsValid(node, element))
 		return empty;
@@ -599,7 +599,7 @@ bool Conversation::LoadDestinations(const DataNode &node, const ConditionsStore 
 	bool hasActivationCondition = false;
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "goto" && hasValue)
 		{
@@ -666,7 +666,7 @@ bool Conversation::HasDisplayRestriction(const DataNode &node)
 
 
 // Add a label, pointing to whatever node is created next.
-void Conversation::AddLabel(const string &label, const DataNode &node)
+void Conversation::AddLabel(const std::string &label, const DataNode &node)
 {
 	if(labels.contains(label))
 	{
@@ -691,7 +691,7 @@ void Conversation::AddLabel(const string &label, const DataNode &node)
 
 // Set up a "goto". Depending on whether the named label has been seen yet
 // or not, it is either resolved immediately or added to the unresolved set.
-void Conversation::Goto(const string &label, int node, int element)
+void Conversation::Goto(const std::string &label, int node, int element)
 {
 	auto it = labels.find(label);
 

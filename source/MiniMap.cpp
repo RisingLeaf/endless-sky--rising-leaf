@@ -36,7 +36,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <set>
 #include <vector>
 
-using namespace std;
+
 
 namespace {
 	// The number of frames to spend interpolating to the next target center.
@@ -52,7 +52,7 @@ MiniMap::MiniMap(const PlayerInfo &player)
 
 
 
-void MiniMap::Step(const shared_ptr<Ship> &flagship)
+void MiniMap::Step(const std::shared_ptr<Ship> &flagship)
 {
 	if(!flagship)
 		return;
@@ -80,7 +80,7 @@ void MiniMap::Step(const shared_ptr<Ship> &flagship)
 	// the next system in the travel plan.
 	else if(!flagship->IsHyperspacing())
 	{
-		const vector<const System *> &plan = player.TravelPlan();
+		const std::vector<const System *> &plan = player.TravelPlan();
 		next = plan.empty() ? nullptr : plan.back();
 	}
 
@@ -160,10 +160,10 @@ void MiniMap::Draw(int step) const
 	{
 		if(!displayMinimap)
 			return;
-		alpha *= min(1.f, fadeMinimap / 30.f);
+		alpha *= std::min(1.f, fadeMinimap / 30.f);
 	}
 
-	set<const System *> drawnSystems;
+	std::set<const System *> drawnSystems;
 
 	const Font &font = FontSet::Get(14);
 	Color lineColor(alpha, 0.f);
@@ -176,10 +176,10 @@ void MiniMap::Draw(int step) const
 	const Color &waypointColor = colors.Get("waypoint")->Additive(alpha * 2.f);
 
 	auto drawSystemLinks = [&](const System &system) -> void {
-		static const string UNKNOWN_SYSTEM = "Unexplored System";
+		static const std::string UNKNOWN_SYSTEM = "Unexplored System";
 		const Government *gov = system.GetGovernment();
 		Point from = system.Position() - center + drawPos;
-		const string &name = player.KnowsName(system) ? system.DisplayName() : UNKNOWN_SYSTEM;
+		const std::string &name = player.KnowsName(system) ? system.DisplayName() : UNKNOWN_SYSTEM;
 		font.Draw(name, from + Point(MapPanel::OUTER, -.5 * font.Height()), lineColor);
 
 		// Draw the origin and destination systems, since they
@@ -227,7 +227,7 @@ void MiniMap::Draw(int step) const
 
 			if(mission.Destination()->IsInSystem(&system))
 			{
-				pair<bool, bool> blink = MapPanel::BlinkMissionIndicator(player, mission, step);
+				std::pair<bool, bool> blink = MapPanel::BlinkMissionIndicator(player, mission, step);
 				if(!blink.first)
 				{
 					bool isSatisfied = mission.IsSatisfied(player) && !mission.IsFailed() && blink.second;

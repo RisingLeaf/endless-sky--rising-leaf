@@ -21,13 +21,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "System.h"
 #include "UI.h"
 
-using namespace std;
+
 
 
 
 // Construct and Load() at the same time.
 NPCAction::NPCAction(const DataNode &node, const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
 {
 	Load(node, playerConditions, visitedSystems, visitedPlanets);
 }
@@ -35,14 +35,14 @@ NPCAction::NPCAction(const DataNode &node, const ConditionsStore *playerConditio
 
 
 void NPCAction::Load(const DataNode &node, const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
 {
 	if(node.Size() >= 2)
 		trigger = node.Token(1);
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 
 		if(key == "triggered")
 			triggered = true;
@@ -72,14 +72,14 @@ void NPCAction::Save(DataWriter &out) const
 
 // Check this template or instantiated NPCAction to see if any used content
 // is not fully defined (e.g. plugin removal, typos in names, etc.).
-string NPCAction::Validate() const
+std::string NPCAction::Validate() const
 {
 	return action.Validate();
 }
 
 
 
-void NPCAction::Do(PlayerInfo &player, UI *ui, const Mission *caller, const shared_ptr<Ship> &target)
+void NPCAction::Do(PlayerInfo &player, UI *ui, const Mission *caller, const std::shared_ptr<Ship> &target)
 {
 	// All actions are currently one-time-use. Actions that are used
 	// are marked as triggered, and cannot be used again.
@@ -92,7 +92,7 @@ void NPCAction::Do(PlayerInfo &player, UI *ui, const Mission *caller, const shar
 
 
 // Convert this validated template into a populated action.
-NPCAction NPCAction::Instantiate(map<string, string> &subs, const System *origin,
+NPCAction NPCAction::Instantiate(std::map<std::string, std::string> &subs, const System *origin,
 	int jumps, int64_t payload) const
 {
 	NPCAction result;

@@ -26,7 +26,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstdlib>
 
-using namespace std;
+
 
 
 
@@ -44,7 +44,7 @@ void ShipManager::Load(const DataNode &node)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 
 		if(key == "id" && hasValue)
@@ -111,7 +111,7 @@ void ShipManager::Do(PlayerInfo &player) const
 	if(model->TrueModelName().empty())
 		return;
 
-	string shipName;
+	std::string shipName;
 	if(Giving())
 	{
 		for(int i = 0; i < count; ++i)
@@ -126,7 +126,7 @@ void ShipManager::Do(PlayerInfo &player) const
 			player.TakeShip(ship.get(), model, takeOutfits);
 	}
 	Messages::Add({(count == 1 ? "The " + model->DisplayModelName() + " \"" + shipName + "\" was " :
-		to_string(count) + " " + model->PluralModelName() + " were ") +
+		std::to_string(count) + " " + model->PluralModelName() + " were ") +
 		(Giving() ? "added to" : "removed from") + " your fleet.",
 		GameData::MessageCategories().Get("normal")});
 }
@@ -134,7 +134,7 @@ void ShipManager::Do(PlayerInfo &player) const
 
 
 // Expands phrases and substitutions in the ship name, into a new copy of this ShipManager
-ShipManager ShipManager::Instantiate(const map<string, string> &subs) const
+ShipManager ShipManager::Instantiate(const std::map<std::string, std::string> &subs) const
 {
 	ShipManager result = *this;
 	result.name = Format::Replace(Phrase::ExpandPhrases(name), subs);
@@ -149,7 +149,7 @@ const Ship *ShipManager::ShipModel() const
 
 
 
-const string &ShipManager::Id() const
+const std::string &ShipManager::Id() const
 {
 	return id;
 }
@@ -163,12 +163,12 @@ bool ShipManager::Giving() const
 
 
 
-vector<shared_ptr<Ship>> ShipManager::SatisfyingShips(const PlayerInfo &player) const
+std::vector<std::shared_ptr<Ship>> ShipManager::SatisfyingShips(const PlayerInfo &player) const
 {
 	const System *here = player.GetSystem();
 	const auto shipToTakeId = player.GiftedShips().find(id);
 	bool foundShip = shipToTakeId != player.GiftedShips().end();
-	vector<shared_ptr<Ship>> satisfyingShips;
+	std::vector<std::shared_ptr<Ship>> satisfyingShips;
 
 	for(const auto &ship : player.Ships())
 	{

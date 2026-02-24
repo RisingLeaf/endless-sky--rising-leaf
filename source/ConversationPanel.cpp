@@ -48,7 +48,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <array>
 #include <iterator>
 
-using namespace std;
+
 
 namespace {
 #if defined _WIN32
@@ -64,7 +64,7 @@ namespace {
 
 // Constructor.
 ConversationPanel::ConversationPanel(PlayerInfo &player, const Conversation &conversation,
-	const Mission *caller, const System *system, const shared_ptr<Ship> &ship, bool useTransactions)
+	const Mission *caller, const System *system, const std::shared_ptr<Ship> &ship, bool useTransactions)
 	: player(player), caller(caller), useTransactions(useTransactions), conversation(conversation),
 	scroll(0.), system(system), ship(ship)
 {
@@ -75,8 +75,8 @@ ConversationPanel::ConversationPanel(PlayerInfo &player, const Conversation &con
 	// These substitutions need to be applied on the fly as each paragraph of
 	// text is prepared for display. Some substitutions already in the map
 	// should not be overwritten.
-	static const array<string, 3> subsToSave = {"<system>", "<date>", "<day>"};
-	map<string, string> savedSubs;
+	static const std::array<std::string, 3> subsToSave = {"<system>", "<date>", "<day>"};
+	std::map<std::string, std::string> savedSubs;
 	for(const auto &sub : subsToSave)
 	{
 		const auto it = subs.find(sub);
@@ -111,7 +111,7 @@ ConversationPanel::~ConversationPanel()
 
 
 
-void ConversationPanel::SetCallback(function<void(int)> fun)
+void ConversationPanel::SetCallback(std::function<void(int)> fun)
 {
 	callback = std::move(fun);
 }
@@ -156,7 +156,7 @@ void ConversationPanel::Draw()
 	if(node < 0)
 	{
 		// The conversation has already ended. Draw a "done" button.
-		static const string done = "[done]";
+		static const std::string done = "[done]";
 		int width = font.Width(done);
 		int height = font.Height();
 		Point off(Screen::Left() + MARGIN + WIDTH - width, point.Y());
@@ -199,7 +199,7 @@ void ConversationPanel::Draw()
 		font.Draw({lastName, layout}, point + Point(350, 0), choice ? bright : gray);
 
 		// Draw the OK button, and remember its location.
-		static const string ok = "[ok]";
+		static const std::string ok = "[ok]";
 		int width = font.Width(ok);
 		int height = font.Height();
 		Point off(Screen::Left() + MARGIN + WIDTH - width, point.Y());
@@ -210,7 +210,7 @@ void ConversationPanel::Draw()
 	}
 	else
 	{
-		string label = "0:";
+		std::string label = "0:";
 		int index = 0;
 		for(const auto &it : choices)
 		{
@@ -237,7 +237,7 @@ void ConversationPanel::Draw()
 		}
 	}
 	// Store the total height of the text.
-	maxScroll = min(0., Screen::Top() - (point.Y() - scroll) + font.Height() + 15.);
+	maxScroll = std::min(0., Screen::Top() - (point.Y() - scroll) + font.Height() + 15.);
 
 	// Reset the hover flag. If the mouse is still moving than the flag will be set in the next frame.
 	isHovering = false;
@@ -270,7 +270,7 @@ bool ConversationPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comm
 	if(choices.empty())
 	{
 		// Don't allow characters that can't be used in a file name.
-		static const string FORBIDDEN = "/\\?*:|\"<>~";
+		static const std::string FORBIDDEN = "/\\?*:|\"<>~";
 		// Prevent the name from being so large that it cannot be saved.
 		// Most path components can be at most 255 bytes.
 		size_t MAX_NAME_LENGTH = 250;
@@ -279,8 +279,8 @@ bool ConversationPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comm
 #endif
 
 		// Right now we're asking the player to enter their name.
-		string &name = (choice ? lastName : firstName);
-		string &otherName = (choice ? firstName : lastName);
+		std::string &name = (choice ? lastName : firstName);
+		std::string &otherName = (choice ? firstName : lastName);
 		// Allow editing the text. The tab key toggles to the other entry field,
 		// as does the return key if the other field is still empty.
 		if(Clipboard::KeyDown(name, key, mod, MAX_NAME_LENGTH, FORBIDDEN))
@@ -294,7 +294,7 @@ bool ConversationPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comm
 			// Caps lock should shift letters, but not any other keys.
 			if((mod & SDL_KMOD_CAPS) && c >= 'a' && c <= 'z')
 				c += 'A' - 'a';
-			if(FORBIDDEN.find(c) == string::npos && (name.size() + otherName.size()) < MAX_NAME_LENGTH)
+			if(FORBIDDEN.find(c) == std::string::npos && (name.size() + otherName.size()) < MAX_NAME_LENGTH)
 				name += c;
 			else
 				flickerTime = 18;
@@ -308,7 +308,7 @@ bool ConversationPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comm
 		else if((key == SDLK_RETURN || key == SDLK_KP_ENTER) && !firstName.empty() && !lastName.empty())
 		{
 			// Display the name the player entered.
-			string name = "\t\tName: " + firstName + " " + lastName + ".\n";
+			std::string name = "\t\tName: " + firstName + " " + lastName + ".\n";
 			text.emplace_back(name);
 
 			player.SetName(firstName, lastName);
@@ -362,7 +362,7 @@ bool ConversationPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comm
 // Allow scrolling by click and drag.
 bool ConversationPanel::Drag(double dx, double dy)
 {
-	scroll = min(0., max(maxScroll, scroll + dy));
+	scroll = std::min(0., std::max(maxScroll, scroll + dy));
 
 	return true;
 }
@@ -391,7 +391,7 @@ bool ConversationPanel::Hover(int x, int y)
 void ConversationPanel::Goto(int index, int selectedChoice)
 {
 	const ConditionsStore &conditions = player.Conditions();
-	Format::ConditionGetter getter = [&conditions](const string &str, size_t start, size_t length) -> int64_t
+	Format::ConditionGetter getter = [&conditions](const std::string &str, size_t start, size_t length) -> int64_t
 	{
 		return conditions.Get(str.substr(start, length));
 	};
@@ -444,7 +444,7 @@ void ConversationPanel::Goto(int index, int selectedChoice)
 		{
 			// This is an ordinary conversation node which should be displayed.
 			// Perform any necessary text replacement, and add the text to the display.
-			string altered = Format::ExpandConditions(Format::Replace(conversation.Text(node), subs), getter);
+			std::string altered = Format::ExpandConditions(Format::Replace(conversation.Text(node), subs), getter);
 			text.emplace_back(altered, conversation.Scene(node), text.empty());
 		}
 		else
@@ -460,7 +460,7 @@ void ConversationPanel::Goto(int index, int selectedChoice)
 	for(int i = 0; i < conversation.Choices(node); ++i)
 		if(conversation.ShouldDisplayNode(node, i))
 		{
-			string altered = Format::ExpandConditions(Format::Replace(conversation.Text(node, i), subs), getter);
+			std::string altered = Format::ExpandConditions(Format::Replace(conversation.Text(node, i), subs), getter);
 			choices.emplace_back(Paragraph(altered), i);
 		}
 	// This is a safeguard in case of logic errors, to ensure we don't set the player name.
@@ -539,7 +539,7 @@ int ConversationPanel::MapChoice(int n) const
 
 
 // Paragraph constructor.
-ConversationPanel::Paragraph::Paragraph(const string &text, const Sprite *scene, bool isFirst)
+ConversationPanel::Paragraph::Paragraph(const std::string &text, const Sprite *scene, bool isFirst)
 	: scene(scene), isFirst(isFirst)
 {
 	wrap.SetAlignment(Alignment::JUSTIFIED);

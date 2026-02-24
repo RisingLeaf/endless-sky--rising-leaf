@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <limits>
 
-using namespace std;
+
 
 
 
@@ -65,7 +65,7 @@ void CategoryList::Sort()
 
 
 // Determine if the CategoryList contains a Category with the given name.
-bool CategoryList::Contains(const string &name) const
+bool CategoryList::Contains(const std::string &name) const
 {
 	const auto it = find_if(list.begin(), list.end(),
 		[&name](const Category &c) noexcept -> bool { return name == c.name; });
@@ -74,11 +74,11 @@ bool CategoryList::Contains(const string &name) const
 
 
 
-const CategoryList::Category CategoryList::GetCategory(const string &name) const
+const CategoryList::Category CategoryList::GetCategory(const std::string &name) const
 {
 	const auto it = find_if(list.begin(), list.end(),
 		[&name](const Category &c) noexcept -> bool { return name == c.name; });
 	if(it != list.end())
 		return *it;
-	return Category("", numeric_limits<int>::max());
+	return Category("", std::numeric_limits<int>::max());
 }

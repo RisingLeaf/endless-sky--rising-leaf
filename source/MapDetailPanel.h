@@ -95,7 +95,7 @@ private:
 
 	static double planetPanelHeight;
 	std::vector<MapPlanetCard> planetCards;
-	// Vector offsets from the center of the "orbits" UI.
+	// std::vector offsets from the center of the "orbits" UI.
 	std::map<const Planet *, Point> planets;
 
 	std::shared_ptr<TextArea> description = nullptr;

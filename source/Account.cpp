@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <numeric>
 #include <sstream>
 
-using namespace std;
+
 
 namespace {
 	// For tracking the player's average income, store daily net worth over this
@@ -48,7 +48,7 @@ void Account::Load(const DataNode &node, bool clearFirst)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "credits" && hasValue)
 			credits = child.Value(1);
@@ -155,9 +155,9 @@ void Account::PayExtra(int mortgage, int64_t amount)
 
 
 // Step forward one day, and return a string summarizing payments made.
-string Account::Step(int64_t assets, int64_t salaries, int64_t maintenance)
+std::string Account::Step(int64_t assets, int64_t salaries, int64_t maintenance)
 {
-	ostringstream out;
+	std::ostringstream out;
 
 	// Keep track of what payments were made and whether any could not be made.
 	crewSalariesOwed += salaries;
@@ -172,7 +172,7 @@ string Account::Step(int64_t assets, int64_t salaries, int64_t maintenance)
 		{
 			// If you can't pay the full salary amount, still pay some of it and
 			// remember how much back wages you owe to your crew.
-			salariesPaid = max<int64_t>(credits, 0);
+			salariesPaid = std::max<int64_t>(credits, 0);
 			crewSalariesOwed -= salariesPaid;
 			credits -= salariesPaid;
 			missedPayment = true;
@@ -193,7 +193,7 @@ string Account::Step(int64_t assets, int64_t salaries, int64_t maintenance)
 		{
 			// Like with crew salaries, maintenance costs can be paid in part with
 			// the unpaid costs being paid later.
-			maintenancePaid = max<int64_t>(credits, 0);
+			maintenancePaid = std::max<int64_t>(credits, 0);
 			maintenanceDue -= maintenancePaid;
 			credits -= maintenancePaid;
 			if(!missedPayment)
@@ -253,7 +253,7 @@ string Account::Step(int64_t assets, int64_t salaries, int64_t maintenance)
 	// If you failed to pay any debt, your credit score drops. Otherwise, even
 	// if you have no debts, it increases. (Because, having no debts at all
 	// makes you at least as credit-worthy as someone who pays debts on time.)
-	creditScore = max(200, min(800, creditScore + (missedPayment ? -5 : 1)));
+	creditScore = std::max(200, std::min(800, creditScore + (missedPayment ? -5 : 1)));
 
 	// If you didn't make any payments, no need to continue further.
 	if(!(salariesPaid + maintenancePaid + mortgagesPaid + finesPaid + debtPaid))
@@ -263,7 +263,7 @@ string Account::Step(int64_t assets, int64_t salaries, int64_t maintenance)
 
 	out << "You paid ";
 
-	map<string, int64_t> typesPaid;
+	std::map<std::string, int64_t> typesPaid;
 	if(salariesPaid)
 		typesPaid["crew salaries"] = salariesPaid;
 	if(maintenancePaid)
@@ -275,8 +275,8 @@ string Account::Step(int64_t assets, int64_t salaries, int64_t maintenance)
 	if(debtPaid)
 		typesPaid["debt"] = debtPaid;
 
-	out << Format::List<map, string, int64_t>(typesPaid,
-		[](const pair<string, int64_t> &it)
+	out << Format::List<std::map, std::string, int64_t>(typesPaid,
+		[](const std::pair<std::string, int64_t> &it)
 		{
 			return Format::CreditString(it.second) + " in " + it.first;
 		});
@@ -286,7 +286,7 @@ string Account::Step(int64_t assets, int64_t salaries, int64_t maintenance)
 
 
 
-const map<string, int64_t> &Account::SalariesIncome() const
+const std::map<std::string, int64_t> &Account::SalariesIncome() const
 {
 	return salariesIncome;
 }
@@ -299,7 +299,7 @@ int64_t Account::SalariesIncomeTotal() const
 		salariesIncome.begin(),
 		salariesIncome.end(),
 		0,
-		[](int64_t value, const map<string, int64_t>::value_type &salary)
+		[](int64_t value, const std::map<std::string, int64_t>::value_type &salary)
 		{
 			return value + salary.second;
 		}
@@ -308,7 +308,7 @@ int64_t Account::SalariesIncomeTotal() const
 
 
 
-void Account::SetSalaryIncome(const string &name, int64_t amount)
+void Account::SetSalaryIncome(const std::string &name, int64_t amount)
 {
 	if(amount == 0)
 		salariesIncome.erase(name);
@@ -327,7 +327,7 @@ int64_t Account::CrewSalariesOwed() const
 
 void Account::PaySalaries(int64_t amount)
 {
-	amount = min(min(amount, crewSalariesOwed), credits);
+	amount = std::min(std::min(amount, crewSalariesOwed), credits);
 	credits -= amount;
 	crewSalariesOwed -= amount;
 }
@@ -343,7 +343,7 @@ int64_t Account::MaintenanceDue() const
 
 void Account::PayMaintenance(int64_t amount)
 {
-	amount = min(min(amount, maintenanceDue), credits);
+	amount = std::min(std::min(amount, maintenanceDue), credits);
 	credits -= amount;
 	maintenanceDue -= amount;
 }
@@ -351,7 +351,7 @@ void Account::PayMaintenance(int64_t amount)
 
 
 // Access the list of mortgages.
-const vector<Mortgage> &Account::Mortgages() const
+const std::vector<Mortgage> &Account::Mortgages() const
 {
 	return mortgages;
 }
@@ -378,7 +378,7 @@ void Account::AddFine(int64_t amount)
 
 // Add debt with the given interest rate and term. If no interest rate is
 // given then the player's credit score is used to determine the interest rate.
-void Account::AddDebt(int64_t amount, optional<double> interest, int term)
+void Account::AddDebt(int64_t amount, std::optional<double> interest, int term)
 {
 	if(interest)
 		mortgages.emplace_back("Debt", amount, *interest, term);
@@ -402,7 +402,7 @@ int64_t Account::Prequalify() const
 	// Put a limit on new debt that the player can take out, as a fraction of
 	// their net worth, to avoid absurd mortgages being offered when the player
 	// has just captured some very lucrative ships.
-	return max<int64_t>(0, min(
+	return std::max<int64_t>(0, std::min(
 		NetWorth() / 3 + 500000 - liabilities,
 		Mortgage::Maximum(YearlyRevenue(), creditScore, payments)));
 }
@@ -427,7 +427,7 @@ int Account::CreditScore() const
 
 // Get the total amount owed for a specific type of mortgage, or all
 // mortgages if a blank string is provided.
-int64_t Account::TotalDebt(const string &type) const
+int64_t Account::TotalDebt(const std::string &type) const
 {
 	int64_t total = 0;
 	for(const Mortgage &mortgage : mortgages)

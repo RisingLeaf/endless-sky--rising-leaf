@@ -24,7 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 
 
@@ -51,7 +51,7 @@ void Weapon::Load(const DataNode &node)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(key == "stream")
 			isStreamed = true;
 		else if(key == "cluster")
@@ -103,7 +103,7 @@ void Weapon::Load(const DataNode &node)
 			}
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
+				const std::string &grandKey = grand.Token(0);
 
 				if(grandKey == "blindspot")
 					blindspot = true;
@@ -128,7 +128,7 @@ void Weapon::Load(const DataNode &node)
 		else if(key == "ammo")
 		{
 			int usage = (child.Size() >= 3) ? child.Value(2) : 1;
-			ammo = make_pair(GameData::Outfits().Get(child.Token(1)), max(0, usage));
+			ammo = std::make_pair(GameData::Outfits().Get(child.Token(1)), std::max(0, usage));
 		}
 		else if(key == "icon")
 			icon = SpriteSet::Get(child.Token(1));
@@ -164,7 +164,7 @@ void Weapon::Load(const DataNode &node)
 				(child.Size() >= 3) ? child.Value(2) : 1);
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
+				const std::string &grandKey = grand.Token(0);
 				bool grandHasValue = grand.Size() >= 2;
 				if(grandKey == "facing" && grandHasValue)
 					submunitions.back().facing = Angle(grand.Value(1));
@@ -192,7 +192,7 @@ void Weapon::Load(const DataNode &node)
 			{
 				for(int j = 0; j < grand.Size(); ++j)
 				{
-					const string &token = grand.Token(j);
+					const std::string &token = grand.Token(j);
 
 					if(token == "inverted")
 						inaccuracyDistribution.second = true;
@@ -215,23 +215,23 @@ void Weapon::Load(const DataNode &node)
 		{
 			double value = child.Value(1);
 			if(key == "lifetime")
-				lifetime = max(0., value);
+				lifetime = std::max(0., value);
 			else if(key == "random lifetime")
-				randomLifetime = max(0., value);
+				randomLifetime = std::max(0., value);
 			else if(key == "fade out")
-				fadeOut = max(0., value);
+				fadeOut = std::max(0., value);
 			else if(key == "reload")
-				reload = max(1., value);
+				reload = std::max(1., value);
 			else if(key == "burst reload")
-				burstReload = max(1., value);
+				burstReload = std::max(1., value);
 			else if(key == "burst count")
-				burstCount = max(1., value);
+				burstCount = std::max(1., value);
 			else if(key == "missile strength")
-				missileStrength = max(0., value);
+				missileStrength = std::max(0., value);
 			else if(key == "anti-missile")
-				antiMissile = max(0., value);
+				antiMissile = std::max(0., value);
 			else if(key == "tractor beam")
-				tractorBeam = max(0., value);
+				tractorBeam = std::max(0., value);
 			else if(key == "penetration count")
 				penetrationCount = static_cast<uint16_t>(value);
 			else if(key == "velocity")
@@ -260,15 +260,15 @@ void Weapon::Load(const DataNode &node)
 			else if(key == "turret turn")
 				turretTurn = value;
 			else if(key == "arc")
-				maxAngle = max(0., value);
+				maxAngle = std::max(0., value);
 			else if(key == "tracking")
-				tracking = max(0., min(1., value));
+				tracking = std::max(0., std::min(1., value));
 			else if(key == "optical tracking")
-				opticalTracking = max(0., min(1., value));
+				opticalTracking = std::max(0., std::min(1., value));
 			else if(key == "infrared tracking")
-				infraredTracking = max(0., min(1., value));
+				infraredTracking = std::max(0., std::min(1., value));
 			else if(key == "radar tracking")
-				radarTracking = max(0., min(1., value));
+				radarTracking = std::max(0., std::min(1., value));
 			else if(key == "firing energy")
 				firingEnergy = value;
 			else if(key == "firing force")
@@ -308,14 +308,14 @@ void Weapon::Load(const DataNode &node)
 			else if(key == "relative firing shields")
 				relativeFiringShields = value;
 			else if(key == "split range")
-				splitRange = max(0., value);
+				splitRange = std::max(0., value);
 			else if(key == "trigger radius")
-				triggerRadius = max(0., value);
+				triggerRadius = std::max(0., value);
 			else if(key == "blast radius")
-				blastRadius = max(0., value);
+				blastRadius = std::max(0., value);
 			else if(key == "safe range override")
 			{
-				safeRange = max(0., value);
+				safeRange = std::max(0., value);
 				safeRangeOverriden = true;
 			}
 			else if(key == "shield damage")
@@ -377,21 +377,21 @@ void Weapon::Load(const DataNode &node)
 			else if(key == "hit force")
 				damage[HIT_FORCE] = value;
 			else if(key == "piercing")
-				piercing = max(0., value);
+				piercing = std::max(0., value);
 			else if(key == "prospecting")
 				prospecting = value;
 			else if(key == "range override")
-				rangeOverride = max(0., value);
+				rangeOverride = std::max(0., value);
 			else if(key == "velocity override")
-				velocityOverride = max(0., value);
+				velocityOverride = std::max(0., value);
 			else if(key == "damage dropoff")
 			{
 				hasDamageDropoff = true;
 				double maxDropoff = (child.Size() >= 3) ? child.Value(2) : 0.;
-				damageDropoffRange = make_pair(max(0., value), maxDropoff);
+				damageDropoffRange = std::make_pair(std::max(0., value), maxDropoff);
 			}
 			else if(key == "dropoff modifier")
-				damageDropoffModifier = max(0., value);
+				damageDropoffModifier = std::max(0., value);
 			else
 				child.PrintTrace("Unrecognized weapon attribute: \"" + key + "\":");
 		}
@@ -436,7 +436,7 @@ void Weapon::Load(const DataNode &node)
 			it = liveEffects.erase(it);
 		else
 		{
-			it->second = max(1, lifetime / it->second);
+			it->second = std::max(1, lifetime / it->second);
 			++it;
 		}
 	}
@@ -514,42 +514,42 @@ const Sprite *Weapon::Icon() const
 
 
 // Effects to be created at the start or end of the weapon's lifetime.
-const map<const Effect *, int> &Weapon::FireEffects() const
+const std::map<const Effect *, int> &Weapon::FireEffects() const
 {
 	return fireEffects;
 }
 
 
 
-const map<const Effect *, int> &Weapon::LiveEffects() const
+const std::map<const Effect *, int> &Weapon::LiveEffects() const
 {
 	return liveEffects;
 }
 
 
 
-const map<const Effect *, int> &Weapon::HitEffects() const
+const std::map<const Effect *, int> &Weapon::HitEffects() const
 {
 	return hitEffects;
 }
 
 
 
-const map<const Effect *, int> &Weapon::TargetEffects() const
+const std::map<const Effect *, int> &Weapon::TargetEffects() const
 {
 	return targetEffects;
 }
 
 
 
-const map<const Effect *, int> &Weapon::DieEffects() const
+const std::map<const Effect *, int> &Weapon::DieEffects() const
 {
 	return dieEffects;
 }
 
 
 
-const vector<Weapon::Submunition> &Weapon::Submunitions() const
+const std::vector<Weapon::Submunition> &Weapon::Submunitions() const
 {
 	return submunitions;
 }
@@ -564,7 +564,7 @@ double Weapon::TotalLifetime() const
 	{
 		totalLifetime = 0.;
 		for(const auto &it : submunitions)
-			totalLifetime = max(totalLifetime, it.weapon ? it.weapon->TotalLifetime() : 0.);
+			totalLifetime = std::max(totalLifetime, it.weapon ? it.weapon->TotalLifetime() : 0.);
 		totalLifetime += lifetime;
 	}
 	return totalLifetime;
@@ -606,7 +606,7 @@ double Weapon::MaxDropoff() const
 
 
 // Return the ranges at which the weapon's damage dropoff begins and ends.
-const pair<double, double> &Weapon::DropoffRanges() const
+const std::pair<double, double> &Weapon::DropoffRanges() const
 {
 	return damageDropoffRange;
 }
@@ -630,7 +630,7 @@ double Weapon::TotalDamage(int index) const
 
 
 
-pair<Distribution::Type, bool> Weapon::InaccuracyDistribution() const
+std::pair<Distribution::Type, bool> Weapon::InaccuracyDistribution() const
 {
 	return inaccuracyDistribution;
 }

@@ -28,7 +28,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "TextArea.h"
 #include "UI.h"
 
-using namespace std;
+
 
 
 
@@ -37,7 +37,7 @@ SpaceportPanel::SpaceportPanel(PlayerInfo &player)
 {
 	SetTrapAllEvents(false);
 
-	description = make_shared<TextArea>();
+	description = std::make_shared<TextArea>();
 	description->SetFont(FontSet::Get(14));
 	description->SetColor(*GameData::Colors().Get("bright"));
 	description->SetAlignment(Alignment::JUSTIFIED);
@@ -70,7 +70,7 @@ void SpaceportPanel::UpdateNews()
 	newsInfo.SetSprite("portrait", portrait);
 	newsInfo.SetString("name", news->SpeakerName() + ':');
 	newsMessage.SetWrapWidth(hasPortrait ? portraitWidth : normalWidth);
-	map<string, string> subs;
+	std::map<std::string, std::string> subs;
 	GameData::GetTextReplacements().Substitutions(subs);
 	player.AddPlayerSubstitutions(subs);
 	newsMessage.Wrap(Format::Replace(news->Message(), subs));
@@ -135,7 +135,7 @@ const News *SpaceportPanel::PickNews() const
 	if(!port.HasNews())
 		return nullptr;
 
-	vector<const News *> matches;
+	std::vector<const News *> matches;
 	const Planet *planet = player.GetPlanet();
 	for(const auto &it : GameData::SpaceportNews())
 		if(!it.second.IsEmpty() && it.second.Matches(planet))

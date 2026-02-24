@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cmath>
 
-using namespace std;
+
 
 Weather::Weather(const Hazard *hazard, int totalLifetime, int lifetimeRemaining, double strength, Point origin)
 	: hazard(hazard), totalLifetime(totalLifetime), lifetimeRemaining(lifetimeRemaining),
@@ -62,7 +62,7 @@ int Weather::Period() const
 	// If a hazard deviates, then the period is divided by the square root of the
 	// strength. This is so that as the strength of a hazard increases, it gets both
 	// more likely to impact the ships in the system and each impact hits harder.
-	return hazard->Deviates() ? max(1, static_cast<int>(hazard->Period() / sqrtStrength)) : hazard->Period();
+	return hazard->Deviates() ? std::max(1, static_cast<int>(hazard->Period() / sqrtStrength)) : hazard->Period();
 }
 
 
@@ -75,7 +75,7 @@ const Point &Weather::Origin() const
 
 
 // Create any environmental effects and decrease the lifetime of this weather.
-void Weather::Step(vector<Visual> &visuals, const Point &center)
+void Weather::Step(std::vector<Visual> &visuals, const Point &center)
 {
 	// Environmental effects are created by choosing a random angle and distance from
 	// their origin, then creating the effect there.
@@ -175,7 +175,7 @@ double Weather::DamageMultiplier() const
 		// will always scale properly with the strength.
 		// This also fixes some precision lost by the fact that the period is an integer.
 		double truePeriod = hazard->Period() / sqrtStrength;
-		double multiplier = max(1, static_cast<int>(truePeriod)) / truePeriod;
+		double multiplier = std::max(1, static_cast<int>(truePeriod)) / truePeriod;
 		return sqrtStrength * multiplier;
 	}
 	else

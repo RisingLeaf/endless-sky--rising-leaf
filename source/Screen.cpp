@@ -19,7 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 namespace {
 	int RAW_WIDTH = 0;
@@ -89,19 +89,19 @@ void Screen::SetZoom(int percent, bool noEvent)
 	if(!noEvent)
 		CustomEvents::SendResize();
 
-	USER_ZOOM = max(100, min(200, percent));
+	USER_ZOOM = std::max(100, std::min(200, percent));
 
 	// Make sure the zoom factor is not set too high for the full UI to fit.
 	static const int MIN_WIDTH = 1000; // Width of main menu
 	static const int MIN_HEIGHT = 500; // Height of preferences panel
 	int minZoomX = 100 * RAW_WIDTH / MIN_WIDTH;
 	int minZoomY = 100 * RAW_HEIGHT / MIN_HEIGHT;
-	int minZoom = min(minZoomX, minZoomY);
+	int minZoom = std::min(minZoomX, minZoomY);
 	// Never go below 100% zoom, no matter how small the window is
-	minZoom = max(minZoom, 100);
+	minZoom = std::max(minZoom, 100);
 	// Use increments of 10, like the user setting
 	minZoom -= minZoom % 10;
-	EFFECTIVE_ZOOM = min(minZoom, UserZoom());
+	EFFECTIVE_ZOOM = std::min(minZoom, UserZoom());
 
 	WIDTH = RAW_WIDTH * 100 / EFFECTIVE_ZOOM;
 	HEIGHT = RAW_HEIGHT * 100 / EFFECTIVE_ZOOM;

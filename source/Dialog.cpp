@@ -40,12 +40,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <utility>
 
-using namespace std;
+
 
 namespace {
 	// Map any conceivable numeric keypad keys to their ASCII values. Most of
 	// these will presumably only exist on special programming keyboards.
-	const map<SDL_Keycode, char> KEY_MAP = {
+	const std::map<SDL_Keycode, char> KEY_MAP = {
 		{SDLK_KP_0, '0'},
 		{SDLK_KP_1, '1'},
 		{SDLK_KP_2, '2'},
@@ -123,7 +123,7 @@ namespace {
 
 
 
-Dialog::Dialog(function<void()> okFunction, const string &message, Truncate truncate, bool canCancel, bool okIsActive)
+Dialog::Dialog(std::function<void()> okFunction, const std::string &message, Truncate truncate, bool canCancel, bool okIsActive)
 	: voidFun(okFunction)
 {
 	Init(message, truncate, canCancel, false);
@@ -134,7 +134,7 @@ Dialog::Dialog(function<void()> okFunction, const string &message, Truncate trun
 
 // Dialog that has no callback (information only). In this form, there is
 // only an "ok" button, not a "cancel" button.
-Dialog::Dialog(const string &text, Truncate truncate, bool allowsFastForward)
+Dialog::Dialog(const std::string &text, Truncate truncate, bool allowsFastForward)
 	: allowsFastForward(allowsFastForward)
 {
 	Init(text, truncate, false);
@@ -143,8 +143,8 @@ Dialog::Dialog(const string &text, Truncate truncate, bool allowsFastForward)
 
 
 // Mission accept / decline dialog.
-Dialog::Dialog(const string &text, PlayerInfo &player, const System *system, Truncate truncate, bool allowsFastForward)
-	: intFun(bind(&PlayerInfo::MissionCallback, &player, placeholders::_1)),
+Dialog::Dialog(const std::string &text, PlayerInfo &player, const System *system, Truncate truncate, bool allowsFastForward)
+	: intFun(std::bind(&PlayerInfo::MissionCallback, &player, std::placeholders::_1)),
 	allowsFastForward(allowsFastForward),
 	system(system), player(&player)
 {
@@ -198,7 +198,7 @@ void Dialog::Draw()
 	const Color &dim = *GameData::Colors().Get("medium");
 	const Color &back = *GameData::Colors().Get("faint");
 	const Color &inactive = *GameData::Colors().Get("inactive");
-	const string okText = isMission ? "Accept" : "OK";
+	const std::string okText = isMission ? "Accept" : "OK";
 	okPos = pos + Point((top->Width() - RIGHT_MARGIN - cancel->Width()) * .5, 0.);
 	Point labelPos(
 		okPos.X() - .5 * font.Width(okText),
@@ -206,7 +206,7 @@ void Dialog::Draw()
 	font.Draw(okText, labelPos, isOkDisabled ? inactive : (okIsActive ? bright : dim));
 	if(canCancel)
 	{
-		string cancelText = isMission ? "Decline" : "Cancel";
+		std::string cancelText = isMission ? "Decline" : "Cancel";
 		cancelPos = pos + Point(okPos.X() - cancel->Width() + BUTTON_RIGHT_MARGIN, 0.);
 		SpriteShader::Draw(cancel, cancelPos);
 		labelPos = {
@@ -235,7 +235,7 @@ void Dialog::Draw()
 
 
 // Format and add the text from the given node to the given string.
-void Dialog::ParseTextNode(const DataNode &node, size_t startingIndex, string &text)
+void Dialog::ParseTextNode(const DataNode &node, size_t startingIndex, std::string &text)
 {
 	for(int i = startingIndex; i < node.Size(); ++i)
 	{
@@ -430,7 +430,7 @@ void Dialog::Resize()
 
 
 // Common code from all three constructors:
-void Dialog::Init(const string &message, Truncate truncate, bool canCancel, bool isMission)
+void Dialog::Init(const std::string &message, Truncate truncate, bool canCancel, bool isMission)
 {
 	Audio::Pause();
 	SetInterruptible(isMission);
@@ -439,7 +439,7 @@ void Dialog::Init(const string &message, Truncate truncate, bool canCancel, bool
 	this->canCancel = canCancel;
 	okIsActive = true;
 
-	text = make_shared<TextArea>();
+	text = std::make_shared<TextArea>();
 	text->SetAlignment(Alignment::JUSTIFIED);
 	text->SetFont(FontSet::Get(14));
 	text->SetTruncate(truncate);

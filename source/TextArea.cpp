@@ -21,7 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "RenderBuffer.h"
 #include "ScrollBar.h"
 
-using namespace std;
+
 
 
 
@@ -52,7 +52,7 @@ TextArea::~TextArea()
 
 
 
-void TextArea::SetText(const string &s)
+void TextArea::SetText(const std::string &s)
 {
 	text = s;
 	Invalidate();
@@ -129,17 +129,17 @@ int TextArea::GetLongestLineWidth()
 void TextArea::PreDraw()
 {
   if(!buffer)
-    buffer = make_unique<RenderBuffer>(size);
+    buffer = std::make_unique<RenderBuffer>(size);
 
   Validate(scrollHeightIncludesTrailingBreak);
   if(!bufferIsValid || !scroll.IsAnimationDone())
   {
     scroll.Step();
 
-    auto target = buffer->SetTarget();
+    buffer->SetTarget();
     Point topLeft(buffer->Left(), buffer->Top() - scroll.AnimatedValue());
     wrappedText.Draw(topLeft, color);
-    target.Deactivate();
+    buffer->Deactivate();
 
     buffer->SetFadePadding(
       scroll.IsScrollAtMin() ? 0 : 20,

@@ -48,7 +48,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <ranges>
 
-using namespace std;
+
 
 namespace {
 	constexpr double WIDTH = 250.;
@@ -184,8 +184,8 @@ bool ShipInfoPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 	{
 		if(shipIt->get() != player.Flagship())
 		{
-			map<const Outfit*, int> uniqueOutfits;
-			auto AddToUniques = [&uniqueOutfits] (const map<const Outfit *, int> &outfits)
+			std::map<const Outfit*, int> uniqueOutfits;
+			auto AddToUniques = [&uniqueOutfits] (const std::map<const Outfit *, int> &outfits)
 			{
 				for(const auto &it : outfits)
 					if(it.first->Attributes().Get("unique"))
@@ -194,7 +194,7 @@ bool ShipInfoPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 			AddToUniques(shipIt->get()->Outfits());
 			AddToUniques(shipIt->get()->Cargo().Outfits());
 
-			string message = "Are you sure you want to disown \""
+			std::string message = "Are you sure you want to disown \""
 				+ shipIt->get()->GivenName()
 				+ "\"? Disowning a ship rather than selling it means you will not get any money for it.";
 			if(!uniqueOutfits.empty())
@@ -205,7 +205,7 @@ bool ShipInfoPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 				auto it = uniqueOutfits.begin();
 				for(int i = 0; i < detailedOutfitSize; ++i)
 				{
-					message += "\n" + to_string(it->second) + " "
+					message += "\n" + std::to_string(it->second) + " "
 						+ (it->second == 1 ? it->first->DisplayName() : it->first->PluralName());
 					++it;
 				}
@@ -214,7 +214,7 @@ bool ShipInfoPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 					int otherUniquesCount = 0;
 					for( ; it != uniqueOutfits.end(); ++it)
 						otherUniquesCount += it->second;
-					message += "\nand " + to_string(otherUniquesCount) + " other unique outfits";
+					message += "\nand " + std::to_string(otherUniquesCount) + " other unique outfits";
 				}
 			}
 
@@ -409,14 +409,14 @@ void ShipInfoPanel::DrawOutfits(const Rectangle &bounds, Rectangle &cargoBounds)
 	// Draw the outfits in the same order used in the outfitter.
 	for(const auto &cat : GameData::GetCategory(CategoryType::OUTFIT))
 	{
-		const string &category = cat.Name();
+		const std::string &category = cat.Name();
 		if(category.empty())
 			continue;
 		auto it = outfits.find(category);
 		if(it == outfits.end())
 			continue;
 
-		auto validOutfits = ranges::filter_view(it->second,
+		auto validOutfits = std::ranges::filter_view(it->second,
 			[](const Outfit *outfit){ return outfit->IsDefined() && !outfit->DisplayName().empty(); });
 
 		if(validOutfits.empty())
@@ -450,7 +450,7 @@ void ShipInfoPanel::DrawOutfits(const Rectangle &bounds, Rectangle &cargoBounds)
 
 			// Draw the outfit name and count.
 			table.DrawTruncatedPair(outfit->DisplayName(), dim,
-				to_string(ship.OutfitCount(outfit)), bright, Truncate::BACK, false);
+				std::to_string(ship.OutfitCount(outfit)), bright, Truncate::BACK, false);
 		}
 		// Add an extra gap in between categories.
 		table.DrawGap(10.);
@@ -462,7 +462,7 @@ void ShipInfoPanel::DrawOutfits(const Rectangle &bounds, Rectangle &cargoBounds)
 		double startY = table.GetRowBounds().Top() - 8.;
 		cargoBounds = Rectangle::WithCorners(
 			Point(cargoBounds.Left(), startY),
-			Point(cargoBounds.Right(), max(startY, cargoBounds.Bottom())));
+			Point(cargoBounds.Right(), std::max(startY, cargoBounds.Bottom())));
 	}
 }
 
@@ -480,7 +480,7 @@ void ShipInfoPanel::DrawWeapons(const Rectangle &bounds)
 	const Sprite *sprite = ship.GetSprite();
 	double scale = 0.;
 	if(sprite)
-		scale = min(1., min((WIDTH - 10) / sprite->Width(), (WIDTH - 10) / sprite->Height()));
+		scale = std::min(1., std::min((WIDTH - 10) / sprite->Width(), (WIDTH - 10) / sprite->Height()));
 
 	// Figure out the left- and right-most hardpoints on the ship. If they are
 	// too far apart, the scale may need to be reduced.
@@ -490,7 +490,7 @@ void ShipInfoPanel::DrawWeapons(const Rectangle &bounds)
 	for(const Hardpoint &hardpoint : ship.Weapons())
 	{
 		// Multiply hardpoint X by 2 to convert to sprite pixels.
-		maxX = max(maxX, fabs(2. * hardpoint.GetPoint().X()));
+		maxX = std::max(maxX, fabs(2. * hardpoint.GetPoint().X()));
 		++count[hardpoint.GetPoint().X() >= 0.][hardpoint.IsTurret()];
 	}
 	// If necessary, shrink the sprite to keep the hardpoints inside the labels.
@@ -499,7 +499,7 @@ void ShipInfoPanel::DrawWeapons(const Rectangle &bounds)
 	static const double LABEL_DX = 95.;
 	static const double LABEL_PAD = 5.;
 	if(maxX > (LABEL_DX - LABEL_PAD))
-		scale = min(scale, (LABEL_DX - LABEL_PAD) / (2. * maxX));
+		scale = std::min(scale, (LABEL_DX - LABEL_PAD) / (2. * maxX));
 
 	// Draw the ship, using the black silhouette swizzle.
 	if(sprite)
@@ -509,8 +509,8 @@ void ShipInfoPanel::DrawWeapons(const Rectangle &bounds)
 	}
 
 	// Figure out how tall each part of the weapon listing will be.
-	int gunRows = max(count[0][0], count[1][0]);
-	int turretRows = max(count[0][1], count[1][1]);
+	int gunRows = std::max(count[0][0], count[1][0]);
+	int turretRows = std::max(count[0][1], count[1][1]);
 	// If there are both guns and turrets, add a gap of ten pixels.
 	double height = 20. * (gunRows + turretRows) + 10. * (gunRows && turretRows);
 
@@ -534,7 +534,7 @@ void ShipInfoPanel::DrawWeapons(const Rectangle &bounds)
 	auto layout = Layout(static_cast<int>(LABEL_WIDTH), Truncate::BACK);
 	for(const Hardpoint &hardpoint : ship.Weapons())
 	{
-		string name = "[empty]";
+		std::string name = "[empty]";
 		if(hardpoint.GetOutfit())
 			name = hardpoint.GetOutfit()->DisplayName();
 
@@ -581,7 +581,7 @@ void ShipInfoPanel::DrawWeapons(const Rectangle &bounds)
 	if(draggingIndex >= 0)
 	{
 		const Outfit *outfit = ship.Weapons()[draggingIndex].GetOutfit();
-		string name = outfit ? outfit->DisplayName() : "[empty]";
+		std::string name = outfit ? outfit->DisplayName() : "[empty]";
 		Point pos(hoverPoint.X() - .5 * font.Width(name), hoverPoint.Y());
 		font.Draw(name, pos + Point(1., 1.), Color(0., 1.));
 		font.Draw(name, pos, bright);
@@ -626,7 +626,7 @@ void ShipInfoPanel::DrawCargo(const Rectangle &bounds)
 				table.DrawHighlight(backColor);
 
 			table.Draw(it.first, dim);
-			table.Draw(to_string(it.second), bright);
+			table.Draw(std::to_string(it.second), bright);
 
 			// Truncate the list if there is not enough space.
 			if(table.GetRowBounds().Bottom() >= endY)
@@ -650,9 +650,9 @@ void ShipInfoPanel::DrawCargo(const Rectangle &bounds)
 
 			// For outfits, show how many of them you have and their total mass.
 			bool isSingular = (it.second == 1 || it.first->Get("installable") < 0.);
-			string name = (isSingular ? it.first->DisplayName() : it.first->PluralName());
+			std::string name = (isSingular ? it.first->DisplayName() : it.first->PluralName());
 			if(!isSingular)
-				name += " (" + to_string(it.second) + "x)";
+				name += " (" + std::to_string(it.second) + "x)";
 			table.Draw(name, dim);
 
 			double mass = it.first->Mass() * it.second;
@@ -673,7 +673,7 @@ void ShipInfoPanel::DrawCargo(const Rectangle &bounds)
 		{
 			// Capitalize the name of the cargo.
 			table.Draw(Format::Capitalize(it.first->Cargo()), dim);
-			table.Draw(to_string(it.second), bright);
+			table.Draw(std::to_string(it.second), bright);
 
 			// Truncate the list if there is not enough space.
 			if(table.GetRowBounds().Bottom() >= endY)
@@ -685,7 +685,7 @@ void ShipInfoPanel::DrawCargo(const Rectangle &bounds)
 	{
 		table.DrawAt(Point(bounds.Left(), endY) + Point(10., 8.));
 		table.Draw("passengers:", dim);
-		table.Draw(to_string(cargo.Passengers()), bright);
+		table.Draw(std::to_string(cargo.Passengers()), bright);
 	}
 }
 
@@ -712,7 +712,7 @@ bool ShipInfoPanel::Hover(const Point &point)
 	hoverPoint = point;
 
 	hoverIndex = -1;
-	const vector<Hardpoint> &weapons = (**shipIt).Weapons();
+	const std::vector<Hardpoint> &weapons = (**shipIt).Weapons();
 	bool dragIsTurret = (draggingIndex >= 0 && weapons[draggingIndex].IsTurret());
 	for(const auto &zone : zones)
 	{
@@ -726,7 +726,7 @@ bool ShipInfoPanel::Hover(const Point &point)
 
 
 
-void ShipInfoPanel::Rename(const string &name)
+void ShipInfoPanel::Rename(const std::string &name)
 {
 	if(shipIt != panelState.Ships().end() && !name.empty())
 	{
@@ -784,7 +784,7 @@ void ShipInfoPanel::Dump()
 	{
 		for(const auto &it : cargo.Outfits())
 		{
-			loss += it.first->Cost() * max(0, it.second);
+			loss += it.first->Cost() * std::max(0, it.second);
 			(*shipIt)->Jettison(it.first, it.second);
 		}
 	}
@@ -802,7 +802,7 @@ void ShipInfoPanel::Dump()
 void ShipInfoPanel::DumpPlunder(int count)
 {
 	int64_t loss = 0;
-	count = min(count, (*shipIt)->Cargo().Get(selectedPlunder));
+	count = std::min(count, (*shipIt)->Cargo().Get(selectedPlunder));
 	if(count > 0)
 	{
 		loss += count * selectedPlunder->Cost();
@@ -820,7 +820,7 @@ void ShipInfoPanel::DumpPlunder(int count)
 void ShipInfoPanel::DumpCommodities(int count)
 {
 	int64_t loss = 0;
-	count = min(count, (*shipIt)->Cargo().Get(selectedCommodity));
+	count = std::min(count, (*shipIt)->Cargo().Get(selectedCommodity));
 	if(count > 0)
 	{
 		int64_t basis = player.GetBasis(selectedCommodity, count);

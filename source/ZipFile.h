@@ -51,10 +51,10 @@ public:
 
 
 private:
-	/// Translates a global filesystem path to a relative path within the zip file.
+	/// Translates a global std::filesystem path to a relative path within the zip file.
 	/// @param path The complete file path, including the zip's path.
 	std::filesystem::path GetPathInZip(const std::filesystem::path &path);
-	/// Translates an in-zip relative path to a global filesystem path.
+	/// Translates an in-zip relative path to a global std::filesystem path.
 	/// @param path The in-zip path, without the zip's own path.
 	std::filesystem::path GetGlobalPath(const std::filesystem::path &path);
 
@@ -62,7 +62,7 @@ private:
 private:
 	/// The zip handle
 	mz_zip_archive zipFile;
-	/// The path of the zip file in the filesystem
+	/// The path of the zip file in the std::filesystem
 	std::filesystem::path basePath;
 	/// The name of the top-level directory inside the zip, or an empty string if it doesn't have such a directory
 	std::filesystem::path topLevelDirectory;

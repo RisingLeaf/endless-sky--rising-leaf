@@ -122,7 +122,7 @@ namespace graphics_layer
     create_info.HasDepth   = Type != GraphicsTypes::RenderBufferType::COLOR;
     create_info.Presenter  = false;
     create_info.TargetType = Type;
-    create_info.Format     = Type == GraphicsTypes::RenderBufferType::DEPTH ? GraphicsTypes::ImageFormat::DEPTH : GraphicsTypes::ImageFormat::RGBA32F;
+    create_info.Format     = Type == GraphicsTypes::RenderBufferType::DEPTH ? GraphicsTypes::ImageFormat::DEPTH : GraphicsTypes::ImageFormat::RGBA;
     Instance->CreateRenderBuffer(frame_buffer, create_info);
   }
 
@@ -150,7 +150,7 @@ namespace graphics_layer
     create_info.HasDepth   = Type != GraphicsTypes::RenderBufferType::COLOR;
     create_info.Presenter  = false;
     create_info.TargetType = Type;
-    create_info.Format     = Type == GraphicsTypes::RenderBufferType::DEPTH ? GraphicsTypes::ImageFormat::DEPTH : GraphicsTypes::ImageFormat::RGBA32F;
+    create_info.Format     = Type == GraphicsTypes::RenderBufferType::DEPTH ? GraphicsTypes::ImageFormat::DEPTH : GraphicsTypes::ImageFormat::RGBA;
     Instance->CreateRenderBuffer(frame_buffer, create_info);
   }
 
@@ -197,183 +197,6 @@ namespace graphics_layer
   {
     Instance->BindVertexBuffer(VertexBuffer.get());
     Instance->DrawIndexed(Size, IndexBuffer.get(), prim_type);
-  }
-
-  TextureHandle::TextureHandle(const GraphicsTypes::GraphicsInstance *instance, const std::string_view path, const bool bpd,
-                               const GraphicsTypes::TextureAddressMode address_mode,
-                               const GraphicsTypes::TextureFilter      filter) : Instance(instance)
-  {
-
-    GraphicsTypes::TextureInfo info;
-    info.Type        = GraphicsTypes::TextureType::TYPE_2D;
-    info.Layers      = 1;
-    info.AddressMode = address_mode;
-    info.Filter      = filter;
-
-    if(!bpd)
-    {
-      int        width, height, channels;
-      const auto pixels = File::ReadImage(path, width, height, channels);
-
-      int min_dim = std::min(width, height);
-      // Calculate mip levels
-      int mip_levels = 1;
-      while(true)
-      {
-        if(min_dim < 2) break;
-        min_dim /= 2;
-        mip_levels++;
-      }
-      info.Format    = GraphicsTypes::ImageFormat::RGBA;
-      info.Width     = width;
-      info.Height    = height;
-      info.MipLevels = mip_levels;
-
-      Instance->CreateTexture(Texture, info, {pixels.Get()});
-    }
-    else
-    {
-      asl::list<unsigned char> pixels;
-      asl::uint8               components, bytes;
-      asl::uint32              width;
-      File::ReadBPD(path, pixels, width, components, bytes);
-
-      if(pixels.empty()) return;
-      if(components == 0 || components > 4)
-      {
-        Log::Error << "Invalid component count for bpd texture." << Log::End;
-        return;
-      }
-      if((components != 4 && bytes > 1) || bytes == 0)
-      {
-        Log::Error << "Invalid byte count for bpd texture." << Log::End;
-        return;
-      }
-
-      switch(components)
-      {
-      case 1: info.Format = GraphicsTypes::ImageFormat::R; break;
-      case 2: info.Format = GraphicsTypes::ImageFormat::RG; break;
-      case 3: info.Format = GraphicsTypes::ImageFormat::RGB; break;
-      case 4:
-        {
-          switch(bytes)
-          {
-          case 1: info.Format = GraphicsTypes::ImageFormat::RGBA; break;
-          case 2: info.Format = GraphicsTypes::ImageFormat::RGBA16F; break;
-          case 4: info.Format = GraphicsTypes::ImageFormat::RGBA32F; break;
-          default:
-            {
-              Log::Error << "Invalid byte count for bpd image." << Log::End;
-              return;
-            }
-          }
-          break;
-        }
-      default: Log::Error << "Invalid component count for bpd image." << Log::End; return;
-      }
-      info.Width  = width;
-      info.Height = ((pixels.size() / bytes) / components) / width;
-
-
-      Instance->CreateTexture(Texture, info, {pixels.data()});
-    }
-  }
-
-  TextureHandle::TextureHandle(const GraphicsTypes::GraphicsInstance *instance, const std::vector<std::string_view> &paths,
-                               const GraphicsTypes::TextureAddressMode address_mode,
-                               const GraphicsTypes::TextureFilter      filter) : Instance(instance)
-  {
-    std::vector<File::PixelHandle> handles;
-    std::vector<const void *>      final_pixels;
-    int                            final_width = -1, final_height = -1;
-    for(const auto &path : paths)
-    {
-      int width, height, channels;
-      handles.emplace_back(File::ReadImage(path, width, height, channels));
-      final_pixels.emplace_back(handles.back().Get());
-
-      if(final_width == -1 && final_height == -1)
-      {
-        final_width  = width;
-        final_height = height;
-      }
-      else if(final_width != width && final_height != height)
-      {
-        Log::Error << "Error: trying to load textures of different sizes into array" << Log::End;
-        return;
-      }
-    }
-
-    int min_dim = std::min(final_width, final_height);
-    // Calculate mip levels
-    int mip_levels = 1;
-    while(true)
-    {
-      if(min_dim < 2) break;
-      min_dim /= 2;
-      mip_levels++;
-    }
-
-    GraphicsTypes::TextureInfo info;
-    info.Width     = final_width;
-    info.Height    = final_height;
-    info.Layers    = final_pixels.size();
-    info.Format    = GraphicsTypes::ImageFormat::RGBA;
-    info.MipLevels = mip_levels;
-    info.Type      = GraphicsTypes::TextureType::TYPE_2D_ARRAY;
-    info.AddressMode = address_mode;
-    info.Filter = filter;
-
-    Instance->CreateTexture(Texture, info, final_pixels);
-  }
-
-  TextureHandle::TextureHandle(const GraphicsTypes::GraphicsInstance *instance, const std::vector<std::string> &paths,
-                               const GraphicsTypes::TextureAddressMode address_mode,
-                               const GraphicsTypes::TextureFilter      filter) : Instance(instance)
-  {
-    std::vector<File::PixelHandle> handles;
-    std::vector<const void *>      final_pixels;
-    int                            final_width = -1, final_height = -1;
-    for(const auto &path : paths)
-    {
-      int width, height, channels;
-      handles.emplace_back(File::ReadImage(path, width, height, channels));
-      final_pixels.emplace_back(handles.back().Get());
-
-      if(final_width == -1 && final_height == -1)
-      {
-        final_width  = width;
-        final_height = height;
-      }
-      else if(final_width != width && final_height != height)
-      {
-        Log::Error << "Error: trying to load textures of different sizes into array" << Log::End;
-        return;
-      }
-    }
-
-    int min_dim = std::min(final_width, final_height);
-    // Calculate mip levels
-    int mip_levels = 1;
-    while(true)
-    {
-      if(min_dim < 2) break;
-      min_dim /= 2;
-      mip_levels++;
-    }
-
-    GraphicsTypes::TextureInfo info;
-    info.Width     = final_width;
-    info.Height    = final_height;
-    info.Layers    = final_pixels.size();
-    info.MipLevels = mip_levels;
-    info.Format    = GraphicsTypes::ImageFormat::RGBA;
-    info.Type      = GraphicsTypes::TextureType::TYPE_2D_ARRAY;
-    info.AddressMode = address_mode;
-    info.Filter = filter;
-
-    Instance->CreateTexture(Texture, info, final_pixels);
   }
 
   TextureHandle::TextureHandle(const GraphicsTypes::GraphicsInstance *instance,
@@ -424,7 +247,7 @@ namespace graphics_layer
     info.Target = target;
     info.AddressMode = address_mode;
     info.Filter = filter;
-    Instance->CreateTexture(Texture, info, {data});
+    Instance->CreateTexture(Texture, info, data);
   }
 
 

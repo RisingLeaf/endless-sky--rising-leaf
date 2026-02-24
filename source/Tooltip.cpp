@@ -21,7 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Preferences.h"
 #include "Screen.h"
 
-using namespace std;
+
 
 namespace {
 	Rectangle CreateBox(const Rectangle &zone, const Point &boxSize,
@@ -196,7 +196,7 @@ void Tooltip::SetZone(const Rectangle &zone)
 
 
 
-void Tooltip::SetText(const string &newText, bool shrink)
+void Tooltip::SetText(const std::string &newText, bool shrink)
 {
 	// Reset the wrap width each time we set text in case the WrappedText
 	// was previously shrunk to the size of the text.

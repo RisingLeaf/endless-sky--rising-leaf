@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Ship.h"
 #include "Weapon.h"
 
-using namespace std;
+
 
 
 
@@ -81,7 +81,7 @@ void DamageProfile::CalculateBlast()
 		// origin and if the projectile uses a trigger radius. The
 		// point of contact must be measured on the sprite outline.
 		// scale = (1 + (tr / (2 * br))^2) / (1 + r^4)^2
-		double blastRadius = max(1., weapon.BlastRadius());
+		double blastRadius = std::max(1., weapon.BlastRadius());
 		double radiusRatio = weapon.TriggerRadius() / blastRadius;
 		k = !radiusRatio ? 1. : (1. + .25 * radiusRatio * radiusRatio);
 		rSquared = 1. / (blastRadius * blastRadius);
@@ -99,7 +99,7 @@ double DamageProfile::Scale(double scale, const Body &body, bool blast) const
 	{
 		// Rather than exactly compute the distance between the explosion and
 		// the closest point on the ship, estimate it using the mask's Radius.
-		double distance = max(0., position.Distance(body.Position()) - body.GetMask().Radius());
+		double distance = std::max(0., position.Distance(body.Position()) - body.GetMask().Radius());
 		double finalR = distance * distance * rSquared;
 		scale *= k / ((1. + finalR * finalR) * (1. + finalR * finalR));
 	}
@@ -107,7 +107,7 @@ double DamageProfile::Scale(double scale, const Body &body, bool blast) const
 	// position for each ship influences the distance used for the damage dropoff.
 	if(isHazard && weapon.HasDamageDropoff())
 	{
-		double distance = max(0., position.Distance(body.Position()) - body.GetMask().Radius());
+		double distance = std::max(0., position.Distance(body.Position()) - body.GetMask().Radius());
 		scale *= weapon.DamageDropoff(distance);
 	}
 
@@ -137,7 +137,7 @@ void DamageProfile::PopulateDamage(DamageDealt &damage, const Ship &ship) const
 	double shields = ship.ShieldLevel();
 	if(shields > 0.)
 	{
-		double piercing = max(0., min(1., weapon.Piercing() / (1. + attributes.Get("piercing protection"))
+		double piercing = std::max(0., std::min(1., weapon.Piercing() / (1. + attributes.Get("piercing protection"))
 			- attributes.Get("piercing resistance")));
 		double highPermeability = attributes.Get("high shield permeability");
 		double lowPermeability = attributes.Get("low shield permeability");
@@ -147,10 +147,10 @@ void DamageProfile::PopulateDamage(DamageDealt &damage, const Ship &ship) const
 			// Determine what portion of its maximum shields the ship is currently at.
 			// Only do this if there is nonzero permeability involved, otherwise don't.
 			double shieldPortion = shields / ship.MaxShields();
-			permeability += max((highPermeability * shieldPortion) +
+			permeability += std::max((highPermeability * shieldPortion) +
 				(lowPermeability * (1. - shieldPortion)), 0.);
 		}
-		shieldFraction = (1. - min(piercing + permeability, 1.)) /
+		shieldFraction = (1. - std::min(piercing + permeability, 1.)) /
 			(1. + ship.DisruptionLevel() * .01);
 
 		damage.shieldDamage = (weapon.ShieldDamage()
@@ -158,7 +158,7 @@ void DamageProfile::PopulateDamage(DamageDealt &damage, const Ship &ship) const
 			* ScaleType(0., 0., attributes.Get("shield protection")
 			+ (ship.IsCloaked() ? attributes.Get("cloak shield protection") : 0.));
 		if(damage.shieldDamage > shields)
-			shieldFraction = min(shieldFraction, shields / damage.shieldDamage);
+			shieldFraction = std::min(shieldFraction, shields / damage.shieldDamage);
 	}
 
 	// Instantaneous damage types.

@@ -59,7 +59,7 @@ public:
 	// worker threads. This also generates collision masks if needed.
 	void Load() noexcept(false);
 	// Create the sprite and optionally upload the image data to the GPU. After this is
-	// called, the internal image buffers and mask vector will be cleared, but
+	// called, the internal image buffers and mask std::vector will be cleared, but
 	// the paths are saved in case the sprite needs to be loaded again.
 	void Upload(Sprite *sprite, bool enableUpload);
 

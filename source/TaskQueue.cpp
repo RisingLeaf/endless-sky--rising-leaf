@@ -20,36 +20,36 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <exception>
 #include <thread>
 
-using namespace std;
+
 
 namespace {
 
 	// The main task queue used by the worker threads.
-	queue<TaskQueue::Task> tasks;
-	mutex asyncMutex;
-	condition_variable asyncCondition;
+	std::queue<TaskQueue::Task> tasks;
+	std::mutex asyncMutex;
+	std::condition_variable asyncCondition;
 	bool shouldQuit = false;
 
 	// Worker threads for executing tasks.
 	struct WorkerThreads {
 		WorkerThreads() noexcept
 		{
-			threads.resize(max(4u, thread::hardware_concurrency()));
-			for(thread &t : threads)
-				t = thread(&TaskQueue::ThreadLoop);
+			threads.resize(std::max(4u, std::thread::hardware_concurrency()));
+			for(std::thread &t : threads)
+				t = std::thread(&TaskQueue::ThreadLoop);
 		}
 		~WorkerThreads()
 		{
 			{
-				lock_guard<mutex> lock(asyncMutex);
+				std::lock_guard<std::mutex> lock(asyncMutex);
 				shouldQuit = true;
 			}
 			asyncCondition.notify_all();
-			for(thread &t : threads)
+			for(std::thread &t : threads)
 				t.join();
 		}
 
-		vector<thread> threads;
+		std::vector<std::thread> threads;
 	} threads;
 }
 
@@ -67,11 +67,11 @@ TaskQueue::~TaskQueue()
 // will get executed on the main thread after the first function finishes.
 // Returns a future representing the future result of the async call. Ignores
 // any main thread task that still need to be executed!
-shared_future<void> TaskQueue::Run(function<void()> asyncTask, function<void()> syncTask)
+std::shared_future<void> TaskQueue::Run(std::function<void()> asyncTask, std::function<void()> syncTask)
 {
-	shared_future<void> result;
+	std::shared_future<void> result;
 	{
-		lock_guard<mutex> lock(asyncMutex);
+		std::lock_guard<std::mutex> lock(asyncMutex);
 		// Do nothing if we are destroying the queue already.
 		if(shouldQuit)
 			return result;
@@ -90,7 +90,7 @@ shared_future<void> TaskQueue::Run(function<void()> asyncTask, function<void()> 
 // Process any tasks to be scheduled to be executed on the main thread.
 void TaskQueue::ProcessSyncTasks()
 {
-	unique_lock<mutex> lock(syncMutex);
+	std::unique_lock<std::mutex> lock(syncMutex);
 	for(int i = 0; !syncTasks.empty() && i < MAX_SYNC_TASKS; ++i)
 	{
 		// Extract the one item we should work on right now.
@@ -109,7 +109,7 @@ void TaskQueue::ProcessSyncTasks()
 void TaskQueue::Wait()
 {
 	while(!IsDone())
-		this_thread::yield();
+		std::this_thread::yield();
 }
 
 
@@ -117,7 +117,7 @@ void TaskQueue::Wait()
 // Whether there are any outstanding async tasks left in this queue.
 bool TaskQueue::IsDone() const
 {
-	lock_guard<mutex> lock(asyncMutex);
+	std::lock_guard<std::mutex> lock(asyncMutex);
 	return futures.empty();
 }
 
@@ -128,7 +128,7 @@ void TaskQueue::ThreadLoop() noexcept
 {
 	while(true)
 	{
-		unique_lock<mutex> lock(asyncMutex);
+		std::unique_lock<std::mutex> lock(asyncMutex);
 		while(true)
 		{
 			// Check whether it is time for this thread to quit.
@@ -154,7 +154,7 @@ void TaskQueue::ThreadLoop() noexcept
 			{
 				// Any exception by the task is caught and rethrown inside the main thread
 				// so we can handle it appropriately.
-				auto exception = current_exception();
+				auto exception = std::current_exception();
 				task.sync = [exception] { rethrow_exception(exception); };
 			}
 
@@ -162,7 +162,7 @@ void TaskQueue::ThreadLoop() noexcept
 			// in the main thread.
 			if(task.sync)
 			{
-				unique_lock<mutex> lock(task.queue->syncMutex);
+				std::unique_lock<std::mutex> lock(task.queue->syncMutex);
 				task.queue->syncTasks.push(std::move(task.sync));
 			}
 

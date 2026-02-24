@@ -18,7 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "DataNode.h"
 #include "image/SpriteSet.h"
 
-using namespace std;
+
 
 
 
@@ -29,7 +29,7 @@ void Galaxy::Load(const DataNode &node)
 		const bool remove = child.Token(0) == "remove";
 		const int keyIndex = remove;
 		const bool hasKey = child.Size() > keyIndex;
-		const string &key = hasKey ? child.Token(keyIndex) : child.Token(0);
+		const std::string &key = hasKey ? child.Token(keyIndex) : child.Token(0);
 
 		if(remove && hasKey)
 		{

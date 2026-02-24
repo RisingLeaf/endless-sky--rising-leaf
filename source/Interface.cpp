@@ -39,7 +39,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
+
 
 namespace {
 	// Parse a set of tokens that specify horizontal and vertical alignment.
@@ -82,11 +82,11 @@ void Interface::Load(const DataNode &node)
 	Point anchor = ParseAlignment(node, 2);
 
 	// Now, parse the elements in it.
-	string visibleIf;
-	string activeIf;
+	std::string visibleIf;
+	std::string activeIf;
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "anchor")
 			anchor = ParseAlignment(child);
@@ -106,7 +106,7 @@ void Interface::Load(const DataNode &node)
 		else if(key == "visible" || key == "active")
 		{
 			// This node alters the visibility or activation of future nodes.
-			string &str = (key == "visible" ? visibleIf : activeIf);
+			std::string &str = (key == "visible" ? visibleIf : activeIf);
 			if(child.Size() >= 3 && child.Token(1) == "if")
 				str = child.Token(2);
 			else
@@ -116,21 +116,21 @@ void Interface::Load(const DataNode &node)
 		{
 			// Check if this node specifies a known element type.
 			if(key == "sprite" || key == "image" || key == "outline")
-				elements.push_back(make_unique<ImageElement>(child, anchor));
+				elements.push_back(std::make_unique<ImageElement>(child, anchor));
 			else if(key == "label" || key == "string" || key == "button" || key == "dynamic button")
-				elements.push_back(make_unique<BasicTextElement>(child, anchor));
+				elements.push_back(std::make_unique<BasicTextElement>(child, anchor));
 			else if(key == "wrapped label" || key == "wrapped string"
 					|| key == "wrapped button" || key == "wrapped dynamic button")
-				elements.push_back(make_unique<WrappedTextElement>(child, anchor));
+				elements.push_back(std::make_unique<WrappedTextElement>(child, anchor));
 			else if(key == "bar" || key == "ring")
-				elements.push_back(make_unique<BarElement>(child, anchor));
+				elements.push_back(std::make_unique<BarElement>(child, anchor));
 			else if(key == "pointer")
-				elements.push_back(make_unique<PointerElement>(child, anchor));
+				elements.push_back(std::make_unique<PointerElement>(child, anchor));
 			else if(key == "fill" || key == "line")
 			{
 				if(key == "line")
 					child.PrintTrace("\"line\" is deprecated, use \"fill\" instead:");
-				elements.push_back(make_unique<FillElement>(child, anchor));
+				elements.push_back(std::make_unique<FillElement>(child, anchor));
 			}
 			else
 			{
@@ -149,14 +149,14 @@ void Interface::Load(const DataNode &node)
 // Draw this interface.
 void Interface::Draw(const Information &info, Panel *panel) const
 {
-	for(const unique_ptr<Element> &element : elements)
+	for(const std::unique_ptr<Element> &element : elements)
 		element->Draw(info, panel);
 }
 
 
 
 // Check if a named point exists.
-bool Interface::HasPoint(const string &name) const
+bool Interface::HasPoint(const std::string &name) const
 {
 	return points.contains(name);
 }
@@ -164,7 +164,7 @@ bool Interface::HasPoint(const string &name) const
 
 
 // Get the center of the named point.
-Point Interface::GetPoint(const string &name) const
+Point Interface::GetPoint(const std::string &name) const
 {
 	auto it = points.find(name);
 	if(it == points.end())
@@ -175,7 +175,7 @@ Point Interface::GetPoint(const string &name) const
 
 
 
-Rectangle Interface::GetBox(const string &name) const
+Rectangle Interface::GetBox(const std::string &name) const
 {
 	auto it = points.find(name);
 	if(it == points.end())
@@ -187,7 +187,7 @@ Rectangle Interface::GetBox(const string &name) const
 
 
 // Get a named value.
-double Interface::GetValue(const string &name) const
+double Interface::GetValue(const std::string &name) const
 {
 	auto it = values.find(name);
 	return (it == values.end() ? 0. : it->second);
@@ -196,9 +196,9 @@ double Interface::GetValue(const string &name) const
 
 
 // Get a named list.
-const vector<double> &Interface::GetList(const string &name) const
+const std::vector<double> &Interface::GetList(const std::string &name) const
 {
-	static vector<double> EMPTY;
+	static std::vector<double> EMPTY;
 	auto it = lists.find(name);
 	return (it == lists.end() ? EMPTY : it->second);
 }
@@ -254,7 +254,7 @@ void Interface::Element::Load(const DataNode &node, const Point &globalAnchor)
 	// Assume that the subclass constructor already parsed this line of data.
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "align" && hasValue)
 			alignment = ParseAlignment(child);
@@ -360,7 +360,7 @@ void Interface::Element::Draw(const Information &info, Panel *panel) const
 
 // Set the conditions that control when this element is visible and active.
 // An empty string means it is always visible or active.
-void Interface::Element::SetConditions(const string &visible, const string &active)
+void Interface::Element::SetConditions(const std::string &visible, const std::string &active)
 {
 	visibleIf = visible;
 	activeIf = active;
@@ -423,7 +423,7 @@ Interface::ImageElement::ImageElement(const DataNode &node, const Point &globalA
 	if(node.Size() < 2)
 		return;
 
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	// Remember whether this is an outline element.
 	isOutline = (key == "outline");
 	// If this is a "sprite," look up the sprite with the given name. Otherwise,
@@ -454,7 +454,7 @@ bool Interface::ImageElement::ParseLine(const DataNode &node)
 {
 	// The "inactive" and "hover" sprite only applies to non-dynamic images.
 	// The "colored" tag only applies to outlines.
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	bool hasValue = node.Size() >= 2;
 	if(key == "inactive" && hasValue && name.empty())
 		sprite[Element::INACTIVE] = SpriteSet::Get(node.Token(1));
@@ -486,7 +486,7 @@ Point Interface::ImageElement::NativeDimensions(const Information &info, int sta
 	// constrained in that dimension.
 	double xScale = !bounds.Width() ? 1000. : bounds.Width() / size.X();
 	double yScale = !bounds.Height() ? 1000. : bounds.Height() / size.Y();
-	return size * min(xScale, yScale);
+	return size * std::min(xScale, yScale);
 }
 
 
@@ -529,7 +529,7 @@ Interface::TextElement::TextElement(const DataNode &node, const Point &globalAnc
 	if(node.Size() < 2)
 		return;
 
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	isDynamic = (key.ends_with("string") || key.ends_with("dynamic button"));
 	if(key.ends_with("button") || key.ends_with("dynamic button"))
 	{
@@ -547,7 +547,7 @@ Interface::TextElement::TextElement(const DataNode &node, const Point &globalAnc
 // itself. This returns false if it does not recognize the line, either.
 bool Interface::TextElement::ParseLine(const DataNode &node)
 {
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	bool hasValue = node.Size() >= 2;
 	if(key == "size" && hasValue)
 		fontSize = node.Value(1);
@@ -618,7 +618,7 @@ void Interface::TextElement::FinishLoadingColors()
 
 
 // Get text contents of this element.
-string Interface::TextElement::GetString(const Information &info) const
+std::string Interface::TextElement::GetString(const Information &info) const
 {
 	return isDynamic ? info.GetString(str) : str;
 }
@@ -689,7 +689,7 @@ bool Interface::WrappedTextElement::ParseLine(const DataNode &node)
 		return true;
 	if(node.Token(0) == "alignment")
 	{
-		const string &value = node.Token(1);
+		const std::string &value = node.Token(1);
 		if(value == "left")
 			textAlignment = Alignment::LEFT;
 		else if(value == "center")
@@ -754,7 +754,7 @@ Interface::BarElement::BarElement(const DataNode &node, const Point &globalAncho
 // itself. This returns false if it does not recognize the line, either.
 bool Interface::BarElement::ParseLine(const DataNode &node)
 {
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	bool hasValue = node.Size() >= 2;
 	if(key == "color" && hasValue)
 	{
@@ -764,9 +764,9 @@ bool Interface::BarElement::ParseLine(const DataNode &node)
 	else if(key == "size" && hasValue)
 		width = node.Value(1);
 	else if(key == "span angle" && hasValue)
-		spanAngle = max(0., min(360., node.Value(1)));
+		spanAngle = std::max(0., std::min(360., node.Value(1)));
 	else if(key == "start angle" && hasValue)
-		startAngle = max(0., min(360., node.Value(1)));
+		startAngle = std::max(0., std::min(360., node.Value(1)));
 	else if(key == "reversed")
 		reversed = true;
 	else
@@ -822,7 +822,7 @@ void Interface::BarElement::Draw(const Rectangle &rect, const Information &info,
 			Color nFromColor = Color::Combine(1 - v, *fromColor, v, *toColor);
 			Point from = start + v * dimensions;
 			v += filled;
-			double lim = min(v, value);
+			double lim = std::min(v, value);
 			Point to = start + lim * dimensions;
 			Color nToColor = Color::Combine(1 - lim, *fromColor, lim, *toColor);
 			v += empty;
@@ -862,7 +862,7 @@ Interface::PointerElement::PointerElement(const DataNode &node, const Point &glo
 // itself. This returns false if it does not recognize the line, either.
 bool Interface::PointerElement::ParseLine(const DataNode &node)
 {
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	bool hasValue = node.Size() >= 2;
 	if(key == "color" && hasValue)
 		color = GameData::Colors().Get(node.Token(1));
@@ -871,7 +871,7 @@ bool Interface::PointerElement::ParseLine(const DataNode &node)
 		const Angle direction(node.Value(1));
 		orientation = direction.Unit();
 	}
-	else if(key == "orientation vector" && node.Size() >= 3)
+	else if(key == "orientation std::vector" && node.Size() >= 3)
 	{
 		orientation.X() = node.Value(1);
 		orientation.Y() = node.Value(2);

@@ -26,13 +26,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <sstream>
 #include <unordered_set>
 
-using namespace std;
+
 
 namespace {
 	// The greatest number displayed without switching to scientific notation.
 	constexpr int64_t SCIENTIFIC_THRESHOLD = 1e15;
 	constexpr int64_t K = 1000;
-	static const vector<pair<const char *, int64_t>> WORD_NUMBERS = {
+	static const std::vector<std::pair<const char *, int64_t>> WORD_NUMBERS = {
 		{ "quintillion", K * K * K * K * K * K },
 		{ "quadrillion", K * K * K * K * K },
 		{ "trillion", K * K * K * K },
@@ -40,13 +40,13 @@ namespace {
 		{ "million", K * K },
 		{ "thousand", K }
 	};
-	static const vector<const char *> ONES_NAMES = {
+	static const std::vector<const char *> ONES_NAMES = {
 		"zero ", "one ", "two ", "three ", "four ", "five ",
 		"six ", "seven ", "eight ", "nine ", "ten ", "eleven ",
 		"twelve ", "thirteen ", "fourteen ", "fifteen ",
 		"sixteen ", "seventeen ", "eighteen ", "nineteen "
 	};
-	static const vector<const char *> TENS_NAMES = {
+	static const std::vector<const char *> TENS_NAMES = {
 		"error", "error", "twenty", "thirty", "forty",
 		"fifty", "sixty", "seventy", "eighty", "ninety"
 	};
@@ -58,7 +58,7 @@ namespace {
 
 	// Implementation of WordForm. Outputs the word form of the wrapped number,
 	// followed by a space.
-	ostream &operator<< (ostream &o, const Wrapped &num)
+	std::ostream &operator<< (std::ostream &o, const Wrapped &num)
 	{
 
 		if(num.value < 0)
@@ -96,7 +96,7 @@ namespace {
 		return o << ' ';
 	}
 
-	string MLAShorthand(int64_t value)
+	std::string MLAShorthand(int64_t value)
 	{
 		bool negative = value < 0;
 		if(negative)
@@ -116,14 +116,14 @@ namespace {
 			snprintf(buf, BUFLEN, "%s%.3f %s",
 				negative ? "negative " : "", above / 1000.0, WORD_NUMBERS[magnitude].first);
 			buf[BUFLEN - 1] = '\0';
-			return string(buf);
+			return std::string(buf);
 		}
-		return string();
+		return std::string();
 	}
 
 	// Format an integer value, inserting its digits into the given string in
 	// reverse order and then reversing the string.
-	void FormatInteger(int64_t value, bool isNegative, string &result)
+	void FormatInteger(int64_t value, bool isNegative, std::string &result)
 	{
 		int places = 0;
 		do {
@@ -141,33 +141,33 @@ namespace {
 		reverse(result.begin(), result.end());
 	}
 
-	string StringSubstituter(const string &source,
-			function<const string *(const string &)> SubstitutionFor)
+	std::string StringSubstituter(const std::string &source,
+			std::function<const std::string *(const std::string &)> SubstitutionFor)
 	{
-		string target;
+		std::string target;
 		target.reserve(source.length());
 
-		string key;
+		std::string key;
 		size_t start = 0;
 		size_t search = start;
 		while(search < source.length())
 		{
 			size_t left = source.find('<', search);
-			if(left == string::npos)
+			if(left == std::string::npos)
 				break;
 
 			size_t right = source.find('>', left);
-			if(right == string::npos)
+			if(right == std::string::npos)
 				break;
 
 			++right;
 			size_t length = right - left;
 			key.assign(source, left, length);
-			const string *sub = SubstitutionFor(key);
+			const std::string *sub = SubstitutionFor(key);
 			if(sub)
 			{
 				target.append(source, start, left - start);
-				target.append(*sub, 0, string::npos);
+				target.append(*sub, 0, std::string::npos);
 				start = right;
 				search = start;
 			}
@@ -181,11 +181,11 @@ namespace {
 
 	// Helper function for Format::Expand, to recursively expand one key,
 	// detecting cycles in the graph (and thus avoiding infinite recursion).
-	void ExpandInto(const string &key, const string &oldValue, const map<string, string> &source,
-			map<string, string> &result, unordered_set<string> &keysBeingExpanded)
+	void ExpandInto(const std::string &key, const std::string &oldValue, const std::map<std::string, std::string> &source,
+			std::map<std::string, std::string> &result, std::unordered_set<std::string> &keysBeingExpanded)
 	{
 		// Optimization for a common case: no substitutions in the substitution.
-		if(oldValue.find('<') == string::npos)
+		if(oldValue.find('<') == std::string::npos)
 		{
 			result.emplace(key, oldValue);
 			return;
@@ -195,7 +195,7 @@ namespace {
 		// detect recursion.
 		auto inserted = keysBeingExpanded.insert(key);
 
-		auto SubstitutionFor = [&](const string &request) -> const string *
+		auto SubstitutionFor = [&](const std::string &request) -> const std::string *
 		{
 			auto hasResult = result.find(request);
 			// Already finished this one.
@@ -214,7 +214,7 @@ namespace {
 			return hasResult == result.end() ? nullptr : &hasResult->second;
 		};
 
-		string newValue = StringSubstituter(oldValue, SubstitutionFor);
+		std::string newValue = StringSubstituter(oldValue, SubstitutionFor);
 
 		// Success! Indicate we're done expanding this key, and provide its value.
 		keysBeingExpanded.erase(inserted.first);
@@ -230,7 +230,7 @@ namespace {
 	//
 	// The getter() acts like ConditionsStore.Get(), providing condition values.
 	// These are passed through Format::Whatever(), and appended to the result.
-	void AppendCondition(string &result, const string &source, const Format::ConditionGetter &getter,
+	void AppendCondition(std::string &result, const std::string &source, const Format::ConditionGetter &getter,
 		size_t formatStart, size_t formatSize, size_t conditionStart, size_t conditionSize)
 	{
 		int64_t value = getter(source, conditionStart, conditionSize);
@@ -240,10 +240,10 @@ namespace {
 			return !source.compare(formatStart, formatSize, format);
 		};
 
-		if(formatStart == string::npos || formatSize == string::npos)
+		if(formatStart == std::string::npos || formatSize == std::string::npos)
 			result.append(Format::Number(value));
 		else if(IsFormat("raw"))
-			result.append(to_string(value));
+			result.append(std::to_string(value));
 		else if(IsFormat("credits"))
 			result.append(Format::CreditString(value)); // 1 credit, 2 credits, etc.
 		else if(IsFormat("scaled"))
@@ -298,27 +298,27 @@ namespace {
 // Convert the given number into abbreviated format with a suffix like
 // "M" for million, "B" for billion, or "T" for trillion. Any number
 // above 1 quadrillion is instead shown in scientific notation.
-string Format::Credits(int64_t value)
+std::string Format::Credits(int64_t value)
 {
 	bool isNegative = (value < 0);
 
 	// If the value is above one quadrillion, show it in scientific notation.
 	if(fabs(value) > SCIENTIFIC_THRESHOLD)
 	{
-		ostringstream out;
+		std::ostringstream out;
 		out.precision(3);
 		out << static_cast<double>(value);
 		return out.str();
 	}
 
 	// Reserve enough space for something like "-123.456M".
-	string result;
+	std::string result;
 	result.reserve(8);
 
 	int64_t absolute = abs(value);
 
 	// Handle numbers bigger than a million.
-	static constexpr array<pair<int64_t, char>, 3> THRESHOLD_SUFFIX = {{
+	static constexpr std::array<std::pair<int64_t, char>, 3> THRESHOLD_SUFFIX = {{
 		{1000000000000ll, 'T'},
 		{1000000000ll, 'B'},
 		{1000000ll, 'M'}
@@ -347,7 +347,7 @@ string Format::Credits(int64_t value)
 
 // Convert the given number into abbreviated format as described in Format::Credits,
 // then attach the ' credit' or ' credits' suffix to it.
-string Format::CreditString(int64_t value)
+std::string Format::CreditString(int64_t value)
 {
 	if(value == 1)
 		return "1 credit";
@@ -359,7 +359,7 @@ string Format::CreditString(int64_t value)
 
 // Writes the given number into a string,
 // then attach the ' ton' or ' tons' suffix to it.
-string Format::MassString(double amount)
+std::string Format::MassString(double amount)
 {
 	if(amount == 1)
 		return "1 ton";
@@ -369,7 +369,7 @@ string Format::MassString(double amount)
 
 
 // Creates a string similar to '<amount> tons of <cargo>'.
-string Format::CargoString(double amount, const string &cargo)
+std::string Format::CargoString(double amount, const std::string &cargo)
 {
 	return MassString(amount) + " of " + cargo;
 }
@@ -377,9 +377,9 @@ string Format::CargoString(double amount, const string &cargo)
 
 
 // Converts the integer to string, and adds the noun, pluralized if needed.
-string Format::SimplePluralization(int amount, const string &noun)
+std::string Format::SimplePluralization(int amount, const std::string &noun)
 {
-	string result = to_string(amount) + ' ' + noun;
+	std::string result = std::to_string(amount) + ' ' + noun;
 	if(amount != 1 && amount != -1)
 		result += 's';
 	return result;
@@ -387,7 +387,7 @@ string Format::SimplePluralization(int amount, const string &noun)
 
 
 
-string Format::StepsToSeconds(size_t steps)
+std::string Format::StepsToSeconds(size_t steps)
 {
 	return Number(steps / 60.) + " s";
 }
@@ -395,14 +395,14 @@ string Format::StepsToSeconds(size_t steps)
 
 
 // Convert a time in seconds to years/days/hours/minutes/seconds
-string Format::PlayTime(double timeVal)
+std::string Format::PlayTime(double timeVal)
 {
-	string result;
+	std::string result;
 	int timeValFormat = 0;
-	static const array<char, 5> SUFFIX = {'s', 'm', 'h', 'd', 'y'};
-	static const array<int, 4> PERIOD = {60, 60, 24, 365};
+	static const std::array<char, 5> SUFFIX = {'s', 'm', 'h', 'd', 'y'};
+	static const std::array<int, 4> PERIOD = {60, 60, 24, 365};
 
-	timeValFormat = max(0., timeVal);
+	timeValFormat = std::max(0., timeVal);
 	// Break time into larger and larger units until the largest one, or the value is empty
 	size_t i = 0;
 	do {
@@ -423,10 +423,10 @@ string Format::PlayTime(double timeVal)
 
 
 
-string Format::TimestampString(chrono::time_point<chrono::system_clock> time)
+std::string Format::TimestampString(std::chrono::time_point<std::chrono::system_clock> time)
 {
 	// TODO: Replace with chrono formatting when it is properly supported.
-	time_t timestamp = chrono::system_clock::to_time_t(time);
+	time_t timestamp = std::chrono::system_clock::to_time_t(time);
 
 	const char *format = TimestampFormatString();
 	static const size_t BUF_SIZE = 28;
@@ -439,16 +439,16 @@ string Format::TimestampString(chrono::time_point<chrono::system_clock> time)
 	return string(str, std::strftime(str, BUF_SIZE, format, &date));
 #else
 	const tm *date = localtime(&timestamp);
-	return string(str, std::strftime(str, BUF_SIZE, format, date));
+	return std::string(str, std::strftime(str, BUF_SIZE, format, date));
 #endif
 }
 
 
 
-string Format::TimestampString(filesystem::file_time_type time)
+std::string Format::TimestampString(std::filesystem::file_time_type time)
 {
-	auto sctp = time_point_cast<chrono::system_clock::duration>(time - filesystem::file_time_type::clock::now()
-		+ chrono::system_clock::now());
+	auto sctp = time_point_cast<std::chrono::system_clock::duration>(time - std::filesystem::file_time_type::clock::now()
+		+ std::chrono::system_clock::now());
 	return TimestampString(sctp);
 }
 
@@ -456,13 +456,13 @@ string Format::TimestampString(filesystem::file_time_type time)
 
 // Convert an ammo count into a short string for use in the ammo display.
 // Only the absolute value of a negative number is considered.
-string Format::AmmoCount(int64_t value)
+std::string Format::AmmoCount(int64_t value)
 {
 	if(fabs(value) >= SCIENTIFIC_THRESHOLD)
 	{
 		if(abs(value) == SCIENTIFIC_THRESHOLD)
 			return "1e+15";
-		ostringstream out;
+		std::ostringstream out;
 		out.precision(1);
 		out << static_cast<double>(value);
 		return out.str();
@@ -471,13 +471,13 @@ string Format::AmmoCount(int64_t value)
 	int64_t absolute = abs(value);
 
 	if(absolute < 10000)
-		return to_string(value);
+		return std::to_string(value);
 
-	string result;
+	std::string result;
 	result.reserve(5);
 
 	// Handle numbers bigger than a thousand.
-	static constexpr array<pair<int64_t, char>, 4> THRESHOLD_SUFFIX = {{
+	static constexpr std::array<std::pair<int64_t, char>, 4> THRESHOLD_SUFFIX = {{
 		{1000000000000ll, 'T'},
 		{1000000000ll, 'B'},
 		{1000000ll, 'M'},
@@ -520,7 +520,7 @@ string Format::AmmoCount(int64_t value)
 
 // Convert the given number to a string, with a reasonable number of decimal
 // places. (This is primarily for displaying ship and outfit attributes.)
-string Format::Number(double value)
+std::string Format::Number(double value)
 {
 	if(!value)
 		return "0";
@@ -531,13 +531,13 @@ string Format::Number(double value)
 	else if(fabs(value) > SCIENTIFIC_THRESHOLD)
 	{
 		// Use scientific notation for excessively large numbers.
-		ostringstream out;
+		std::ostringstream out;
 		out.precision(3);
 		out << value;
 		return out.str();
 	}
 
-	string result;
+	std::string result;
 	bool isNegative = (value < 0.);
 	value = fabs(value);
 
@@ -580,12 +580,12 @@ string Format::Number(double value)
 
 // Format the given value as a number with exactly the given number of
 // decimal places (even if they are all 0).
-string Format::Decimal(double value, int places)
+std::string Format::Decimal(double value, int places)
 {
 	double integer;
 	double fraction = fabs(modf(value, &integer));
 
-	string result = to_string(static_cast<int>(integer)) + ".";
+	std::string result = std::to_string(static_cast<int>(integer)) + ".";
 	while(places--)
 	{
 		fraction = modf(fraction * 10., &integer);
@@ -596,11 +596,11 @@ string Format::Decimal(double value, int places)
 
 
 
-string Format::WordForm(int64_t value, bool startOfSentence)
+std::string Format::WordForm(int64_t value, bool startOfSentence)
 {
-	ostringstream o;
+	std::ostringstream o;
 	o << Wrapped { value };
-	string result = o.str();
+	std::string result = o.str();
 	if(result.size() > 0 && result[result.size() - 1] == ' ')
 		result.resize(result.size() - 1);
 	if(!result.empty() && startOfSentence && result[0] >= 'a' && result[0] <= 'z')
@@ -611,7 +611,7 @@ string Format::WordForm(int64_t value, bool startOfSentence)
 
 
 // Chicago manual of style
-string Format::ChicagoForm(int64_t value, bool startOfSentence)
+std::string Format::ChicagoForm(int64_t value, bool startOfSentence)
 {
 	if(startOfSentence)
 		return WordForm(value, true);
@@ -635,7 +635,7 @@ string Format::ChicagoForm(int64_t value, bool startOfSentence)
 
 
 // MLA Handbook style
-string Format::MLAForm(int64_t value, bool startOfSentence)
+std::string Format::MLAForm(int64_t value, bool startOfSentence)
 {
 	if(startOfSentence)
 		return WordForm(value, true);
@@ -643,7 +643,7 @@ string Format::MLAForm(int64_t value, bool startOfSentence)
 		return WordForm(value, startOfSentence);
 
 	// 21350000 => 21.35 million
-	string shorthand = MLAShorthand(value);
+	std::string shorthand = MLAShorthand(value);
 	if(!shorthand.empty())
 		return shorthand;
 
@@ -668,13 +668,13 @@ string Format::MLAForm(int64_t value, bool startOfSentence)
 // string can have suffixes like "M", "B", etc.
 // It can also contain spaces or "," as separators like 1,000 or 1 000.
 // Does not support parsing NaN or infinite values.
-double Format::Parse(const string &str)
+double Format::Parse(const std::string &str)
 {
 	double place = 1.;
 	double value = 0.;
 
-	string::const_iterator it = str.begin();
-	string::const_iterator end = str.end();
+	std::string::const_iterator it = str.begin();
+	std::string::const_iterator end = str.end();
 	while(it != end && (*it < '0' || *it > '9') && *it != '.')
 		++it;
 
@@ -718,9 +718,9 @@ double Format::Parse(const string &str)
 
 
 
-string Format::Replace(const string &source, const map<string, string> &keys)
+std::string Format::Replace(const std::string &source, const std::map<std::string, std::string> &keys)
 {
-	auto SubstitutionFor = [&](const string &key) -> const string *
+	auto SubstitutionFor = [&](const std::string &key) -> const std::string *
 	{
 		auto found = keys.find(key);
 		return (found == keys.end()) ? nullptr : &found->second;
@@ -731,10 +731,10 @@ string Format::Replace(const string &source, const map<string, string> &keys)
 
 
 
-void Format::Expand(map<string, string> &keys)
+void Format::Expand(std::map<std::string, std::string> &keys)
 {
-	map<string, string> newKeys;
-	unordered_set<string> keysBeingExpanded;
+	std::map<std::string, std::string> newKeys;
+	std::unordered_set<std::string> keysBeingExpanded;
 	for(auto it = keys.begin(); it != keys.end(); ++it)
 		if(newKeys.find(it->first) == newKeys.end())
 			ExpandInto(it->first, it->second, keys, newKeys, keysBeingExpanded);
@@ -743,21 +743,21 @@ void Format::Expand(map<string, string> &keys)
 
 
 
-void Format::ReplaceAll(string &text, const string &target, const string &replacement)
+void Format::ReplaceAll(std::string &text, const std::string &target, const std::string &replacement)
 {
 	// If the searched string is an empty string, do nothing.
 	if(target.empty())
 		return;
 
-	string newString;
+	std::string newString;
 	newString.reserve(text.length());
 
 	// Index at which to begin searching for the target string.
 	size_t start = 0;
 	size_t matchLength = target.length();
 	// Index at which the target string was found.
-	size_t findPos = string::npos;
-	while((findPos = text.find(target, start)) != string::npos)
+	size_t findPos = std::string::npos;
+	while((findPos = text.find(target, start)) != std::string::npos)
 	{
 		newString.append(text, start, findPos - start);
 		newString += replacement;
@@ -772,9 +772,9 @@ void Format::ReplaceAll(string &text, const string &target, const string &replac
 
 
 
-string Format::Capitalize(const string &str)
+std::string Format::Capitalize(const std::string &str)
 {
-	string result = str;
+	std::string result = str;
 	bool first = true;
 	for(char &c : result)
 	{
@@ -792,9 +792,9 @@ string Format::Capitalize(const string &str)
 
 
 
-string Format::LowerCase(const string &str)
+std::string Format::LowerCase(const std::string &str)
 {
-	string result = str;
+	std::string result = str;
 	for(char &c : result)
 		c = tolower(static_cast<unsigned char>(c));
 	return result;
@@ -803,14 +803,14 @@ string Format::LowerCase(const string &str)
 
 
 // Split a single string into substrings with the given separator.
-vector<string> Format::Split(const string &str, const string &separator)
+std::vector<std::string> Format::Split(const std::string &str, const std::string &separator)
 {
-	vector<string> result;
+	std::vector<std::string> result;
 	size_t begin = 0;
 	while(true)
 	{
 		size_t pos = str.find(separator, begin);
-		if(pos == string::npos)
+		if(pos == std::string::npos)
 			pos = str.length();
 		result.emplace_back(str, begin, pos - begin);
 		begin = pos + separator.size();
@@ -822,19 +822,19 @@ vector<string> Format::Split(const string &str, const string &separator)
 
 
 
-string Format::ExpandConditions(const string &source, const ConditionGetter &getter)
+std::string Format::ExpandConditions(const std::string &source, const ConditionGetter &getter)
 {
 	// Optimization for most common case: no conditions
-	if(source.find('&') == string::npos)
+	if(source.find('&') == std::string::npos)
 		return source;
 
-	string result;
+	std::string result;
 	result.reserve(source.size());
 
-	size_t formatStart = string::npos;
-	size_t formatSize = string::npos;
-	size_t conditionStart = string::npos;
-	size_t conditionSize = string::npos;
+	size_t formatStart = std::string::npos;
+	size_t formatSize = std::string::npos;
+	size_t conditionStart = std::string::npos;
+	size_t conditionSize = std::string::npos;
 
 	// Hand-coded regular grammar parser for:
 	//	&[format@condition]
@@ -881,7 +881,7 @@ string Format::ExpandConditions(const string &source, const ConditionGetter &get
 			state = OUTER;
 		else if(state == PREFIX && next == LPAREN)
 		{
-			formatStart = formatSize = conditionStart = conditionSize = string::npos;
+			formatStart = formatSize = conditionStart = conditionSize = std::string::npos;
 			state = LPAREN;
 		}
 		else if(state == LPAREN && next == DIVIDER)
@@ -929,13 +929,13 @@ string Format::ExpandConditions(const string &source, const ConditionGetter &get
 		}
 	}
 	if(start < source.size())
-		result.append(source, start, string::npos);
+		result.append(source, start, std::string::npos);
 	return result;
 }
 
 
 
-int Format::Search(const string &str, const string &sub)
+int Format::Search(const std::string &str, const std::string &sub)
 {
 	auto it = search(str.begin(), str.end(), sub.begin(), sub.end(),
 		[](unsigned char a, unsigned char b) { return toupper(a) == toupper(b); });

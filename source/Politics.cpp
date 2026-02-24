@@ -27,7 +27,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
+
 
 
 
@@ -42,7 +42,7 @@ namespace {
 			return true;
 
 		const int legalGoods = ship.Cargo().Used() - contraband;
-		const double illegalRatio = legalGoods ? max(1., 2. * netIllegalCargo / legalGoods) : 1.;
+		const double illegalRatio = legalGoods ? std::max(1., 2. * netIllegalCargo / legalGoods) : 1.;
 		const double scanChance = illegalRatio / (1. + ship.Attributes().Get("scan interference"));
 		return Random::Real() > scanChance;
 	}
@@ -86,7 +86,7 @@ bool Politics::IsEnemy(const Government *first, const Government *second) const
 	// Just for simplicity, if one of the governments is the player, make sure
 	// it is the first one.
 	if(second->IsPlayer())
-		swap(first, second);
+		std::swap(first, second);
 	if(first->IsPlayer())
 	{
 		if(bribed.contains(second))
@@ -142,7 +142,7 @@ void Politics::Offend(const Government *gov, int eventType, int count)
 			// influencing their reputation with the other.
 			double penalty = (count * weight) * other->PenaltyFor(eventType, gov);
 			if(eventType & ShipEvent::ATROCITY && weight > 0)
-				Politics::SetReputation(other, min(0., reputationWith[other]));
+				Politics::SetReputation(other, std::min(0., reputationWith[other]));
 
 			Politics::AddReputation(other, -penalty);
 		}
@@ -244,7 +244,7 @@ bool Politics::HasDominated(const Planet *planet) const
 
 
 // Check to see if the player has done anything they should be fined for.
-pair<const Conversation *, string> Politics::Fine(PlayerInfo &player,
+std::pair<const Conversation *, std::string> Politics::Fine(PlayerInfo &player,
 	const Government *gov, int scan, const Ship *target, double security)
 {
 	// Do nothing if you have already been fined today, or if you evade
@@ -253,9 +253,9 @@ pair<const Conversation *, string> Politics::Fine(PlayerInfo &player,
 		return {};
 
 	const Conversation *deathSentence = nullptr;
-	string reason;
+	std::string reason;
 	int64_t maxFine = 0;
-	for(const shared_ptr<Ship> &ship : player.Ships())
+	for(const std::shared_ptr<Ship> &ship : player.Ships())
 	{
 		if(target && target != &*ship)
 			continue;
@@ -284,7 +284,7 @@ pair<const Conversation *, string> Politics::Fine(PlayerInfo &player,
 					if(mission.IsFailed())
 						continue;
 
-					string fineMessage = mission.FineMessage();
+					std::string fineMessage = mission.FineMessage();
 					if(!fineMessage.empty())
 					{
 						reason = ".\n\t";
@@ -301,7 +301,7 @@ pair<const Conversation *, string> Politics::Fine(PlayerInfo &player,
 		}
 		if((!scan || (scan & ShipEvent::SCAN_CARGO)) && !EvadesCargoScan(*ship))
 		{
-			pair<int, const Conversation *> fine = ship->Cargo().IllegalCargoFine(gov);
+			std::pair<int, const Conversation *> fine = ship->Cargo().IllegalCargoFine(gov);
 			if(fine.second)
 				deathSentence = fine.second;
 			if((fine.first > maxFine && maxFine >= 0) || fine.first < 0)
@@ -315,7 +315,7 @@ pair<const Conversation *, string> Politics::Fine(PlayerInfo &player,
 						continue;
 
 					// Append the fineMessage from each applicable mission, if available.
-					string fineMessage = mission.FineMessage();
+					std::string fineMessage = mission.FineMessage();
 					if(!fineMessage.empty())
 					{
 						reason = ".\n\t";
@@ -416,8 +416,8 @@ void Politics::AddReputation(const Government *gov, double value)
 
 void Politics::SetReputation(const Government *gov, double value)
 {
-	value = min(value, gov->ReputationMax());
-	value = max(value, gov->ReputationMin());
+	value = std::min(value, gov->ReputationMax());
+	value = std::max(value, gov->ReputationMin());
 	reputationWith[gov] = value;
 }
 

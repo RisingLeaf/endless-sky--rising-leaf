@@ -27,7 +27,7 @@ VS_BEGIN
 	pos = origin + vec2(unit.y, -unit.x) * vert.x * widthOffset - unit * capOffset * vert.y;
 	// Transform the vertex position into es coordinates, so it can easily be consumed by the fragment shader,
 	// which has access to the start/end points of the line in es' coordinate system.
-	gl_Position     = vec4(pos / glob.scale, 0, 1);
+	gl_Position     = vec4(pos * glob.scale * vec2(0.5, -0.5), 0, 1);
 	gl_Position.y   = -gl_Position.y;
 	gl_Position.xy *= 2.0;
 VS_END

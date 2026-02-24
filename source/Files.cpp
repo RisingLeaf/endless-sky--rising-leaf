@@ -28,29 +28,29 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <sstream>
 #include <stdexcept>
 
-using namespace std;
+
 
 namespace {
-	filesystem::path resources;
-	filesystem::path config;
+	std::filesystem::path resources;
+	std::filesystem::path config;
 
-	filesystem::path dataPath;
-	filesystem::path imagePath;
-	filesystem::path soundPath;
-	filesystem::path savePath;
-	filesystem::path userPluginPath;
-	filesystem::path globalPluginPath;
-	filesystem::path testPath;
+	std::filesystem::path dataPath;
+	std::filesystem::path imagePath;
+	std::filesystem::path soundPath;
+	std::filesystem::path savePath;
+	std::filesystem::path userPluginPath;
+	std::filesystem::path globalPluginPath;
+	std::filesystem::path testPath;
 
-	shared_ptr<iostream> errorLog;
+	std::shared_ptr<std::iostream> errorLog;
 
 	// Open the given folder in a separate window.
-	void OpenFolder(const filesystem::path &path)
+	void OpenFolder(const std::filesystem::path &path)
 	{
 		// TODO: Remove SDL version check after Ubuntu 20.04 reaches end of life
 #if SDL_VERSION_ATLEAST(2, 0, 14)
 		if(SDL_OpenURL(("file://" + path.string()).c_str()))
-			Logger::LogError("Warning: SDL_OpenURL failed with \"" + string(SDL_GetError()) + "\"");
+			Logger::LogError("Warning: SDL_OpenURL failed with \"" + std::string(SDL_GetError()) + "\"");
 #elif defined(__linux__)
 		// Some supported distributions do not have an up-to-date SDL.
 		cout.flush();
@@ -64,9 +64,9 @@ namespace {
 
 	/// The open zip files per thread. Since ZLIB doesn't support multithreaded access on the same zip handle,
 	/// each file is opened multiple times on demand.
-	thread_local map<filesystem::path, shared_ptr<ZipFile>> OPEN_ZIP_FILES;
+	thread_local std::map<std::filesystem::path, std::shared_ptr<ZipFile>> OPEN_ZIP_FILES;
 
-	shared_ptr<ZipFile> GetZipFile(const filesystem::path &filePath)
+	std::shared_ptr<ZipFile> GetZipFile(const std::filesystem::path &filePath)
 	{
 		/// Check if this zip is already open on this thread.
 		for(auto &[zipPath, file] : OPEN_ZIP_FILES)
@@ -74,7 +74,7 @@ namespace {
 				return file;
 
 		/// If not, open the zip file.
-		filesystem::path zipPath = filePath;
+		std::filesystem::path zipPath = filePath;
 		while(!exists(zipPath))
 		{
 			if(!zipPath.has_parent_path() || zipPath.parent_path() == zipPath)
@@ -85,7 +85,7 @@ namespace {
 		{
 			/// Limit the number of open zip files to one per thread to avoid having too many files open.
 			OPEN_ZIP_FILES.clear();
-			return OPEN_ZIP_FILES.emplace(zipPath, make_shared<ZipFile>(zipPath)).first->second;
+			return OPEN_ZIP_FILES.emplace(zipPath, std::make_shared<ZipFile>(zipPath)).first->second;
 		}
 
 		return {};
@@ -100,7 +100,7 @@ void Files::Init(const char * const *argv)
 	// different directories to use.
 	for(const char * const *it = argv + 1; *it; ++it)
 	{
-		string arg = *it;
+		std::string arg = *it;
 		if((arg == "-r" || arg == "--resources") && *++it)
 			resources = *it;
 		else if((arg == "-c" || arg == "--config") && *++it)
@@ -114,20 +114,20 @@ void Files::Init(const char * const *argv)
 		// operating system, and can be overridden by a command line argument.
 		const char *basePath = SDL_GetBasePath();
 		if(!basePath)
-			throw runtime_error("Unable to get path to resource directory!");
+			throw std::runtime_error("Unable to get path to resource directory!");
 		resources = basePath;
 
 		if(Exists(resources))
-			resources = filesystem::canonical(resources);
+			resources = std::filesystem::canonical(resources);
 
 #if defined __linux__ || defined __FreeBSD__ || defined __DragonFly__
 		// Special case, for Linux: the resource files are not in the same place as
 		// the executable, but are under the same prefix (/usr or /usr/local).
 		// When used as an iterator, a trailing / will create an empty item at
 		// the end, so parent paths do not include it.
-		static const filesystem::path LOCAL_PATH = "/usr/local";
-		static const filesystem::path STANDARD_PATH = "/usr";
-		static const filesystem::path RESOURCE_PATH = "share/games/endless-sky/";
+		static const std::filesystem::path LOCAL_PATH = "/usr/local";
+		static const std::filesystem::path STANDARD_PATH = "/usr";
+		static const std::filesystem::path RESOURCE_PATH = "share/games/endless-sky/";
 
 		if(IsParent(LOCAL_PATH, resources))
 			resources = LOCAL_PATH / RESOURCE_PATH;
@@ -141,7 +141,7 @@ void Files::Init(const char * const *argv)
 	while(!Exists(resources / "credits.txt"))
 	{
 		if(!resources.has_parent_path() || resources.parent_path() == resources)
-			throw runtime_error("Unable to find the resource directories!");
+			throw std::runtime_error("Unable to find the resource directories!");
 		resources = resources.parent_path();
 	}
 	dataPath = resources / "data";
@@ -154,15 +154,15 @@ void Files::Init(const char * const *argv)
 		// Create the directory for the saved games, preferences, etc., if necessary.
 		char *str = SDL_GetPrefPath(nullptr, "endless-sky");
 		if(!str)
-			throw runtime_error("Unable to get path to config directory!");
+			throw std::runtime_error("Unable to get path to config directory!");
 		config = str;
 		SDL_free(str);
 	}
 
 	if(!Exists(config))
-		throw runtime_error("Unable to create config directory!");
+		throw std::runtime_error("Unable to create config directory!");
 
-	config = filesystem::canonical(config);
+	config = std::filesystem::canonical(config);
 
 	savePath = config / "saves";
 	CreateFolder(savePath);
@@ -174,86 +174,86 @@ void Files::Init(const char * const *argv)
 
 	// Check that all the directories exist.
 	if(!Exists(dataPath) || !Exists(imagePath) || !Exists(soundPath))
-		throw runtime_error("Unable to find the resource directories!");
+		throw std::runtime_error("Unable to find the resource directories!");
 	if(!Exists(savePath))
-		throw runtime_error("Unable to create save directory!");
+		throw std::runtime_error("Unable to create save directory!");
 	if(!Exists(userPluginPath))
-		throw runtime_error("Unable to create plugins directory!");
+		throw std::runtime_error("Unable to create plugins directory!");
 }
 
 
 
-const filesystem::path &Files::Resources()
+const std::filesystem::path &Files::Resources()
 {
 	return resources;
 }
 
 
 
-const filesystem::path &Files::Config()
+const std::filesystem::path &Files::Config()
 {
 	return config;
 }
 
 
 
-const filesystem::path &Files::Data()
+const std::filesystem::path &Files::Data()
 {
 	return dataPath;
 }
 
 
 
-const filesystem::path &Files::Images()
+const std::filesystem::path &Files::Images()
 {
 	return imagePath;
 }
 
 
 
-const filesystem::path &Files::Sounds()
+const std::filesystem::path &Files::Sounds()
 {
 	return soundPath;
 }
 
 
 
-const filesystem::path &Files::Saves()
+const std::filesystem::path &Files::Saves()
 {
 	return savePath;
 }
 
 
 
-const filesystem::path &Files::UserPlugins()
+const std::filesystem::path &Files::UserPlugins()
 {
 	return userPluginPath;
 }
 
 
 
-const filesystem::path &Files::GlobalPlugins()
+const std::filesystem::path &Files::GlobalPlugins()
 {
 	return globalPluginPath;
 }
 
 
 
-const filesystem::path &Files::Tests()
+const std::filesystem::path &Files::Tests()
 {
 	return testPath;
 }
 
 
 
-vector<filesystem::path> Files::List(const filesystem::path &directory)
+std::vector<std::filesystem::path> Files::List(const std::filesystem::path &directory)
 {
-	vector<filesystem::path> list;
+	std::vector<std::filesystem::path> list;
 
 	if(!Exists(directory) || !is_directory(directory))
 	{
 		// Check if the requested file is in a known zip.
-		shared_ptr<ZipFile> zip = GetZipFile(directory);
+		std::shared_ptr<ZipFile> zip = GetZipFile(directory);
 		if(zip)
 		{
 			list = zip->ListFiles(directory, false, false);
@@ -263,7 +263,7 @@ vector<filesystem::path> Files::List(const filesystem::path &directory)
 	}
 
 
-	for(const auto &entry : filesystem::directory_iterator(directory))
+	for(const auto &entry : std::filesystem::directory_iterator(directory))
 		if(entry.is_regular_file())
 			list.emplace_back(entry);
 
@@ -275,14 +275,14 @@ vector<filesystem::path> Files::List(const filesystem::path &directory)
 
 
 // Get a list of any directories in the given directory.
-vector<filesystem::path> Files::ListDirectories(const filesystem::path &directory)
+std::vector<std::filesystem::path> Files::ListDirectories(const std::filesystem::path &directory)
 {
-	vector<filesystem::path> list;
+	std::vector<std::filesystem::path> list;
 
 	if(!Exists(directory) || !is_directory(directory))
 	{
 		// Check if the requested file is in a known zip.
-		shared_ptr<ZipFile> zip = GetZipFile(directory);
+		std::shared_ptr<ZipFile> zip = GetZipFile(directory);
 		if(zip)
 		{
 			list = zip->ListFiles(directory, false, true);
@@ -291,7 +291,7 @@ vector<filesystem::path> Files::ListDirectories(const filesystem::path &director
 		return list;
 	}
 
-	for(const auto &entry : filesystem::directory_iterator(directory))
+	for(const auto &entry : std::filesystem::directory_iterator(directory))
 		if(entry.is_directory())
 			list.emplace_back(entry);
 
@@ -301,13 +301,13 @@ vector<filesystem::path> Files::ListDirectories(const filesystem::path &director
 
 
 
-vector<filesystem::path> Files::RecursiveList(const filesystem::path &directory)
+std::vector<std::filesystem::path> Files::RecursiveList(const std::filesystem::path &directory)
 {
-	vector<filesystem::path> list;
+	std::vector<std::filesystem::path> list;
 	if(!Exists(directory) || !is_directory(directory))
 	{
 		// Check if the requested file is in a known zip.
-		shared_ptr<ZipFile> zip = GetZipFile(directory);
+		std::shared_ptr<ZipFile> zip = GetZipFile(directory);
 		if(zip)
 		{
 			list = zip->ListFiles(directory, true, false);
@@ -316,7 +316,7 @@ vector<filesystem::path> Files::RecursiveList(const filesystem::path &directory)
 		return list;
 	}
 
-	for(const auto &entry : filesystem::recursive_directory_iterator(directory))
+	for(const auto &entry : std::filesystem::recursive_directory_iterator(directory))
 		if(entry.is_regular_file())
 			list.emplace_back(entry);
 
@@ -326,12 +326,12 @@ vector<filesystem::path> Files::RecursiveList(const filesystem::path &directory)
 
 
 
-bool Files::Exists(const filesystem::path &filePath)
+bool Files::Exists(const std::filesystem::path &filePath)
 {
 	if(exists(filePath))
 		return true;
 
-	shared_ptr<ZipFile> zip = GetZipFile(filePath);
+	std::shared_ptr<ZipFile> zip = GetZipFile(filePath);
 	if(zip)
 		return zip->Exists(filePath);
 	return false;
@@ -339,14 +339,14 @@ bool Files::Exists(const filesystem::path &filePath)
 
 
 
-filesystem::file_time_type Files::Timestamp(const filesystem::path &filePath)
+std::filesystem::file_time_type Files::Timestamp(const std::filesystem::path &filePath)
 {
 	return last_write_time(filePath);
 }
 
 
 
-bool Files::Copy(const filesystem::path &from, const filesystem::path &to)
+bool Files::Copy(const std::filesystem::path &from, const std::filesystem::path &to)
 {
 #ifdef _WIN32
 	// Due to a mingw bug, the overwrite_existing flag is not respected on Windows.
@@ -355,7 +355,7 @@ bool Files::Copy(const filesystem::path &from, const filesystem::path &to)
 		Delete(to);
 #endif
 	try {
-		copy(from, to, filesystem::copy_options::overwrite_existing);
+		copy(from, to, std::filesystem::copy_options::overwrite_existing);
 	}
 	catch(...)
 	{
@@ -366,14 +366,14 @@ bool Files::Copy(const filesystem::path &from, const filesystem::path &to)
 
 
 
-void Files::Move(const filesystem::path &from, const filesystem::path &to)
+void Files::Move(const std::filesystem::path &from, const std::filesystem::path &to)
 {
 	rename(from, to);
 }
 
 
 
-void Files::Delete(const filesystem::path &filePath)
+void Files::Delete(const std::filesystem::path &filePath)
 {
 	remove_all(filePath);
 }
@@ -381,30 +381,30 @@ void Files::Delete(const filesystem::path &filePath)
 
 
 // Get the filename from a path.
-string Files::Name(const filesystem::path &path)
+std::string Files::Name(const std::filesystem::path &path)
 {
 	return path.filename().string();
 }
 
 
 
-bool Files::IsParent(const filesystem::path &parent, const filesystem::path &child)
+bool Files::IsParent(const std::filesystem::path &parent, const std::filesystem::path &child)
 {
-	if(distance(child.begin(), child.end()) < distance(parent.begin(), parent.end()))
+	if(std::distance(child.begin(), child.end()) < std::distance(parent.begin(), parent.end()))
 		return false;
-	return equal(parent.begin(), parent.end(), child.begin());
+	return std::equal(parent.begin(), parent.end(), child.begin());
 }
 
 
 
-shared_ptr<iostream> Files::Open(const filesystem::path &path, bool write)
+std::shared_ptr<std::iostream> Files::Open(const std::filesystem::path &path, bool write)
 {
 	if(!exists(path) && !write)
 	{
 		// Writing to a zip is not supported.
-		shared_ptr<ZipFile> zip = GetZipFile(path);
+		std::shared_ptr<ZipFile> zip = GetZipFile(path);
 		if(zip)
-			return shared_ptr<iostream>(new stringstream(zip->ReadFile(path), ios::in | ios::binary));
+			return std::shared_ptr<std::iostream>(new std::stringstream(zip->ReadFile(path), std::ios::in | std::ios::binary));
 		return {};
 	}
 
@@ -412,37 +412,37 @@ shared_ptr<iostream> Files::Open(const filesystem::path &path, bool write)
 #ifdef _WIN32
 		return shared_ptr<iostream>{new fstream{path, ios::out}};
 #else
-		return shared_ptr<iostream>{new fstream{path, ios::out | ios::binary}};
+		return std::shared_ptr<std::iostream>{new std::fstream{path, std::ios::out | std::ios::binary}};
 #endif
-	return shared_ptr<iostream>{new fstream{path, ios::in | ios::binary}};
+	return std::shared_ptr<std::iostream>{new std::fstream{path, std::ios::in | std::ios::binary}};
 }
 
 
 
-string Files::Read(const filesystem::path &path)
+std::string Files::Read(const std::filesystem::path &path)
 {
 	return Read(Open(path));
 }
 
 
 
-string Files::Read(shared_ptr<iostream> file)
+std::string Files::Read(std::shared_ptr<std::iostream> file)
 {
 	if(!file)
 		return "";
-	return string{istreambuf_iterator<char>{*file}, {}};
+	return std::string{std::istreambuf_iterator<char>{*file}, {}};
 }
 
 
 
-void Files::Write(const filesystem::path &path, const string &data)
+void Files::Write(const std::filesystem::path &path, const std::string &data)
 {
 	Write(Open(path, true), data);
 }
 
 
 
-void Files::Write(shared_ptr<iostream> file, const string &data)
+void Files::Write(std::shared_ptr<std::iostream> file, const std::string &data)
 {
 	if(!file)
 		return;
@@ -452,15 +452,15 @@ void Files::Write(shared_ptr<iostream> file, const string &data)
 
 
 
-void Files::CreateFolder(const filesystem::path &path)
+void Files::CreateFolder(const std::filesystem::path &path)
 {
 	if(Exists(path))
 		return;
 
-	if(filesystem::create_directory(path))
-		filesystem::permissions(path, filesystem::perms(filesystem::perms::owner_all));
+	if(std::filesystem::create_directory(path))
+		std::filesystem::permissions(path, std::filesystem::perms(std::filesystem::perms::owner_all));
 	else
-		throw runtime_error("Error creating directory!");
+		throw std::runtime_error("Error creating directory!");
 }
 
 
@@ -481,19 +481,19 @@ void Files::OpenUserSavesFolder()
 
 
 
-void Files::LogErrorToFile(const string &message)
+void Files::LogErrorToFile(const std::string &message)
 {
 	if(!errorLog)
 	{
 		errorLog = Open(config / "errors.txt", true);
 		if(!errorLog)
 		{
-			cerr << "Unable to create \"errors.txt\" " << (config.empty()
-				? "in current directory" : "in \"" + config.string() + "\"") << endl;
+			std::cerr << "Unable to create \"errors.txt\" " << (config.empty()
+				? "in current directory" : "in \"" + config.string() + "\"") << std::endl;
 			return;
 		}
 	}
 
 	Write(errorLog, message);
-	*errorLog << endl;
+	*errorLog << std::endl;
 }

@@ -64,11 +64,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <limits>
 
-using namespace std;
+
 
 namespace {
-	const string SHOW_ESCORT_SYSTEMS = "Show escort systems on map";
-	const string SHOW_STORED_OUTFITS = "Show stored outfits on map";
+	const std::string SHOW_ESCORT_SYSTEMS = "Show escort systems on map";
+	const std::string SHOW_STORED_OUTFITS = "Show stored outfits on map";
 	const double MISSION_POINTERS_ANGLE_DELTA = 30.;
 	const int MAX_STARS = 5;
 
@@ -94,7 +94,7 @@ namespace {
 
 	void PointerDrawCount::Reserve()
 	{
-		maximumActive = max(MapPanel::MAX_MISSION_POINTERS_DRAWN / 2,
+		maximumActive = std::max(MapPanel::MAX_MISSION_POINTERS_DRAWN / 2,
 			MapPanel::MAX_MISSION_POINTERS_DRAWN - (available + unavailable));
 	}
 
@@ -117,8 +117,8 @@ namespace {
 
 	// Log how many player ships are in a given system, tracking whether
 	// they are parked or in-flight.
-	void TallyEscorts(const vector<shared_ptr<Ship>> &escorts,
-		map<const System *, MapPanel::SystemTooltipData> &locations)
+	void TallyEscorts(const std::vector<std::shared_ptr<Ship>> &escorts,
+		std::map<const System *, MapPanel::SystemTooltipData> &locations)
 	{
 		for(const auto &ship : escorts)
 		{
@@ -138,8 +138,8 @@ namespace {
 	}
 
 	// Log how many stored outfits are in a given system.
-	void TallyOutfits(const map<const Planet *, CargoHold> &outfits,
-		map<const System *, MapPanel::SystemTooltipData> &locations)
+	void TallyOutfits(const std::map<const Planet *, CargoHold> &outfits,
+		std::map<const System *, MapPanel::SystemTooltipData> &locations)
 	{
 		for(const auto &hold : outfits)
 		{
@@ -212,17 +212,17 @@ void MapPanel::DrawPointer(Point position, unsigned &systemCount, const Color &c
 
 
 
-pair<bool, bool> MapPanel::BlinkMissionIndicator(const PlayerInfo &player, const Mission &mission, int step)
+std::pair<bool, bool> MapPanel::BlinkMissionIndicator(const PlayerInfo &player, const Mission &mission, int step)
 {
 	bool blink = false;
 	int daysLeft = 1;
 	if(mission.Deadline())
 	{
 		daysLeft = player.RemainingDeadline(mission);
-		int blinkFactor = min(6, max(1, daysLeft));
+		int blinkFactor = std::min(6, std::max(1, daysLeft));
 		blink = (step % (10 * blinkFactor) > 5 * blinkFactor);
 	}
-	return pair<bool, bool>(blink, daysLeft > 0);
+	return std::pair<bool, bool>(blink, daysLeft > 0);
 }
 
 
@@ -358,7 +358,7 @@ void MapPanel::Draw()
 
 
 
-void MapPanel::FinishDrawing(const string &buttonCondition)
+void MapPanel::FinishDrawing(const std::string &buttonCondition)
 {
 	// Display the name of and distance to the selected system.
 	DrawSelectedSystem();
@@ -387,7 +387,7 @@ void MapPanel::FinishDrawing(const string &buttonCondition)
 		{
 			MapPanel::SystemTooltipData t = escortSystems.at(hoverSystem);
 
-			string text;
+			std::string text;
 			if(hoverSystem == &playerSystem)
 			{
 				if(player.Flagship())
@@ -400,11 +400,11 @@ void MapPanel::FinishDrawing(const string &buttonCondition)
 			// If you have both active and parked escorts, call the active ones
 			// "active escorts." Otherwise, just call them "escorts."
 			if(t.activeShips && t.parkedShips)
-				text += to_string(t.activeShips) + (t.activeShips == 1 ? " active escort\n" : " active escorts\n");
+				text += std::to_string(t.activeShips) + (t.activeShips == 1 ? " active escort\n" : " active escorts\n");
 			else if(t.activeShips)
-				text += to_string(t.activeShips) + (t.activeShips == 1 ? " escort" : " escorts");
+				text += std::to_string(t.activeShips) + (t.activeShips == 1 ? " escort" : " escorts");
 			if(t.parkedShips)
-				text += to_string(t.parkedShips) + (t.parkedShips == 1 ? " parked escort" : " parked escorts");
+				text += std::to_string(t.parkedShips) + (t.parkedShips == 1 ? " parked escort" : " parked escorts");
 			if(!t.outfits.empty())
 			{
 				if(t.activeShips || t.parkedShips)
@@ -414,11 +414,11 @@ void MapPanel::FinishDrawing(const string &buttonCondition)
 				for(const auto &it : t.outfits)
 					sum += it.second;
 
-				text += to_string(sum) + (sum == 1 ? " stored outfit" : " stored outfits");
+				text += std::to_string(sum) + (sum == 1 ? " stored outfit" : " stored outfits");
 
 				if(HasMultipleLandablePlanets(*hoverSystem) || t.outfits.size() > 1)
 					for(const auto &it : t.outfits)
-						text += "\n - " + to_string(it.second) + " on " + it.first->DisplayName();
+						text += "\n - " + std::to_string(it.second) + " on " + it.first->DisplayName();
 			}
 
 			tooltip.SetText(text);
@@ -430,10 +430,10 @@ void MapPanel::FinishDrawing(const string &buttonCondition)
 	// Draw a warning if the selected system is not routable.
 	if(selectedSystem != &playerSystem && !distance.HasRoute(*selectedSystem))
 	{
-		static const string NO_SHIP = "You do not have a flagship to jump with!";
-		static const string NO_DRIVE = "You do not have a drive installed to be able to jump!";
-		static const string UNAVAILABLE = "You have no available route to this system.";
-		static const string UNKNOWN = "You have not yet mapped a route to this system.";
+		static const std::string NO_SHIP = "You do not have a flagship to jump with!";
+		static const std::string NO_DRIVE = "You do not have a drive installed to be able to jump!";
+		static const std::string UNAVAILABLE = "You have no available route to this system.";
+		static const std::string UNKNOWN = "You have not yet mapped a route to this system.";
 		const Ship *flagship = player.Flagship();
 		if(!flagship)
 			info.SetString("route error", NO_SHIP);
@@ -612,7 +612,7 @@ Color MapPanel::MapColor(double value)
 	if(std::isnan(value))
 		return UninhabitedColor();
 
-	value = min(1., max(-1., value));
+	value = std::min(1., std::max(-1., value));
 	if(value < 0.)
 		return Color(
 			.12 + .12 * value,
@@ -634,20 +634,20 @@ Color MapPanel::ReputationColor(double reputation, bool canLand, bool hasDominat
 	// If the system allows you to land, always show it in blue even if the
 	// government is hostile.
 	if(canLand)
-		reputation = max(reputation, 0.);
+		reputation = std::max(reputation, 0.);
 
 	if(hasDominated)
 		return Color(.1, .6, 0., .4);
 	else if(reputation < 0.)
 	{
-		reputation = min(1., .1 * log(1. - reputation) + .1);
+		reputation = std::min(1., .1 * log(1. - reputation) + .1);
 		return Color(.6, .4 * (1. - reputation), 0., .4);
 	}
 	else if(!canLand)
 		return Color(.6, .54, 0., .4);
 	else
 	{
-		reputation = min(1., .1 * log(1. + reputation) + .1);
+		reputation = std::min(1., .1 * log(1. + reputation) + .1);
 		return Color(0., .6 * (1. - reputation), .6, .4);
 	}
 }
@@ -673,7 +673,7 @@ Color MapPanel::DangerColor(const double danger)
 	if(std::isnan(danger))
 		return *GameData::Colors().Get("map danger none");
 	else if(danger > .5)
-		return Color(.6, .4 * (2. - 2. * min(1., danger)), 0., .4);
+		return Color(.6, .4 * (2. - 2. * std::min(1., danger)), 0., .4);
 	else
 		return MapColor(2. * danger - 1.);
 }
@@ -710,7 +710,7 @@ void MapPanel::Select(const System *system)
 	// Update the cache to apply any visual changes needed after the selected system was changed.
 	UpdateCache();
 
-	vector<const System *> &plan = player.TravelPlan();
+	std::vector<const System *> &plan = player.TravelPlan();
 	Ship *flagship = player.Flagship();
 	if(!flagship || (!plan.empty() && system == plan.front()))
 		return;
@@ -742,7 +742,7 @@ void MapPanel::Select(const System *system)
 		if(!addedRoute.HasRoute())
 			return;
 
-		vector<const System *> newPlan = addedRoute.Plan();
+		std::vector<const System *> newPlan = addedRoute.Plan();
 		plan.insert(plan.begin(), newPlan.begin(), newPlan.end());
 	}
 	else if(distance.HasRoute(*system))
@@ -762,7 +762,7 @@ void MapPanel::Select(const System *system)
 
 
 
-void MapPanel::Find(const string &name)
+void MapPanel::Find(const std::string &name)
 {
 	int bestIndex = 9999;
 	for(const auto &it : GameData::Systems())
@@ -891,7 +891,7 @@ void MapPanel::UpdateCache()
 		// Scale danger to span [0, 1] based on known systems, without including raid fleets
 		// as those can greatly skew the range once they start having a chance of appearing,
 		// leading to silly (and not very useful) displays.
-		double dangerMin = numeric_limits<double>::max();
+		double dangerMin = std::numeric_limits<double>::max();
 		for(const auto &it : GameData::Systems())
 		{
 			const System &system = it.second;
@@ -942,7 +942,7 @@ void MapPanel::UpdateCache()
 					const Trade::Commodity &com = GameData::Commodities()[commodity];
 					double price = system.Trade(com.name);
 					if(!price)
-						value = numeric_limits<double>::quiet_NaN();
+						value = std::numeric_limits<double>::quiet_NaN();
 					else
 						value = (2. * (price - com.low)) / (com.high - com.low) - 1.;
 				}
@@ -952,7 +952,7 @@ void MapPanel::UpdateCache()
 					for(const StellarObject &object : system.Objects())
 						if(object.HasSprite() && object.HasValidPlanet())
 							size += object.GetPlanet()->ShipyardStock().size();
-					value = size ? min(10., size) / 10. : -1.;
+					value = size ? std::min(10., size) / 10. : -1.;
 				}
 				else if(commodity == SHOW_OUTFITTER)
 				{
@@ -960,7 +960,7 @@ void MapPanel::UpdateCache()
 					for(const StellarObject &object : system.Objects())
 						if(object.HasSprite() && object.HasValidPlanet())
 							size += object.GetPlanet()->OutfitterStock().size();
-					value = size ? min(60., size) / 60. : -1.;
+					value = size ? std::min(60., size) / 60. : -1.;
 				}
 				else if(commodity == SHOW_VISITED)
 				{
@@ -995,7 +995,7 @@ void MapPanel::UpdateCache()
 				if(danger > 0.)
 					color = DangerColor(1. - dangerScale * log(danger / dangerMax));
 				else
-					color = DangerColor(numeric_limits<double>::quiet_NaN());
+					color = DangerColor(std::numeric_limits<double>::quiet_NaN());
 			}
 			else
 			{
@@ -1031,7 +1031,7 @@ void MapPanel::UpdateCache()
 			}
 		}
 
-		static const vector<const Sprite *> unmappedSystem = {SpriteSet::Get("map/unexplored-star")};
+		static const std::vector<const Sprite *> unmappedSystem = {SpriteSet::Get("map/unexplored-star")};
 
 		const bool canViewSystem = player.CanView(system);
 		nodes.emplace_back(system.Position(), color,
@@ -1085,8 +1085,8 @@ void MapPanel::DrawTravelPlan()
 
 	bool stranded = false;
 	bool hasEscort = false;
-	map<const Ship *, double> fuel;
-	for(const shared_ptr<Ship> &it : player.Ships())
+	std::map<const Ship *, double> fuel;
+	for(const std::shared_ptr<Ship> &it : player.Ships())
 		if(!it->IsParked() && (!it->CanBeCarried() || it.get() == flagship) && it->GetSystem() == flagship->GetSystem())
 		{
 			if(it->IsDisabled())
@@ -1162,14 +1162,14 @@ void MapPanel::DrawSelectedSystem()
 	const Sprite *sprite = SpriteSet::Get("ui/selected system");
 	SpriteShader::Draw(sprite, Point(0. + selectedSystemOffset, Screen::Top() + .5f * sprite->Height()));
 
-	string text;
+	std::string text;
 	if(!player.KnowsName(*selectedSystem))
 		text = "Selected system: unexplored system";
 	else
 		text = "Selected system: " + selectedSystem->DisplayName();
 
 	int jumps = 0;
-	const vector<const System *> &plan = player.TravelPlan();
+	const std::vector<const System *> &plan = player.TravelPlan();
 	auto it = find(plan.begin(), plan.end(), selectedSystem);
 	if(it != plan.end())
 		jumps = plan.end() - it;
@@ -1179,7 +1179,7 @@ void MapPanel::DrawSelectedSystem()
 	if(jumps == 1)
 		text += " (1 jump away)";
 	else if(jumps > 0)
-		text += " (" + to_string(jumps) + " jumps away)";
+		text += " (" + std::to_string(jumps) + " jumps away)";
 
 	const Font &font = FontSet::Get(14);
 	Point pos(-175. + selectedSystemOffset, Screen::Top() + .5 * (30. - font.Height()));
@@ -1234,10 +1234,10 @@ void MapPanel::DrawEscorts()
 void MapPanel::DrawWormholes()
 {
 	// Keep track of what arrows and links need to be drawn.
-	vector<WormholeArrow> arrowsToDraw;
+	std::vector<WormholeArrow> arrowsToDraw;
 
 	// A system can host more than one set of wormholes (e.g. Cardea), and some wormholes may even
-	// share a link vector.
+	// share a link std::vector.
 	for(auto &&it : GameData::Wormholes())
 	{
 		if(!it.second.IsValid())
@@ -1338,7 +1338,7 @@ void MapPanel::DrawSystems()
 			Angle angularSpacing = 0;
 			Point starOffset = Point(0, 0);
 
-			const int starsToDraw = min<int>(node.mapIcons.size(), MAX_STARS);
+			const int starsToDraw = std::min<int>(node.mapIcons.size(), MAX_STARS);
 			if(starsToDraw > 1)
 			{
 				starAngle = node.name.length() + node.position.Length();
@@ -1367,7 +1367,7 @@ void MapPanel::DrawSystems()
 			if(it == closeGovernments.end())
 				closeGovernments[node.government] = distance;
 			else
-				it->second = min(it->second, distance);
+				it->second = std::min(it->second, distance);
 		}
 	}
 	starBatch.Draw();
@@ -1396,7 +1396,7 @@ void MapPanel::DrawNames()
 void MapPanel::DrawMissions()
 {
 	// Draw a pointer for each active or available mission.
-	map<const System *, PointerDrawCount> missionCount;
+	std::map<const System *, PointerDrawCount> missionCount;
 
 	const Set<Color> &colors = GameData::Colors();
 	const Color &availableColor = *colors.Get("available job");
@@ -1439,7 +1439,7 @@ void MapPanel::DrawMissions()
 		auto &it = missionCount[system];
 		if(it.drawn < it.MaximumActive())
 		{
-			pair<bool, bool> blink = BlinkMissionIndicator(player, mission, step);
+			std::pair<bool, bool> blink = BlinkMissionIndicator(player, mission, step);
 			bool isSatisfied = IsSatisfied(player, mission) && blink.second;
 			const Color &color = blink.first ? black : isSatisfied ? currentColor : blockedColor;
 			DrawPointer(system, it.drawn, it.MaximumActive(), color, isSatisfied);
@@ -1484,7 +1484,7 @@ void MapPanel::DrawPointer(const System *system, unsigned &systemCount, unsigned
 void MapPanel::IncrementZoom()
 {
 	const Interface *mapInterface = GameData::Interfaces().Get("map");
-	double newZoom = min<double>(mapInterface->GetValue("max zoom"), player.MapZoom() + 1);
+	double newZoom = std::min<double>(mapInterface->GetValue("max zoom"), player.MapZoom() + 1);
 	zoom.Set(newZoom, mapInterface->GetValue("zoom animation duration"));
 	player.SetMapZoom(newZoom);
 }
@@ -1493,7 +1493,7 @@ void MapPanel::IncrementZoom()
 void MapPanel::DecrementZoom()
 {
 	const Interface *mapInterface = GameData::Interfaces().Get("map");
-	double newZoom = max<double>(mapInterface->GetValue("min zoom"), player.MapZoom() - 1);
+	double newZoom = std::max<double>(mapInterface->GetValue("min zoom"), player.MapZoom() - 1);
 	zoom.Set(newZoom, mapInterface->GetValue("zoom animation duration"));
 	player.SetMapZoom(newZoom);
 }

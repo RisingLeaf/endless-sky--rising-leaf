@@ -25,7 +25,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cassert>
 
-using namespace std;
+
 
 
 
@@ -48,7 +48,7 @@ void Message::Category::Load(const DataNode &node)
 
 	for(const auto &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 
 		if(key == "main color" && hasValue)
@@ -57,7 +57,7 @@ void Message::Category::Load(const DataNode &node)
 			setColor(child, logColor);
 		else if(key == "main duplicates" && hasValue)
 		{
-			const string &value = child.Token(1);
+			const std::string &value = child.Token(1);
 			if(value == "keep new")
 				mainDuplicates = DuplicatesStrategy::KEEP_NEW;
 			else if(value == "keep old")
@@ -67,7 +67,7 @@ void Message::Category::Load(const DataNode &node)
 		}
 		else if(key == "log duplicates" && hasValue)
 		{
-			const string &value = child.Token(1);
+			const std::string &value = child.Token(1);
 			if(value == "keep old")
 				allowsLogDuplicates = false;
 			else if(value == "keep both")
@@ -95,7 +95,7 @@ bool Message::Category::IsLoaded() const
 
 
 
-const string &Message::Category::Name() const
+const std::string &Message::Category::Name() const
 {
 	return name;
 }
@@ -144,7 +144,7 @@ bool Message::Category::LogOnly() const
 
 
 
-Message::Message(const string &text, const Category *category)
+Message::Message(const std::string &text, const Category *category)
 	: text{text}, category{category}
 {
 }
@@ -166,7 +166,7 @@ void Message::Load(const DataNode &node)
 
 	for(const auto &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 
 		if(key == "text" && hasValue)
@@ -220,7 +220,7 @@ void Message::Save(DataWriter &out) const
 
 
 
-const string &Message::Name() const
+const std::string &Message::Name() const
 {
 	return name;
 }
@@ -234,12 +234,12 @@ bool Message::IsPhrase() const
 
 
 
-string Message::Text() const
+std::string Message::Text() const
 {
 	if(isPhrase)
 		return GameData::Phrases().Get(text)->Get();
 
-	map<string, string> subs;
+	std::map<std::string, std::string> subs;
 	GameData::GetTextReplacements().Substitutions(subs);
 	for(const auto &[key, value] : subs)
 		subs[key] = Phrase::ExpandPhrases(value);
@@ -249,7 +249,7 @@ string Message::Text() const
 
 
 
-string Message::Text(const map<string, string> &subs) const
+std::string Message::Text(const std::map<std::string, std::string> &subs) const
 {
 	assert(!isPhrase && "Cannot apply custom substitutions to a global phrase");
 	return Command::ReplaceNamesWithKeys(Format::Replace(Phrase::ExpandPhrases(text), subs));

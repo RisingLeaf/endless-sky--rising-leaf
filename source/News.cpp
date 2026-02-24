@@ -21,12 +21,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 
 
 void News::Load(const DataNode &node, const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
 {
 	for(const DataNode &child : node)
 	{
@@ -39,7 +39,7 @@ void News::Load(const DataNode &node, const ConditionsStore *playerConditions,
 		}
 
 		// Get the key and value (if any).
-		const string &tag = child.Token((add || remove) ? 1 : 0);
+		const std::string &tag = child.Token((add || remove) ? 1 : 0);
 		const int valueIndex = (add || remove) ? 2 : 1;
 		const bool hasValue = child.Size() > valueIndex;
 
@@ -74,7 +74,7 @@ void News::Load(const DataNode &node, const ConditionsStore *playerConditions,
 			else if(remove)
 			{
 				// Collect all values to be removed.
-				auto toRemove = set<const Sprite *>{};
+				auto toRemove = std::set<const Sprite *>{};
 				for(int i = valueIndex; i < child.Size(); ++i)
 					toRemove.emplace(SpriteSet::Get(child.Token(i)));
 
@@ -143,7 +143,7 @@ bool News::Matches(const Planet *planet) const
 
 
 // Get the speaker's name.
-string News::SpeakerName() const
+std::string News::SpeakerName() const
 {
 	return speakerNames.Get();
 }
@@ -159,7 +159,7 @@ const Sprite *News::Portrait() const
 
 
 // Get the speaker's message, chosen randomly.
-string News::Message() const
+std::string News::Message() const
 {
 	return messages.Get();
 }

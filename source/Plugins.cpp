@@ -25,12 +25,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <map>
 
-using namespace std;
+
 
 namespace {
 	Set<Plugin> plugins;
 
-	void LoadSettingsFromFile(const filesystem::path &path)
+	void LoadSettingsFromFile(const std::filesystem::path &path)
 	{
 		DataFile prefs(path);
 		for(const DataNode &node : prefs)
@@ -66,14 +66,14 @@ bool Plugin::PluginDependencies::IsValid() const
 	// plugin developer to see all errors and not just the first.
 	bool isValid = true;
 
-	string dependencyCollisions;
+	std::string dependencyCollisions;
 
 	// Required dependencies will already be valid due to sets not
 	// allowing duplicate values. Therefore we only need to check optional
 	// and conflicts.
 
 	// Check and log collisions between optional and required dependencies.
-	for(const string &dependency : optional)
+	for(const std::string &dependency : optional)
 	{
 		if(required.contains(dependency))
 			dependencyCollisions += dependency + ", ";
@@ -88,7 +88,7 @@ bool Plugin::PluginDependencies::IsValid() const
 	}
 
 	// Check and log collisions between conflicted and required dependencies.
-	for(const string &dependency : conflicted)
+	for(const std::string &dependency : conflicted)
 	{
 		if(required.contains(dependency))
 		{
@@ -106,7 +106,7 @@ bool Plugin::PluginDependencies::IsValid() const
 	}
 
 	// Check and log collisions between optional and conflicted dependencies.
-	for(const string &dependency : conflicted)
+	for(const std::string &dependency : conflicted)
 	{
 		if(optional.contains(dependency))
 		{
@@ -129,15 +129,15 @@ bool Plugin::PluginDependencies::IsValid() const
 
 
 // Constructs a description of the plugin from its name, tags, dependencies, etc.
-string Plugin::CreateDescription() const
+std::string Plugin::CreateDescription() const
 {
-	string text;
+	std::string text;
 	if(!version.empty())
 		text += "Version: " + version + '\n';
 	if(!authors.empty())
 	{
 		text += "Authors: ";
-		for(const string &author : authors)
+		for(const std::string &author : authors)
 			text += author + ", ";
 		text.pop_back();
 		text.pop_back();
@@ -146,7 +146,7 @@ string Plugin::CreateDescription() const
 	if(!tags.empty())
 	{
 		text += "Tags: ";
-		for(const string &tag : tags)
+		for(const std::string &tag : tags)
 			text += tag + ", ";
 		text.pop_back();
 		text.pop_back();
@@ -160,19 +160,19 @@ string Plugin::CreateDescription() const
 		if(!dependencies.required.empty())
 		{
 			text += "  Requires:\n";
-			for(const string &dependency : dependencies.required)
+			for(const std::string &dependency : dependencies.required)
 				text += "  - " + dependency + '\n';
 		}
 		if(!dependencies.optional.empty())
 		{
 			text += "  Optional:\n";
-			for(const string &dependency : dependencies.optional)
+			for(const std::string &dependency : dependencies.optional)
 				text += "  - " + dependency + '\n';
 		}
 		if(!dependencies.conflicted.empty())
 		{
 			text += "  Conflicts:\n";
-			for(const string &dependency : dependencies.conflicted)
+			for(const std::string &dependency : dependencies.conflicted)
 				text += "  - " + dependency + '\n';
 		}
 		text += '\n';
@@ -194,23 +194,23 @@ bool Plugin::IsValid() const
 
 
 // Attempt to load a plugin at the given path.
-const Plugin *Plugins::Load(const filesystem::path &path)
+const Plugin *Plugins::Load(const std::filesystem::path &path)
 {
 	// Get the name of the folder containing the plugin.
-	string name = path.filename().string();
+	std::string name = path.filename().string();
 
-	filesystem::path pluginFile = path / "plugin.txt";
-	string aboutText;
-	string version;
-	set<string> authors;
-	set<string> tags;
+	std::filesystem::path pluginFile = path / "plugin.txt";
+	std::string aboutText;
+	std::string version;
+	std::set<std::string> authors;
+	std::set<std::string> tags;
 	Plugin::PluginDependencies dependencies;
 
 	// Load plugin metadata from plugin.txt.
 	bool hasName = false;
 	for(const DataNode &child : DataFile(pluginFile))
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "name" && hasValue)
 		{
@@ -231,7 +231,7 @@ const Plugin *Plugins::Load(const filesystem::path &path)
 		{
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
+				const std::string &grandKey = grand.Token(0);
 				bool grandHasValue = grand.Size() >= 2;
 				if(grandKey == "game version" && grandHasValue)
 					dependencies.gameVersion = grand.Token(1);
@@ -317,7 +317,7 @@ void Plugins::Save()
 
 
 // Whether the path points to a valid plugin.
-bool Plugins::IsPlugin(const filesystem::path &path)
+bool Plugins::IsPlugin(const std::filesystem::path &path)
 {
 	// A folder is a valid plugin if it contains one (or more) of the assets folders.
 	// (They can be empty too).
@@ -348,7 +348,7 @@ const Set<Plugin> &Plugins::Get()
 
 
 // Toggles enabling or disabling a plugin for the next game restart.
-void Plugins::TogglePlugin(const string &name)
+void Plugins::TogglePlugin(const std::string &name)
 {
 	auto *plugin = plugins.Get(name);
 	plugin->currentState = !plugin->currentState;

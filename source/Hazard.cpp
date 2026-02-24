@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "GameData.h"
 #include "Random.h"
 
-using namespace std;
+
 
 
 
@@ -32,7 +32,7 @@ void Hazard::Load(const DataNode &node)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(key == "weapon")
 			Weapon::Load(child);
 		else if(key == "constant strength")
@@ -42,21 +42,21 @@ void Hazard::Load(const DataNode &node)
 		else if(child.Size() < 2)
 			child.PrintTrace("Skipping hazard attribute with no value specified:");
 		else if(key == "period")
-			period = max(1, static_cast<int>(child.Value(1)));
+			period = std::max(1, static_cast<int>(child.Value(1)));
 		else if(key == "duration")
 		{
-			minDuration = max(0, static_cast<int>(child.Value(1)));
-			maxDuration = max(minDuration, (child.Size() >= 3 ? static_cast<int>(child.Value(2)) : 0));
+			minDuration = std::max(0, static_cast<int>(child.Value(1)));
+			maxDuration = std::max(minDuration, (child.Size() >= 3 ? static_cast<int>(child.Value(2)) : 0));
 		}
 		else if(key == "strength")
 		{
-			minStrength = max(0., child.Value(1));
-			maxStrength = max(minStrength, (child.Size() >= 3) ? child.Value(2) : 0.);
+			minStrength = std::max(0., child.Value(1));
+			maxStrength = std::max(minStrength, (child.Size() >= 3) ? child.Value(2) : 0.);
 		}
 		else if(key == "range")
 		{
-			minRange = max(0., (child.Size() >= 3) ? child.Value(1) : 0.);
-			maxRange = max(minRange, (child.Size() >= 3) ? child.Value(2) : child.Value(1));
+			minRange = std::max(0., (child.Size() >= 3) ? child.Value(1) : 0.);
+			maxRange = std::max(minRange, (child.Size() >= 3) ? child.Value(2) : child.Value(1));
 		}
 		else if(key == "environmental effect")
 		{
@@ -82,7 +82,7 @@ bool Hazard::IsValid() const
 
 
 // The name of the hazard in the data files.
-const string &Hazard::Name() const
+const std::string &Hazard::Name() const
 {
 	return name;
 }
@@ -144,7 +144,7 @@ double Hazard::MaxRange() const
 
 
 // Visuals to be created while this hazard is active.
-const map<const Effect *, float> &Hazard::EnvironmentalEffects() const
+const std::map<const Effect *, float> &Hazard::EnvironmentalEffects() const
 {
 	return environmentalEffects;
 }

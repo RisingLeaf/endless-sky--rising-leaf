@@ -49,7 +49,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <sstream>
 #include <string>
 
-using namespace std;
+
 
 
 
@@ -99,7 +99,7 @@ void MainPanel::Step()
 	// will call this object's OnCallback() function;
 	if(isActive && player.GetPlanet() && !player.GetPlanet()->IsWormhole())
 	{
-		GetUI()->Push(new PlanetPanel(player, bind(&MainPanel::OnCallback, this)));
+		GetUI()->Push(new PlanetPanel(player, std::bind(&MainPanel::OnCallback, this)));
 		player.Land(GetUI());
 		isActive = false;
 	}
@@ -163,7 +163,7 @@ void MainPanel::Draw()
 
 	if(Preferences::Has("Show CPU / GPU load"))
 	{
-		string loadString = to_string(lround(load * 100.)) + "% GPU";
+		std::string loadString = std::to_string(lround(load * 100.)) + "% GPU";
 		const Color &color = *GameData::Colors().Get("medium");
 		FontSet::Get(14).Draw(loadString, Point(10., Screen::Height() * -.5 + 5.), color);
 
@@ -333,9 +333,9 @@ bool MainPanel::Scroll(double dx, double dy)
 
 void MainPanel::ShowScanDialog(const ShipEvent &event)
 {
-	shared_ptr<Ship> target = event.Target();
+	std::shared_ptr<Ship> target = event.Target();
 
-	ostringstream out;
+	std::ostringstream out;
 	if(event.Type() & ShipEvent::SCAN_CARGO)
 	{
 		bool first = true;
@@ -377,14 +377,14 @@ void MainPanel::ShowScanDialog(const ShipEvent &event)
 			out << "This " + target->Noun() + " is not equipped with any outfits.\n";
 
 		// Split target->Outfits() into categories, then iterate over them in order.
-		vector<string> categories;
+		std::vector<std::string> categories;
 		for(const auto &category : GameData::GetCategory(CategoryType::OUTFIT))
 			categories.push_back(category.Name());
-		auto comparator = ByGivenOrder<string>(categories);
-		map<string, map<const string, int>, ByGivenOrder<string>> outfitsByCategory(comparator);
+		auto comparator = ByGivenOrder<std::string>(categories);
+		std::map<std::string, std::map<const std::string, int>, ByGivenOrder<std::string>> outfitsByCategory(comparator);
 		for(const auto &it : target->Outfits())
 		{
-			string outfitNameForDisplay = (it.second == 1 ? it.first->DisplayName() : it.first->PluralName());
+			std::string outfitNameForDisplay = (it.second == 1 ? it.first->DisplayName() : it.first->PluralName());
 			if(it.first->IsDefined() && !it.first->Category().empty() && !outfitNameForDisplay.empty())
 				outfitsByCategory[it.first->Category()].emplace(std::move(outfitNameForDisplay), it.second);
 		}
@@ -400,7 +400,7 @@ void MainPanel::ShowScanDialog(const ShipEvent &event)
 					out << "\t\t" << it2.second << " " << it2.first << "\n";
 		}
 
-		map<string, int> count;
+		std::map<std::string, int> count;
 		for(const Ship::Bay &bay : target->Bays())
 			if(bay.ship)
 			{
@@ -445,7 +445,7 @@ bool MainPanel::ShowHailPanel()
 	if(flagship->Zoom() < 1.)
 		return false;
 
-	shared_ptr<Ship> target = flagship->GetTargetShip();
+	std::shared_ptr<Ship> target = flagship->GetTargetShip();
 	if((SDL_GetModState() & SDL_KMOD_SHIFT) && flagship->GetTargetStellar())
 		target.reset();
 
@@ -501,7 +501,7 @@ bool MainPanel::ShowHelp(bool force)
 	if(!flagship)
 		return false;
 
-	vector<string> forced;
+	std::vector<std::string> forced;
 	// Check if any help messages should be shown.
 	if(Preferences::Has("Control ship with mouse"))
 	{
@@ -539,7 +539,7 @@ bool MainPanel::ShowHelp(bool force)
 		else if(DoHelp("stranded"))
 			return true;
 	}
-	shared_ptr<Ship> target = flagship->GetTargetShip();
+	std::shared_ptr<Ship> target = flagship->GetTargetShip();
 	if(target && target->IsDisabled() && !target->GetGovernment()->IsEnemy())
 	{
 		if(force)
@@ -596,7 +596,7 @@ bool MainPanel::ShowHelp(bool force)
 		int count = 1 + lostness / 3600;
 		if(count > lostCount && count <= 7)
 		{
-			string message = "lost 1";
+			std::string message = "lost 1";
 			message.back() += lostCount;
 			++lostCount;
 			if(force)
@@ -694,7 +694,7 @@ void MainPanel::StepEvents(bool &isActive)
 			}
 			else if(event.TargetGovernment() && event.TargetGovernment()->IsPlayer())
 			{
-				string message = actor->Fine(player, event.Type(), &*event.Target()).second;
+				std::string message = actor->Fine(player, event.Type(), &*event.Target()).second;
 				if(!message.empty())
 				{
 					GetUI()->Push(new Dialog(message));

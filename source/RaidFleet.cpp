@@ -21,7 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 
 RaidFleet::RaidFleet(const Fleet *fleet, double minAttraction, double maxAttraction)
@@ -31,7 +31,7 @@ RaidFleet::RaidFleet(const Fleet *fleet, double minAttraction, double maxAttract
 
 
 
-void RaidFleet::Load(vector<RaidFleet> &raidFleets, const DataNode &node, bool remove, int valueIndex)
+void RaidFleet::Load(std::vector<RaidFleet> &raidFleets, const DataNode &node, bool remove, int valueIndex)
 {
 	const Fleet *fleet = GameData::Fleets().Get(node.Token(valueIndex));
 	if(remove)

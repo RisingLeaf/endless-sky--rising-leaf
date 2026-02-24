@@ -33,7 +33,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <map>
 #include <sstream>
 
-using namespace std;
+
 
 
 
@@ -53,7 +53,7 @@ void ShipInfoDisplay::Update(const Ship &ship, const PlayerInfo &player, bool de
 	const Depreciation &depreciation = ship.IsYours() ? player.FleetDepreciation() : player.StockDepreciation();
 	UpdateOutfits(ship, player, depreciation);
 
-	maximumHeight = max(descriptionHeight, max(attributesHeight, outfitsHeight));
+	maximumHeight = std::max(descriptionHeight, std::max(attributesHeight, outfitsHeight));
 }
 
 
@@ -150,7 +150,7 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	if(scrollingPanel)
 	{
 		attributeHeaderLabels.push_back("category:");
-		const string &category = ship.BaseAttributes().Category();
+		const std::string &category = ship.BaseAttributes().Category();
 		attributeHeaderValues.push_back(category.empty() ? "???" : category);
 		attributesHeight += 20;
 	}
@@ -162,7 +162,7 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	const Outfit &attributes = ship.Attributes();
 
 	if(!ship.IsYours())
-		for(const string &license : attributes.Licenses())
+		for(const std::string &license : attributes.Licenses())
 		{
 			if(player.HasLicense(license))
 				continue;
@@ -183,15 +183,15 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 		attributeLabels.push_back("cost:");
 	else
 	{
-		ostringstream out;
+		std::ostringstream out;
 		out << "cost (" << (100 * depreciated) / fullCost << "%):";
 		attributeLabels.push_back(out.str());
 	}
 	attributeValues.push_back(Format::Credits(depreciated));
 	attributesHeight += 20;
 
-	attributeLabels.push_back(string());
-	attributeValues.push_back(string());
+	attributeLabels.push_back(std::string());
+	attributeValues.push_back(std::string());
 	attributesHeight += 10;
 	double shieldRegen = (attributes.Get("shield generation")
 		+ attributes.Get("delayed shield generation"))
@@ -253,11 +253,11 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	double fullMass = emptyMass + attributes.Get("cargo space");
 	isGeneric &= (fullMass != emptyMass);
 	double forwardThrust = attributes.Get("thrust") ? attributes.Get("thrust") : attributes.Get("afterburner thrust");
-	attributeLabels.push_back(string());
-	attributeValues.push_back(string());
+	attributeLabels.push_back(std::string());
+	attributeValues.push_back(std::string());
 	attributesHeight += 10;
 	attributeLabels.push_back(isGeneric ? "movement (full - no cargo):" : "movement:");
-	attributeValues.push_back(string());
+	attributeValues.push_back(std::string());
 	attributesHeight += 20;
 	attributeLabels.push_back("max speed:");
 	attributeValues.push_back(Format::Number(60. * forwardThrust / ship.Drag()));
@@ -287,8 +287,8 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	attributesHeight += 20;
 
 	// Find out how much outfit, engine, and weapon space the chassis has.
-	map<string, double> chassis;
-	static const vector<string> NAMES = {
+	std::map<std::string, double> chassis;
+	static const std::vector<std::string> NAMES = {
 		"outfit space free:", "outfit space",
 		"    weapon capacity:", "weapon capacity",
 		"    engine capacity:", "engine capacity",
@@ -299,10 +299,10 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 		chassis[NAMES[i]] = attributes.Get(NAMES[i]);
 	for(const auto &it : ship.Outfits())
 		for(auto &cit : chassis)
-			cit.second -= min(0., it.second * it.first->Get(cit.first));
+			cit.second -= std::min(0., it.second * it.first->Get(cit.first));
 
-	attributeLabels.push_back(string());
-	attributeValues.push_back(string());
+	attributeLabels.push_back(std::string());
+	attributeValues.push_back(std::string());
 	attributesHeight += 10;
 	for(unsigned i = 0; i < NAMES.size(); i += 2)
 	{
@@ -315,16 +315,16 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	// Print the number of bays for each bay-type we have
 	for(const auto &category : GameData::GetCategory(CategoryType::BAY))
 	{
-		const string &bayType = category.Name();
+		const std::string &bayType = category.Name();
 		int totalBays = ship.BaysTotal(bayType);
 		if(totalBays)
 		{
 			// make sure the label is printed in lower case
-			string bayLabel = bayType;
-			transform(bayLabel.begin(), bayLabel.end(), bayLabel.begin(), ::tolower);
+			std::string bayLabel = bayType;
+			std::transform(bayLabel.begin(), bayLabel.end(), bayLabel.begin(), ::tolower);
 
 			attributeLabels.emplace_back(bayLabel + " bays:");
-			attributeValues.emplace_back(to_string(totalBays));
+			attributeValues.emplace_back(std::to_string(totalBays));
 			attributesHeight += 20;
 		}
 	}
@@ -351,10 +351,10 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	// Add energy and heat while moving to the table.
 	attributesHeight += 20;
 	const double movingEnergyPerFrame =
-		max(attributes.Get("thrusting energy"), attributes.Get("reverse thrusting energy"))
+		std::max(attributes.Get("thrusting energy"), attributes.Get("reverse thrusting energy"))
 		+ attributes.Get("turning energy")
 		+ attributes.Get("afterburner energy");
-	const double movingHeatPerFrame = max(attributes.Get("thrusting heat"), attributes.Get("reverse thrusting heat"))
+	const double movingHeatPerFrame = std::max(attributes.Get("thrusting heat"), attributes.Get("reverse thrusting heat"))
 		+ attributes.Get("turning heat")
 		+ attributes.Get("afterburner heat");
 	tableLabels.push_back("moving:");
@@ -435,7 +435,7 @@ void ShipInfoDisplay::UpdateOutfits(const Ship &ship, const PlayerInfo &player, 
 	outfitValues.clear();
 	outfitsHeight = 20;
 
-	map<string, map<string, int>> listing;
+	std::map<std::string, std::map<std::string, int>> listing;
 	for(const auto &it : ship.Outfits())
 		if(it.first->IsDefined() && !it.first->Category().empty() && !it.first->DisplayName().empty())
 			listing[it.first->Category()][it.first->DisplayName()] += it.second;
@@ -445,19 +445,19 @@ void ShipInfoDisplay::UpdateOutfits(const Ship &ship, const PlayerInfo &player, 
 		// Pad by 10 pixels before each category.
 		if(&cit != &*listing.begin())
 		{
-			outfitLabels.push_back(string());
-			outfitValues.push_back(string());
+			outfitLabels.push_back(std::string());
+			outfitValues.push_back(std::string());
 			outfitsHeight += 10;
 		}
 
 		outfitLabels.push_back(cit.first + ':');
-		outfitValues.push_back(string());
+		outfitValues.push_back(std::string());
 		outfitsHeight += 20;
 
 		for(const auto &it : cit.second)
 		{
 			outfitLabels.push_back(it.first);
-			outfitValues.push_back(to_string(it.second));
+			outfitValues.push_back(std::to_string(it.second));
 			outfitsHeight += 20;
 		}
 	}
@@ -472,7 +472,7 @@ void ShipInfoDisplay::UpdateOutfits(const Ship &ship, const PlayerInfo &player, 
 	saleHeight = 20;
 
 	saleLabels.push_back("This ship will sell for:");
-	saleValues.push_back(string());
+	saleValues.push_back(std::string());
 	saleHeight += 20;
 	saleLabels.push_back("empty hull:");
 	saleValues.push_back(Format::Credits(chassisCost));

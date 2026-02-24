@@ -19,27 +19,27 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "text/Format.h"
 #include "GameData.h"
 
-using namespace std;
+
 
 
 
 // Replace all occurrences ${phrase name} with the expanded phrase from GameData::Phrases()
-string Phrase::ExpandPhrases(const string &source)
+std::string Phrase::ExpandPhrases(const std::string &source)
 {
-	string result;
+	std::string result;
 	size_t next = 0;
 	while(next < source.length())
 	{
 		size_t var = source.find("${", next);
-		if(var == string::npos)
+		if(var == std::string::npos)
 			break;
 		else if(var > next)
 			result.append(source, next, var - next);
 		next = source.find('}', var);
-		if(next == string::npos)
+		if(next == std::string::npos)
 			break;
 		++next;
-		string phraseName = string{source, var + 2, next - var - 3};
+		std::string phraseName = std::string{source, var + 2, next - var - 3};
 		const Phrase *phrase = GameData::Phrases().Find(phraseName);
 		result.append(phrase ? phrase->Get() : phraseName);
 	}
@@ -47,7 +47,7 @@ string Phrase::ExpandPhrases(const string &source)
 	if(!next)
 		return source;
 	else if(next < source.length())
-		result.append(source, next, string::npos);
+		result.append(source, next, std::string::npos);
 	return result;
 }
 
@@ -66,7 +66,7 @@ void Phrase::Load(const DataNode &node)
 	name = node.Size() >= 2 ? node.Token(1) : "Unnamed Phrase";
 	// To avoid a possible parsing ambiguity, the interpolation delimiters
 	// may not be used in a Phrase's name.
-	if(name.find("${") != string::npos || name.find('}') != string::npos)
+	if(name.find("${") != std::string::npos || name.find('}') != std::string::npos)
 	{
 		node.PrintTrace("Error: Phrase names may not contain '${' or '}':");
 		return;
@@ -91,7 +91,7 @@ bool Phrase::IsEmpty() const
 
 // Get the name associated with the node this phrase was instantiated
 // from, or "Unnamed Phrase" if it was anonymously defined.
-const string &Phrase::Name() const
+const std::string &Phrase::Name() const
 {
 	return name;
 }
@@ -99,9 +99,9 @@ const string &Phrase::Name() const
 
 
 // Get a random sentence's text.
-string Phrase::Get() const
+std::string Phrase::Get() const
 {
-	string result;
+	std::string result;
 	if(sentences.empty())
 		return result;
 
@@ -150,12 +150,12 @@ Phrase::Choice::Choice(const DataNode &node, bool isPhraseName)
 
 	if(isPhraseName)
 	{
-		emplace_back(string{}, GameData::Phrases().Get(node.Token(0)));
+		emplace_back(std::string{}, GameData::Phrases().Get(node.Token(0)));
 		return;
 	}
 
 	// This node is a text string that may contain an interpolation request.
-	const string &entry = node.Token(0);
+	const std::string &entry = node.Token(0);
 	if(entry.empty())
 	{
 		// A blank choice was desired.
@@ -168,24 +168,24 @@ Phrase::Choice::Choice(const DataNode &node, bool isPhraseName)
 	{
 		// Determine if there is an interpolation request in this string.
 		size_t left = entry.find("${", start);
-		if(left == string::npos)
+		if(left == std::string::npos)
 			break;
 		size_t right = entry.find('}', left);
-		if(right == string::npos)
+		if(right == std::string::npos)
 			break;
 
 		// Add the text up to the ${, and then add the contained phrase name.
 		++right;
 		size_t length = right - left;
-		auto text = string{entry, start, left - start};
-		auto phraseName = string{entry, left + 2, length - 3};
+		auto text = std::string{entry, start, left - start};
+		auto phraseName = std::string{entry, left + 2, length - 3};
 		emplace_back(text, nullptr);
-		emplace_back(string{}, GameData::Phrases().Get(phraseName));
+		emplace_back(std::string{}, GameData::Phrases().Get(phraseName));
 		start = right;
 	}
 	// Add the remaining text to the sequence.
 	if(entry.length() - start > 0)
-		emplace_back(string{entry, start, entry.length() - start}, nullptr);
+		emplace_back(std::string{entry, start, entry.length() - start}, nullptr);
 }
 
 
@@ -212,16 +212,16 @@ void Phrase::Sentence::Load(const DataNode &node, const Phrase *parent)
 		emplace_back();
 		auto &part = back();
 
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(key == "word")
 			for(const DataNode &grand : child)
-				part.choices.emplace_back((grand.Size() >= 2) ? max<int>(1, grand.Value(1)) : 1, grand);
+				part.choices.emplace_back((grand.Size() >= 2) ? std::max<int>(1, grand.Value(1)) : 1, grand);
 		else if(key == "phrase")
 			for(const DataNode &grand : child)
-				part.choices.emplace_back((grand.Size() >= 2) ? max<int>(1, grand.Value(1)) : 1, grand, true);
+				part.choices.emplace_back((grand.Size() >= 2) ? std::max<int>(1, grand.Value(1)) : 1, grand, true);
 		else if(key == "replace")
 			for(const DataNode &grand : child)
-				part.replacements.emplace_back(grand.Token(0), (grand.Size() >= 2) ? grand.Token(1) : string{});
+				part.replacements.emplace_back(grand.Token(0), (grand.Size() >= 2) ? grand.Token(1) : std::string{});
 		else
 			child.PrintTrace("Skipping unrecognized attribute:");
 

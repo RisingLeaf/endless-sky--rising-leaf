@@ -34,21 +34,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cstddef>
 #include <map>
 
-using namespace std;
+
 
 namespace {
-	map<string, bool> settings;
+	std::map<std::string, bool> settings;
 	int scrollSpeed = 60;
 	int tooltipActivation = 60;
 
 	// Strings for ammo expenditure:
-	const string EXPEND_AMMO = "Escorts expend ammo";
-	const string FRUGAL_ESCORTS = "Escorts use ammo frugally";
+	const std::string EXPEND_AMMO = "Escorts expend ammo";
+	const std::string FRUGAL_ESCORTS = "Escorts use ammo frugally";
 
-	const vector<string> DATEFMT_OPTIONS = {"dd/mm/yyyy", "mm/dd/yyyy", "yyyy-mm-dd"};
+	const std::vector<std::string> DATEFMT_OPTIONS = {"dd/mm/yyyy", "mm/dd/yyyy", "yyyy-mm-dd"};
 	int dateFormatIndex = 0;
 
-	const vector<string> NOTIF_OPTIONS = {"off", "message", "both"};
+	const std::vector<std::string> NOTIF_OPTIONS = {"off", "message", "both"};
 	int notifOptionsIndex = 1;
 
 	size_t zoomIndex = 4;
@@ -56,16 +56,16 @@ namespace {
 
 	// Default to fullscreen.
 	int screenModeIndex = 1;
-	const vector<string> SCREEN_MODE_SETTINGS = {"windowed", "fullscreen"};
+	const std::vector<std::string> SCREEN_MODE_SETTINGS = {"windowed", "fullscreen"};
 
 	// Enable standard VSync by default.
-	const vector<string> VSYNC_SETTINGS = {"off", "on", "adaptive"};
+	const std::vector<std::string> VSYNC_SETTINGS = {"off", "on", "adaptive"};
 	int vsyncIndex = 1;
 
-	const vector<string> CAMERA_ACCELERATION_SETTINGS = {"off", "on", "reversed"};
+	const std::vector<std::string> CAMERA_ACCELERATION_SETTINGS = {"off", "on", "reversed"};
 	int cameraAccelerationIndex = 1;
 
-	const map<string, SoundCategory> VOLUME_SETTINGS = {
+	const std::map<std::string, SoundCategory> VOLUME_SETTINGS = {
 		{"volume", SoundCategory::MASTER},
 		{"music volume", SoundCategory::MUSIC},
 		{"ui volume", SoundCategory::UI},
@@ -89,17 +89,17 @@ namespace {
 
 		const bool IsActive() const { return state != Preferences::OverlayState::DISABLED; }
 
-		const string &ToString() const
+		const std::string &ToString() const
 		{
-			return OVERLAY_SETTINGS[max<int>(0, min<int>(OVERLAY_SETTINGS.size() - 1, static_cast<int>(state)))];
+			return OVERLAY_SETTINGS[std::max<int>(0, std::min<int>(OVERLAY_SETTINGS.size() - 1, static_cast<int>(state)))];
 		}
 
 		const int ToInt() const { return static_cast<int>(state); }
 
 		void SetState(int value)
 		{
-			value = max<int>(value, 0);
-			value = min<int>(value, OVERLAY_SETTINGS.size() - 1);
+			value = std::max<int>(value, 0);
+			value = std::min<int>(value, OVERLAY_SETTINGS.size() - 1);
 			state = static_cast<Preferences::OverlayState>(value);
 		}
 
@@ -127,16 +127,16 @@ namespace {
 
 
 	private:
-		static const vector<string> OVERLAY_SETTINGS;
+		static const std::vector<std::string> OVERLAY_SETTINGS;
 
 
 	private:
 		Preferences::OverlayState state = Preferences::OverlayState::OFF;
 	};
 
-	const vector<string> OverlaySetting::OVERLAY_SETTINGS = {"off", "always on", "damaged", "--", "on hit"};
+	const std::vector<std::string> OverlaySetting::OVERLAY_SETTINGS = {"off", "always on", "damaged", "--", "on hit"};
 
-	map<Preferences::OverlayType, OverlaySetting> statusOverlaySettings = {
+	std::map<Preferences::OverlayType, OverlaySetting> statusOverlaySettings = {
 		{Preferences::OverlayType::ALL, Preferences::OverlayState::OFF},
 		{Preferences::OverlayType::FLAGSHIP, Preferences::OverlayState::ON},
 		{Preferences::OverlayType::ESCORT, Preferences::OverlayState::ON},
@@ -144,47 +144,47 @@ namespace {
 		{Preferences::OverlayType::NEUTRAL, Preferences::OverlayState::OFF},
 	};
 
-	const vector<string> TURRET_OVERLAYS_SETTINGS = {"off", "always on", "blindspots only"};
+	const std::vector<std::string> TURRET_OVERLAYS_SETTINGS = {"off", "always on", "blindspots only"};
 	int turretOverlaysIndex = 2;
 
-	const vector<string> AUTO_AIM_SETTINGS = {"off", "always on", "when firing"};
+	const std::vector<std::string> AUTO_AIM_SETTINGS = {"off", "always on", "when firing"};
 	int autoAimIndex = 2;
 
-	const vector<string> AUTO_FIRE_SETTINGS = {"off", "on", "guns only", "turrets only"};
+	const std::vector<std::string> AUTO_FIRE_SETTINGS = {"off", "on", "guns only", "turrets only"};
 	int autoFireIndex = 0;
 
-	const vector<string> BOARDING_SETTINGS = {"proximity", "value", "mixed"};
+	const std::vector<std::string> BOARDING_SETTINGS = {"proximity", "value", "mixed"};
 	int boardingIndex = 0;
 
-	const vector<string> FLOTSAM_SETTINGS = {"off", "on", "flagship only", "escorts only"};
+	const std::vector<std::string> FLOTSAM_SETTINGS = {"off", "on", "flagship only", "escorts only"};
 	int flotsamIndex = 1;
 
 	// Enable "fast" parallax by default. "fancy" is too GPU heavy, especially for low-end hardware.
-	const vector<string> PARALLAX_SETTINGS = {"off", "fancy", "fast"};
+	const std::vector<std::string> PARALLAX_SETTINGS = {"off", "fancy", "fast"};
 	int parallaxIndex = 2;
 
-	const vector<string> EXTENDED_JUMP_EFFECT_SETTINGS = {"off", "medium", "heavy"};
+	const std::vector<std::string> EXTENDED_JUMP_EFFECT_SETTINGS = {"off", "medium", "heavy"};
 	int extendedJumpEffectIndex = 0;
 
-	const vector<string> ALERT_INDICATOR_SETTING = {"off", "audio", "visual", "both"};
+	const std::vector<std::string> ALERT_INDICATOR_SETTING = {"off", "audio", "visual", "both"};
 	int alertIndicatorIndex = 3;
 
-	const vector<string> MINIMAP_DISPLAY_SETTING = {"off", "when jumping", "always on"};
+	const std::vector<std::string> MINIMAP_DISPLAY_SETTING = {"off", "when jumping", "always on"};
 	int minimapDisplayIndex = 1;
 
-	const vector<string> FLAGSHIP_SPACE_PRIORITY_SETTINGS = {"none", "passengers", "cargo", "both"};
+	const std::vector<std::string> FLAGSHIP_SPACE_PRIORITY_SETTINGS = {"none", "passengers", "cargo", "both"};
 	int flagshipSpacePriorityIndex = 1;
 
-	const vector<string> LARGE_GRAPHICS_REDUCTION_SETTINGS = {"off", "largest only", "all"};
+	const std::vector<std::string> LARGE_GRAPHICS_REDUCTION_SETTINGS = {"off", "largest only", "all"};
 	int largeGraphicsReductionIndex = 0;
 
 	int previousSaveCount = 3;
 
 #ifdef _WIN32
-	const vector<string> TITLE_BAR_THEME_SETTINGS = {"system default", "light", "dark"};
+	const std::vector<string> TITLE_BAR_THEME_SETTINGS = {"system default", "light", "dark"};
 	int titleBarThemeIndex = 0;
 
-	const vector<string> WINDOW_ROUNDING_SETTINGS = {"system default", "off", "large", "small"};
+	const std::vector<string> WINDOW_ROUNDING_SETTINGS = {"system default", "off", "large", "small"};
 	int windowRoundingIndex = 0;
 #endif
 }
@@ -220,7 +220,7 @@ void Preferences::Load()
 	DataFile prefs(Files::Config() / "preferences.txt");
 	for(const DataNode &node : prefs)
 	{
-		const string &key = node.Token(0);
+		const std::string &key = node.Token(0);
 		bool hasValue = node.Size() >= 2;
 		if(key == "window size" && node.Size() >= 3)
 			Screen::SetRaw(node.Value(1), node.Value(2), true);
@@ -233,15 +233,15 @@ void Preferences::Load()
 		else if(key == "Tooltip activation time" && hasValue)
 			tooltipActivation = node.Value(1);
 		else if(key == "boarding target")
-			boardingIndex = max<int>(0, min<int>(node.Value(1), BOARDING_SETTINGS.size() - 1));
+			boardingIndex = std::max<int>(0, std::min<int>(node.Value(1), BOARDING_SETTINGS.size() - 1));
 		else if(key == "Flotsam collection")
-			flotsamIndex = max<int>(0, min<int>(node.Value(1), FLOTSAM_SETTINGS.size() - 1));
+			flotsamIndex = std::max<int>(0, std::min<int>(node.Value(1), FLOTSAM_SETTINGS.size() - 1));
 		else if(key == "view zoom")
-			zoomIndex = max(0., node.Value(1));
+			zoomIndex = std::max(0., node.Value(1));
 		else if(key == "vsync")
-			vsyncIndex = max<int>(0, min<int>(node.Value(1), VSYNC_SETTINGS.size() - 1));
+			vsyncIndex = std::max<int>(0, std::min<int>(node.Value(1), VSYNC_SETTINGS.size() - 1));
 		else if(key == "camera acceleration")
-			cameraAccelerationIndex = max<int>(0, min<int>(node.Value(1), CAMERA_ACCELERATION_SETTINGS.size() - 1));
+			cameraAccelerationIndex = std::max<int>(0, std::min<int>(node.Value(1), CAMERA_ACCELERATION_SETTINGS.size() - 1));
 		else if(key == "Show all status overlays")
 			statusOverlaySettings[OverlayType::ALL].SetState(node.Value(1));
 		else if(key == "Show flagship overlay")
@@ -253,33 +253,33 @@ void Preferences::Load()
 		else if(key == "Show neutral overlays")
 			statusOverlaySettings[OverlayType::NEUTRAL].SetState(node.Value(1));
 		else if(key == "Turret overlays")
-			turretOverlaysIndex = clamp<int>(node.Value(1), 0, TURRET_OVERLAYS_SETTINGS.size() - 1);
+			turretOverlaysIndex = std::clamp<int>(node.Value(1), 0, TURRET_OVERLAYS_SETTINGS.size() - 1);
 		else if(key == "Automatic aiming")
-			autoAimIndex = max<int>(0, min<int>(node.Value(1), AUTO_AIM_SETTINGS.size() - 1));
+			autoAimIndex = std::max<int>(0, std::min<int>(node.Value(1), AUTO_AIM_SETTINGS.size() - 1));
 		else if(key == "Automatic firing")
-			autoFireIndex = max<int>(0, min<int>(node.Value(1), AUTO_FIRE_SETTINGS.size() - 1));
+			autoFireIndex = std::max<int>(0, std::min<int>(node.Value(1), AUTO_FIRE_SETTINGS.size() - 1));
 		else if(key == "Parallax background")
-			parallaxIndex = max<int>(0, min<int>(node.Value(1), PARALLAX_SETTINGS.size() - 1));
+			parallaxIndex = std::max<int>(0, std::min<int>(node.Value(1), PARALLAX_SETTINGS.size() - 1));
 		else if(key == "Extended jump effects")
-			extendedJumpEffectIndex = max<int>(0, min<int>(node.Value(1), EXTENDED_JUMP_EFFECT_SETTINGS.size() - 1));
+			extendedJumpEffectIndex = std::max<int>(0, std::min<int>(node.Value(1), EXTENDED_JUMP_EFFECT_SETTINGS.size() - 1));
 		else if(key == "fullscreen")
-			screenModeIndex = max<int>(0, min<int>(node.Value(1), SCREEN_MODE_SETTINGS.size() - 1));
+			screenModeIndex = std::max<int>(0, std::min<int>(node.Value(1), SCREEN_MODE_SETTINGS.size() - 1));
 		else if(key == "date format")
-			dateFormatIndex = max<int>(0, min<int>(node.Value(1), DATEFMT_OPTIONS.size() - 1));
+			dateFormatIndex = std::max<int>(0, std::min<int>(node.Value(1), DATEFMT_OPTIONS.size() - 1));
 		else if(key == "alert indicator")
-			alertIndicatorIndex = max<int>(0, min<int>(node.Value(1), ALERT_INDICATOR_SETTING.size() - 1));
+			alertIndicatorIndex = std::max<int>(0, std::min<int>(node.Value(1), ALERT_INDICATOR_SETTING.size() - 1));
 		else if(key == "Show mini-map")
-			minimapDisplayIndex = max<int>(0, min<int>(node.Value(1), MINIMAP_DISPLAY_SETTING.size() - 1));
+			minimapDisplayIndex = std::max<int>(0, std::min<int>(node.Value(1), MINIMAP_DISPLAY_SETTING.size() - 1));
 		else if(key == "Prioritize flagship use")
-			flagshipSpacePriorityIndex = clamp<int>(node.Value(1), 0, FLAGSHIP_SPACE_PRIORITY_SETTINGS.size() - 1);
+			flagshipSpacePriorityIndex = std::clamp<int>(node.Value(1), 0, FLAGSHIP_SPACE_PRIORITY_SETTINGS.size() - 1);
 		else if(key == "Reduce large graphics")
-			largeGraphicsReductionIndex = clamp<int>(node.Value(1), 0, LARGE_GRAPHICS_REDUCTION_SETTINGS.size() - 1);
+			largeGraphicsReductionIndex = std::clamp<int>(node.Value(1), 0, LARGE_GRAPHICS_REDUCTION_SETTINGS.size() - 1);
 		else if(key == "previous saves" && hasValue)
-			previousSaveCount = max<int>(3, node.Value(1));
+			previousSaveCount = std::max<int>(3, node.Value(1));
 		else if(key == "alt-mouse turning")
 			settings["Control ship with mouse"] = (!hasValue || node.Value(1));
 		else if(key == "notification settings")
-			notifOptionsIndex = max<int>(0, min<int>(node.Value(1), NOTIF_OPTIONS.size() - 1));
+			notifOptionsIndex = std::max<int>(0, std::min<int>(node.Value(1), NOTIF_OPTIONS.size() - 1));
 #ifdef _WIN32
 		else if(key == "Title bar theme")
 			titleBarThemeIndex = clamp<int>(node.Value(1), 0, TITLE_BAR_THEME_SETTINGS.size() - 1);
@@ -368,7 +368,7 @@ void Preferences::Save()
 
 
 
-bool Preferences::Has(const string &name)
+bool Preferences::Has(const std::string &name)
 {
 	auto it = settings.find(name);
 	return (it != settings.end() && it->second);
@@ -376,7 +376,7 @@ bool Preferences::Has(const string &name)
 
 
 
-void Preferences::Set(const string &name, bool on)
+void Preferences::Set(const std::string &name, bool on)
 {
 	settings[name] = on;
 }
@@ -393,7 +393,7 @@ void Preferences::ToggleAmmoUsage()
 
 
 
-string Preferences::AmmoUsage()
+std::string Preferences::AmmoUsage()
 {
 	return Has(EXPEND_AMMO) ? Has(FRUGAL_ESCORTS) ? "frugally" : "always" : "never";
 }
@@ -417,7 +417,7 @@ Preferences::DateFormat Preferences::GetDateFormat()
 
 
 
-const string &Preferences::DateFormatSetting()
+const std::string &Preferences::DateFormatSetting()
 {
 	return DATEFMT_OPTIONS[dateFormatIndex];
 }
@@ -441,7 +441,7 @@ Preferences::NotificationSetting Preferences::GetNotificationSetting()
 
 
 
-const string &Preferences::NotificationSettingString()
+const std::string &Preferences::NotificationSettingString()
 {
 	return NOTIF_OPTIONS[notifOptionsIndex];
 }
@@ -533,9 +533,9 @@ double Preferences::MaxViewZoom()
 
 
 
-const vector<double> &Preferences::Zooms()
+const std::vector<double> &Preferences::Zooms()
 {
-	static vector<double> DEFAULT_ZOOMS{1.};
+	static std::vector<double> DEFAULT_ZOOMS{1.};
 	const auto &zooms = GameData::Interfaces().Get("main view")->GetList("zooms");
 	return zooms.empty() ? DEFAULT_ZOOMS : zooms;
 }
@@ -560,7 +560,7 @@ Preferences::BackgroundParallax Preferences::GetBackgroundParallax()
 
 
 
-const string &Preferences::ParallaxSetting()
+const std::string &Preferences::ParallaxSetting()
 {
 	return PARALLAX_SETTINGS[parallaxIndex];
 }
@@ -584,7 +584,7 @@ Preferences::ExtendedJumpEffects Preferences::GetExtendedJumpEffects()
 
 
 
-const string &Preferences::ExtendedJumpEffectsSetting()
+const std::string &Preferences::ExtendedJumpEffectsSetting()
 {
 	return EXTENDED_JUMP_EFFECT_SETTINGS[extendedJumpEffectIndex];
 }
@@ -599,7 +599,7 @@ void Preferences::ToggleScreenMode()
 
 
 
-const string &Preferences::ScreenModeSetting()
+const std::string &Preferences::ScreenModeSetting()
 {
 	return SCREEN_MODE_SETTINGS[screenModeIndex];
 }
@@ -639,7 +639,7 @@ Preferences::VSync Preferences::VSyncState()
 
 
 
-const string &Preferences::VSyncSetting()
+const std::string &Preferences::VSyncSetting()
 {
 	return VSYNC_SETTINGS[vsyncIndex];
 }
@@ -660,7 +660,7 @@ Preferences::CameraAccel Preferences::CameraAcceleration()
 
 
 
-const string &Preferences::CameraAccelerationSetting()
+const std::string &Preferences::CameraAccelerationSetting()
 {
 	return CAMERA_ACCELERATION_SETTINGS[cameraAccelerationIndex];
 }
@@ -692,7 +692,7 @@ Preferences::OverlayState Preferences::StatusOverlaysState(Preferences::OverlayT
 
 
 
-const string &Preferences::StatusOverlaysSetting(Preferences::OverlayType type)
+const std::string &Preferences::StatusOverlaysSetting(Preferences::OverlayType type)
 {
 	const auto &allOverlaysSetting = statusOverlaySettings[OverlayType::ALL];
 	if(allOverlaysSetting.IsActive())
@@ -720,7 +720,7 @@ Preferences::TurretOverlays Preferences::GetTurretOverlays()
 
 
 
-const string &Preferences::TurretOverlaysSetting()
+const std::string &Preferences::TurretOverlaysSetting()
 {
 	return TURRET_OVERLAYS_SETTINGS[turretOverlaysIndex];
 }
@@ -741,7 +741,7 @@ Preferences::AutoAim Preferences::GetAutoAim()
 
 
 
-const string &Preferences::AutoAimSetting()
+const std::string &Preferences::AutoAimSetting()
 {
 	return AUTO_AIM_SETTINGS[autoAimIndex];
 }
@@ -762,7 +762,7 @@ Preferences::AutoFire Preferences::GetAutoFire()
 
 
 
-const string &Preferences::AutoFireSetting()
+const std::string &Preferences::AutoFireSetting()
 {
 	return AUTO_FIRE_SETTINGS[autoFireIndex];
 }
@@ -786,7 +786,7 @@ Preferences::BoardingPriority Preferences::GetBoardingPriority()
 
 
 
-const string &Preferences::BoardingSetting()
+const std::string &Preferences::BoardingSetting()
 {
 	return BOARDING_SETTINGS[boardingIndex];
 }
@@ -807,7 +807,7 @@ Preferences::FlotsamCollection Preferences::GetFlotsamCollection()
 
 
 
-const string &Preferences::FlotsamSetting()
+const std::string &Preferences::FlotsamSetting()
 {
 	return FLOTSAM_SETTINGS[flotsamIndex];
 }
@@ -829,7 +829,7 @@ Preferences::AlertIndicator Preferences::GetAlertIndicator()
 
 
 
-const string &Preferences::AlertSetting()
+const std::string &Preferences::AlertSetting()
 {
 	return ALERT_INDICATOR_SETTING[alertIndicatorIndex];
 }
@@ -884,7 +884,7 @@ Preferences::MinimapDisplay Preferences::GetMinimapDisplay()
 
 
 
-const string &Preferences::MinimapSetting()
+const std::string &Preferences::MinimapSetting()
 {
 	return MINIMAP_DISPLAY_SETTING[minimapDisplayIndex];
 }
@@ -906,7 +906,7 @@ Preferences::FlagshipSpacePriority Preferences::GetFlagshipSpacePriority()
 
 
 
-const string &Preferences::FlagshipSpacePrioritySetting()
+const std::string &Preferences::FlagshipSpacePrioritySetting()
 {
 	return FLAGSHIP_SPACE_PRIORITY_SETTINGS[flagshipSpacePriorityIndex];
 }
@@ -928,7 +928,7 @@ Preferences::LargeGraphicsReduction Preferences::GetLargeGraphicsReduction()
 
 
 
-const string &Preferences::LargeGraphicsReductionSetting()
+const std::string &Preferences::LargeGraphicsReductionSetting()
 {
 	return LARGE_GRAPHICS_REDUCTION_SETTINGS[largeGraphicsReductionIndex];
 }
@@ -952,7 +952,7 @@ Preferences::TitleBarTheme Preferences::GetTitleBarTheme()
 
 
 
-const string &Preferences::TitleBarThemeSetting()
+const std::string &Preferences::TitleBarThemeSetting()
 {
 	return TITLE_BAR_THEME_SETTINGS[titleBarThemeIndex];
 }
@@ -975,7 +975,7 @@ Preferences::WindowRounding Preferences::GetWindowRounding()
 
 
 
-const string &Preferences::WindowRoundingSetting()
+const std::string &Preferences::WindowRoundingSetting()
 {
 	return WINDOW_ROUNDING_SETTINGS[windowRoundingIndex];
 }

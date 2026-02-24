@@ -30,37 +30,37 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <vector>
 #include <iostream>
 
-using namespace std;
+
 
 namespace {
-	const set<string> PNG_EXTENSIONS{".png"};
-	const set<string> JPG_EXTENSIONS{".jpg", ".jpeg", ".jpe"};
-	const set<string> AVIF_EXTENSIONS{".avif", ".avifs"};
-	const set<string> IMAGE_EXTENSIONS = []()
+	const std::set<std::string> PNG_EXTENSIONS{".png"};
+	const std::set<std::string> JPG_EXTENSIONS{".jpg", ".jpeg", ".jpe"};
+	const std::set<std::string> AVIF_EXTENSIONS{".avif", ".avifs"};
+	const std::set<std::string> IMAGE_EXTENSIONS = []()
 	{
-		set<string> extensions(PNG_EXTENSIONS);
+		std::set<std::string> extensions(PNG_EXTENSIONS);
 		extensions.insert(JPG_EXTENSIONS.begin(), JPG_EXTENSIONS.end());
 		extensions.insert(AVIF_EXTENSIONS.begin(), AVIF_EXTENSIONS.end());
 		return extensions;
 	}();
-	const set<string> IMAGE_SEQUENCE_EXTENSIONS = AVIF_EXTENSIONS;
+	const std::set<std::string> IMAGE_SEQUENCE_EXTENSIONS = AVIF_EXTENSIONS;
 
-	bool ReadPNG(const filesystem::path &path, ImageBuffer &buffer, int frame);
-	bool ReadJPG(const filesystem::path &path, ImageBuffer &buffer, int frame);
-	int ReadAVIF(const filesystem::path &path, ImageBuffer &buffer, int frame, bool alphaPreMultiplied);
+	bool ReadPNG(const std::filesystem::path &path, ImageBuffer &buffer, int frame);
+	bool ReadJPG(const std::filesystem::path &path, ImageBuffer &buffer, int frame);
+	int ReadAVIF(const std::filesystem::path &path, ImageBuffer &buffer, int frame, bool alphaPreMultiplied);
 	void Premultiply(ImageBuffer &buffer, int frame, BlendingMode additive);
 }
 
 
 
-const set<string> &ImageBuffer::ImageExtensions()
+const std::set<std::string> &ImageBuffer::ImageExtensions()
 {
 	return IMAGE_EXTENSIONS;
 }
 
 
 
-const set<string> &ImageBuffer::ImageSequenceExtensions()
+const std::set<std::string> &ImageBuffer::ImageSequenceExtensions()
 {
 	return IMAGE_SEQUENCE_EXTENSIONS;
 }
@@ -176,9 +176,9 @@ void ImageBuffer::ShrinkToHalfSize()
 					+ static_cast<unsigned>(aIt[4]) + static_cast<unsigned>(bIt[4]) + 2) / 4;
 		}
 	}
-	swap(width, result.width);
-	swap(height, result.height);
-	swap(pixels, result.pixels);
+	std::swap(width, result.width);
+	std::swap(height, result.height);
+	std::swap(pixels, result.pixels);
 }
 
 
@@ -217,13 +217,13 @@ int ImageBuffer::Read(const ImageFileData &data, int frame)
 namespace {
 	void ReadPNGInput(png_structp pngStruct, png_bytep outBytes, png_size_t byteCountToRead)
 	{
-		static_cast<iostream *>(png_get_io_ptr(pngStruct))->read(reinterpret_cast<char *>(outBytes), byteCountToRead);
+		static_cast<std::iostream *>(png_get_io_ptr(pngStruct))->read(reinterpret_cast<char *>(outBytes), byteCountToRead);
 	}
 
-	bool ReadPNG(const filesystem::path &path, ImageBuffer &buffer, int frame)
+	bool ReadPNG(const std::filesystem::path &path, ImageBuffer &buffer, int frame)
 	{
 		// Open the file, and make sure it really is a PNG.
-		shared_ptr<iostream> file = Files::Open(path.string());
+		std::shared_ptr<std::iostream> file = Files::Open(path.string());
 		if(!file)
 			return false;
 
@@ -255,22 +255,22 @@ namespace {
 		try {
 			buffer.Allocate(width, height);
 		}
-		catch(const bad_alloc &)
+		catch(const std::bad_alloc &)
 		{
 			png_destroy_read_struct(&png, &info, nullptr);
-			const string message = "Failed to allocate contiguous memory for \"" + path.string() + "\"";
+			const std::string message = "Failed to allocate contiguous memory for \"" + path.string() + "\"";
 			Logger::LogError(message);
-			throw runtime_error(message);
+			throw std::runtime_error(message);
 		}
 		// Make sure this frame's dimensions are valid.
 		if(!width || !height || width != buffer.Width() || height != buffer.Height())
 		{
 			png_destroy_read_struct(&png, &info, nullptr);
-			string message = "Skipped processing \"" + path.string() + "\":\n\tAll image frames must have equal ";
+			std::string message = "Skipped processing \"" + path.string() + "\":\n\tAll image frames must have equal ";
 			if(width && width != buffer.Width())
-				Logger::LogError(message + "width: expected " + to_string(buffer.Width()) + " but was " + to_string(width));
+				Logger::LogError(message + "width: expected " + std::to_string(buffer.Width()) + " but was " + std::to_string(width));
 			if(height && height != buffer.Height())
-				Logger::LogError(message + "height: expected " + to_string(buffer.Height()) + " but was " + to_string(height));
+				Logger::LogError(message + "height: expected " + std::to_string(buffer.Height()) + " but was " + std::to_string(height));
 			return false;
 		}
 
@@ -304,7 +304,7 @@ namespace {
 		png_read_update_info(png, info);
 
 		// Read the file.
-		vector<png_byte *> rows(height, nullptr);
+		std::vector<png_byte *> rows(height, nullptr);
 		for(int y = 0; y < height; ++y)
 			rows[y] = reinterpret_cast<png_byte *>(buffer.Begin(y, frame));
 
@@ -318,9 +318,9 @@ namespace {
 
 
 
-	bool ReadJPG(const filesystem::path &path, ImageBuffer &buffer, int frame)
+	bool ReadJPG(const std::filesystem::path &path, ImageBuffer &buffer, int frame)
 	{
-		string data = Files::Read(path);
+		std::string data = Files::Read(path);
 		if(data.empty())
 			return false;
 
@@ -345,27 +345,27 @@ namespace {
 		try {
 			buffer.Allocate(width, height);
 		}
-		catch(const bad_alloc &)
+		catch(const std::bad_alloc &)
 		{
 			jpeg_destroy_decompress(&cinfo);
-			const string message = "Failed to allocate contiguous memory for \"" + path.string() + "\"";
+			const std::string message = "Failed to allocate contiguous memory for \"" + path.string() + "\"";
 			Logger::LogError(message);
-			throw runtime_error(message);
+			throw std::runtime_error(message);
 		}
 		// Make sure this frame's dimensions are valid.
 		if(!width || !height || width != buffer.Width() || height != buffer.Height())
 		{
 			jpeg_destroy_decompress(&cinfo);
-			string message = "Skipped processing \"" + path.string() + "\":\t\tAll image frames must have equal ";
+			std::string message = "Skipped processing \"" + path.string() + "\":\t\tAll image frames must have equal ";
 			if(width && width != buffer.Width())
-				Logger::LogError(message + "width: expected " + to_string(buffer.Width()) + " but was " + to_string(width));
+				Logger::LogError(message + "width: expected " + std::to_string(buffer.Width()) + " but was " + std::to_string(width));
 			if(height && height != buffer.Height())
-				Logger::LogError(message + "height: expected " + to_string(buffer.Height()) + " but was " + to_string(height));
+				Logger::LogError(message + "height: expected " + std::to_string(buffer.Height()) + " but was " + std::to_string(height));
 			return false;
 		}
 
 		// Read the file.
-		vector<JSAMPLE *> rows(height, nullptr);
+		std::vector<JSAMPLE *> rows(height, nullptr);
 		for(int y = 0; y < height; ++y)
 			rows[y] = reinterpret_cast<JSAMPLE *>(buffer.Begin(y, frame));
 
@@ -387,9 +387,9 @@ namespace {
 	// based on how much longer its duration is compared to this unit.
 	// TODO: If animation properties are exposed here, we can have custom presentation
 	// logic that avoids duplicating the frames.
-	int ReadAVIF(const filesystem::path &path, ImageBuffer &buffer, int frame, bool alphaPreMultiplied)
+	int ReadAVIF(const std::filesystem::path &path, ImageBuffer &buffer, int frame, bool alphaPreMultiplied)
 	{
-		unique_ptr<avifDecoder, void(*)(avifDecoder *)> decoder(avifDecoderCreate(), avifDecoderDestroy);
+		std::unique_ptr<avifDecoder, void(*)(avifDecoder *)> decoder(avifDecoderCreate(), avifDecoderDestroy);
 		if(!decoder)
 		{
 			Logger::LogError("Could not create avif decoder");
@@ -397,7 +397,7 @@ namespace {
 		}
 		// Maintenance note: this is where decoder defaults should be overwritten (codec, exif/xmp, etc.)
 
-		string data = Files::Read(path);
+		std::string data = Files::Read(path);
 		avifResult result = avifDecoderSetIOMemory(decoder.get(), reinterpret_cast<const uint8_t *>(data.c_str()),
 			data.size());
 		if(result != AVIF_RESULT_OK)
@@ -409,7 +409,7 @@ namespace {
 		result = avifDecoderParse(decoder.get());
 		if(result != AVIF_RESULT_OK)
 		{
-			Logger::LogError(string("Failed to decode image: ") + avifResultToString(result));
+			Logger::LogError(std::string("Failed to decode image: ") + avifResultToString(result));
 			return 0;
 		}
 		// Generic image information is now available (width, height, depth, color profile, metadata, alpha, etc.),
@@ -432,7 +432,7 @@ namespace {
 				frameTimeUnit = timing.duration;
 		}
 		// Based on this unit, we can calculate how many times each frame is repeated.
-		vector<size_t> repeats(decoder->imageCount);
+		std::vector<size_t> repeats(decoder->imageCount);
 		size_t bufferFrameCount = 0;
 		for(size_t i = 0; i < static_cast<size_t>(decoder->imageCount); ++i)
 		{
@@ -453,11 +453,11 @@ namespace {
 				buffer.Clear(bufferFrameCount);
 			buffer.Allocate(decoder->image->width, decoder->image->height);
 		}
-		catch(const bad_alloc &)
+		catch(const std::bad_alloc &)
 		{
-			const string message = "Failed to allocate contiguous memory for \"" + path.generic_string() + "\"";
+			const std::string message = "Failed to allocate contiguous memory for \"" + path.generic_string() + "\"";
 			Logger::LogError(message);
-			throw runtime_error(message);
+			throw std::runtime_error(message);
 		}
 		if(static_cast<unsigned>(buffer.Width()) != decoder->image->width
 			|| static_cast<unsigned>(buffer.Height()) != decoder->image->height)
@@ -494,7 +494,7 @@ namespace {
 			{
 				uint8_t *end = reinterpret_cast<uint8_t *>(buffer.Begin(0, frame + bufferFrame + 1));
 				uint8_t *dest = reinterpret_cast<uint8_t *>(buffer.Begin(0, frame + bufferFrame + i));
-				copy(image.pixels, end, dest);
+				std::copy(image.pixels, end, dest);
 			}
 			bufferFrame += repeats[avifFrameIndex];
 

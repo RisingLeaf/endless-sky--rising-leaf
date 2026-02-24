@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <vector>
 
-using namespace std;
+
 
 namespace {
 	double ManipulateNormal(double smoothness, bool inverted)
@@ -57,7 +57,7 @@ namespace {
 
 
 
-Angle Distribution::GenerateInaccuracy(double value, pair<Type, bool> distribution)
+Angle Distribution::GenerateInaccuracy(double value, std::pair<Type, bool> distribution)
 {
 	// Check if there is any inaccuracy to apply
 	if(!value)

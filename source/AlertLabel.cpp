@@ -25,7 +25,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 namespace {
 	const double DANGEROUS_ABOVE = .1;
@@ -33,7 +33,7 @@ namespace {
 
 
 
-AlertLabel::AlertLabel(const Point &position, const Projectile &projectile, const shared_ptr<Ship> &flagship,
+AlertLabel::AlertLabel(const Point &position, const Projectile &projectile, const std::shared_ptr<Ship> &flagship,
 		double zoom)
 	: position(position), zoom(zoom)
 {

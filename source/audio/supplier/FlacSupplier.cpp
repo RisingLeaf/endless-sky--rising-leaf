@@ -19,11 +19,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <utility>
 
-using namespace std;
 
 
 
-FlacSupplier::FlacSupplier(shared_ptr<iostream> data, bool looping)
+
+FlacSupplier::FlacSupplier(std::shared_ptr<std::iostream> data, bool looping)
 	: AsyncAudioSupplier(std::move(data), looping)
 {
 }
@@ -36,7 +36,7 @@ FLAC__StreamDecoderWriteStatus FlacSupplier::write_callback(const FLAC__Frame *f
 	const size_t blocksize = frame->header.blocksize;
 
 	AwaitBufferSpace();
-	static vector<sample_t> samples;
+	static std::vector<sample_t> samples;
 	for(size_t i = 0; i < blocksize; ++i)
 		for(size_t ch = 0; ch < channels; ++ch)
 			samples.push_back(static_cast<sample_t>(buffer[ch][i]));
@@ -53,19 +53,19 @@ void FlacSupplier::metadata_callback(const FLAC__StreamMetadata *metadata)
 	if(metadata->data.stream_info.channels != 2)
 	{
 		Logger::LogError("FLAC channel count should be two, but is "
-			+ to_string(metadata->data.stream_info.channels) + ". The audio may be corrupt.");
+			+ std::to_string(metadata->data.stream_info.channels) + ". The audio may be corrupt.");
 		done = true;
 	}
 	if(metadata->data.stream_info.bits_per_sample != 16)
 	{
 		Logger::LogError("FLAC should use 16-bit samples, but is "
-			+ to_string(metadata->data.stream_info.bits_per_sample) + "-bit instead. The audio may be corrupt.");
+			+ std::to_string(metadata->data.stream_info.bits_per_sample) + "-bit instead. The audio may be corrupt.");
 		done = true;
 	}
 	if(metadata->data.stream_info.sample_rate != SAMPLE_RATE)
 	{
-		Logger::LogError("FLAC should use " + to_string(SAMPLE_RATE) + " sample rate, but is "
-			+ to_string(metadata->data.stream_info.sample_rate) + ". The audio may be corrupt.");
+		Logger::LogError("FLAC should use " + std::to_string(SAMPLE_RATE) + " sample rate, but is "
+			+ std::to_string(metadata->data.stream_info.sample_rate) + ". The audio may be corrupt.");
 		done = true;
 	}
 }
@@ -74,7 +74,7 @@ void FlacSupplier::metadata_callback(const FLAC__StreamMetadata *metadata)
 
 void FlacSupplier::error_callback(FLAC__StreamDecoderErrorStatus status)
 {
-	Logger::LogError("FLAC error " + string(FLAC__StreamDecoderErrorStatusString[status]));
+	Logger::LogError("FLAC error " + std::string(FLAC__StreamDecoderErrorStatusString[status]));
 	done = true;
 	PadBuffer();
 }

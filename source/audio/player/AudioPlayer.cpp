@@ -20,16 +20,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <vector>
 
-using namespace std;
+
 
 namespace {
 	/// The currently unclaimed OpenAL sources for reuse.
-	vector<ALuint> availableSources;
+	std::vector<ALuint> availableSources;
 }
 
 
 
-AudioPlayer::AudioPlayer(SoundCategory category, unique_ptr<AudioSupplier> supplier, bool spatial)
+AudioPlayer::AudioPlayer(SoundCategory category, std::unique_ptr<AudioSupplier> supplier, bool spatial)
 	: category(category), spatial(spatial), audioSupplier(std::move(supplier))
 {
 }
@@ -70,7 +70,7 @@ void AudioPlayer::Update()
 		{
 			// All queued buffers finished, and we don't have any others left. Playback has finished.
 			// Unqueue all buffers and return them, then release the source.
-			vector<ALuint> buffers(buffersDone);
+			std::vector<ALuint> buffers(buffersDone);
 			alSourceUnqueueBuffers(alSource, buffers.size(), buffers.data());
 
 			for(ALuint buffer : buffers)
@@ -84,7 +84,7 @@ void AudioPlayer::Update()
 	else if(audioSupplier->AvailableChunks())
 	{
 		// Queue as many buffers as possible.
-		vector<ALuint> buffers(min(static_cast<size_t>(buffersDone), audioSupplier->AvailableChunks()));
+		std::vector<ALuint> buffers(std::min(static_cast<size_t>(buffersDone), audioSupplier->AvailableChunks()));
 		alSourceUnqueueBuffers(alSource, buffers.size(), buffers.data());
 
 		for(ALuint &buffer : buffers)
@@ -170,9 +170,9 @@ void AudioPlayer::Init()
 		if(!ClaimSource())
 			return;
 
-	int bufferCount = clamp(audioSupplier->MaxChunks(), static_cast<size_t>(1), MAX_INITIAL_BUFFERS);
+	int bufferCount = std::clamp(audioSupplier->MaxChunks(), static_cast<size_t>(1), MAX_INITIAL_BUFFERS);
 
-	vector<ALuint> buffers;
+	std::vector<ALuint> buffers;
 	buffers.reserve(bufferCount);
 	for(int i = 0; i < bufferCount; ++i)
 	{

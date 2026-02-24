@@ -25,7 +25,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cmath>
 
-using namespace std;
+
 
 
 
@@ -37,7 +37,7 @@ void ShipNameDialog::Draw()
 	SpriteShader::Draw(SpriteSet::Get("ui/dialog cancel"), randomPos);
 
 	const Font &font = FontSet::Get(14);
-	static const string RANDOM = "Random";
+	static const std::string RANDOM = "Random";
 	Point labelPos = randomPos - .5 * Point(font.Width(RANDOM), font.Height());
 	font.Draw(RANDOM, labelPos, *GameData::Colors().Get("medium"));
 }

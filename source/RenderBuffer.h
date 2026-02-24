@@ -25,27 +25,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 // in the bottom right.
 class RenderBuffer {
 public:
-	// RAII wrapper to prevent accidentally not unbinding the render target.
-	class RenderTargetGuard final {
-	public:
-		~RenderTargetGuard();
-
-		// Explicitly deactivate render target;
-		void Deactivate();
-
-
-	protected:
-		RenderTargetGuard(RenderBuffer &b, int screenWidth, int screenHeight);
-
-
-	private:
-		RenderBuffer &buffer;
-		Screen::ScreenDimensionsGuard screenGuard;
-		friend class RenderBuffer;
-	};
-
-
-public:
 	// Create a texture of the given size that can be used as a render target.
 	RenderBuffer(const Point &dimensions);
 	virtual ~RenderBuffer();
@@ -53,9 +32,9 @@ public:
 	// Initialize the shaders used internally.
 	static void Init();
 
-	// Turn this buffer on as a render target. The render target is restored if
-	// the Activation object goes out of scope.
-	[[nodiscard]] RenderTargetGuard SetTarget();
+	// Turn this buffer on as a render target.
+	void SetTarget();
+	void Deactivate();
 
 	// Draw the contents of this buffer at the specified position.
 	void Draw(const Point &position);
@@ -71,11 +50,6 @@ public:
 	double Width() const;
 
 	void SetFadePadding(float top, float bottom, float right = 0, float left = 0);
-
-
-protected:
-	void Deactivate();
-
 
 private:
 	Point size;

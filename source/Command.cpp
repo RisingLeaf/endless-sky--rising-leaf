@@ -26,18 +26,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <map>
 
-using namespace std;
+
 
 namespace {
 	// These lookup tables make it possible to map a command to its description,
 	// the name of the key it is mapped to, or the SDL keycode it is mapped to.
-	map<Command, string> description;
-	map<Command, string> keyName;
-	map<int, Command> commandForKeycode;
-	map<Command, int> keycodeForCommand;
+	std::map<Command, std::string> description;
+	std::map<Command, std::string> keyName;
+	std::map<int, Command> commandForKeycode;
+	std::map<Command, int> keycodeForCommand;
 	// Keep track of any keycodes that are mapped to multiple commands, in order
 	// to display a warning to the player.
-	map<int, int> keycodeCount;
+	std::map<int, int> keycodeCount;
 	// Need a uint64_t 1 to generate Commands.
 	const uint64_t ONE = 1;
 }
@@ -96,9 +96,9 @@ const Command Command::SHIFT(ONE << 39, "");
 
 // In the given text, replace any instances of command names (in angle brackets)
 // with key names (in quotes).
-string Command::ReplaceNamesWithKeys(const string &text)
+std::string Command::ReplaceNamesWithKeys(const std::string &text)
 {
-	map<string, string> subs;
+	std::map<std::string, std::string> subs;
 	for(const auto &it : description)
 		subs['<' + it.second + '>'] = '"' + keyName[it.first] + '"';
 
@@ -138,12 +138,12 @@ void Command::ReadKeyboard()
 
 
 // Load the keyboard preferences.
-void Command::LoadSettings(const filesystem::path &path)
+void Command::LoadSettings(const std::filesystem::path &path)
 {
 	DataFile file(path);
 
 	// Create a map of command names to Command objects in the enumeration above.
-	map<string, Command> commands;
+	std::map<std::string, Command> commands;
 	for(const auto &it : description)
 		commands[it.second] = it.first;
 
@@ -174,7 +174,7 @@ void Command::LoadSettings(const filesystem::path &path)
 
 
 // Save the keyboard preferences.
-void Command::SaveSettings(const filesystem::path &path)
+void Command::SaveSettings(const std::filesystem::path &path)
 {
 	DataWriter out(path);
 
@@ -210,9 +210,9 @@ void Command::SetKey(Command command, int keycode)
 
 // Get the description of this command. If this command is a combination of more
 // than one command, an empty string is returned.
-const string &Command::Description() const
+const std::string &Command::Description() const
 {
-	static const string empty;
+	static const std::string empty;
 	auto it = description.find(*this);
 	return (it == description.end() ? empty : it->second);
 }
@@ -221,9 +221,9 @@ const string &Command::Description() const
 
 // Get the name of the key that is mapped to this command. If this command is
 // a combination of more than one command, an empty string is returned.
-const string &Command::KeyName() const
+const std::string &Command::KeyName() const
 {
-	static const string empty = "(none)";
+	static const std::string empty = "(none)";
 	auto it = keyName.find(*this);
 
 	return (!HasBinding() ? empty : it->second);
@@ -263,7 +263,7 @@ void Command::Load(const DataNode &node)
 {
 	for(int i = 1; i < node.Size(); ++i)
 	{
-		static const map<string, Command> lookup = {
+		static const std::map<std::string, Command> lookup = {
 			{"none", Command::NONE},
 			{"menu", Command::MENU},
 			{"forward", Command::FORWARD},
@@ -362,7 +362,7 @@ Command Command::AndNot(Command command) const
 // Set the turn direction and amount to a value between -1 and 1.
 void Command::SetTurn(double amount)
 {
-	turn = max(-1., min(1., amount));
+	turn = std::max(-1., std::min(1., amount));
 }
 
 
@@ -431,7 +431,7 @@ Command::Command(uint64_t state)
 
 // Private constructor that also stores the given description in the lookup
 // table. (This is used for the enumeration at the top of this file.)
-Command::Command(uint64_t state, const string &text)
+Command::Command(uint64_t state, const std::string &text)
 	: state(state)
 {
 	if(!text.empty())

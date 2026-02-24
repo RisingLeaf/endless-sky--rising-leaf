@@ -26,10 +26,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cmath>
 
-using namespace std;
+
 
 namespace {
-	string TriggerToText(MissionTimer::TimerTrigger trigger)
+	std::string TriggerToText(MissionTimer::TimerTrigger trigger)
 	{
 		switch(trigger)
 		{
@@ -46,7 +46,7 @@ namespace {
 
 
 MissionTimer::MissionTimer(const DataNode &node, const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
 {
 	Load(node, playerConditions, visitedSystems, visitedPlanets);
 }
@@ -54,7 +54,7 @@ MissionTimer::MissionTimer(const DataNode &node, const ConditionsStore *playerCo
 
 
 void MissionTimer::Load(const DataNode &node, const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
 {
 	if(node.Size() < 2)
 	{
@@ -64,11 +64,11 @@ void MissionTimer::Load(const DataNode &node, const ConditionsStore *playerCondi
 
 	waitTime = node.Value(1);
 	if(node.Size() > 2)
-		randomWaitTime = max<int>(1, node.Value(2));
+		randomWaitTime = std::max<int>(1, node.Value(2));
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 
 		if(key == "elapsed" && hasValue)
@@ -82,7 +82,7 @@ void MissionTimer::Load(const DataNode &node, const ConditionsStore *playerCondi
 			hasRequirements = true;
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
+				const std::string &grandKey = grand.Token(0);
 				hasValue = grand.Size() >= 2;
 
 				if(grandKey == "idle")
@@ -133,7 +133,7 @@ void MissionTimer::Load(const DataNode &node, const ConditionsStore *playerCondi
 		}
 		else if(key == "on" && hasValue)
 		{
-			const string &trigger = child.Token(1);
+			const std::string &trigger = child.Token(1);
 			if(trigger == "timeup")
 				actions[TimerTrigger::TIMEUP].Load(child, playerConditions, visitedSystems, visitedPlanets);
 			else if(trigger == "deactivation")
@@ -145,7 +145,7 @@ void MissionTimer::Load(const DataNode &node, const ConditionsStore *playerCondi
 		{
 			for(const DataNode &grand : child)
 			{
-				const string &trigger = grand.Token(0);
+				const std::string &trigger = grand.Token(0);
 				if(trigger == "deactivation")
 					triggeredActions.insert(TimerTrigger::DEACTIVATION);
 				else
@@ -219,7 +219,7 @@ void MissionTimer::Save(DataWriter &out) const
 
 
 
-MissionTimer MissionTimer::Instantiate(map<string, string> &subs, const System *origin,
+MissionTimer MissionTimer::Instantiate(std::map<std::string, std::string> &subs, const System *origin,
 	int jumps, int64_t payload) const
 {
 	MissionTimer result;
@@ -242,7 +242,7 @@ MissionTimer MissionTimer::Instantiate(map<string, string> &subs, const System *
 		result.waitTime += Random::Int(randomWaitTime);
 
 	// Validate all the actions attached to the timer, and if they're all valid, instantiate them too.
-	string reason;
+	std::string reason;
 	auto ait = actions.begin();
 	for( ; ait != actions.end(); ++ait)
 	{

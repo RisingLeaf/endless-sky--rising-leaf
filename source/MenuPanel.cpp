@@ -44,7 +44,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <stdexcept>
 
-using namespace std;
+
 
 namespace {
 	const int SCROLL_MOD = 2;
@@ -241,13 +241,13 @@ void MenuPanel::DrawCredits() const
 	const int top = static_cast<int>(creditsRect.Top());
 	const int bottom = static_cast<int>(creditsRect.Bottom());
 	int y = bottom + 5 - scroll / SCROLL_MOD;
-	for(const string &line : credits)
+	for(const std::string &line : credits)
 	{
 		float fade = 1.f;
 		if(y < top + 20)
-			fade = max(0.f, (y - top) / 20.f);
+			fade = std::max(0.f, (y - top) / 20.f);
 		else if(y > bottom - 20)
-			fade = max(0.f, (bottom - y) / 20.f);
+			fade = std::max(0.f, (bottom - y) / 20.f);
 		if(fade)
 		{
 			Color color(((line.empty() || line[0] == ' ') ? .2f : .4f) * fade, 0.f);

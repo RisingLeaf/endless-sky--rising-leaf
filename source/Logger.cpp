@@ -18,27 +18,27 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <iostream>
 #include <mutex>
 
-using namespace std;
+
 
 namespace {
-	function<void(const string &message)> logErrorCallback = nullptr;
-	mutex logErrorMutex;
+	std::function<void(const std::string &message)> logErrorCallback = nullptr;
+	std::mutex logErrorMutex;
 }
 
 
 
-void Logger::SetLogErrorCallback(function<void(const string &message)> callback)
+void Logger::SetLogErrorCallback(std::function<void(const std::string &message)> callback)
 {
 	logErrorCallback = std::move(callback);
 }
 
 
 
-void Logger::LogError(const string &message)
+void Logger::LogError(const std::string &message)
 {
-	lock_guard<mutex> lock(logErrorMutex);
+	std::lock_guard<std::mutex> lock(logErrorMutex);
 	// Log by default to stderr.
-	cerr << message << endl;
+	std::cerr << message << std::endl;
 	// Perform additional logging through callback if any is registered.
 	if(logErrorCallback)
 		logErrorCallback(message);

@@ -28,7 +28,6 @@ namespace File
 {
   struct ShaderString;
 }
-
 namespace MTL
 {
   class RenderPipelineState;
@@ -37,6 +36,7 @@ namespace MTL
   class CommandQueue;
   class RenderPassDescriptor;
   class Texture;
+  class Buffer;
 } // namespace MTL
 namespace CA
 {
@@ -66,6 +66,9 @@ namespace graphics_metal
     MTL::Texture              *MSAARenderTargetTexture = nullptr;
     MTL::Texture              *DepthTexture            = nullptr;
 
+    static constexpr size_t MaxBindBytes = 4096;
+    MTL::Buffer            *DynamicVertexBuffer     = nullptr; mutable size_t DynamicVertexBufferOffset = 0;
+
     friend void                            CreateRenderPassDescriptor(MetalGraphicsInstance *instance);
     friend void                            CreateDepthAndMSAAResources(MetalGraphicsInstance *instance, int width, int height);
     friend void                            UpdateRenderPassDescriptor(const MetalGraphicsInstance *instance);
@@ -76,7 +79,10 @@ namespace graphics_metal
   public:
     explicit MetalGraphicsInstance(int width, int height);
 
-    void CreateShader(std::unique_ptr<GraphicsTypes::ShaderInstance> &shader_instance, const ShaderInfo &shader_info, const std::vector<File::ShaderString> &shader_code) const override;
+    void CreateShader(std::unique_ptr<GraphicsTypes::ShaderInstance> &shader_instance,
+                      const ShaderInfo                               &shader_info,
+                      const std::vector<File::ShaderString>          &shader_code,
+                      std::string_view                                name) const override;
 
     void CreateBuffer(std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance, GraphicsTypes::BufferType type, size_t buffer_size) const override;
     void CreateBuffer(std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance, GraphicsTypes::BufferType type, size_t buffer_size, const void *data) const override;
@@ -84,7 +90,7 @@ namespace graphics_metal
     // Copies lhs into rhs.
     void CopyBuffer(GraphicsTypes::BufferInstance *buffer_instance_rhs, GraphicsTypes::BufferInstance *buffer_instance_lhs) const override;
 
-    void CreateTexture(std::unique_ptr<GraphicsTypes::TextureInstance> &texture_instance, const GraphicsTypes::TextureInfo &texture_info, const std::vector<const void *> &in_data) const override;
+    void CreateTexture(std::unique_ptr<GraphicsTypes::TextureInstance> &texture_instance, const GraphicsTypes::TextureInfo &texture_info, const void *in_data) const override;
 
     void                            CreateRenderBuffer(std::unique_ptr<GraphicsTypes::RenderBufferInstance> &render_buffer_instance, const GraphicsTypes::FrameBufferInfo &create_info) const override;
     GraphicsTypes::TextureInstance *GetRenderBufferTexture(GraphicsTypes::RenderBufferInstance *render_buffer_instance) const override;

@@ -17,7 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "PlayerInfo.h"
 
-using namespace std;
+
 
 
 
@@ -43,7 +43,7 @@ void InfoPanelState::SetSelectedIndex(int newSelectedIndex)
 
 
 
-void InfoPanelState::SetSelected(set<int> selected)
+void InfoPanelState::SetSelected(std::set<int> selected)
 {
 	allSelected = std::move(selected);
 	if(!allSelected.empty())
@@ -102,14 +102,14 @@ void InfoPanelState::DeselectAll()
 
 
 
-void InfoPanelState::Disown(vector<shared_ptr<Ship>>::const_iterator it)
+void InfoPanelState::Disown(std::vector<std::shared_ptr<Ship>>::const_iterator it)
 {
 	ships.erase(it);
 }
 
 
 
-const set<int> &InfoPanelState::AllSelected() const
+const std::set<int> &InfoPanelState::AllSelected() const
 {
 	return allSelected;
 }
@@ -137,14 +137,14 @@ void InfoPanelState::SetScroll(int newScroll)
 
 
 
-vector<shared_ptr<Ship>> &InfoPanelState::Ships()
+std::vector<std::shared_ptr<Ship>> &InfoPanelState::Ships()
 {
 	return ships;
 }
 
 
 
-const vector<shared_ptr<Ship>> &InfoPanelState::Ships() const
+const std::vector<std::shared_ptr<Ship>> &InfoPanelState::Ships() const
 {
 	return ships;
 }
@@ -162,7 +162,7 @@ bool InfoPanelState::ReorderShipsTo(int toIndex)
 
 
 // If the move accesses invalid indices, no moves are done.
-bool InfoPanelState::ReorderShips(const set<int> &fromIndices, int toIndex)
+bool InfoPanelState::ReorderShips(const std::set<int> &fromIndices, int toIndex)
 {
 	if(fromIndices.empty() || static_cast<unsigned>(toIndex) >= ships.size())
 		return false;
@@ -173,8 +173,8 @@ bool InfoPanelState::ReorderShips(const set<int> &fromIndices, int toIndex)
 
 	// Remove the ships from last to first, so that each removal leaves all the
 	// remaining indices in the set still valid.
-	vector<shared_ptr<Ship>> removed;
-	for(set<int>::const_iterator it = fromIndices.end(); it != fromIndices.begin(); )
+	std::vector<std::shared_ptr<Ship>> removed;
+	for(std::set<int>::const_iterator it = fromIndices.end(); it != fromIndices.begin(); )
 	{
 		// The "it" pointer doesn't point to the beginning of the list, so it is
 		// safe to decrement it here.
@@ -192,7 +192,7 @@ bool InfoPanelState::ReorderShips(const set<int> &fromIndices, int toIndex)
 			--toIndex;
 	}
 	// Make sure the insertion index is within the list.
-	toIndex = min<int>(toIndex + direction, ships.size());
+	toIndex = std::min<int>(toIndex + direction, ships.size());
 	ships.insert(ships.begin() + toIndex, removed.begin(), removed.end());
 
 	// Change the selected indices so they still refer to the block of ships

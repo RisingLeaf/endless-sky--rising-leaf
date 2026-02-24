@@ -32,7 +32,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "GameWindow.h"
 #include "graphics/graphics_layer.h"
 
-using namespace std;
+
 
 namespace
 {
@@ -43,10 +43,10 @@ namespace
 } // namespace
 
 
-Font::Font(const filesystem::path &imagePath) { Load(imagePath); }
+Font::Font(const std::filesystem::path &imagePath) { Load(imagePath); }
 
 
-void Font::Load(const filesystem::path &imagePath)
+void Font::Load(const std::filesystem::path &imagePath)
 {
   // Load the texture.
   ImageBuffer image;
@@ -68,7 +68,7 @@ void Font::Draw(const DisplayText &text, const Point &point, const Color &color)
 void Font::DrawAliased(const DisplayText &text, double x, double y, const Color &color) const
 {
   int          width     = -1;
-  const string truncText = TruncateText(text, width);
+  const std::string truncText = TruncateText(text, width);
   const auto  &layout    = text.GetLayout();
   if(width >= 0)
   {
@@ -79,13 +79,13 @@ void Font::DrawAliased(const DisplayText &text, double x, double y, const Color 
 }
 
 
-void Font::Draw(const string &str, const Point &point, const Color &color) const
+void Font::Draw(const std::string &str, const Point &point, const Color &color) const
 {
   DrawAliased(str, round(point.X()), round(point.Y()), color);
 }
 
 
-void Font::DrawAliased(const string &str, double x, double y, const Color &color) const
+void Font::DrawAliased(const std::string &str, double x, double y, const Color &color) const
 {
   shader.Bind();
 
@@ -97,7 +97,7 @@ void Font::DrawAliased(const string &str, double x, double y, const Color &color
   int       previous        = 0;
   bool      isAfterSpace    = true;
   bool      underlineChar   = false;
-  const int underscoreGlyph = max(0, min(GLYPHS - 1, '_' - 32));
+  const int underscoreGlyph = std::max(0, std::min(GLYPHS - 1, '_' - 32));
 
   for(char c : str)
   {
@@ -148,13 +148,13 @@ void Font::DrawAliased(const string &str, double x, double y, const Color &color
 }
 
 
-int Font::Width(const string &str, char after) const { return WidthRawString(str.c_str(), after); }
+int Font::Width(const std::string &str, char after) const { return WidthRawString(str.c_str(), after); }
 
 
 int Font::FormattedWidth(const DisplayText &text, char after) const
 {
   int          width     = -1;
-  const string truncText = TruncateText(text, width);
+  const std::string truncText = TruncateText(text, width);
   return width < 0 ? WidthRawString(truncText.c_str(), after) : width;
 }
 
@@ -177,7 +177,7 @@ int Font::Glyph(char c, bool isAfterSpace) noexcept
   if(c == '\'' && isAfterSpace) return 96;
   if(c == '"' && isAfterSpace) return 97;
 
-  return max(0, min(GLYPHS - 3, c - 32));
+  return std::max(0, std::min(GLYPHS - 3, c - 32));
 }
 
 
@@ -222,7 +222,7 @@ void Font::CalculateAdvances(ImageBuffer &image)
         {
         }
         int distance = (pit - pend) + 1;
-        glyphWidth   = max(distance, glyphWidth);
+        glyphWidth   = std::max(distance, glyphWidth);
 
         // Special case: if "next" is zero (i.e. end of line of text),
         // calculate the full width of this character. Otherwise:
@@ -242,14 +242,14 @@ void Font::CalculateAdvances(ImageBuffer &image)
           // So for zero kerning distance, you would want:
           distance += 1 - (nit - (nend - width));
         }
-        maxD = max(maxD, distance);
+        maxD = std::max(maxD, distance);
 
         // Update the pointer to point to the beginning of the next row.
         begin += pitch;
       }
       // This is a fudge factor to avoid over-kerning, especially for the
       // underscore and for glyph combinations like AV.
-      advance[previous * GLYPHS + next] = max(maxD, glyphWidth - 4) / 2;
+      advance[previous * GLYPHS + next] = std::max(maxD, glyphWidth - 4) / 2;
     }
 
   // Set the space size based on the character width.
@@ -306,18 +306,18 @@ int Font::WidthRawString(const char *str, char after) const noexcept
       previous = glyph;
     }
   }
-  width += advance[previous * GLYPHS + max(0, min(GLYPHS - 1, after - 32))];
+  width += advance[previous * GLYPHS + std::max(0, std::min(GLYPHS - 1, after - 32))];
 
   return width;
 }
 
 
 // Param width will be set to the width of the return value, unless the layout width is negative.
-string Font::TruncateText(const DisplayText &text, int &width) const
+std::string Font::TruncateText(const DisplayText &text, int &width) const
 {
   width                = -1;
   const auto   &layout = text.GetLayout();
-  const string &str    = text.GetText();
+  const std::string &str    = text.GetText();
   if(layout.width < 0 || (layout.align == Alignment::LEFT && layout.truncate == Truncate::NONE)) return str;
   width = layout.width;
   switch(layout.truncate)
@@ -331,35 +331,35 @@ string Font::TruncateText(const DisplayText &text, int &width) const
 }
 
 
-string Font::TruncateBack(const string &str, int &width) const
+std::string Font::TruncateBack(const std::string &str, int &width) const
 {
   return TruncateEndsOrMiddle(str,
                               width,
-                              [](const string &str, int charCount) { return str.substr(0, charCount) + "..."; });
+                              [](const std::string &str, int charCount) { return str.substr(0, charCount) + "..."; });
 }
 
 
-string Font::TruncateFront(const string &str, int &width) const
+std::string Font::TruncateFront(const std::string &str, int &width) const
 {
   return TruncateEndsOrMiddle(str,
                               width,
-                              [](const string &str, int charCount)
+                              [](const std::string &str, int charCount)
                               { return "..." + str.substr(str.size() - charCount); });
 }
 
 
-string Font::TruncateMiddle(const string &str, int &width) const
+std::string Font::TruncateMiddle(const std::string &str, int &width) const
 {
   return TruncateEndsOrMiddle(
       str,
       width,
-      [](const string &str, int charCount)
+      [](const std::string &str, int charCount)
       { return str.substr(0, (charCount + 1) / 2) + "..." + str.substr(str.size() - charCount / 2); });
 }
 
 
-string
-Font::TruncateEndsOrMiddle(const string &str, int &width, function<string(const string &, int)> getResultString) const
+std::string
+Font::TruncateEndsOrMiddle(const std::string &str, int &width, std::function<std::string(const std::string &, int)> getResultString) const
 {
   int firstWidth = WidthRawString(str.c_str());
   if(firstWidth <= width)

@@ -1,3 +1,4 @@
+u_in float zoom;
 u_in mat2 rotate;
 u_in vec2 translate;
 u_in float elongation;
@@ -13,7 +14,7 @@ VS_BEGIN
 	fragmentAlpha = spec.brightness * (4. / (4. + spec.elongation)) * size * .2 + .05;
 	coord = vec2(sin(corner), cos(corner));
 	vec2 elongated = vec2(coord.x * size, coord.y * (size + spec.elongation));
-	gl_Position = vec4((spec.rotate * elongated + spec.translate + offset) * glob.scale, 0, 1);
+	gl_Position = vec4((spec.rotate * elongated + spec.translate + offset) * glob.scale * spec.zoom, 0, 1);
 VS_END
 
 FS_BEGIN

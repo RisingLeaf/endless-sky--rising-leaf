@@ -17,7 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 
 
@@ -216,6 +216,6 @@ bool Rectangle::Overlaps(const Point &circle, const double radius) const
 	if(Contains(circle))
 		return true;
 
-	const Point closest = Point(max(Left(), min(Right(), circle.X())), max(Top(), min(Bottom(), circle.Y())));
+	const Point closest = Point(std::max(Left(), std::min(Right(), circle.X())), std::max(Top(), std::min(Bottom(), circle.Y())));
 	return (circle - closest).LengthSquared() < radius * radius;
 }

@@ -22,17 +22,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Ship.h"
 #include "System.h"
 
-using namespace std;
+
 
 
 
 void Person::Load(const DataNode &node, const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
 {
 	isLoaded = true;
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 
 		if(key == "system")
@@ -46,7 +46,7 @@ void Person::Load(const DataNode &node, const ConditionsStore *playerConditions,
 			// Name ships that are not the flagship with the name provided, if any.
 			// The flagship, and any unnamed fleet members, will be given the name of the Person.
 			bool setName = !ships.empty() && child.Size() >= 3;
-			ships.emplace_back(make_shared<Ship>(child, playerConditions));
+			ships.emplace_back(std::make_shared<Ship>(child, playerConditions));
 			if(setName)
 				ships.back()->SetGivenName(child.Token(2));
 		}
@@ -66,7 +66,7 @@ void Person::Load(const DataNode &node, const ConditionsStore *playerConditions,
 // Finish loading all the ships in this person specification.
 void Person::FinishLoading()
 {
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 	{
 		ship->FinishLoading(true);
 		if(formationPattern)
@@ -107,7 +107,7 @@ int Person::Frequency(const System *system) const
 
 // Get the person's characteristics. The ship object is persistent, i.e. it
 // will be recycled every time this person appears.
-const list<shared_ptr<Ship>> &Person::Ships() const
+const std::list<std::shared_ptr<Ship>> &Person::Ships() const
 {
 	return ships;
 }
@@ -149,7 +149,7 @@ bool Person::IsDestroyed() const
 // Mark this person as destroyed.
 void Person::Destroy()
 {
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		ship->Destroy();
 }
 
@@ -158,7 +158,7 @@ void Person::Destroy()
 // Mark this person as no longer destroyed.
 void Person::Restore()
 {
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 	{
 		ship->Restore();
 		ship->SetSystem(nullptr);
@@ -171,7 +171,7 @@ void Person::Restore()
 // Check if a person is already placed somewhere.
 bool Person::IsPlaced() const
 {
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(ship->GetSystem())
 			return true;
 

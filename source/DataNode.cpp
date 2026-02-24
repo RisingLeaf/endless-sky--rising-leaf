@@ -22,7 +22,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cctype>
 #include <cmath>
 
-using namespace std;
+
 
 
 
@@ -87,7 +87,7 @@ int DataNode::Size() const noexcept
 
 
 // Get all tokens.
-const vector<string> &DataNode::Tokens() const noexcept
+const std::vector<std::string> &DataNode::Tokens() const noexcept
 {
 	return tokens;
 }
@@ -95,7 +95,7 @@ const vector<string> &DataNode::Tokens() const noexcept
 
 
 // Add tokens to the node.
-void DataNode::AddToken(const string &token)
+void DataNode::AddToken(const std::string &token)
 {
 	tokens.emplace_back(token);
 }
@@ -104,7 +104,7 @@ void DataNode::AddToken(const string &token)
 
 // Get the token with the given index. No bounds checking is done.
 // DataFile loading guarantees index 0 always exists.
-const string &DataNode::Token(int index) const
+const std::string &DataNode::Token(int index) const
 {
 	return tokens[index];
 }
@@ -116,7 +116,7 @@ double DataNode::Value(int index) const
 {
 	// Check for empty strings and out-of-bounds indices.
 	if(static_cast<size_t>(index) >= tokens.size() || tokens[index].empty())
-		PrintTrace("Error: Requested token index (" + to_string(index) + ") is out of bounds:");
+		PrintTrace("Error: Requested token index (" + std::to_string(index) + ") is out of bounds:");
 	else if(!IsNumber(tokens[index]))
 		PrintTrace("Error: Cannot convert value \"" + tokens[index] + "\" to a number:");
 	else
@@ -128,7 +128,7 @@ double DataNode::Value(int index) const
 
 
 // Static helper function for any class which needs to parse string -> number.
-double DataNode::Value(const string &token)
+double DataNode::Value(const std::string &token)
 {
 	// Allowed format: "[+-]?[0-9]*[.]?[0-9]*([eE][+-]?[0-9]*)?".
 	if(!IsNumber(token))
@@ -192,7 +192,7 @@ bool DataNode::IsNumber(int index) const
 
 
 
-bool DataNode::IsNumber(const string &token)
+bool DataNode::IsNumber(const std::string &token)
 {
 	bool hasDecimalPoint = false;
 	bool hasExponent = false;
@@ -237,12 +237,12 @@ bool DataNode::BoolValue(int index) const
 {
 	// Check for empty strings and out-of-bounds indices.
 	if(static_cast<size_t>(index) >= tokens.size() || tokens[index].empty())
-		PrintTrace("Error: Requested token index (" + to_string(index) + ") is out of bounds:");
+		PrintTrace("Error: Requested token index (" + std::to_string(index) + ") is out of bounds:");
 	else if(!IsBool(tokens[index]))
 		PrintTrace("Error: Cannot convert value \"" + tokens[index] + "\" to a boolean:");
 	else
 	{
-		const string &token = tokens[index];
+		const std::string &token = tokens[index];
 		return token == "true" || token == "1";
 	}
 
@@ -264,14 +264,14 @@ bool DataNode::IsBool(int index) const
 
 
 
-bool DataNode::IsBool(const string &token)
+bool DataNode::IsBool(const std::string &token)
 {
 	return token == "true" || token == "1" || token == "false" || token == "0";
 }
 
 
 
-bool DataNode::IsConditionName(const string &token)
+bool DataNode::IsConditionName(const std::string &token)
 {
 	// For now check if condition names start with an alphabetic character, and that is all we check for now.
 	// Token "'" is required for backwards compatibility (used for illegal tokens).
@@ -305,7 +305,7 @@ bool DataNode::HasChildren() const noexcept
 
 
 // Iterator to the beginning of the list of children.
-list<DataNode>::const_iterator DataNode::begin() const noexcept
+std::list<DataNode>::const_iterator DataNode::begin() const noexcept
 {
 	return children.begin();
 }
@@ -313,7 +313,7 @@ list<DataNode>::const_iterator DataNode::begin() const noexcept
 
 
 // Iterator to the end of the list of children.
-list<DataNode>::const_iterator DataNode::end() const noexcept
+std::list<DataNode>::const_iterator DataNode::end() const noexcept
 {
 	return children.end();
 }
@@ -321,7 +321,7 @@ list<DataNode>::const_iterator DataNode::end() const noexcept
 
 
 // Print a message followed by a "trace" of this node and its parents.
-int DataNode::PrintTrace(const string &message) const
+int DataNode::PrintTrace(const std::string &message) const
 {
 	if(!message.empty())
 		Logger::LogError(message);
@@ -335,9 +335,9 @@ int DataNode::PrintTrace(const string &message) const
 		return indent;
 
 	// Convert this node back to tokenized text, with quotes used as necessary.
-	string line = !parent ? "" : "L" + to_string(lineNumber) + ": ";
-	line.append(string(indent, ' '));
-	for(const string &token : tokens)
+	std::string line = !parent ? "" : "L" + std::to_string(lineNumber) + ": ";
+	line.append(std::string(indent, ' '));
+	for(const std::string &token : tokens)
 	{
 		if(&token != &tokens.front())
 			line += ' ';

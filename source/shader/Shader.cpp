@@ -23,15 +23,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../risingleaf_shared/system/File.h"
 #include "../risingleaf_shared/system/Log.h"
 
-using namespace std;
 
 
 
-void Shader::Create(const vector<File::ShaderString> &shader_code)
+
+void Shader::Create(const std::vector<File::ShaderString> &shader_code)
 {
 	Log::Info<<"Compiling Shader: "<<Name<<Log::End;
 
-  GameWindow::GetInstance()->CreateShader(ShaderInstance, Info, shader_code);
+  GameWindow::GetInstance()->CreateShader(ShaderInstance, Info, shader_code, Name);
 
 	if (!ShaderInstance)
 		throw std::runtime_error("Shader Instance not found: " + std::string(Name));

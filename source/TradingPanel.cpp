@@ -35,10 +35,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <string>
 
-using namespace std;
+
 
 namespace {
-	const string TRADE_LEVEL[] = {
+	const std::string TRADE_LEVEL[] = {
 		"(very low)",
 		"(low)",
 		"(medium)",
@@ -69,7 +69,7 @@ TradingPanel::~TradingPanel()
 {
 	if(profit)
 	{
-		string message = "You sold " + Format::CargoString(tonsSold, "cargo ");
+		std::string message = "You sold " + Format::CargoString(tonsSold, "cargo ");
 
 		if(profit < 0)
 			message += "at a loss of " + Format::CreditString(-profit) + ".";
@@ -113,7 +113,7 @@ void TradingPanel::Draw()
 	font.Draw("Commodity", Point(MIN_X + NAME_X, y), selected);
 	font.Draw("Price", Point(MIN_X + PRICE_X, y), selected);
 
-	string mod = "x " + to_string(Modifier());
+	std::string mod = "x " + std::to_string(Modifier());
 	font.Draw(mod, Point(MIN_X + BUY_X, y), unselected);
 	font.Draw(mod, Point(MIN_X + SELL_X, y), unselected);
 
@@ -122,7 +122,7 @@ void TradingPanel::Draw()
 	y += 5;
 	int lastY = y + 20 * COMMODITY_COUNT + 25;
 	font.Draw("free:", Point(MIN_X + SELL_X + 5, lastY), selected);
-	font.Draw(to_string(player.Cargo().Free()), Point(MIN_X + HOLD_X, lastY), selected);
+	font.Draw(std::to_string(player.Cargo().Free()), Point(MIN_X + HOLD_X, lastY), selected);
 
 	int outfits = player.Cargo().OutfitsSize();
 	int missionCargo = player.Cargo().MissionCargoSize();
@@ -139,7 +139,7 @@ void TradingPanel::Draw()
 			}
 		sellOutfits = (hasOutfits && !hasMinables);
 
-		string str = Format::MassString(outfits + missionCargo) + " of ";
+		std::string str = Format::MassString(outfits + missionCargo) + " of ";
 		if(hasMinables && missionCargo)
 			str += "mission cargo and other items.";
 		else if(hasOutfits && missionCargo)
@@ -172,12 +172,12 @@ void TradingPanel::Draw()
 		if(price)
 		{
 			canBuy |= isSelected;
-			font.Draw(to_string(price), Point(MIN_X + PRICE_X, y), color);
+			font.Draw(std::to_string(price), Point(MIN_X + PRICE_X, y), color);
 
 			int basis = player.GetBasis(commodity.name);
 			if(basis && basis != price && hold)
 			{
-				string profit = to_string(price - basis);
+				std::string profit = std::to_string(price - basis);
 				font.Draw(profit, Point(MIN_X + PROFIT_X, y), color);
 				showProfit = true;
 			}
@@ -203,7 +203,7 @@ void TradingPanel::Draw()
 		{
 			sellOutfits = false;
 			canSell |= (price != 0);
-			font.Draw(to_string(hold), Point(MIN_X + HOLD_X, y), selected);
+			font.Draw(std::to_string(hold), Point(MIN_X + HOLD_X, y), selected);
 		}
 	}
 
@@ -228,9 +228,9 @@ bool TradingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, 
 	if(command.Has(Command::HELP))
 		DoHelp("trading", true);
 	else if(key == SDLK_UP)
-		player.SetMapColoring(max(0, player.MapColoring() - 1));
+		player.SetMapColoring(std::max(0, player.MapColoring() - 1));
 	else if(key == SDLK_DOWN)
-		player.SetMapColoring(max(0, min(COMMODITY_COUNT - 1, player.MapColoring() + 1)));
+		player.SetMapColoring(std::max(0, std::min(COMMODITY_COUNT - 1, player.MapColoring() + 1)));
 	else if(key == SDLK_EQUALS || key == SDLK_KP_PLUS || key == SDLK_PLUS || key == SDLK_RETURN || key == SDLK_SPACE)
 		Buy(1);
 	else if(key == SDLK_MINUS || key == SDLK_KP_MINUS || key == SDLK_BACKSPACE || key == SDLK_DELETE)
@@ -241,7 +241,7 @@ bool TradingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, 
 	{
 		for(const auto &it : player.Cargo().Commodities())
 		{
-			const string &commodity = it.first;
+			const std::string &commodity = it.first;
 			const int64_t &amount = it.second;
 			int64_t price = system.Trade(commodity);
 			if(!price || !amount)
@@ -317,20 +317,20 @@ void TradingPanel::Buy(int64_t amount)
 		return;
 
 	amount *= Modifier();
-	const string &type = GameData::Commodities()[selectedRow].name;
+	const std::string &type = GameData::Commodities()[selectedRow].name;
 	int64_t price = system.Trade(type);
 	if(!price)
 		return;
 
 	if(amount > 0)
 	{
-		amount = min(amount, min<int64_t>(player.Cargo().Free(), player.Accounts().Credits() / price));
+		amount = std::min(amount, std::min<int64_t>(player.Cargo().Free(), player.Accounts().Credits() / price));
 		player.AdjustBasis(type, amount * price);
 	}
 	else
 	{
 		// Selling cargo:
-		amount = max<int64_t>(amount, -player.Cargo().Get(type));
+		amount = std::max<int64_t>(amount, -player.Cargo().Get(type));
 
 		int64_t basis = player.GetBasis(type, amount);
 		player.AdjustBasis(type, basis);

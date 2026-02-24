@@ -51,7 +51,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <sstream>
 
-using namespace std;
+
 
 namespace {
 	constexpr int SIDE_WIDTH = 280;
@@ -82,11 +82,11 @@ namespace {
 
 	size_t MaxDisplayedMissions(bool onRight)
 	{
-		return static_cast<unsigned>(max(0, static_cast<int>(floor((Screen::Height() - (onRight ? 160. : 190.)) / 20.))));
+		return static_cast<unsigned>(std::max(0, static_cast<int>(floor((Screen::Height() - (onRight ? 160. : 190.)) / 20.))));
 	}
 
 	// Compute the required scroll amount for the given list of jobs/missions.
-	void ScrollMissionList(const list<Mission> &missionList, const list<Mission>::const_iterator &it,
+	void ScrollMissionList(const std::list<Mission> &missionList, const std::list<Mission>::const_iterator &it,
 		double &sideScroll, bool checkVisibility)
 	{
 		// We don't need to scroll at all if the selection must be within the viewport. The current
@@ -113,7 +113,7 @@ namespace {
 			else if(desiredScroll > bottomOfPage)
 			{
 				// Scroll downwards (but not so far that the list's bottom sprite comes upwards further than needed).
-				sideScroll = min(maximumScroll, sideScroll + (desiredScroll - bottomOfPage));
+				sideScroll = std::min(maximumScroll, sideScroll + (desiredScroll - bottomOfPage));
 			}
 		}
 	}
@@ -253,7 +253,7 @@ void MissionPanel::Draw()
 	const Ship *flagship = player.Flagship();
 	const double jumpRange = flagship ? flagship->JumpNavigation().JumpRange() : 0.;
 	const System *previous = player.GetSystem();
-	const vector<const System *> plan = distance.Plan(*selectedSystem);
+	const std::vector<const System *> plan = distance.Plan(*selectedSystem);
 	for(auto it = plan.rbegin(); it != plan.rend(); ++it)
 	{
 		const System *next = *it;
@@ -454,7 +454,7 @@ bool MissionPanel::Click(int x, int y, MouseButton button, int clicks)
 			return false;
 		}
 		// Available missions
-		unsigned index = max(0, (y + static_cast<int>(availableScroll) - 36 - Screen::Top()) / 20);
+		unsigned index = std::max(0, (y + static_cast<int>(availableScroll) - 36 - Screen::Top()) / 20);
 		if(index < available.size())
 		{
 			const auto lastAvailableIt = availableIt;
@@ -475,7 +475,7 @@ bool MissionPanel::Click(int x, int y, MouseButton button, int clicks)
 	else if(x >= Screen::Right() - SIDE_WIDTH)
 	{
 		// Accepted missions
-		int index = max(0, (y + static_cast<int>(acceptedScroll) - 36 - Screen::Top()) / 20);
+		int index = std::max(0, (y + static_cast<int>(acceptedScroll) - 36 - Screen::Top()) / 20);
 		if(index < AcceptedVisible())
 		{
 			const auto lastAcceptedIt = acceptedIt;
@@ -598,14 +598,14 @@ bool MissionPanel::Drag(double dx, double dy)
 {
 	if(dragSide < 0)
 	{
-		availableScroll = max(0.,
-			min(available.size() * 20. + 190. - Screen::Height(),
+		availableScroll = std::max(0.,
+			std::min(available.size() * 20. + 190. - Screen::Height(),
 				availableScroll - dy));
 	}
 	else if(dragSide > 0)
 	{
-		acceptedScroll = max(0.,
-			min(accepted.size() * 20. + 160. - Screen::Height(),
+		acceptedScroll = std::max(0.,
+			std::min(accepted.size() * 20. + 160. - Screen::Height(),
 				acceptedScroll - dy));
 	}
 	else if(canDrag)
@@ -622,7 +622,7 @@ bool MissionPanel::Hover(int x, int y)
 	dragSide = 0;
 	int oldSort = hoverSort;
 	hoverSort = -1;
-	unsigned index = max(0, (y + static_cast<int>(availableScroll) - 36 - Screen::Top()) / 20);
+	unsigned index = std::max(0, (y + static_cast<int>(availableScroll) - 36 - Screen::Top()) / 20);
 	if(x < Screen::Left() + SIDE_WIDTH)
 	{
 		if(index < available.size())
@@ -672,7 +672,7 @@ void MissionPanel::Resize()
 
 void MissionPanel::InitTextArea()
 {
-	description = make_shared<TextArea>();
+	description = std::make_shared<TextArea>();
 	description->SetFont(FontSet::Get(14));
 	description->SetAlignment(Alignment::JUSTIFIED);
 	description->SetColor(*GameData::Colors().Get("bright"));
@@ -735,7 +735,7 @@ void MissionPanel::DrawKey() const
 		*colors.Get("blocked mission"),
 		*colors.Get("waypoint")
 	};
-	static const string LABEL[ROWS] = {
+	static const std::string LABEL[ROWS] = {
 		"Available job; can accept",
 		"Too little space to accept",
 		"Active job; go here to complete",
@@ -762,12 +762,12 @@ void MissionPanel::DrawKey() const
 // waypoints) by drawing colored rings around them.
 void MissionPanel::DrawMissionSystem(const Mission &mission, const Color &color) const
 {
-	auto toVisit = set<const System *>{mission.Waypoints()};
+	auto toVisit = std::set<const System *>{mission.Waypoints()};
 	toVisit.insert(mission.MarkedSystems().begin(), mission.MarkedSystems().end());
 	toVisit.insert(mission.TrackedSystems().begin(), mission.TrackedSystems().end());
 	for(const Planet *planet : mission.Stopovers())
 		toVisit.insert(planet->GetSystem());
-	auto hasVisited = set<const System *>{mission.VisitedWaypoints()};
+	auto hasVisited = std::set<const System *>{mission.VisitedWaypoints()};
 	hasVisited.insert(mission.UnmarkedSystems().begin(), mission.UnmarkedSystems().end());
 	for(const Planet *planet : mission.VisitedStopovers())
 		hasVisited.insert(planet->GetSystem());
@@ -796,7 +796,7 @@ void MissionPanel::DrawMissionSystem(const Mission &mission, const Color &color)
 
 
 // Draw the background for the lists of available and accepted missions (based on pos).
-Point MissionPanel::DrawPanel(Point pos, const string &label, int entries, bool sorter) const
+Point MissionPanel::DrawPanel(Point pos, const std::string &label, int entries, bool sorter) const
 {
 	const Color &back = *GameData::Colors().Get("map side panel background");
 	const Color &text = *GameData::Colors().Get("medium");
@@ -874,7 +874,7 @@ Point MissionPanel::DrawPanel(Point pos, const string &label, int entries, bool 
 
 
 
-Point MissionPanel::DrawList(const list<Mission> &missionList, Point pos, const list<Mission>::const_iterator &selectIt,
+Point MissionPanel::DrawList(const std::list<Mission> &missionList, Point pos, const std::list<Mission>::const_iterator &selectIt,
 	bool separateDeadlineOrPossible) const
 {
 	const Font &font = FontSet::Get(14);
@@ -998,7 +998,7 @@ void MissionPanel::DrawTooltips()
 	// Create the tooltip text.
 	if(!tooltip.HasText())
 	{
-		string text;
+		std::string text;
 		if(hoverSort == 0)
 			text = "Filter out missions with a deadline";
 		else if(hoverSort == 1)
@@ -1058,7 +1058,7 @@ void MissionPanel::Accept(bool force)
 			MakeSpaceAndAccept();
 			return;
 		}
-		ostringstream out;
+		std::ostringstream out;
 		if(cargoToSell > 0 && crewToFire > 0)
 			out << "You must fire " << crewToFire << " of your flagship's non-essential crew members and sell "
 				<< Format::CargoString(cargoToSell, "ordinary commodities") << " to make room for this mission. Continue?";
@@ -1092,7 +1092,7 @@ void MissionPanel::Accept(bool force)
 		bool stillLooking = true;
 
 		// Updates availableIt if matching system found, returns true if planet also matches.
-		auto SelectNext = [this, planet, system, &stillLooking](const list<Mission>::const_iterator &it) -> bool
+		auto SelectNext = [this, planet, system, &stillLooking](const std::list<Mission>::const_iterator &it) -> bool
 		{
 			if(it->Destination() && it->Destination()->IsInSystem(system))
 			{
@@ -1110,7 +1110,7 @@ void MissionPanel::Accept(bool force)
 			return false;
 		};
 
-		const list<Mission>::const_iterator startHere = availableIt;
+		const std::list<Mission>::const_iterator startHere = availableIt;
 		for(auto it = startHere; it != available.end(); ++it)
 			if(SelectNext(it))
 				return;
@@ -1136,7 +1136,7 @@ void MissionPanel::MakeSpaceAndAccept()
 		if(cargoToSell <= 0)
 			break;
 
-		int toSell = min(cargoToSell, it.second);
+		int toSell = std::min(cargoToSell, it.second);
 		int64_t price = player.GetSystem()->Trade(it.first);
 
 		int64_t basis = player.GetBasis(it.first, toSell);

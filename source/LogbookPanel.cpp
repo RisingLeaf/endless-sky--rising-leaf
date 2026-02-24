@@ -16,7 +16,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "LogbookPanel.h"
 
 #include "text/Alignment.h"
-#include "Color.h"
 #include "text/DisplayText.h"
 #include "shader/FillShader.h"
 #include "text/Font.h"
@@ -33,7 +32,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <set>
 
-using namespace std;
+
 
 namespace {
 	const double SIDEBAR_WIDTH = 100.;
@@ -46,7 +45,7 @@ namespace {
 	const double MINIMUM_SELECTION_DISTANCE = LINE_HEIGHT * 3;
 
 	const double GAP = 30.;
-	const string MONTH[] = {
+	const std::string MONTH[] = {
 		"  January", "  February", "  March", "  April", "  May", "  June",
 		"  July", "  August", "  September", "  October", "  November", "  December"};
 }
@@ -117,7 +116,7 @@ void LogbookPanel::Draw()
 		pos.Y() += LINE_HEIGHT;
 	}
 
-	maxCategoryScroll = max(0., maxCategoryScroll + pos.Y() - Screen::Bottom());
+	maxCategoryScroll = std::max(0., maxCategoryScroll + pos.Y() - Screen::Bottom());
 
 	// Parameters for drawing the main text:
 	WrappedText wrap(font);
@@ -134,7 +133,7 @@ void LogbookPanel::Draw()
 		const auto layout = Layout(static_cast<int>(TEXT_WIDTH - 2. * PAD), Alignment::RIGHT);
 		for(auto datedEntry = begin; datedEntry != end; ++datedEntry)
 		{
-			string date = datedEntry->first.ToString();
+			std::string date = datedEntry->first.ToString();
 			font.Draw({date, layout}, pos + Point(0., textOffset.Y()), dim);
 			pos.Y() += LINE_HEIGHT;
 
@@ -154,7 +153,7 @@ void LogbookPanel::Draw()
 		}
 	}
 
-	maxScroll = max(0., scroll + pos.Y() - Screen::Bottom());
+	maxScroll = std::max(0., scroll + pos.Y() - Screen::Bottom());
 }
 
 
@@ -231,7 +230,7 @@ bool LogbookPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, 
 			if(position < MINIMUM_SELECTION_DISTANCE || position > (Screen::Height() - MINIMUM_SELECTION_DISTANCE))
 				categoryScroll = position - (Screen::Height() / 2);
 
-			categoryScroll = max(categoryScroll, 0.);
+			categoryScroll = std::max(categoryScroll, 0.);
 		}
 	}
 	else
@@ -275,9 +274,9 @@ bool LogbookPanel::Click(int x, int y, MouseButton button, int clicks)
 bool LogbookPanel::Drag(double dx, double dy)
 {
 	if((hoverPoint.X() - Screen::Left()) > SIDEBAR_WIDTH)
-		scroll = max(0., min(maxScroll, scroll - dy));
+		scroll = std::max(0., std::min(maxScroll, scroll - dy));
 	else
-		categoryScroll = max(0., min(maxCategoryScroll, categoryScroll - dy));
+		categoryScroll = std::max(0., std::min(maxCategoryScroll, categoryScroll - dy));
 
 	return true;
 }
@@ -316,8 +315,8 @@ void LogbookPanel::Update(bool selectLast)
 	}
 
 	// Check what years and months have entries for them.
-	set<int> years;
-	set<int> months;
+	std::set<int> years;
+	std::set<int> months;
 	for(const auto &it : player.Logbook())
 	{
 		years.insert(it.first.Year());
@@ -328,7 +327,7 @@ void LogbookPanel::Update(bool selectLast)
 	// Generate the table of contents.
 	for(int year : years)
 	{
-		contents.emplace_back(to_string(year));
+		contents.emplace_back(std::to_string(year));
 		dates.emplace_back(0, 0, year);
 		if(selectedDate && year == selectedDate.Year())
 			for(int month : months)

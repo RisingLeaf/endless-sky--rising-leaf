@@ -19,7 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cmath>
 
-using namespace std;
+
 
 namespace {
 	const double CAMERA_VELOCITY_TRACKING = 0.1;

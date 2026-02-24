@@ -15,18 +15,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Orders.h"
 
-using namespace std;
 
 
 
-void Orders::SetTargetShip(shared_ptr<Ship> ship)
+
+void Orders::SetTargetShip(std::shared_ptr<Ship> ship)
 {
 	targetShip = ship;
 }
 
 
 
-void Orders::SetTargetAsteroid(shared_ptr<Minable> asteroid)
+void Orders::SetTargetAsteroid(std::shared_ptr<Minable> asteroid)
 {
 	targetAsteroid = asteroid;
 }
@@ -47,14 +47,14 @@ void Orders::SetTargetSystem(const System *system)
 
 
 
-shared_ptr<Ship> Orders::GetTargetShip() const
+std::shared_ptr<Ship> Orders::GetTargetShip() const
 {
 	return targetShip.lock();
 }
 
 
 
-shared_ptr<Minable> Orders::GetTargetAsteroid() const
+std::shared_ptr<Minable> Orders::GetTargetAsteroid() const
 {
 	return targetAsteroid.lock();
 }

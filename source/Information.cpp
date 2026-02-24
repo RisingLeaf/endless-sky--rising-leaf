@@ -17,7 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "image/Sprite.h"
 
-using namespace std;
+
 
 
 
@@ -43,7 +43,7 @@ bool Information::HasCustomRegion() const
 
 
 
-void Information::SetSprite(const string &name, const Sprite *sprite, const Point &unit,
+void Information::SetSprite(const std::string &name, const Sprite *sprite, const Point &unit,
 	float frame, const Swizzle *swizzle)
 {
 	sprites[name] = sprite;
@@ -54,7 +54,7 @@ void Information::SetSprite(const string &name, const Sprite *sprite, const Poin
 
 
 
-const Sprite *Information::GetSprite(const string &name) const
+const Sprite *Information::GetSprite(const std::string &name) const
 {
 	static const Sprite empty;
 
@@ -64,7 +64,7 @@ const Sprite *Information::GetSprite(const string &name) const
 
 
 
-const Point &Information::GetSpriteUnit(const string &name) const
+const Point &Information::GetSpriteUnit(const std::string &name) const
 {
 	static const Point up(0., -1.);
 
@@ -74,7 +74,7 @@ const Point &Information::GetSpriteUnit(const string &name) const
 
 
 
-float Information::GetSpriteFrame(const string &name) const
+float Information::GetSpriteFrame(const std::string &name) const
 {
 	auto it = spriteFrames.find(name);
 	return (it == spriteFrames.end()) ? 0.f : it->second;
@@ -82,7 +82,7 @@ float Information::GetSpriteFrame(const string &name) const
 
 
 
-const Swizzle *Information::GetSwizzle(const string &name) const
+const Swizzle *Information::GetSwizzle(const std::string &name) const
 {
 	auto it = spriteSwizzles.find(name);
 	return it == spriteSwizzles.end() ? 0 : it->second;
@@ -90,16 +90,16 @@ const Swizzle *Information::GetSwizzle(const string &name) const
 
 
 
-void Information::SetString(const string &name, const string &value)
+void Information::SetString(const std::string &name, const std::string &value)
 {
 	strings[name] = value;
 }
 
 
 
-const string &Information::GetString(const string &name) const
+const std::string &Information::GetString(const std::string &name) const
 {
-	static const string empty;
+	static const std::string empty;
 
 	auto it = strings.find(name);
 	return (it == strings.end()) ? empty : it->second;
@@ -107,7 +107,7 @@ const string &Information::GetString(const string &name) const
 
 
 
-void Information::SetBar(const string &name, double value, double segments)
+void Information::SetBar(const std::string &name, double value, double segments)
 {
 	bars[name] = value;
 	barSegments[name] = segments;
@@ -115,7 +115,7 @@ void Information::SetBar(const string &name, double value, double segments)
 
 
 
-double Information::BarValue(const string &name) const
+double Information::BarValue(const std::string &name) const
 {
 	auto it = bars.find(name);
 
@@ -124,7 +124,7 @@ double Information::BarValue(const string &name) const
 
 
 
-double Information::BarSegments(const string &name) const
+double Information::BarSegments(const std::string &name) const
 {
 	auto it = barSegments.find(name);
 
@@ -133,14 +133,14 @@ double Information::BarSegments(const string &name) const
 
 
 
-void Information::SetCondition(const string &condition)
+void Information::SetCondition(const std::string &condition)
 {
 	conditions.insert(condition);
 }
 
 
 
-bool Information::HasCondition(const string &condition) const
+bool Information::HasCondition(const std::string &condition) const
 {
 	if(condition.empty())
 		return true;

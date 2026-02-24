@@ -22,7 +22,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "GameWindow.h"
 #include "Shader.h"
 
-using namespace std;
+
 
 namespace
 {

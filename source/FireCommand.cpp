@@ -19,11 +19,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <vector>
 
-using namespace std;
+
 
 namespace {
 	template<typename T>
-	void SubsetAssign(vector<T> &lhs, const vector<T> &rhs) noexcept
+	void SubsetAssign(std::vector<T> &lhs, const std::vector<T> &rhs) noexcept
 	{
 		const auto size = lhs.size() < rhs.size() ? lhs.size() : rhs.size();
 		for(size_t i = 0; i < size; ++i)
@@ -109,7 +109,7 @@ void FireCommand::SetAim(int index, double amount) noexcept
 {
 	if(!IsIndexValid(index))
 		return;
-	aim[index] = round(127. * max(-1., min(1., amount)));
+	aim[index] = round(127. * std::max(-1., std::min(1., amount)));
 }
 
 

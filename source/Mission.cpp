@@ -37,21 +37,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <limits>
 #include <sstream>
 
-using namespace std;
+
 
 namespace {
 	// Pick a random commodity that would make sense to be exported from the
 	// first system to the second.
 	const Trade::Commodity *PickCommodity(const System &from, const System &to)
 	{
-		vector<int> weight;
+		std::vector<int> weight;
 		int total = 0;
 		for(const Trade::Commodity &commodity : GameData::Commodities())
 		{
 			// For every 100 credits in profit you can make, double the chance
 			// of this commodity being chosen.
 			double profit = to.Trade(commodity.name) - from.Trade(commodity.name);
-			int w = max<int>(1, 100. * pow(2., profit * .01));
+			int w = std::max<int>(1, 100. * pow(2., profit * .01));
 			weight.push_back(w);
 			total += w;
 		}
@@ -70,7 +70,7 @@ namespace {
 
 	// If a source, destination, waypoint, or stopover supplies more than one explicit choice
 	// or a mixture of explicit choice and location filter, print a warning.
-	void ParseMixedSpecificity(const DataNode &node, string &&kind, int expected)
+	void ParseMixedSpecificity(const DataNode &node, std::string &&kind, int expected)
 	{
 		if(node.Size() >= expected + 1)
 			node.PrintTrace("Warning: use a location filter to choose from multiple " + kind + "s:");
@@ -78,7 +78,7 @@ namespace {
 			node.PrintTrace("Warning: location filter ignored due to use of explicit " + kind + ":");
 	}
 
-	string TriggerToText(Mission::Trigger trigger)
+	std::string TriggerToText(Mission::Trigger trigger)
 	{
 		switch(trigger)
 		{
@@ -116,7 +116,7 @@ namespace {
 
 // Construct and Load() at the same time.
 Mission::Mission(const DataNode &node, const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
 {
 	Load(node, playerConditions, visitedSystems, visitedPlanets);
 }
@@ -125,7 +125,7 @@ Mission::Mission(const DataNode &node, const ConditionsStore *playerConditions,
 
 // Load a mission, either from the game data or from a saved game.
 void Mission::Load(const DataNode &node, const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
 {
 	// All missions need a name.
 	if(node.Size() < 2)
@@ -148,7 +148,7 @@ void Mission::Load(const DataNode &node, const ConditionsStore *playerConditions
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "name" && hasValue)
 			displayName = child.Token(1);
@@ -299,7 +299,7 @@ void Mission::Load(const DataNode &node, const ConditionsStore *playerConditions
 		else if(key == "waypoint" && hasValue)
 		{
 			bool visited = child.Size() >= 3 && child.Token(2) == "visited";
-			set<const System *> &set = visited ? visitedWaypoints : waypoints;
+			std::set<const System *> &set = visited ? visitedWaypoints : waypoints;
 			set.insert(GameData::Systems().Get(child.Token(1)));
 			ParseMixedSpecificity(child, "system", 2 + visited);
 		}
@@ -308,7 +308,7 @@ void Mission::Load(const DataNode &node, const ConditionsStore *playerConditions
 		else if(key == "stopover" && hasValue)
 		{
 			bool visited = child.Size() >= 3 && child.Token(2) == "visited";
-			set<const Planet *> &set = visited ? visitedStopovers : stopovers;
+			std::set<const Planet *> &set = visited ? visitedStopovers : stopovers;
 			set.insert(GameData::Planets().Get(child.Token(1)));
 			ParseMixedSpecificity(child, "planet", 2 + visited);
 		}
@@ -317,7 +317,7 @@ void Mission::Load(const DataNode &node, const ConditionsStore *playerConditions
 		else if(key == "mark" && hasValue)
 		{
 			bool unmarked = child.Size() >= 3 && child.Token(2) == "unmarked";
-			set<const System *> &set = unmarked ? unmarkedSystems : markedSystems;
+			std::set<const System *> &set = unmarked ? unmarkedSystems : markedSystems;
 			set.insert(GameData::Systems().Get(child.Token(1)));
 		}
 		else if(key == "substitutions" && child.HasChildren())
@@ -340,7 +340,7 @@ void Mission::Load(const DataNode &node, const ConditionsStore *playerConditions
 		}
 		else if(key == "on" && hasValue)
 		{
-			static const map<string, Trigger> trigger = {
+			static const std::map<std::string, Trigger> trigger = {
 				{"complete", COMPLETE},
 				{"offer", OFFER},
 				{"accept", ACCEPT},
@@ -368,7 +368,7 @@ void Mission::Load(const DataNode &node, const ConditionsStore *playerConditions
 				else
 					color = ExclusiveItem<Color>(GameData::Colors().Get(child.Token(2)));
 			};
-			const string &value = child.Token(1);
+			const std::string &value = child.Token(1);
 			if(value == "unavailable")
 				setColor(unavailable);
 			else if(value == "unselected")
@@ -384,14 +384,14 @@ void Mission::Load(const DataNode &node, const ConditionsStore *playerConditions
 
 	if(displayName.empty())
 		displayName = trueName;
-	hasTrackedNpcs = ranges::any_of(npcs, [](const NPC &npc) { return npc.GetPersonality().IsTracked(); });
+	hasTrackedNpcs = std::ranges::any_of(npcs, [](const NPC &npc) { return npc.GetPersonality().IsTracked(); });
 }
 
 
 
 // Save a mission. It is safe to assume that any mission that is being saved
 // is already "instantiated," so only a subset of the data must be saved.
-void Mission::Save(DataWriter &out, const string &tag) const
+void Mission::Save(DataWriter &out, const std::string &tag) const
 {
 	out.Write(tag, trueName);
 	out.BeginChild();
@@ -416,7 +416,7 @@ void Mission::Save(DataWriter &out, const string &tag) const
 			out.Write("stealth");
 		if(!isVisible)
 			out.Write("invisible");
-		auto saveColor = [&out](const ExclusiveItem<Color> &color, string tokenName) noexcept -> void {
+		auto saveColor = [&out](const ExclusiveItem<Color> &color, std::string tokenName) noexcept -> void {
 			if(!color->IsLoaded())
 				return;
 			if(!color->TrueName().empty())
@@ -578,21 +578,21 @@ const EsUuid &Mission::UUID() const noexcept
 // Get the internal name used for this mission. This name is unique and is
 // never modified by string substitution, so it can be used in condition
 // variables, etc.
-const string &Mission::TrueName() const
+const std::string &Mission::TrueName() const
 {
 	return trueName;
 }
 
 
 
-const string &Mission::DisplayName() const
+const std::string &Mission::DisplayName() const
 {
 	return displayName;
 }
 
 
 
-const string &Mission::Description() const
+const std::string &Mission::Description() const
 {
 	return description;
 }
@@ -749,49 +749,49 @@ const Planet *Mission::Destination() const
 
 
 
-const set<const System *> &Mission::Waypoints() const
+const std::set<const System *> &Mission::Waypoints() const
 {
 	return waypoints;
 }
 
 
 
-const set<const System *> &Mission::VisitedWaypoints() const
+const std::set<const System *> &Mission::VisitedWaypoints() const
 {
 	return visitedWaypoints;
 }
 
 
 
-const set<const Planet *> &Mission::Stopovers() const
+const std::set<const Planet *> &Mission::Stopovers() const
 {
 	return stopovers;
 }
 
 
 
-const set<const Planet *> &Mission::VisitedStopovers() const
+const std::set<const Planet *> &Mission::VisitedStopovers() const
 {
 	return visitedStopovers;
 }
 
 
 
-const set<const System *> &Mission::MarkedSystems() const
+const std::set<const System *> &Mission::MarkedSystems() const
 {
 	return markedSystems;
 }
 
 
 
-const set<const System *> &Mission::UnmarkedSystems() const
+const std::set<const System *> &Mission::UnmarkedSystems() const
 {
 	return unmarkedSystems;
 }
 
 
 
-const set<const System *> &Mission::TrackedSystems() const
+const std::set<const System *> &Mission::TrackedSystems() const
 {
 	return trackedSystems;
 }
@@ -820,7 +820,7 @@ void Mission::RecalculateTrackedSystems()
 
 
 
-void Mission::Mark(const set<const System *> &systems) const
+void Mission::Mark(const std::set<const System *> &systems) const
 {
 	for(const System *system : systems)
 	{
@@ -831,7 +831,7 @@ void Mission::Mark(const set<const System *> &systems) const
 
 
 
-void Mission::Unmark(const set<const System *> &systems) const
+void Mission::Unmark(const std::set<const System *> &systems) const
 {
 	for(const System *system : systems)
 		if(markedSystems.erase(system))
@@ -840,7 +840,7 @@ void Mission::Unmark(const set<const System *> &systems) const
 
 
 
-const string &Mission::Cargo() const
+const std::string &Mission::Cargo() const
 {
 	return cargo;
 }
@@ -861,7 +861,7 @@ int Mission::Fine() const
 
 
 
-string Mission::FineMessage() const
+std::string Mission::FineMessage() const
 {
 	return fineMessage;
 }
@@ -932,7 +932,7 @@ bool Mission::HasClearance(const Planet *planet) const
 
 // Get the string to be shown in the destination planet's hailing dialog. If
 // this is "auto", you don't have to hail them to get landing permission.
-const string &Mission::ClearanceMessage() const
+const std::string &Mission::ClearanceMessage() const
 {
 	return clearance;
 }
@@ -949,7 +949,7 @@ bool Mission::HasFullClearance() const
 
 
 // Check if it's possible to offer or complete this mission right now.
-bool Mission::CanOffer(const PlayerInfo &player, const shared_ptr<Ship> &boardingShip) const
+bool Mission::CanOffer(const PlayerInfo &player, const std::shared_ptr<Ship> &boardingShip) const
 {
 	if(location == BOARDING || location == ASSISTING)
 	{
@@ -1134,7 +1134,7 @@ void Mission::Fail()
 // because it requires you to have more passenger or cargo space free. After
 // calling this function, any future calls to it will return an empty string
 // so that you do not display the same message multiple times.
-string Mission::BlockedMessage(const PlayerInfo &player)
+std::string Mission::BlockedMessage(const PlayerInfo &player)
 {
 	if(blocked.empty())
 		return "";
@@ -1159,20 +1159,20 @@ string Mission::BlockedMessage(const PlayerInfo &player)
 		bunksNeeded -= flagship->Cargo().BunksFree();
 	}
 
-	map<string, string> subs;
+	std::map<std::string, std::string> subs;
 	GameData::GetTextReplacements().Substitutions(subs);
 	substitutions.Substitutions(subs);
 	player.AddPlayerSubstitutions(subs);
 
 	subs["<conditions>"] = toAccept.Test() ? "meet" : "do not meet";
 
-	ostringstream out;
+	std::ostringstream out;
 	if(bunksNeeded > 0)
-		out << (bunksNeeded == 1 ? "another bunk" : to_string(bunksNeeded) + " more bunks");
+		out << (bunksNeeded == 1 ? "another bunk" : std::to_string(bunksNeeded) + " more bunks");
 	if(bunksNeeded > 0 && cargoNeeded > 0)
 		out << " and ";
 	if(cargoNeeded > 0)
-		out << (cargoNeeded == 1 ? "another ton" : to_string(cargoNeeded) + " more tons") << " of cargo space";
+		out << (cargoNeeded == 1 ? "another ton" : std::to_string(cargoNeeded) + " more tons") << " of cargo space";
 	if(bunksNeeded <= 0 && cargoNeeded <= 0)
 		out << "no additional space";
 	subs["<capacity>"] = out.str();
@@ -1181,7 +1181,7 @@ string Mission::BlockedMessage(const PlayerInfo &player)
 		subs[keyValue.first] = Phrase::ExpandPhrases(keyValue.second);
 	Format::Expand(subs);
 
-	string message = Format::Replace(blocked, subs);
+	std::string message = Format::Replace(blocked, subs);
 	blocked.clear();
 	return message;
 }
@@ -1210,7 +1210,7 @@ bool Mission::IsUnique() const
 // When the state of this mission changes, it may make changes to the player
 // information or show new UI panels. PlayerInfo::MissionCallback() will be
 // used as the callback for any UI panel that returns a value.
-bool Mission::Do(Trigger trigger, PlayerInfo &player, UI *ui, const shared_ptr<Ship> &boardingShip)
+bool Mission::Do(Trigger trigger, PlayerInfo &player, UI *ui, const std::shared_ptr<Ship> &boardingShip)
 {
 	if(trigger == STOPOVER)
 	{
@@ -1311,10 +1311,10 @@ bool Mission::Do(Trigger trigger, PlayerInfo &player, UI *ui, const shared_ptr<S
 
 
 
-bool Mission::RequiresGiftedShip(const string &shipId) const
+bool Mission::RequiresGiftedShip(const std::string &shipId) const
 {
 	// Check if any uncompleted actions required for the mission needs this ship.
-	set<Trigger> requiredActions;
+	std::set<Trigger> requiredActions;
 	{
 		requiredActions.insert(Trigger::COMPLETE);
 		if(!stopovers.empty())
@@ -1333,7 +1333,7 @@ bool Mission::RequiresGiftedShip(const string &shipId) const
 
 // Get a list of NPCs associated with this mission. Every time the player
 // takes off from a planet, they should be added to the active ships.
-const list<NPC> &Mission::NPCs() const
+const std::list<NPC> &Mission::NPCs() const
 {
 	return npcs;
 }
@@ -1359,7 +1359,7 @@ void Mission::StepTimers(PlayerInfo &player, UI *ui)
 
 
 // Checks if the given ship belongs to one of the mission's NPCs.
-bool Mission::HasShip(const shared_ptr<Ship> &ship) const
+bool Mission::HasShip(const std::shared_ptr<Ship> &ship) const
 {
 	for(const auto &npc : npcs)
 		for(const auto &npcShip : npc.Ships())
@@ -1377,7 +1377,7 @@ void Mission::Do(const ShipEvent &event, PlayerInfo &player, UI *ui)
 	if(event.TargetGovernment()->IsPlayer() && !IsFailed())
 	{
 		bool failed = false;
-		string message;
+		std::string message;
 		if(event.Type() & ShipEvent::DESTROY)
 		{
 			// Destroyed ships carrying mission cargo result in failed missions.
@@ -1453,7 +1453,7 @@ const MissionAction &Mission::GetAction(Trigger trigger) const
 
 // "Instantiate" a mission by replacing randomly selected values and places
 // with a single choice, and then replacing any wildcard text as well.
-Mission Mission::Instantiate(const PlayerInfo &player, const shared_ptr<Ship> &boardingShip) const
+Mission Mission::Instantiate(const PlayerInfo &player, const std::shared_ptr<Ship> &boardingShip) const
 {
 	Mission result;
 	// If anything goes wrong below, this mission should not be offered.
@@ -1532,7 +1532,7 @@ Mission Mission::Instantiate(const PlayerInfo &player, const shared_ptr<Ship> &b
 	// cargo name with something more specific.
 	if(!cargo.empty())
 	{
-		const string expandedCargo = Phrase::ExpandPhrases(cargo);
+		const std::string expandedCargo = Phrase::ExpandPhrases(cargo);
 		const Trade::Commodity *commodity = nullptr;
 		if(expandedCargo == "random")
 			commodity = PickCommodity(*sourceSystem, *result.destination->GetSystem());
@@ -1598,13 +1598,13 @@ Mission Mission::Instantiate(const PlayerInfo &player, const shared_ptr<Ship> &b
 	result.toFail = toFail;
 
 	// Generate the substitutions map.
-	map<string, string> subs;
+	std::map<std::string, std::string> subs;
 	GameData::GetTextReplacements().Substitutions(subs);
 	substitutions.Substitutions(subs);
 	subs["<commodity>"] = result.cargo;
 	subs["<tons>"] = Format::MassString(result.cargoSize);
 	subs["<cargo>"] = Format::CargoString(result.cargoSize, subs["<commodity>"]);
-	subs["<bunks>"] = to_string(result.passengers);
+	subs["<bunks>"] = std::to_string(result.passengers);
 	subs["<passengers>"] = (result.passengers == 1) ? "passenger" : "passengers";
 	subs["<fare>"] = (result.passengers == 1) ? "a passenger" : (subs["<bunks>"] + " passengers");
 	if(player.GetPlanet())
@@ -1625,18 +1625,18 @@ Mission Mission::Instantiate(const PlayerInfo &player, const shared_ptr<Ship> &b
 	};
 	if(!result.stopovers.empty())
 	{
-		subs["<stopovers>"] = Format::List<set, const Planet *>(result.stopovers,
+		subs["<stopovers>"] = Format::List<std::set, const Planet *>(result.stopovers,
 			[](const Planet *const &planet)
 			{
 				return planet->DisplayName() + " in the " + planet->GetSystem()->DisplayName() + " system";
 			});
-		subs["<planet stopovers>"] = Format::List<set, const Planet *>(result.stopovers, getDisplayName);
+		subs["<planet stopovers>"] = Format::List<std::set, const Planet *>(result.stopovers, getDisplayName);
 	}
 	// Waypoints and marks: "<system name>" with "," and "and".
 	if(!result.waypoints.empty())
-		subs["<waypoints>"] = Format::List<set, const System *>(result.waypoints, getDisplayName);
+		subs["<waypoints>"] = Format::List<std::set, const System *>(result.waypoints, getDisplayName);
 	if(!result.markedSystems.empty())
-		subs["<marks>"] = Format::List<set, const System *>(result.markedSystems, getDisplayName);
+		subs["<marks>"] = Format::List<std::set, const System *>(result.markedSystems, getDisplayName);
 
 	// Done making subs, so expand the phrases and recursively substitute.
 	for(const auto &keyValue : subs)
@@ -1644,7 +1644,7 @@ Mission Mission::Instantiate(const PlayerInfo &player, const shared_ptr<Ship> &b
 	Format::Expand(subs);
 
 	// Instantiate the NPCs. This also fills in the "<npc>" substitution.
-	string reason;
+	std::string reason;
 	for(auto &&n : npcs)
 		reason = n.Validate(true);
 	if(!reason.empty())
@@ -1732,7 +1732,7 @@ int Mission::CalculateJumps(const System *sourceSystem)
 	// Estimate how far the player will have to travel to visit all the waypoints
 	// and stopovers and then to land on the destination planet. Rather than a
 	// full traveling salesman path, just calculate a greedy approximation.
-	list<const System *> destinations;
+	std::list<const System *> destinations;
 	for(const System *system : waypoints)
 		destinations.push_back(system);
 	for(const Planet *planet : stopovers)
@@ -1748,7 +1748,7 @@ int Mission::CalculateJumps(const System *sourceSystem)
 		auto bestIt = it;
 		int bestDays = distance.Days(**bestIt);
 		if(bestDays < 0)
-			bestDays = numeric_limits<int>::max();
+			bestDays = std::numeric_limits<int>::max();
 		for(++it; it != destinations.end(); ++it)
 		{
 			int days = distance.Days(**it);
@@ -1761,7 +1761,7 @@ int Mission::CalculateJumps(const System *sourceSystem)
 
 		sourceSystem = *bestIt;
 		// If currently unreachable, this system adds -1 to the deadline, to match previous behavior.
-		expectedJumps += bestDays == numeric_limits<int>::max() ? -1 : bestDays;
+		expectedJumps += bestDays == std::numeric_limits<int>::max() ? -1 : bestDays;
 		destinations.erase(bestIt);
 	}
 	DistanceMap distance(sourceSystem,
@@ -1806,7 +1806,7 @@ bool Mission::Enter(const System *system, PlayerInfo &player, UI *ui)
 // locations, so move that parsing out to a helper function.
 bool Mission::ParseContraband(const DataNode &node)
 {
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	if(key == "illegal" && node.Size() == 2)
 		fine = node.Value(1);
 	else if(key == "illegal" && node.Size() == 3)

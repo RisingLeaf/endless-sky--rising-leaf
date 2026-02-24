@@ -26,22 +26,22 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cassert>
 
-using namespace std;
+
 
 namespace {
 	// Determine whether the given path or name is to a sprite for which a
 	// collision mask ought to be generated.
-	bool IsMasked(const filesystem::path &path)
+	bool IsMasked(const std::filesystem::path &path)
 	{
 		if(path.empty())
 			return false;
-		filesystem::path directory = *path.begin();
+		std::filesystem::path directory = *path.begin();
 		return directory == "ship" || directory == "asteroid";
 	}
 
-	// Add consecutive frames from the given map to the given vector. Issue warnings for missing or mislabeled frames.
-	void AddValid(const map<size_t, filesystem::path> &frameData, vector<filesystem::path> &sequence,
-		const string &prefix, bool is2x, bool isSwizzleMask) noexcept(false)
+	// Add consecutive frames from the given map to the given std::vector. Issue warnings for missing or mislabeled frames.
+	void AddValid(const std::map<size_t, std::filesystem::path> &frameData, std::vector<std::filesystem::path> &sequence,
+		const std::string &prefix, bool is2x, bool isSwizzleMask) noexcept(false)
 	{
 		if(frameData.empty())
 			return;
@@ -49,7 +49,7 @@ namespace {
 		if(frameData.begin()->first != 0)
 		{
 			Logger::LogError(prefix + "ignored " + (isSwizzleMask ? "mask " : "") + (is2x ? "@2x " : "")
-				+ "frame " + to_string(frameData.begin()->first) + " (" + to_string(frameData.size())
+				+ "frame " + std::to_string(frameData.begin()->first) + " (" + std::to_string(frameData.size())
 				+ " ignored in total). Animations must start at frame 0.");
 			return;
 		}
@@ -60,18 +60,18 @@ namespace {
 		auto end = frameData.end();
 		while(++next != end && next->first == it->first + 1)
 			it = next;
-		// Copy the sorted, valid paths from the map to the frame sequence vector.
+		// Copy the sorted, valid paths from the map to the frame sequence std::vector.
 		size_t count = distance(frameData.begin(), next);
 		sequence.resize(count);
 		transform(frameData.begin(), next, sequence.begin(),
-			[](const pair<size_t, filesystem::path> &p) -> filesystem::path { return p.second; });
+			[](const std::pair<size_t, std::filesystem::path> &p) -> std::filesystem::path { return p.second; });
 
 		// If `next` is not the end, then there was at least one discontinuous frame.
 		if(next != frameData.end())
 		{
 			size_t ignored = distance(next, frameData.end());
 			Logger::LogError(prefix + "missing " + (isSwizzleMask ? "mask " : "") + (is2x ? "@2x " : "") + "frame "
-				+ to_string(it->first + 1) + " (" + to_string(ignored)
+				+ std::to_string(it->first + 1) + " (" + std::to_string(ignored)
 				+ (ignored > 1 ? " frames" : " frame") + " ignored in total).");
 		}
 	}
@@ -80,9 +80,9 @@ namespace {
 
 
 // Check if the given path is to an image of a valid file type.
-bool ImageSet::IsImage(const filesystem::path &path)
+bool ImageSet::IsImage(const std::filesystem::path &path)
 {
-	filesystem::path ext = path.extension();
+	std::filesystem::path ext = path.extension();
 	return ImageBuffer::ImageExtensions().contains(Format::LowerCase(ext.string()));
 }
 
@@ -90,7 +90,7 @@ bool ImageSet::IsImage(const filesystem::path &path)
 
 // Determine whether the given path or name is for a sprite whose loading
 // should be deferred until needed.
-bool ImageSet::IsDeferred(const filesystem::path &path)
+bool ImageSet::IsDeferred(const std::filesystem::path &path)
 {
 	if(path.empty())
 		return false;
@@ -99,7 +99,7 @@ bool ImageSet::IsDeferred(const filesystem::path &path)
 
 
 
-ImageSet::ImageSet(string name)
+ImageSet::ImageSet(std::string name)
 	: name(std::move(name))
 {
 }
@@ -107,7 +107,7 @@ ImageSet::ImageSet(string name)
 
 
 // Get the name of the sprite for this image set.
-const string &ImageSet::Name() const
+const std::string &ImageSet::Name() const
 {
 	return name;
 }
@@ -137,7 +137,7 @@ void ImageSet::Add(ImageFileData data)
 // Reduce all given paths to frame images into a sequence of consecutive frames.
 void ImageSet::ValidateFrames() noexcept(false)
 {
-	string prefix = "Sprite \"" + name + "\": ";
+	std::string prefix = "Sprite \"" + name + "\": ";
 	AddValid(framePaths[0], paths[0], prefix, false, false);
 	AddValid(framePaths[1], paths[1], prefix, true, false);
 	AddValid(framePaths[2], paths[2], prefix, false, true);
@@ -151,7 +151,7 @@ void ImageSet::ValidateFrames() noexcept(false)
 	for(int i = 0; i < 4; ++i)
 		for(const auto &path : paths[i])
 		{
-			string ext = path.extension().string();
+			std::string ext = path.extension().string();
 			if(ImageBuffer::ImageSequenceExtensions().contains(Format::LowerCase(ext)) && paths[i].size() > 1)
 			{
 				Logger::LogError("Image sequences must be exclusive; ignoring all but the image sequence data for \""
@@ -162,11 +162,11 @@ void ImageSet::ValidateFrames() noexcept(false)
 			}
 		}
 
-	auto DropPaths = [&](vector<filesystem::path> &toResize, const string &specifier)
+	auto DropPaths = [&](std::vector<std::filesystem::path> &toResize, const std::string &specifier)
 	{
 		if(toResize.size() > paths[0].size())
 		{
-			Logger::LogError(prefix + to_string(toResize.size() - paths[0].size())
+			Logger::LogError(prefix + std::to_string(toResize.size() - paths[0].size())
 				+ " extra frames for the " + specifier + " sprite will be ignored.");
 			toResize.resize(paths[0].size());
 		}
@@ -212,7 +212,7 @@ void ImageSet::Load() noexcept(false)
 	for(size_t i = 0; i < paths[0].size(); ++i)
 	{
 		int loadedFrames = buffer[0].Read(paths[0][i], i);
-		const string fileName = "\"" + name + "\" frame #" + to_string(i);
+		const std::string fileName = "\"" + name + "\" frame #" + std::to_string(i);
 		if(!loadedFrames)
 		{
 			Logger::LogError("Failed to read image data for \"" + fileName);
@@ -233,7 +233,7 @@ void ImageSet::Load() noexcept(false)
 		}
 	}
 
-	auto FillSwizzleMasks = [&](vector<filesystem::path> &toFill, unsigned int intendedSize)
+	auto FillSwizzleMasks = [&](std::vector<std::filesystem::path> &toFill, unsigned int intendedSize)
 	{
 		if(toFill.size() == 1 && intendedSize > 1)
 			for(unsigned int i = toFill.size(); i < intendedSize; i++)
@@ -245,7 +245,7 @@ void ImageSet::Load() noexcept(false)
 	FillSwizzleMasks(paths[3], paths[0].size());
 
 
-	auto LoadSprites = [&](const vector<filesystem::path> &toLoad, ImageBuffer &buffer, const string &specifier)
+	auto LoadSprites = [&](const std::vector<std::filesystem::path> &toLoad, ImageBuffer &buffer, const std::string &specifier)
 	{
 		for(size_t i = 0; i < frames && i < toLoad.size(); ++i)
 			if(!buffer.Read(toLoad[i], i))
@@ -265,13 +265,13 @@ void ImageSet::Load() noexcept(false)
 	bool willBlur = (buffer[0].Width() & 1) || (buffer[0].Height() & 1);
 	if(willBlur && (name.starts_with("ship/") || name.starts_with("outfit/") || name.starts_with("thumbnail/")))
 		Logger::LogError("Warning: image \"" + name + "\" will be blurry since width and/or height are not even ("
-			+ to_string(buffer[0].Width()) + "x" + to_string(buffer[0].Height()) + ").");
+			+ std::to_string(buffer[0].Width()) + "x" + std::to_string(buffer[0].Height()) + ").");
 }
 
 
 
 // Create the sprite and optionally upload the image data to the GPU. After this is
-// called, the internal image buffers and mask vector will be cleared, but
+// called, the internal image buffers and mask std::vector will be cleared, but
 // the paths are saved in case the sprite needs to be loaded again.
 void ImageSet::Upload(Sprite *sprite, bool enableUpload)
 {

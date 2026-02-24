@@ -22,7 +22,7 @@
 namespace gm
 {
   template <typename T, asl::uint32 N>
-  constexpr matrix<T, N> outer(const vector<T, N> &a, const vector<T, N> &b)
+  constexpr matrix<T, N> outer(const std::vector<T, N> &a, const std::vector<T, N> &b)
   {
     matrix<T, N> result{};
     for(asl::uint32 i = 0; i < N; i++)
@@ -32,7 +32,7 @@ namespace gm
   }
 
   template <typename T, asl::uint32 N>
-  constexpr matrix<T, N> exterior(const vector<T, N> &a, const vector<T, N> &b)
+  constexpr matrix<T, N> exterior(const std::vector<T, N> &a, const std::vector<T, N> &b)
   {
     matrix<T, N> result{};
     for(asl::uint32 i = 0; i < N; ++i)

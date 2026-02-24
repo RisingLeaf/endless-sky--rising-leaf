@@ -21,17 +21,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <map>
 #include <mutex>
 
-using namespace std;
+
 
 namespace {
-	map<string, Sprite> sprites;
+	std::map<std::string, Sprite> sprites;
 
-	mutex modifyMutex;
+	std::mutex modifyMutex;
 }
 
 
 
-const Sprite *SpriteSet::Get(const string &name)
+const Sprite *SpriteSet::Get(const std::string &name)
 {
 	return Modify(name);
 }
@@ -52,9 +52,9 @@ void SpriteSet::CheckReferences()
 
 
 
-Sprite *SpriteSet::Modify(const string &name)
+Sprite *SpriteSet::Modify(const std::string &name)
 {
-	lock_guard<mutex> guard(modifyMutex);
+	std::lock_guard<std::mutex> guard(modifyMutex);
 
 	auto it = sprites.find(name);
 	if(it == sprites.end())

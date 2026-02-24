@@ -27,7 +27,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <cstring>
 
-using namespace std;
+
 
 namespace {
 	const double EPS = 0.0000000001;
@@ -35,7 +35,7 @@ namespace {
 	// A mapping of attribute names to specifically-allowed minimum values. Based on the
 	// specific usage of the attribute, the allowed minimum value is chosen to avoid
 	// disallowed or undesirable behaviors (such as dividing by zero).
-	const auto MINIMUM_OVERRIDES = map<string, double>{
+	const auto MINIMUM_OVERRIDES = std::map<std::string, double>{
 		// Attributes which are present and map to zero may have any value.
 		{"shield energy", 0.},
 		{"shield fuel", 0.},
@@ -178,10 +178,10 @@ namespace {
 		{"turret turn multiplier", -1.}
 	};
 
-	void AddFlareSprites(vector<pair<Body, int>> &thisFlares, const pair<Body, int> &it, int count)
+	void AddFlareSprites(std::vector<std::pair<Body, int>> &thisFlares, const std::pair<Body, int> &it, int count)
 	{
 		auto oit = find_if(thisFlares.begin(), thisFlares.end(),
-			[&it](const pair<Body, int> &flare)
+			[&it](const std::pair<Body, int> &flare)
 			{
 				return (it.first.GetSprite() == flare.first.GetSprite()
 					&& it.first.Scale() == flare.first.Scale());
@@ -197,7 +197,7 @@ namespace {
 	// Used to add the contents of one outfit's map to another, while also
 	// erasing any key with a value of zero.
 	template<class T>
-	void MergeMaps(map<const T *, int> &thisMap, const map<const T *, int> &otherMap, int count)
+	void MergeMaps(std::map<const T *, int> &thisMap, const std::map<const T *, int> &otherMap, int count)
 	{
 		for(const auto &it : otherMap)
 		{
@@ -219,7 +219,7 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 
 		if(key == "display name" && hasValue)
@@ -280,10 +280,10 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
 		else if(key == "weapon")
 		{
 			if(!weapon)
-				weapon = make_shared<Weapon>();
+				weapon = std::make_shared<Weapon>();
 			Weapon newWeapon = *weapon;
 			newWeapon.Load(child);
-			weapon = make_shared<Weapon>(std::move(newWeapon));
+			weapon = std::make_shared<Weapon>(std::move(newWeapon));
 		}
 		else if(key == "ammo" && hasValue)
 			ammoStored = GameData::Outfits().Get(child.Token(1));
@@ -308,7 +308,7 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
 		else if(key == "jump range" && hasValue)
 		{
 			// Jump range must be positive.
-			attributes[key] = max(0., child.Value(1));
+			attributes[key] = std::max(0., child.Value(1));
 		}
 		else if(hasValue)
 			attributes[key] = child.Value(1);
@@ -363,15 +363,15 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
 	{
 		Weapon newWeapon = *weapon;
 		newWeapon.turretTurn = 4.;
-		weapon = make_shared<Weapon>(std::move(newWeapon));
+		weapon = std::make_shared<Weapon>(std::move(newWeapon));
 		node.PrintTrace("Warning: Deprecated use of a turret without specified \"turret turn\":");
 	}
 
 	// Convert any legacy cargo / outfit scan definitions into power & speed,
 	// so no runtime code has to check for both.
-	auto convertScan = [&](string &&kind) -> void
+	auto convertScan = [&](std::string &&kind) -> void
 	{
-		string label = kind + " scan";
+		std::string label = kind + " scan";
 		double initial = attributes.Get(label);
 		if(initial)
 		{
@@ -417,42 +417,42 @@ bool Outfit::IsDefined() const
 
 // When writing to the player's save, the reference name is used even if this
 // outfit was not fully defined (i.e. belongs to an inactive plugin).
-const string &Outfit::TrueName() const
+const std::string &Outfit::TrueName() const
 {
 	return trueName;
 }
 
 
 
-void Outfit::SetTrueName(const string &name)
+void Outfit::SetTrueName(const std::string &name)
 {
 	this->trueName = name;
 }
 
 
 
-const string &Outfit::DisplayName() const
+const std::string &Outfit::DisplayName() const
 {
 	return displayName;
 }
 
 
 
-const string &Outfit::PluralName() const
+const std::string &Outfit::PluralName() const
 {
 	return pluralName;
 }
 
 
 
-const string &Outfit::Category() const
+const std::string &Outfit::Category() const
 {
 	return category;
 }
 
 
 
-const string &Outfit::Series() const
+const std::string &Outfit::Series() const
 {
 	return series;
 }
@@ -466,7 +466,7 @@ const int Outfit::Index() const
 
 
 
-string Outfit::Description() const
+std::string Outfit::Description() const
 {
 	return description.ToString();
 }
@@ -474,7 +474,7 @@ string Outfit::Description() const
 
 
 // Get the licenses needed to purchase this outfit.
-const vector<string> &Outfit::Licenses() const
+const std::vector<std::string> &Outfit::Licenses() const
 {
 	return licenses;
 }
@@ -496,7 +496,7 @@ double Outfit::Get(const char *attribute) const
 
 
 
-double Outfit::Get(const string &attribute) const
+double Outfit::Get(const std::string &attribute) const
 {
 	return Get(attribute.c_str());
 }
@@ -612,42 +612,42 @@ const Outfit *Outfit::AmmoStoredOrUsed() const
 
 
 // Get this outfit's engine flare sprite, if any.
-const vector<pair<Body, int>> &Outfit::FlareSprites() const
+const std::vector<std::pair<Body, int>> &Outfit::FlareSprites() const
 {
 	return flareSprites;
 }
 
 
 
-const vector<pair<Body, int>> &Outfit::ReverseFlareSprites() const
+const std::vector<std::pair<Body, int>> &Outfit::ReverseFlareSprites() const
 {
 	return reverseFlareSprites;
 }
 
 
 
-const vector<pair<Body, int>> &Outfit::SteeringFlareSprites() const
+const std::vector<std::pair<Body, int>> &Outfit::SteeringFlareSprites() const
 {
 	return steeringFlareSprites;
 }
 
 
 
-const map<const Sound *, int> &Outfit::FlareSounds() const
+const std::map<const Sound *, int> &Outfit::FlareSounds() const
 {
 	return flareSounds;
 }
 
 
 
-const map<const Sound *, int> &Outfit::ReverseFlareSounds() const
+const std::map<const Sound *, int> &Outfit::ReverseFlareSounds() const
 {
 	return reverseFlareSounds;
 }
 
 
 
-const map<const Sound *, int> &Outfit::SteeringFlareSounds() const
+const std::map<const Sound *, int> &Outfit::SteeringFlareSounds() const
 {
 	return steeringFlareSounds;
 }
@@ -655,7 +655,7 @@ const map<const Sound *, int> &Outfit::SteeringFlareSounds() const
 
 
 // Get the afterburner effect, if any.
-const map<const Effect *, int> &Outfit::AfterburnerEffects() const
+const std::map<const Effect *, int> &Outfit::AfterburnerEffects() const
 {
 	return afterburnerEffects;
 }
@@ -663,63 +663,63 @@ const map<const Effect *, int> &Outfit::AfterburnerEffects() const
 
 
 // Get this outfit's jump effects and sounds, if any.
-const map<const Effect *, int> &Outfit::JumpEffects() const
+const std::map<const Effect *, int> &Outfit::JumpEffects() const
 {
 	return jumpEffects;
 }
 
 
 
-const map<const Sound *, int> &Outfit::HyperSounds() const
+const std::map<const Sound *, int> &Outfit::HyperSounds() const
 {
 	return hyperSounds;
 }
 
 
 
-const map<const Sound *, int> &Outfit::HyperInSounds() const
+const std::map<const Sound *, int> &Outfit::HyperInSounds() const
 {
 	return hyperInSounds;
 }
 
 
 
-const map<const Sound *, int> &Outfit::HyperOutSounds() const
+const std::map<const Sound *, int> &Outfit::HyperOutSounds() const
 {
 	return hyperOutSounds;
 }
 
 
 
-const map<const Sound *, int> &Outfit::JumpSounds() const
+const std::map<const Sound *, int> &Outfit::JumpSounds() const
 {
 	return jumpSounds;
 }
 
 
 
-const map<const Sound *, int> &Outfit::JumpInSounds() const
+const std::map<const Sound *, int> &Outfit::JumpInSounds() const
 {
 	return jumpInSounds;
 }
 
 
 
-const map<const Sound *, int> &Outfit::JumpOutSounds() const
+const std::map<const Sound *, int> &Outfit::JumpOutSounds() const
 {
 	return jumpOutSounds;
 }
 
 
 
-const map<const Sound *, int> &Outfit::CargoScanSounds() const
+const std::map<const Sound *, int> &Outfit::CargoScanSounds() const
 {
 	return cargoScanSounds;
 }
 
 
 
-const map<const Sound *, int> &Outfit::OutfitScanSounds() const
+const std::map<const Sound *, int> &Outfit::OutfitScanSounds() const
 {
 	return outfitScanSounds;
 }
@@ -735,7 +735,7 @@ const Sprite *Outfit::FlotsamSprite() const
 
 
 // Add the license with the given name to the licenses required by this outfit, if it is not already present.
-void Outfit::AddLicense(const string &name)
+void Outfit::AddLicense(const std::string &name)
 {
 	const auto it = find(licenses.begin(), licenses.end(), name);
 	if(it == licenses.end())

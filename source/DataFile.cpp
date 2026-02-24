@@ -18,12 +18,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Files.h"
 #include "text/Utf8.h"
 
-using namespace std;
+
 
 
 
 // Constructor, taking a file path (in UTF-8).
-DataFile::DataFile(const filesystem::path &path)
+DataFile::DataFile(const std::filesystem::path &path)
 {
 	Load(path);
 }
@@ -31,7 +31,7 @@ DataFile::DataFile(const filesystem::path &path)
 
 
 // Constructor, taking an istream. This can be cin or a file.
-DataFile::DataFile(istream &in)
+DataFile::DataFile(std::istream &in)
 {
 	Load(in);
 }
@@ -39,9 +39,9 @@ DataFile::DataFile(istream &in)
 
 
 // Load from a file path (in UTF-8).
-void DataFile::Load(const filesystem::path &path)
+void DataFile::Load(const std::filesystem::path &path)
 {
-	string data = Files::Read(path);
+	std::string data = Files::Read(path);
 	if(data.empty())
 		return;
 
@@ -59,9 +59,9 @@ void DataFile::Load(const filesystem::path &path)
 
 
 // Constructor, taking an istream. This can be cin or a file.
-void DataFile::Load(istream &in)
+void DataFile::Load(std::istream &in)
 {
-	string data;
+	std::string data;
 
 	static const size_t BLOCK = 4096;
 	while(in)
@@ -81,7 +81,7 @@ void DataFile::Load(istream &in)
 
 
 // Get an iterator to the start of the list of nodes in this file.
-list<DataNode>::const_iterator DataFile::begin() const
+std::list<DataNode>::const_iterator DataFile::begin() const
 {
 	return root.begin();
 }
@@ -89,7 +89,7 @@ list<DataNode>::const_iterator DataFile::begin() const
 
 
 // Get an iterator to the end of the list of nodes in this file.
-list<DataNode>::const_iterator DataFile::end() const
+std::list<DataNode>::const_iterator DataFile::end() const
 {
 	return root.end();
 }
@@ -97,13 +97,13 @@ list<DataNode>::const_iterator DataFile::end() const
 
 
 // Parse the given text.
-void DataFile::LoadData(const string &data)
+void DataFile::LoadData(const std::string &data)
 {
 	// Keep track of the current stack of indentation levels and the most recent
 	// node at each level - that is, the node that will be the "parent" of any
 	// new node added at the next deeper indentation level.
-	vector<DataNode *> stack(1, &root);
-	vector<int> separatorStack(1, -1);
+	std::vector<DataNode *> stack(1, &root);
+	std::vector<int> separatorStack(1, -1);
 	bool fileIsTabs = false;
 	bool fileIsSpaces = false;
 	size_t lineNumber = 0;
@@ -147,7 +147,7 @@ void DataFile::LoadData(const string &data)
 		if(c == '#')
 		{
 			if(mixedIndentation)
-				root.PrintTrace("Warning: Mixed whitespace usage for comment at line " + to_string(lineNumber));
+				root.PrintTrace("Warning: Mixed whitespace usage for comment at line " + std::to_string(lineNumber));
 			while(c != '\n')
 				c = Utf8::DecodeCodePoint(data, pos);
 		}
@@ -164,7 +164,7 @@ void DataFile::LoadData(const string &data)
 		}
 
 		// Add this node as a child of the proper node.
-		list<DataNode> &children = stack.back()->children;
+		std::list<DataNode> &children = stack.back()->children;
 		children.emplace_back(stack.back());
 		DataNode &node = children.back();
 		node.lineNumber = lineNumber;

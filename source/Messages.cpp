@@ -19,17 +19,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "GameData.h"
 
 #include <mutex>
+#include <ranges>
 
-using namespace std;
+
 
 namespace {
 	const int MAX_LOG = 10000;
 
-	mutex incomingMutex;
+	std::mutex incomingMutex;
 
-	vector<pair<string, const Message::Category *>> incoming;
-	vector<Messages::Entry> recent;
-	deque<pair<string, const Message::Category *>> logged;
+	std::vector<std::pair<std::string, const Message::Category *>> incoming;
+	std::vector<Messages::Entry> recent;
+	std::deque<std::pair<std::string, const Message::Category *>> logged;
 }
 
 
@@ -40,7 +41,7 @@ void Messages::Add(const Message &message)
 	const Message::Category *category = message.GetCategory();
 	if(!category)
 		return;
-	string text = message.Text();
+	std::string text = message.Text();
 
 	if(category->AllowsLogDuplicates() || logged.empty() || text != logged.front().first)
 	{
@@ -51,7 +52,7 @@ void Messages::Add(const Message &message)
 
 	if(category->LogOnly())
 		return;
-	lock_guard<mutex> lock(incomingMutex);
+	std::lock_guard<std::mutex> lock(incomingMutex);
 	incoming.emplace_back(text, category);
 }
 
@@ -60,9 +61,9 @@ void Messages::Add(const Message &message)
 // Get the messages for the given game step. Any messages that are too old
 // will be culled out, and new ones that have just been added will have
 // their "step" set to the given value.
-const vector<Messages::Entry> &Messages::Get(int step, int animationDuration)
+const std::vector<Messages::Entry> &Messages::Get(int step, int animationDuration)
 {
-	lock_guard<mutex> lock(incomingMutex);
+	std::lock_guard<std::mutex> lock(incomingMutex);
 
 	// Erase messages that have reached the end of their lifetime.
 	auto it = recent.begin();
@@ -109,7 +110,7 @@ const vector<Messages::Entry> &Messages::Get(int step, int animationDuration)
 
 
 
-const deque<pair<string, const Message::Category *>> &Messages::GetLog()
+const std::deque<std::pair<std::string, const Message::Category *>> &Messages::GetLog()
 {
 	return logged;
 }
@@ -126,7 +127,7 @@ void Messages::ClearLog()
 // Reset the messages (i.e. because a new game was loaded).
 void Messages::Reset()
 {
-	lock_guard<mutex> lock(incomingMutex);
+	std::lock_guard<std::mutex> lock(incomingMutex);
 	incoming.clear();
 	recent.clear();
 	logged.clear();
@@ -154,8 +155,8 @@ void Messages::SaveLog(DataWriter &out)
 	out.Write("message log");
 	out.BeginChild();
 	{
-		for(auto it = logged.rbegin(); it != logged.rend(); ++it)
-			out.Write(it->second->Name(), it->first);
+		for(auto &[message, category] : std::ranges::reverse_view(logged))
+			out.Write(category->Name(), message);
 	}
 	out.EndChild();
 }

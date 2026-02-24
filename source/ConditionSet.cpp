@@ -27,7 +27,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <set>
 #include <utility>
 
-using namespace std;
+
 
 namespace
 {
@@ -40,7 +40,7 @@ namespace
 		// Test operators return 0 (false) or 1 (true).
 		// "Apply" operators return the value that the condition should have
 		// after applying the expression.
-		static const map<ConditionSet::ExpressionOp, BinFun> opMap = {
+		static const std::map<ConditionSet::ExpressionOp, BinFun> opMap = {
 			{ConditionSet::ExpressionOp::EQ, [](int64_t a, int64_t b) -> int64_t { return a == b; }},
 			{ConditionSet::ExpressionOp::NE, [](int64_t a, int64_t b) -> int64_t { return a != b; }},
 			{ConditionSet::ExpressionOp::LT, [](int64_t a, int64_t b) -> int64_t { return a < b; }},
@@ -51,7 +51,7 @@ namespace
 			{ConditionSet::ExpressionOp::MUL, [](int64_t a, int64_t b) { return a * b; }},
 			{ConditionSet::ExpressionOp::ADD, [](int64_t a, int64_t b) { return a + b; }},
 			{ConditionSet::ExpressionOp::SUB, [](int64_t a, int64_t b) { return a - b; }},
-			{ConditionSet::ExpressionOp::DIV, [](int64_t a, int64_t b) { return b ? a / b : numeric_limits<int64_t>::max(); }}
+			{ConditionSet::ExpressionOp::DIV, [](int64_t a, int64_t b) { return b ? a / b : std::numeric_limits<int64_t>::max(); }}
 		};
 
 		auto it = opMap.find(op);
@@ -59,7 +59,7 @@ namespace
 	}
 
 	/// Map string tokens to precedence and internal operators.
-	const auto CS_TOKEN_CONVERSION = map<const string, ConditionSet::ExpressionOp>{
+	const auto CS_TOKEN_CONVERSION = std::map<std::string_view, ConditionSet::ExpressionOp>{
 		// Infix arithmetic multiply, divide and modulo have a higher precedence than add and subtract.
 		{ "*", ConditionSet::ExpressionOp::MUL },
 		{ "/", ConditionSet::ExpressionOp::DIV },
@@ -111,7 +111,7 @@ namespace
 	}
 
 
-	ConditionSet::ExpressionOp ParseOperator(const string &stringToken)
+	ConditionSet::ExpressionOp ParseOperator(const std::string &stringToken)
 	{
 		auto it = CS_TOKEN_CONVERSION.find(stringToken);
 		if(it != CS_TOKEN_CONVERSION.end())
@@ -158,7 +158,7 @@ ConditionSet &ConditionSet::operator=(const ConditionSet &&other) noexcept
 	// The other ConditionSet might be a child of the current one, so we
 	// need to keep the children safe until the end of the assignment.
 	// The attribute tells the compiler that oldChildren are actually used.
-	[[maybe_unused]] vector<ConditionSet> oldChildren = std::move(children);
+	[[maybe_unused]] std::vector<ConditionSet> oldChildren = std::move(children);
 
 	// Then move over all content.
 	expressionOperator = other.expressionOperator;
@@ -181,7 +181,7 @@ ConditionSet &ConditionSet::operator=(const ConditionSet &other)
 	// The other ConditionSet might be a child of the current one, so we
 	// need to keep the children safe until the end of the assignment.
 	// The attribute tells the compiler that oldChildren are actually used.
-	[[maybe_unused]] vector<ConditionSet> oldChildren = std::move(children);
+	[[maybe_unused]] std::vector<ConditionSet> oldChildren = std::move(children);
 
 	// Then copy over all content.
 	expressionOperator = other.expressionOperator;
@@ -199,7 +199,7 @@ ConditionSet &ConditionSet::operator=(const ConditionSet &other)
 void ConditionSet::Load(const DataNode &node, const ConditionsStore *conditions)
 {
 	if(!conditions)
-		throw runtime_error("Unable to Load ConditionSet without a pointer to a ConditionsStore!");
+		throw std::runtime_error("Unable to Load ConditionSet without a pointer to a ConditionsStore!");
 	this->conditions = conditions;
 
 	// The top-node is always an 'and' node, without the keyword.
@@ -243,9 +243,9 @@ void ConditionSet::SaveChild(int childNr, DataWriter &out) const
 // Save a subset of conditions, by writing out tokens (without a newline).
 void ConditionSet::SaveSubset(DataWriter &out) const
 {
-	string opTxt = "";
-	auto it = find_if(CS_TOKEN_CONVERSION.begin(), CS_TOKEN_CONVERSION.end(),
-		[this](const pair<const string, ConditionSet::ExpressionOp> &e) {
+	std::string opTxt = "";
+	auto it = std::find_if(CS_TOKEN_CONVERSION.begin(), CS_TOKEN_CONVERSION.end(),
+		[this](const std::pair<std::string_view, ExpressionOp> &e) {
 			return e.second == expressionOperator;
 		});
 	if(it != CS_TOKEN_CONVERSION.end())
@@ -358,7 +358,7 @@ int64_t ConditionSet::Evaluate() const
 		case ExpressionOp::VAR:
 		{
 			if(!conditions)
-				throw runtime_error("Unable to Evaluate ExpressionOp::VAR with condition name \"" + conditionName
+				throw std::runtime_error("Unable to Evaluate ExpressionOp::VAR with condition name \"" + conditionName
 					+ "\" in ConditionSet without a pointer to a ConditionsStore!");
 			return conditions->Get(conditionName);
 		}
@@ -410,9 +410,9 @@ int64_t ConditionSet::Evaluate() const
 
 
 // Get the names of the conditions that are relevant for this ConditionSet.
-set<string> ConditionSet::RelevantConditions() const
+std::set<std::string> ConditionSet::RelevantConditions() const
 {
-	set<string> result;
+	std::set<std::string> result;
 	// Add the name from this set, if it is a VAR type operator.
 	if(expressionOperator == ExpressionOp::VAR)
 		result.emplace(conditionName);
@@ -428,9 +428,9 @@ set<string> ConditionSet::RelevantConditions() const
 bool ConditionSet::ParseNode(const DataNode &node)
 {
 	if(!conditions)
-		throw runtime_error("Unable to ParseNode(full) for a ConditionSet without a pointer to a ConditionsStore!");
+		throw std::runtime_error("Unable to ParseNode(full) for a ConditionSet without a pointer to a ConditionsStore!");
 
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	// Special handling for 'and' and 'or' nodes.
 	if(node.Size() == 1)
 	{
@@ -496,7 +496,7 @@ bool ConditionSet::ParseNode(const DataNode &node)
 bool ConditionSet::ParseNode(const DataNode &node, int &tokenNr)
 {
 	if(!conditions)
-		throw runtime_error("Unable to ParseNode(indexed) for a ConditionSet without a pointer to a ConditionsStore!");
+		throw std::runtime_error("Unable to ParseNode(indexed) for a ConditionSet without a pointer to a ConditionsStore!");
 
 	// Nodes beyond this point should not have children.
 	if(node.HasChildren())
@@ -579,7 +579,7 @@ bool ConditionSet::Optimize(const DataNode &node)
 bool ConditionSet::ParseBooleanChildren(const DataNode &node)
 {
 	if(!conditions)
-		throw runtime_error("Unable to ParseBooleans in a ConditionSet without a pointer to a ConditionsStore!");
+		throw std::runtime_error("Unable to ParseBooleans in a ConditionSet without a pointer to a ConditionsStore!");
 
 	if(!node.HasChildren())
 		return FailParse(node, "child-nodes expected, found none");
@@ -602,7 +602,7 @@ bool ConditionSet::ParseBooleanChildren(const DataNode &node)
 bool ConditionSet::ParseMini(const DataNode &node, int &tokenNr)
 {
 	if(!conditions)
-		throw runtime_error("Unable to ParseMini in a ConditionSet without a pointer to a ConditionsStore!");
+		throw std::runtime_error("Unable to ParseMini in a ConditionSet without a pointer to a ConditionsStore!");
 
 	if(tokenNr >= node.Size())
 		return FailParse(node, "expected terminal or sub-expression, found none");
@@ -673,7 +673,7 @@ bool ConditionSet::ParseMini(const DataNode &node, int &tokenNr)
 bool ConditionSet::ParseFromInfix(const DataNode &node, int &tokenNr, ExpressionOp parentOp)
 {
 	if(!conditions)
-		throw runtime_error("Unable to ParseFromInfix in a ConditionSet without a pointer to a ConditionsStore!");
+		throw std::runtime_error("Unable to ParseFromInfix in a ConditionSet without a pointer to a ConditionsStore!");
 
 	// Keep on parsing until we reach an end-state (error, end-of-tokens, closing-bracket, lower precedence token)
 	while(true)
@@ -795,7 +795,7 @@ bool ConditionSet::FailParse()
 
 
 
-bool ConditionSet::FailParse(const DataNode &node, const string &failText)
+bool ConditionSet::FailParse(const DataNode &node, const std::string &failText)
 {
 	node.PrintTrace("Error: " + failText + ":");
 	return FailParse();

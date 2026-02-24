@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 namespace {
 	// Additional distance the scrollbar's tab can be selected from.
@@ -90,7 +90,7 @@ bool ScrollBar::Hover(int x, int y)
 		Point ab = b - a;
 		Point ap = p - a;
 
-		double h = clamp(ap.Dot(ab) / ab.LengthSquared(), 0., 1.);
+		double h = std::clamp(ap.Dot(ab) / ab.LengthSquared(), 0., 1.);
 		double d = (ap - ab * h).Length();
 
 		return d;
@@ -134,12 +134,12 @@ bool ScrollBar::Click(int x, int y, MouseButton button, int clicks)
 	Point clickPos(x, y);
 	if((clickPos - from).Length() < 10.)
 	{
-		fraction = clamp(fraction - displaySizeFraction * .6f, 0.f, 1.f);
+		fraction = std::clamp(fraction - displaySizeFraction * .6f, 0.f, 1.f);
 		return true;
 	}
 	if((clickPos - to).Length() < 10.)
 	{
-		fraction = clamp(fraction + displaySizeFraction * .6f, 0.f, 1.f);
+		fraction = std::clamp(fraction + displaySizeFraction * .6f, 0.f, 1.f);
 		return true;
 	}
 

@@ -246,7 +246,7 @@ private:
 	double ramscoopMultiplier = 1.;
 
 	// Stellar objects, listed in such an order that an object's parents are
-	// guaranteed to appear before it (so that if we traverse the vector in
+	// guaranteed to appear before it (so that if we traverse the std::vector in
 	// order, updating positions, an object's parents will already be at the
 	// proper position before that object is updated).
 	std::vector<StellarObject> objects;

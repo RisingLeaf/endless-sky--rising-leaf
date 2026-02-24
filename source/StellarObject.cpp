@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 namespace {
 	bool usingMatches = false;
@@ -63,12 +63,12 @@ double StellarObject::Radius() const
 {
 	double radius = -1.;
 	if(HasSprite())
-		radius = .5 * min(Width(), Height());
+		radius = .5 * std::min(Width(), Height());
 
 	// Special case: stars may have a huge cloud around them, but only count the
 	// core of the cloud as part of the radius.
 	if(isStar)
-		radius = min(radius, 80.);
+		radius = std::min(radius, 80.);
 
 	return radius;
 }
@@ -90,9 +90,9 @@ const Planet *StellarObject::GetPlanet() const
 
 
 // Only planets that you can land on have names.
-const string &StellarObject::DisplayName() const
+const std::string &StellarObject::DisplayName() const
 {
-	static const string UNKNOWN = "???";
+	static const std::string UNKNOWN = "???";
 	return (planet && !planet->DisplayName().empty()) ? planet->DisplayName() : UNKNOWN;
 }
 
@@ -100,13 +100,13 @@ const string &StellarObject::DisplayName() const
 
 // If it is impossible to land on this planet, get the message
 // explaining why (e.g. too hot, too cold, etc.).
-const string &StellarObject::LandingMessage() const
+const std::string &StellarObject::LandingMessage() const
 {
 	// Check if there's a custom message for this sprite type.
 	if(GameData::HasLandingMessage(GetSprite()))
 		return GameData::LandingMessage(GetSprite());
 
-	static const string EMPTY;
+	static const std::string EMPTY;
 	return (message ? *message : EMPTY);
 }
 
@@ -157,7 +157,7 @@ bool StellarObject::IsMoon() const
 
 
 
-// Get this object's parent index (in the System's vector of objects).
+// Get this object's parent index (in the System's std::vector of objects).
 int StellarObject::Parent() const
 {
 	return parent;
@@ -173,7 +173,7 @@ double StellarObject::Distance() const
 
 
 
-const vector<RandomEvent<Hazard>> &StellarObject::Hazards() const
+const std::vector<RandomEvent<Hazard>> &StellarObject::Hazards() const
 {
 	return hazards;
 }

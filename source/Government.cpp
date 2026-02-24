@@ -28,16 +28,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
+
 
 namespace {
 	// Load ShipEvent strings and corresponding numerical values into a map.
-	void PenaltyHelper(const DataNode &node, map<int, double> &penalties)
+	void PenaltyHelper(const DataNode &node, std::map<int, double> &penalties)
 	{
 		for(const DataNode &child : node)
 			if(child.Size() >= 2)
 			{
-				const string &key = child.Token(0);
+				const std::string &key = child.Token(0);
 				if(key == "assist")
 					penalties[ShipEvent::ASSIST] = child.Value(1);
 				else if(key == "disable")
@@ -65,7 +65,7 @@ namespace {
 	}
 
 	// Determine the penalty for the given ShipEvent based on the values in the given map.
-	double PenaltyHelper(int eventType, const map<int, double> &penalties)
+	double PenaltyHelper(int eventType, const std::map<int, double> &penalties)
 	{
 		double penalty = 0.;
 		for(const auto &it : penalties)
@@ -99,8 +99,8 @@ Government::Government()
 
 
 // Load a government's definition from a file.
-void Government::Load(const DataNode &node, const set<const System *> *visitedSystems,
-	const set<const Planet *> *visitedPlanets)
+void Government::Load(const DataNode &node, const std::set<const System *> *visitedSystems,
+	const std::set<const Planet *> *visitedPlanets)
 {
 	if(node.Size() >= 2)
 	{
@@ -111,7 +111,7 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 
 	// For the following keys, if this data node defines a new value for that
 	// key, the old values should be cleared (unless using the "add" keyword).
-	set<string> shouldOverwrite = {"raid"};
+	std::set<std::string> shouldOverwrite = {"raid"};
 
 	for(const DataNode &child : node)
 	{
@@ -123,7 +123,7 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 			continue;
 		}
 
-		const string &key = child.Token((add || remove) ? 1 : 0);
+		const std::string &key = child.Token((add || remove) ? 1 : 0);
 		int valueIndex = (add || remove) ? 2 : 1;
 		bool hasValue = child.Size() > valueIndex;
 
@@ -145,11 +145,11 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 			{
 				for(const DataNode &grand : child)
 				{
-					const string &grandKey = grand.Token(0);
+					const std::string &grandKey = grand.Token(0);
 					if(grandKey == "max")
-						reputationMax = numeric_limits<double>::max();
+						reputationMax = std::numeric_limits<double>::max();
 					else if(grandKey == "min")
-						reputationMin = numeric_limits<double>::lowest();
+						reputationMin = std::numeric_limits<double>::lowest();
 				}
 			}
 			else if(key == "raid")
@@ -210,7 +210,7 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 				if(grand.Size() >= 2)
 				{
 					const Government *gov = GameData::Governments().Get(grand.Token(0));
-					attitudeToward.resize(nextID, numeric_limits<double>::quiet_NaN());
+					attitudeToward.resize(nextID, std::numeric_limits<double>::quiet_NaN());
 					attitudeToward[gov->id] = grand.Value(1);
 				}
 				else
@@ -221,7 +221,7 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 		{
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
+				const std::string &grandKey = grand.Token(0);
 				bool hasGrandValue = grand.Size() >= 2;
 				if(grandKey == "player reputation" && hasGrandValue)
 					initialPlayerReputation = add ? initialPlayerReputation + grand.Value(valueIndex) : grand.Value(valueIndex);
@@ -267,7 +267,7 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 		else if(key == "custom penalties for")
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
+				const std::string &grandKey = grand.Token(0);
 				if(grandKey == "remove" && grand.Size() >= 2)
 					customPenalties[GameData::Governments().Get(grand.Token(1))->id].clear();
 				else
@@ -290,7 +290,7 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 					grand.PrintTrace("Skipping unrecognized attribute:");
 					continue;
 				}
-				const string &grandKey = grand.Token(0);
+				const std::string &grandKey = grand.Token(0);
 				if(grandKey == "remove")
 				{
 					if(grand.Token(1) == "ignore universal")
@@ -330,7 +330,7 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 				deathSentenceForBlock = GameData::Conversations().Get(child.Token(valueIndex + 1));
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
+				const std::string &grandKey = grand.Token(0);
 				if(grand.Size() == 1)
 					atrocityOutfits[GameData::Outfits().Get(grandKey)] = {true, deathSentenceForBlock};
 				else if(grandKey == "remove")
@@ -381,9 +381,9 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 		else if(key == "player reputation")
 			initialPlayerReputation = add ? initialPlayerReputation + child.Value(valueIndex) : child.Value(valueIndex);
 		else if(key == "crew attack")
-			crewAttack = max(0., add ? child.Value(valueIndex) + crewAttack : child.Value(valueIndex));
+			crewAttack = std::max(0., add ? child.Value(valueIndex) + crewAttack : child.Value(valueIndex));
 		else if(key == "crew defense")
-			crewDefense = max(0., add ? child.Value(valueIndex) + crewDefense : child.Value(valueIndex));
+			crewDefense = std::max(0., add ? child.Value(valueIndex) + crewDefense : child.Value(valueIndex));
 		else if(key == "bribe")
 			bribe = add ? bribe + child.Value(valueIndex) : child.Value(valueIndex);
 		else if(key == "fine")
@@ -433,7 +433,7 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 
 
 // Get the display name of this government.
-const string &Government::DisplayName() const
+const std::string &Government::DisplayName() const
 {
 	return displayName;
 }
@@ -441,14 +441,14 @@ const string &Government::DisplayName() const
 
 
 // Set / Get the true name used for this government in the data files.
-void Government::SetTrueName(const string &trueName)
+void Government::SetTrueName(const std::string &trueName)
 {
 	this->trueName = trueName;
 }
 
 
 
-const string &Government::TrueName() const
+const std::string &Government::TrueName() const
 {
 	return trueName;
 }
@@ -514,7 +514,7 @@ double Government::PenaltyFor(int eventType, const Government *other) const
 	if(it == customPenalties.end())
 		return PenaltyHelper(eventType, penalties);
 
-	map<int, double> tempPenalties = penalties;
+	std::map<int, double> tempPenalties = penalties;
 	for(const auto &penalty : it->second)
 		tempPenalties[penalty.first] = penalty.second;
 	return PenaltyHelper(eventType, tempPenalties);
@@ -578,7 +578,7 @@ const Conversation *Government::DeathSentence() const
 
 // Get a hail message (which depends on whether this is an enemy government
 // and if the ship is disabled).
-string Government::GetHail(bool isDisabled) const
+std::string Government::GetHail(bool isDisabled) const
 {
 	const Phrase *phrase = nullptr;
 
@@ -593,7 +593,7 @@ string Government::GetHail(bool isDisabled) const
 
 
 // Find out if this government speaks a different language.
-const string &Government::Language() const
+const std::string &Government::Language() const
 {
 	return language;
 }
@@ -611,7 +611,7 @@ bool Government::SendUntranslatedHails() const
 // Pirate raids in this government's systems use these fleet definitions. If
 // it is empty, there are no pirate raids.
 // The second attribute denotes the minimal and maximal attraction required for the fleet to appear.
-const vector<RaidFleet> &Government::RaidFleets() const
+const std::vector<RaidFleet> &Government::RaidFleets() const
 {
 	return raidFleets;
 }
@@ -664,7 +664,7 @@ void Government::Bribe() const
 
 // Check to see if the player has done anything they should be fined for.
 // Each government can only fine you once per day.
-pair<const Conversation *, string> Government::Fine(PlayerInfo &player, int scan,
+std::pair<const Conversation *, std::string> Government::Fine(PlayerInfo &player, int scan,
 	const Ship *target, double security) const
 {
 	return GameData::GetPolitics().Fine(player, this, scan, target, security);

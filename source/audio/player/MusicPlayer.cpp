@@ -15,11 +15,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "MusicPlayer.h"
 
-using namespace std;
 
 
 
-MusicPlayer::MusicPlayer(unique_ptr<AudioSupplier> audioSupplier)
+
+MusicPlayer::MusicPlayer(std::unique_ptr<AudioSupplier> audioSupplier)
 	: AudioPlayer(SoundCategory::MUSIC, std::move(audioSupplier), false)
 {
 }

@@ -22,8 +22,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "shader/Shader.h"
 
 #include "graphics/graphics_layer.h"
+#include "shader/SpriteShader.h"
 
-using namespace std;
+
 
 namespace {
 	Shader shader("renderBuffer shader");
@@ -60,29 +61,6 @@ void RenderBuffer::Init()
 }
 
 
-
-RenderBuffer::RenderTargetGuard::~RenderTargetGuard()
-{
-	Deactivate();
-}
-
-
-
-void RenderBuffer::RenderTargetGuard::Deactivate()
-{
-	buffer.Deactivate();
-	screenGuard.Deactivate();
-}
-
-
-
-RenderBuffer::RenderTargetGuard::RenderTargetGuard(RenderBuffer &b, int screenWidth, int screenHeight)
-	: buffer(b), screenGuard(screenWidth, screenHeight)
-{
-}
-
-
-
 // Create a texture of the given size that can be used as a render target.
 RenderBuffer::RenderBuffer(const Point &dimensions)
 : size(dimensions),
@@ -102,11 +80,14 @@ RenderBuffer::~RenderBuffer() = default;
 
 
 
-// Turn this buffer on as a render target. The render target is restored if
-// the Activation object goes out of scope.
-RenderBuffer::RenderTargetGuard RenderBuffer::SetTarget()
+void RenderBuffer::SetTarget()
 {
 	FrameBuffer.Bind();
+
+  SpriteShader::Bind();
+  ShaderInfo::CommonUniformBufferData cm_data;
+  cm_data.scale = {2.f / static_cast<float>(size.X()), -2.f / static_cast<float>(size.Y())};
+  GameWindow::GetInstance()->SetCommonUniforms(cm_data);
 }
 
 

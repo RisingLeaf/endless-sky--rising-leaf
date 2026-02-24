@@ -19,7 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "ConditionsStore.h"
 #include "DataNode.h"
 
-using namespace std;
+
 
 
 
@@ -60,9 +60,9 @@ bool Paragraphs::IsEmptyFor() const
 
 
 
-string Paragraphs::ToString() const
+std::string Paragraphs::ToString() const
 {
-	string result;
+	std::string result;
 	for(const auto &varsText : text)
 		if(!varsText.second.empty() && varsText.first.Test())
 			result += varsText.second;

@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "graphics/graphics_layer.h"
 
-using namespace std;
+
 
 namespace {
 	Shader shader("pointer shader");

@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <thread>
 #endif
 
-using namespace std;
+
 
 
 
@@ -31,7 +31,7 @@ using namespace std;
 // elapses until Time() is called.
 FrameTimer::FrameTimer()
 {
-	next = chrono::steady_clock::now();
+	next = std::chrono::steady_clock::now();
 }
 
 
@@ -40,10 +40,10 @@ FrameTimer::FrameTimer()
 // _unless_ a frame takes too long by at least the given lag, in which case
 // the next frame happens immediately but no "catch-up" is done.
 FrameTimer::FrameTimer(int fps, int maxLagMsec)
-	: step(chrono::nanoseconds(1000000000 / fps)),
-	maxLag(chrono::milliseconds(maxLagMsec))
+	: step(std::chrono::nanoseconds(1000000000 / fps)),
+	maxLag(std::chrono::milliseconds(maxLagMsec))
 {
-	next = chrono::steady_clock::now();
+	next = std::chrono::steady_clock::now();
 	Step();
 }
 
@@ -57,7 +57,7 @@ void FrameTimer::Wait()
 	// it and that it does not ignore. But, the worst that would happen in that
 	// case is that this particular frame will end too quickly, and then it will
 	// go back to normal for the next one.
-	chrono::steady_clock::time_point now = chrono::steady_clock::now();
+	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
 	if(now < next)
 	{
 		// This should never happen with a true steady clock, but make sure that
@@ -69,11 +69,11 @@ void FrameTimer::Wait()
 		// compared to the native Windows Sleep function.
 		// See the thread starting with https://sourceforge.net/p/mingw-w64/mailman/message/37013810/.
 #ifdef _WIN32
-		Sleep(chrono::duration_cast<chrono::milliseconds>(next - now).count());
+		Sleep(std::chrono::duration_cast<std::chrono::milliseconds>(next - now).count());
 #else
-		this_thread::sleep_until(next);
+		std::this_thread::sleep_until(next);
 #endif
-		now = chrono::steady_clock::now();
+		now = std::chrono::steady_clock::now();
 	}
 	// If the lag is too high, don't try to do catch-up.
 	if(now - next > maxLag)
@@ -87,8 +87,8 @@ void FrameTimer::Wait()
 // Find out how long it has been since this timer was created, in seconds.
 double FrameTimer::Time() const
 {
-	chrono::steady_clock::time_point now = chrono::steady_clock::now();
-	return chrono::duration_cast<chrono::nanoseconds>(now - next).count() * .000000001;
+	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+	return std::chrono::duration_cast<std::chrono::nanoseconds>(now - next).count() * .000000001;
 }
 
 
@@ -96,7 +96,7 @@ double FrameTimer::Time() const
 // Change the frame rate (for viewing in slow motion).
 void FrameTimer::SetFrameRate(int fps)
 {
-	step = chrono::nanoseconds(1000000000 / fps);
+	step = std::chrono::nanoseconds(1000000000 / fps);
 }
 
 

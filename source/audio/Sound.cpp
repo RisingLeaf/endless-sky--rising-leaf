@@ -21,20 +21,20 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <iostream>
 
-using namespace std;
+
 
 namespace {
 	// Read a WAV header, and return the size of the data, in bytes. If the file
 	// is an unsupported format (anything but little-endian 16-bit PCM at 44100 HZ),
 	// this will return 0.
-	uint32_t ReadHeader(shared_ptr<iostream> &in, uint32_t frequency);
-	uint32_t Read4(const shared_ptr<iostream> &in);
-	uint16_t Read2(const shared_ptr<iostream> &in);
+	uint32_t ReadHeader(std::shared_ptr<std::iostream> &in, uint32_t frequency);
+	uint32_t Read4(const std::shared_ptr<std::iostream> &in);
+	uint16_t Read2(const std::shared_ptr<std::iostream> &in);
 }
 
 
 
-bool Sound::Load(const filesystem::path &path, const string &name)
+bool Sound::Load(const std::filesystem::path &path, const std::string &name)
 {
 	if(path.extension() != ".wav")
 		return false;
@@ -42,9 +42,9 @@ bool Sound::Load(const filesystem::path &path, const string &name)
 
 	isLooped = path.stem().string().ends_with('~');
 	bool isFast = isLooped ? path.stem().string().ends_with("@3x~") : path.stem().string().ends_with("@3x");
-	vector<AudioSupplier::sample_t> &buf = isFast ? buffer3x : buffer;
+	std::vector<AudioSupplier::sample_t> &buf = isFast ? buffer3x : buffer;
 
-	shared_ptr<iostream> in = Files::Open(path);
+	std::shared_ptr<std::iostream> in = Files::Open(path);
 	if(!in)
 		return false;
 	uint32_t bytes = ReadHeader(in, AudioSupplier::SAMPLE_RATE);
@@ -55,7 +55,7 @@ bool Sound::Load(const filesystem::path &path, const string &name)
 	}
 
 	// Read 16-bit mono from the file.
-	vector<char> data(bytes);
+	std::vector<char> data(bytes);
 	in->read(data.data(), bytes);
 
 	// Store 16-bit stereo buffer.
@@ -70,21 +70,21 @@ bool Sound::Load(const filesystem::path &path, const string &name)
 
 
 
-const string &Sound::Name() const
+const std::string &Sound::Name() const
 {
 	return name;
 }
 
 
 
-const vector<AudioSupplier::sample_t> &Sound::Buffer() const
+const std::vector<AudioSupplier::sample_t> &Sound::Buffer() const
 {
 	return buffer.empty() ? buffer3x : buffer;
 }
 
 
 
-const vector<AudioSupplier::sample_t> &Sound::Buffer3x() const
+const std::vector<AudioSupplier::sample_t> &Sound::Buffer3x() const
 {
 	return buffer3x.empty() ? buffer : buffer3x;
 }
@@ -98,9 +98,9 @@ bool Sound::IsLooping() const
 
 
 
-unique_ptr<AudioSupplier> Sound::CreateSupplier() const
+std::unique_ptr<AudioSupplier> Sound::CreateSupplier() const
 {
-	return unique_ptr<AudioSupplier>{new WavSupplier{*this, false, IsLooping()}};
+	return std::unique_ptr<AudioSupplier>{new WavSupplier{*this, false, IsLooping()}};
 }
 
 
@@ -109,7 +109,7 @@ namespace {
 	// Read a WAV header, and return the size of the data, in bytes. If the file
 	// is an unsupported format (anything but little-endian 16-bit PCM at 44100 HZ),
 	// this will return 0.
-	uint32_t ReadHeader(shared_ptr<iostream> &in, uint32_t frequency)
+	uint32_t ReadHeader(std::shared_ptr<std::iostream> &in, uint32_t frequency)
 	{
 		uint32_t chunkID = Read4(in);
 		if(chunkID != 0x46464952) // "RIFF" in big endian.
@@ -142,7 +142,7 @@ namespace {
 
 				// Skip any further bytes in this chunk.
 				if(subchunkSize > 16)
-					in->seekg(subchunkSize - 16, ios::cur);
+					in->seekg(subchunkSize - 16, std::ios::cur);
 
 				if(audioFormat != 1)
 					return 0;
@@ -164,13 +164,13 @@ namespace {
 				return subchunkSize;
 			}
 			else
-				in->seekg(subchunkSize, ios::cur);
+				in->seekg(subchunkSize, std::ios::cur);
 		}
 	}
 
 
 
-	uint32_t Read4(const shared_ptr<iostream> &in)
+	uint32_t Read4(const std::shared_ptr<std::iostream> &in)
 	{
 		unsigned char data[4];
 		in->read(reinterpret_cast<char *>(data), 4);
@@ -184,7 +184,7 @@ namespace {
 
 
 
-	uint16_t Read2(const shared_ptr<iostream> &in)
+	uint16_t Read2(const std::shared_ptr<std::iostream> &in)
 	{
 		unsigned char data[2];
 		in->read(reinterpret_cast<char *>(data), 2);

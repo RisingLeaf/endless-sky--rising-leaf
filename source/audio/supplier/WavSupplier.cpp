@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
+
 
 
 
@@ -50,9 +50,9 @@ size_t WavSupplier::AvailableChunks() const
 
 
 
-vector<AudioSupplier::sample_t> WavSupplier::NextDataChunk()
+std::vector<AudioSupplier::sample_t> WavSupplier::NextDataChunk()
 {
-	vector<sample_t> samples(OUTPUT_CHUNK);
+	std::vector<sample_t> samples(OUTPUT_CHUNK);
 	// If we are at the beginning of the buffer and it was already played, this is a loop.
 	if(!currentSample && wasStarted && !isLooping)
 		return samples;
@@ -65,8 +65,8 @@ vector<AudioSupplier::sample_t> WavSupplier::NextDataChunk()
 			is3x = nextPlaybackIs3x;
 			wasStarted = true;
 		}
-		const vector<sample_t> &input = is3x ? sound.Buffer3x() : sound.Buffer();
-		size_t readChunk = min(input.size() - currentSample, samples.size() - currentSampleCount);
+		const std::vector<sample_t> &input = is3x ? sound.Buffer3x() : sound.Buffer();
+		size_t readChunk = std::min(input.size() - currentSample, samples.size() - currentSampleCount);
 		std::copy_n(input.begin() + currentSample, readChunk, samples.begin() + currentSampleCount);
 		currentSampleCount += readChunk;
 		currentSample = (currentSample + readChunk) % input.size();

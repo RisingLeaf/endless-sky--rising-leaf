@@ -22,7 +22,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <map>
 #include <vector>
 
-using namespace std;
+
 
 namespace {
 	// Make sure the length of PersonalityTrait matches PERSONALITY_COUNT
@@ -72,7 +72,7 @@ namespace {
 		LAST_ITEM_IN_PERSONALITY_TRAIT_ENUM
 	};
 
-	const map<string, PersonalityTrait> TOKEN = {
+	const std::map<std::string, PersonalityTrait> TOKEN = {
 		{"pacifist", PACIFIST},
 		{"forbearing", FORBEARING},
 		{"timid", TIMID},
@@ -115,7 +115,7 @@ namespace {
 	};
 
 	// Tokens that combine two or more flags.
-	const map<string, vector<PersonalityTrait>> COMPOSITE_TOKEN = {
+	const std::map<std::string, std::vector<PersonalityTrait>> COMPOSITE_TOKEN = {
 		{"heroic", {DARING, HUNTING}}
 	};
 
@@ -489,7 +489,7 @@ void Personality::UpdateConfusion(bool isFiring)
 Personality Personality::Defender()
 {
 	Personality defender;
-	defender.flags = bitset<PERSONALITY_COUNT>((1LL << STAYING) | (1LL << MARKED) | (1LL << HUNTING) | (1LL << DARING)
+	defender.flags = std::bitset<PERSONALITY_COUNT>((1LL << STAYING) | (1LL << MARKED) | (1LL << HUNTING) | (1LL << DARING)
 			| (1LL << UNCONSTRAINED) | (1LL << TARGET));
 	return defender;
 }
@@ -501,7 +501,7 @@ Personality Personality::Defender()
 Personality Personality::DefenderFighter()
 {
 	Personality defender;
-	defender.flags = bitset<PERSONALITY_COUNT>((1LL << STAYING) | (1LL << HUNTING) | (1LL << DARING)
+	defender.flags = std::bitset<PERSONALITY_COUNT>((1LL << STAYING) | (1LL << HUNTING) | (1LL << DARING)
 			| (1LL << UNCONSTRAINED));
 	return defender;
 }
@@ -510,7 +510,7 @@ Personality Personality::DefenderFighter()
 
 void Personality::Parse(const DataNode &node, int index, bool remove)
 {
-	const string &token = node.Token(index);
+	const std::string &token = node.Token(index);
 
 	auto it = TOKEN.find(token);
 	if(it == TOKEN.end())

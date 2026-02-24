@@ -24,7 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "graphics/graphics_layer.h"
 
-using namespace std;
+
 
 namespace {
 	Shader shader("ring shader");
@@ -38,7 +38,6 @@ void RingShader::Init() {
     info.SetInputSize(2 * sizeof(float));
 	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
 
-	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // u_in vec2  scale;
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // u_in vec2  position;
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT); // u_in float radius;
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT); // u_in float width;
@@ -100,7 +99,7 @@ void RingShader::Add(const Point &pos, float radius, float width, float fraction
 
 	GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
 
-	square.Draw(GraphicsTypes::PrimitiveType::TRIANGLES);
+	square.Draw(GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
 }
 
 

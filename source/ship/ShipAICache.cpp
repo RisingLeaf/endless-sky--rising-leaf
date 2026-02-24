@@ -24,7 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
+
 
 
 
@@ -67,16 +67,16 @@ void ShipAICache::Calibrate(const Ship &ship)
 		// Exploding weaponry that can damage this ship requires special consideration.
 		if(weapon->SafeRange())
 		{
-			minSafeDistance = max(weapon->SafeRange(), minSafeDistance);
+			minSafeDistance = std::max(weapon->SafeRange(), minSafeDistance);
 			splashDPS += DPS;
 		}
 
 		// The artillery AI should be applied at 1000 pixels range, or 500 if the weapon is homing.
 		double range = weapon->Range();
-		shortestRange = min(range, shortestRange);
+		shortestRange = std::min(range, shortestRange);
 		if(range >= 1000. || (weapon->Homing() && range >= 500.))
 		{
-			shortestArtillery = min(range, shortestArtillery);
+			shortestArtillery = std::min(range, shortestArtillery);
 			artilleryDPS += DPS;
 		}
 	}
@@ -120,9 +120,9 @@ void ShipAICache::Calibrate(const Ship &ship)
 			continue;
 		double weaponRange = weapon->Range() + hardpoint.GetPoint().Length();
 		if(hardpoint.IsTurret())
-			turretRange = max(turretRange, weaponRange);
+			turretRange = std::max(turretRange, weaponRange);
 		else
-			gunRange = max(gunRange, weaponRange);
+			gunRange = std::max(gunRange, weaponRange);
 	}
 }
 

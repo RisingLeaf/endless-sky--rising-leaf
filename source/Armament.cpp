@@ -25,7 +25,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <limits>
 
-using namespace std;
+
 
 
 
@@ -179,7 +179,7 @@ void Armament::Swap(unsigned first, unsigned second)
 
 
 // Access the array of weapon hardpoints.
-const vector<Hardpoint> &Armament::Get() const
+const std::vector<Hardpoint> &Armament::Get() const
 {
 	return hardpoints;
 }
@@ -207,9 +207,9 @@ int Armament::TurretCount() const
 
 // Determine the installed weaponry's reusable ammunition. That is, all ammo outfits that are not also
 // weapons (as then they would be installed on hardpoints, like the "Nuclear Missile" and other one-shots).
-set<const Outfit *> Armament::RestockableAmmo() const
+std::set<const Outfit *> Armament::RestockableAmmo() const
 {
-	auto restockable = set<const Outfit *>{};
+	auto restockable = std::set<const Outfit *>{};
 	for(const Hardpoint &hardpoint : hardpoints)
 	{
 		const Weapon *weapon = hardpoint.GetWeapon();
@@ -235,7 +235,7 @@ void Armament::Aim(const Ship &ship, const FireCommand &command)
 
 
 // Fire the given weapon, if it is ready.
-void Armament::Fire(unsigned index, Ship &ship, vector<Projectile> &projectiles, vector<Visual> &visuals, bool jammed)
+void Armament::Fire(unsigned index, Ship &ship, std::vector<Projectile> &projectiles, std::vector<Visual> &visuals, bool jammed)
 {
 	// Don't check if the hardpoint jammed here, as the weapon may not even
 	// attempt to fire due to stream reloading.
@@ -262,7 +262,7 @@ void Armament::Fire(unsigned index, Ship &ship, vector<Projectile> &projectiles,
 
 
 bool Armament::FireAntiMissile(unsigned index, Ship &ship, const Projectile &projectile,
-	vector<Visual> &visuals, bool jammed)
+	std::vector<Visual> &visuals, bool jammed)
 {
 	if(!CheckHardpoint(index, jammed))
 		return false;
@@ -273,7 +273,7 @@ bool Armament::FireAntiMissile(unsigned index, Ship &ship, const Projectile &pro
 
 
 bool Armament::FireTractorBeam(unsigned index, Ship &ship, const Flotsam &flotsam,
-	vector<Visual> &visuals, bool jammed)
+	std::vector<Visual> &visuals, bool jammed)
 {
 	if(!CheckHardpoint(index, jammed))
 		return false;
@@ -289,12 +289,12 @@ void Armament::Step(const Ship &ship)
 	for(Hardpoint &hardpoint : hardpoints)
 		hardpoint.Step();
 
-	for(auto &it : streamReload)
+	for(auto &[outfit, num] : streamReload)
 	{
-		int count = ship.OutfitCount(it.first);
-		it.second -= count;
+		const int count = ship.OutfitCount(outfit);
+		num -= count;
 		// Always reload to the quickest firing interval.
-		it.second = max(it.second, 1 - count);
+		num = std::max(num, 1 - count);
 	}
 }
 

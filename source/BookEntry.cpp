@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "shader/SpriteShader.h"
 #include "text/WrappedText.h"
 
-using namespace std;
+
 
 
 
@@ -53,14 +53,14 @@ void BookEntry::Add(const BookEntry &other)
 
 
 
-BookEntry BookEntry::Instantiate(const map<string, string> &subs) const
+BookEntry BookEntry::Instantiate(const std::map<std::string, std::string> &subs) const
 {
 	BookEntry newEntry;
 	for(const Item &item : items)
 	{
 		// Perform requested substitutions on the text of this node and return a new variant.
-		if(holds_alternative<string>(item))
-			newEntry.items.emplace_back(Format::Replace(std::get<string>(item), subs));
+		if(holds_alternative<std::string>(item))
+			newEntry.items.emplace_back(Format::Replace(std::get<std::string>(item), subs));
 		else
 			newEntry.items.emplace_back(item);
 	}
@@ -76,8 +76,8 @@ void BookEntry::Save(DataWriter &out) const
 		for(const Item &item : items)
 		{
 			// Break the text up into paragraphs.
-			if(holds_alternative<string>(item))
-				for(const string &line : Format::Split(std::get<string>(item), "\n\t"))
+			if(holds_alternative<std::string>(item))
+				for(const std::string &line : Format::Split(std::get<std::string>(item), "\n\t"))
 					out.Write(line);
 			else
 				out.Write("scene", std::get<const Sprite *>(item)->Name());
@@ -93,9 +93,9 @@ int BookEntry::Draw(const Point &topLeft, WrappedText &wrap, const Color &color)
 	Point drawPoint = topLeft;
 	for(const Item &item : items)
 	{
-		if(holds_alternative<string>(item))
+		if(holds_alternative<std::string>(item))
 		{
-			wrap.Wrap(std::get<string>(item));
+			wrap.Wrap(std::get<std::string>(item));
 			wrap.Draw(drawPoint, color);
 			drawPoint.Y() += wrap.Height();
 		}
@@ -118,7 +118,7 @@ void BookEntry::LoadSingle(const DataNode &node, int startAt)
 		items.emplace_back(SpriteSet::Get(node.Token(startAt + 1)));
 	else
 	{
-		string text;
+		std::string text;
 		for(int i = startAt; i < node.Size(); ++i)
 			// Skip empty strings.
 			if(!node.Token(i).empty())

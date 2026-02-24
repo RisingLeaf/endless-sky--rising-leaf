@@ -30,7 +30,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <set>
 #include <string>
 
-using namespace std;
+
 
 namespace {
 	// Maximum allowed projectile velocity.
@@ -40,7 +40,7 @@ namespace {
 	// Warn the user only once about too-large projectile velocities.
 	bool warned = false;
 
-	thread_local vector<bool> seen;
+	thread_local std::vector<bool> seen;
 }
 
 
@@ -77,7 +77,7 @@ void CollisionSet::Clear(int step)
 	sorted.clear();
 	counts.clear();
 	all.clear();
-	// The counts vector starts with two sentinel slots that will be used in the
+	// The counts std::vector starts with two sentinel slots that will be used in the
 	// course of performing the radix sort.
 	counts.resize(CELLS * CELLS + 2u, 0u);
 }
@@ -118,7 +118,7 @@ void CollisionSet::Finish()
 	// index of the output element where that bin begins.
 	partial_sum(counts.begin(), counts.end(), counts.begin());
 
-	// Allocate space for a sorted copy of the vector.
+	// Allocate space for a sorted copy of the std::vector.
 	sorted.resize(added.size());
 
 	// Now, perform a radix sort.
@@ -137,7 +137,7 @@ void CollisionSet::Finish()
 
 // Get all possible collisions for the given projectile. Collisions are not necessarily
 // sorted by distance.
-void CollisionSet::Line(const Projectile &projectile, vector<Collision> &result) const
+void CollisionSet::Line(const Projectile &projectile, std::vector<Collision> &result) const
 {
 	// What objects the projectile hits depends on its government.
 	const Government *pGov = projectile.GetGovernment();
@@ -152,7 +152,7 @@ void CollisionSet::Line(const Projectile &projectile, vector<Collision> &result)
 
 // Get all possible collisions along a line. Collisions are not necessarily sorted by
 // distance.
-void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &lineResult,
+void CollisionSet::Line(const Point &from, const Point &to, std::vector<Collision> &lineResult,
 		const Government *pGov, const Body *target) const
 {
 	const int x = from.X();
@@ -172,8 +172,8 @@ void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &l
 	{
 		// Examine all objects in the current grid cell.
 		const auto index = (gy & WRAP_MASK) * CELLS + (gx & WRAP_MASK);
-		vector<Entry>::const_iterator it = sorted.begin() + counts[index];
-		vector<Entry>::const_iterator end = sorted.begin() + counts[index + 1];
+		std::vector<Entry>::const_iterator it = sorted.begin() + counts[index];
+		std::vector<Entry>::const_iterator end = sorted.begin() + counts[index + 1];
 		for( ; it != end; ++it)
 		{
 			// Skip objects that were put in this same grid cell only because
@@ -204,7 +204,7 @@ void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &l
 		// Cap projectile velocity to prevent integer overflows.
 		if(!warned)
 		{
-			Logger::LogError("Warning: maximum projectile velocity is " + to_string(MAX_VELOCITY));
+			Logger::LogError("Warning: maximum projectile velocity is " + std::to_string(MAX_VELOCITY));
 			warned = true;
 		}
 		Point newEnd = from + pVelocity.Unit() * USED_MAX_VELOCITY;
@@ -221,7 +221,7 @@ void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &l
 	const uint64_t my = abs(endY - y);
 	// Behave as if each grid cell has this width and height. This guarantees
 	// that we only need to work with integer coordinates.
-	const uint64_t scale = max<uint64_t>(mx, 1) * max<uint64_t>(my, 1);
+	const uint64_t scale = std::max<uint64_t>(mx, 1) * std::max<uint64_t>(my, 1);
 	const uint64_t fullScale = CELL_SIZE * scale;
 
 	// Get the "remainder" distance that we must travel in x and y in order to
@@ -241,8 +241,8 @@ void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &l
 	{
 		// Examine all objects in the current grid cell.
 		auto i = (gy & WRAP_MASK) * CELLS + (gx & WRAP_MASK);
-		vector<Entry>::const_iterator it = sorted.begin() + counts[i];
-		vector<Entry>::const_iterator end = sorted.begin() + counts[i + 1];
+		std::vector<Entry>::const_iterator it = sorted.begin() + counts[i];
+		std::vector<Entry>::const_iterator end = sorted.begin() + counts[i + 1];
 		for( ; it != end; ++it)
 		{
 			// Skip objects that were put in this same grid cell only because
@@ -309,7 +309,7 @@ void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &l
 
 
 // Get all objects within the given range of the given point.
-void CollisionSet::Circle(const Point &center, double radius, vector<Body *> &result) const
+void CollisionSet::Circle(const Point &center, double radius, std::vector<Body *> &result) const
 {
 	Ring(center, 0., radius, result);
 }
@@ -318,7 +318,7 @@ void CollisionSet::Circle(const Point &center, double radius, vector<Body *> &re
 
 // Get all objects touching a ring with a given inner and outer range
 // centered at the given point.
-void CollisionSet::Ring(const Point &center, double inner, double outer, vector<Body *> &circleResult) const
+void CollisionSet::Ring(const Point &center, double inner, double outer, std::vector<Body *> &circleResult) const
 {
 	// Calculate the range of (x, y) grid coordinates this ring covers.
 	const int minX = static_cast<int>(center.X() - outer) >> SHIFT;
@@ -336,8 +336,8 @@ void CollisionSet::Ring(const Point &center, double inner, double outer, vector<
 		{
 			const auto gx = x & WRAP_MASK;
 			const auto index = gy * CELLS + gx;
-			vector<Entry>::const_iterator it = sorted.begin() + counts[index];
-			vector<Entry>::const_iterator end = sorted.begin() + counts[index + 1];
+			auto it = sorted.begin() + counts[index];
+			auto end = sorted.begin() + counts[index + 1];
 
 			for( ; it != end; ++it)
 			{
@@ -363,7 +363,7 @@ void CollisionSet::Ring(const Point &center, double inner, double outer, vector<
 
 
 
-const vector<Body *> &CollisionSet::All() const
+const std::vector<Body *> &CollisionSet::All() const
 {
 	return all;
 }

@@ -33,11 +33,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <string>
 
-using namespace std;
+
 
 namespace {
 	// Column headings.
-	const string HEADING[6] = {"Type", "Principal", "Interest", "Term", "Payment", ""};
+	const std::string HEADING[6] = {"Type", "Principal", "Interest", "Term", "Payment", ""};
 	// X coordinates of the columns of the table.
 	const int COLUMN[5] = {20, 130, 210, 280, 330};
 	const int EXTRA_X = 410;
@@ -93,7 +93,7 @@ void BankPanel::Draw()
 
 	// Draw the heading of the table.
 	table.SetColor(selected);
-	for(const string &heading : HEADING)
+	for(const std::string &heading : HEADING)
 		table.Draw(heading);
 	table.DrawGap(5);
 
@@ -213,7 +213,7 @@ void BankPanel::Draw()
 		// Your daily income offsets expenses.
 		totalPayment -= salariesIncome + tributeIncome + b.assetsReturns;
 
-		static const string LABEL[] = {"", "Your Salary Income", "Your Tribute Income", "Your Salary and Tribute Income",
+		static const std::string LABEL[] = {"", "Your Salary Income", "Your Tribute Income", "Your Salary and Tribute Income",
 			"Your Return on Assets Income", "Your Salary and Return on Assets Income",
 			"Your Tribute and Return on Assets Income", "Your Salary, Tribute, and Returns Income" };
 		const auto incomeLayout = Layout(310, Truncate::BACK);
@@ -233,13 +233,13 @@ void BankPanel::Draw()
 
 	// Draw the credit score.
 	table.DrawAt(Point(0., FIRST_Y + 210.));
-	string credit = "Your credit score is " + to_string(player.Accounts().CreditScore()) + ".";
+	std::string credit = "Your credit score is " + std::to_string(player.Accounts().CreditScore()) + ".";
 	const auto scoreLayout = Layout(460, Truncate::MIDDLE);
 	table.DrawCustom({credit, scoreLayout});
 	table.Advance(5);
 
 	// Report whether the player qualifies for a new loan.
-	string amount;
+	std::string amount;
 	if(!qualify)
 		amount = "You do not qualify for further loans at this time.";
 	else
@@ -354,19 +354,19 @@ bool BankPanel::Click(int x, int y, MouseButton button, int clicks)
 
 
 // Apply an extra payment to a debt. (This is a dialog callback.)
-void BankPanel::PayExtra(const string &str)
+void BankPanel::PayExtra(const std::string &str)
 {
 	int64_t amount = static_cast<int64_t>(Format::Parse(str));
 	// Check if the selected row is the "Other" row, which is only the case if
 	// you have more mortages than can be displayed.
-	const vector<Mortgage> &mortgages = player.Accounts().Mortgages();
+	const std::vector<Mortgage> &mortgages = player.Accounts().Mortgages();
 	bool isOther = (selectedRow == mortgageRows - 1 && mergedMortgages);
 
 	// Pay the mortgage. If this is the "other" row, loop through all the
 	// mortgages included in that row.
 	do {
 		// You cannot pay more than you have or more than the mortgage principal.
-		int64_t payment = min(amount, min(player.Accounts().Credits(), mortgages[selectedRow].Principal()));
+		int64_t payment = std::min(amount, std::min(player.Accounts().Credits(), mortgages[selectedRow].Principal()));
 		if(payment < 1)
 			break;
 
@@ -382,12 +382,12 @@ void BankPanel::PayExtra(const string &str)
 
 
 // Apply for a new mortgage. (This is a dialog callback.)
-void BankPanel::NewMortgage(const string &str)
+void BankPanel::NewMortgage(const std::string &str)
 {
 	int64_t amount = static_cast<int64_t>(Format::Parse(str));
 
 	// Limit the amount to whatever you have qualified for.
-	amount = min(amount, qualify);
+	amount = std::min(amount, qualify);
 	if(amount > 0)
 		player.Accounts().AddMortgage(amount);
 

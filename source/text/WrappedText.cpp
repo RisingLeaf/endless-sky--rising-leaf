@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cstring>
 
-using namespace std;
+
 
 
 
@@ -123,7 +123,7 @@ void WrappedText::SetParagraphBreak(int height)
 
 // Get the word positions when wrapping the given text. The coordinates
 // always begin at (0, 0).
-void WrappedText::Wrap(const string &str)
+void WrappedText::Wrap(const std::string &str)
 {
 	SetText(str.data(), str.length());
 
@@ -229,7 +229,7 @@ void WrappedText::Wrap()
 	// Keep track of how wide the current line is. This is just so we know how
 	// much extra space must be allotted by the alignment code.
 	int lineWidth = 0;
-	// This is the index in the "words" vector of the first word on this line.
+	// This is the index in the "words" std::vector of the first word on this line.
 	size_t lineBegin = 0;
 
 	// TODO: handle single words that are longer than the wrap width. Right now
@@ -238,7 +238,7 @@ void WrappedText::Wrap()
 	// would require a different format for the buffer, though, because it means
 	// inserting '\0' characters even where there is no whitespace.
 
-	for(string::iterator it = text.begin(); it != text.end(); ++it)
+	for(std::string::iterator it = text.begin(); it != text.end(); ++it)
 	{
 		const char c = *it;
 
@@ -318,7 +318,7 @@ void WrappedText::Wrap()
 
 	// We have over-calculated the actual height by an extra paragraph break,
 	// so subtract that.
-	height = max(0, word.y - paragraphBreak);
+	height = std::max(0, word.y - paragraphBreak);
 }
 
 

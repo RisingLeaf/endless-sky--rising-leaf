@@ -42,12 +42,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <utility>
 
-using namespace std;
+
 
 
 
 // Constructor.
-BoardingPanel::BoardingPanel(PlayerInfo &player, const shared_ptr<Ship> &victim)
+BoardingPanel::BoardingPanel(PlayerInfo &player, const std::shared_ptr<Ship> &victim)
 	: player(player), you(player.FlagshipPtr()), victim(victim),
 	attackOdds(*you, *victim), defenseOdds(*victim, *you)
 {
@@ -107,7 +107,7 @@ BoardingPanel::BoardingPanel(PlayerInfo &player, const shared_ptr<Ship> &victim)
 	// The list is 240 pixels tall, and there are 10 pixels padding on the top
 	// and the bottom, so:
 	scroll.SetDisplaySize(220.);
-	scroll.SetMaxValue(max(0., 20. * plunder.size()));
+	scroll.SetMaxValue(std::max(0., 20. * plunder.size()));
 }
 
 
@@ -183,8 +183,8 @@ void BoardingPanel::Draw()
 	if(you)
 	{
 		crew = you->Crew();
-		info.SetString("cargo space", to_string(you->Cargo().Free()));
-		info.SetString("your crew", to_string(crew));
+		info.SetString("cargo space", std::to_string(you->Cargo().Free()));
+		info.SetString("your crew", std::to_string(crew));
 		info.SetString("your attack",
 			Format::Decimal(attackOdds.AttackerPower(crew), 1));
 		info.SetString("your defense",
@@ -193,7 +193,7 @@ void BoardingPanel::Draw()
 	int vCrew = victim ? victim->Crew() : 0;
 	if(victim && (canCapture || victim->IsYours()))
 	{
-		info.SetString("enemy crew", to_string(vCrew));
+		info.SetString("enemy crew", std::to_string(vCrew));
 		info.SetString("enemy attack",
 			Format::Decimal(defenseOdds.AttackerPower(vCrew), 1));
 		info.SetString("enemy defense",
@@ -226,7 +226,7 @@ void BoardingPanel::Draw()
 
 	// Draw the status messages from hand to hand combat.
 	Point messagePos(50., 55.);
-	for(const string &message : messages)
+	for(const std::string &message : messages)
 	{
 		font.Draw(message, messagePos, bright);
 		messagePos.Y() += 20.;
@@ -252,7 +252,7 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 		CanTakeResult canTake = CanTake();
 		if(canTake != CanTakeResult::CAN_TAKE)
 		{
-			string message;
+			std::string message;
 			if(canTake == CanTakeResult::TARGET_YOURS)
 				message = "You cannot plunder your own ship.";
 			else if(canTake == CanTakeResult::NO_SELECTION)
@@ -302,7 +302,7 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 			plunder.erase(plunder.begin() + selected);
 			if(plunder.size() && selected == static_cast<int>(plunder.size()))
 				--selected;
-			scroll.SetMaxValue(max(0., 20. * plunder.size()));
+			scroll.SetMaxValue(std::max(0., 20. * plunder.size()));
 		}
 		else
 			plunder[selected].Take(count);
@@ -358,7 +358,7 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 
 			// To speed things up, have multiple rounds of combat each time you
 			// click the button, if you started with a lot of crew.
-			int rounds = max(1, yourStartCrew / 5);
+			int rounds = std::max(1, yourStartCrew / 5);
 			for(int round = 0; round < rounds; ++round)
 			{
 				int yourCrew = you->Crew();
@@ -425,12 +425,12 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 				messages.push_back("They attack. ");
 
 			if(yourCasualties && enemyCasualties)
-				messages.back() += "You lose " + to_string(yourCasualties)
-					+ " crew; they lose " + to_string(enemyCasualties) + ".";
+				messages.back() += "You lose " + std::to_string(yourCasualties)
+					+ " crew; they lose " + std::to_string(enemyCasualties) + ".";
 			else if(yourCasualties)
-				messages.back() += "You lose " + to_string(yourCasualties) + " crew.";
+				messages.back() += "You lose " + std::to_string(yourCasualties) + " crew.";
 			else if(enemyCasualties)
-				messages.back() += "They lose " + to_string(enemyCasualties) + " crew.";
+				messages.back() += "They lose " + std::to_string(enemyCasualties) + " crew.";
 
 			// Check if either ship has been captured.
 			if(!you->Crew())
@@ -447,7 +447,7 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 				int crewTransferred = victim->WasCaptured(you);
 				if(crewTransferred > 0)
 				{
-					string transferMessage = Format::Number(crewTransferred) + " crew member";
+					std::string transferMessage = Format::Number(crewTransferred) + " crew member";
 					if(crewTransferred == 1)
 						transferMessage += " has";
 					else
@@ -536,7 +536,7 @@ bool BoardingPanel::Scroll(double dx, double dy)
 
 
 // Constructor (commodity cargo).
-BoardingPanel::Plunder::Plunder(const string &commodity, int count, int unitValue)
+BoardingPanel::Plunder::Plunder(const std::string &commodity, int count, int unitValue)
 	: name(commodity), outfit(nullptr), count(count), unitValue(unitValue)
 {
 	UpdateStrings();
@@ -581,7 +581,7 @@ int64_t BoardingPanel::Plunder::UnitValue() const
 
 
 // Get the name of this item. If it is a commodity, this is its name.
-const string &BoardingPanel::Plunder::Name() const
+const std::string &BoardingPanel::Plunder::Name() const
 {
 	return name;
 }
@@ -590,7 +590,7 @@ const string &BoardingPanel::Plunder::Name() const
 
 // Get the mass, in the format "<count> x <unit mass>". If the count is
 // 1, only the unit mass is reported.
-const string &BoardingPanel::Plunder::Size() const
+const std::string &BoardingPanel::Plunder::Size() const
 {
 	return size;
 }
@@ -598,7 +598,7 @@ const string &BoardingPanel::Plunder::Size() const
 
 
 // Get the total value (unit value times count) as a string.
-const string &BoardingPanel::Plunder::Value() const
+const std::string &BoardingPanel::Plunder::Value() const
 {
 	return value;
 }
@@ -650,7 +650,7 @@ void BoardingPanel::Plunder::UpdateStrings()
 	if(count == 1)
 		size = Format::Number(mass);
 	else
-		size = to_string(count) + " x " + Format::Number(mass);
+		size = std::to_string(count) + " x " + Format::Number(mass);
 
 	value = Format::Credits(unitValue * count);
 }
@@ -737,10 +737,10 @@ void BoardingPanel::DoKeyboardNavigation(const SDL_Keycode key)
 		else if(key == SDLK_DOWN)
 			++selected;
 	}
-	selected = max(0, min(static_cast<int>(plunder.size() - 1), selected));
+	selected = std::max(0, std::min(static_cast<int>(plunder.size() - 1), selected));
 
 	// Scroll down at least far enough to view the current item.
-	double minimumScroll = max(0., 20. * selected - 200.);
+	double minimumScroll = std::max(0., 20. * selected - 200.);
 	double maximumScroll = 20. * selected;
-	scroll.Set(clamp<double>(scroll, minimumScroll, maximumScroll));
+	scroll.Set(std::clamp<double>(scroll, minimumScroll, maximumScroll));
 }

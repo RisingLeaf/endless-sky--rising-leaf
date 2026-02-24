@@ -33,10 +33,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 namespace {
-	const string SPACEPORT = "Space_port";
+	const std::string SPACEPORT = "Space_port";
 }
 
 
@@ -56,11 +56,11 @@ void Port::Load(const DataNode &node, const ConditionsStore *playerConditions)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "recharges" && (child.HasChildren() || hasValue))
 		{
-			auto setRecharge = [&](const DataNode &valueNode, const string &value) noexcept -> void {
+			auto setRecharge = [&](const DataNode &valueNode, const std::string &value) noexcept -> void {
 				if(value == "all")
 					recharge |= RechargeType::All;
 				else if(value == "shields")
@@ -81,7 +81,7 @@ void Port::Load(const DataNode &node, const ConditionsStore *playerConditions)
 		}
 		else if(key == "services" && (child.HasChildren() || hasValue))
 		{
-			auto setServices = [&](const DataNode &valueNode, const string &value) noexcept -> void {
+			auto setServices = [&](const DataNode &valueNode, const std::string &value) noexcept -> void {
 				if(value == "all")
 					services |= ServicesType::All;
 				else if(value == "trading")
@@ -114,7 +114,7 @@ void Port::Load(const DataNode &node, const ConditionsStore *playerConditions)
 		}
 		else if(key == "to" && child.Size() >= 2)
 		{
-			const string &conditional = child.Token(1);
+			const std::string &conditional = child.Token(1);
 			if(conditional == "bribe")
 				toRequireBribe.Load(child, playerConditions);
 			else if(conditional == "access")
@@ -129,7 +129,7 @@ void Port::Load(const DataNode &node, const ConditionsStore *playerConditions)
 				ConditionSet conditionSet(child, playerConditions);
 				for(int i = 2; i < child.Size(); ++i)
 				{
-					const string &listValue = child.Token(i);
+					const std::string &listValue = child.Token(i);
 					if(listValue == "all")
 					{
 						toRecharge[RechargeType::Shields] = conditionSet;
@@ -159,7 +159,7 @@ void Port::Load(const DataNode &node, const ConditionsStore *playerConditions)
 				ConditionSet conditionSet(child, playerConditions);
 				for(int i = 2; i < child.Size(); ++i)
 				{
-					const string &listValue = child.Token(i);
+					const std::string &listValue = child.Token(i);
 					if(listValue == "all")
 					{
 						toService[ServicesType::Trading] = conditionSet;
@@ -226,7 +226,7 @@ bool Port::CustomLoaded() const
 
 
 
-const string &Port::DisplayName() const
+const std::string &Port::DisplayName() const
 {
 	return displayName;
 }

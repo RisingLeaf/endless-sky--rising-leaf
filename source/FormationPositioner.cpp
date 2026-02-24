@@ -24,7 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
+
 
 
 
@@ -84,7 +84,7 @@ Point FormationPositioner::Position(const Ship *ship)
 		// Add the ship to the set of coordinates. We add it with a default
 		// coordinate of Point(0,0), it will gets its proper coordinate in
 		// the next generate round.
-		shipPositions[ship] = make_pair(relPos, tickTock);
+		shipPositions[ship] = std::make_pair(relPos, tickTock);
 
 		// Add the ship to the ring.
 		shipsInFormation.push_back(ship->shared_from_this());
@@ -159,8 +159,8 @@ void FormationPositioner::CalculateDirection()
 	if(!pattern->Rotatable())
 		return;
 
-	// Calculate new direction. If the formationLead is moving, then we use the movement vector,
-	// otherwise use the facing vector.
+	// Calculate new direction. If the formationLead is moving, then we use the movement std::vector,
+	// otherwise use the facing std::vector.
 	Point velocity = formationLead->Velocity();
 	Angle desiredDir = velocity.Length() > .1 ? Angle(velocity) : formationLead->Facing();
 
@@ -206,7 +206,7 @@ void FormationPositioner::CalculateDirection()
 		// about 12 seconds.
 		constexpr double MAX_FORMATION_TURN = .25;
 
-		deltaDir = Angle(clamp(deltaDir.Degrees(), -MAX_FORMATION_TURN, MAX_FORMATION_TURN));
+		deltaDir = Angle(std::clamp(deltaDir.Degrees(), -MAX_FORMATION_TURN, MAX_FORMATION_TURN));
 
 		direction += deltaDir;
 	}

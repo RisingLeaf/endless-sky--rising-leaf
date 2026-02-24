@@ -41,7 +41,7 @@ public:
 	bool IsLoaded() const;
 	void SetTrueName(const std::string &name);
 	const std::string &TrueName() const;
-	// Get the color as a float vector, suitable for use by OpenGL.
+	// Get the color as a float std::vector, suitable for use by OpenGL.
 	const float *Get() const;
 
 	// Get this color, but entirely opaque. That is, this is the color you would
@@ -62,7 +62,7 @@ public:
 
 
 private:
-	// Store the color as a float vector for easy interfacing with OpenGL.
+	// Store the color as a float std::vector for easy interfacing with OpenGL.
 	float color[4];
 
 	std::string trueName;

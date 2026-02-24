@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Shader.h"
 #include "../image/Sprite.h"
 
-using namespace std;
+
 
 namespace {
 	Shader shader("outline shader");

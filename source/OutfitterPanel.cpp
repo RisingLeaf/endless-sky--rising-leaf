@@ -43,16 +43,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <limits>
 #include <memory>
 
-using namespace std;
+
 
 namespace {
 	// Label for the description field of the detail pane.
-	const string DESCRIPTION = "description";
+	const std::string DESCRIPTION = "description";
 
 	// Determine the refillable ammunition a particular ship consumes or stores.
-	set<const Outfit *> GetRefillableAmmunition(const Ship &ship) noexcept
+	std::set<const Outfit *> GetRefillableAmmunition(const Ship &ship) noexcept
 	{
-		auto toRefill = set<const Outfit *>{};
+		auto toRefill = std::set<const Outfit *>{};
 		for(auto &&it : ship.Weapons())
 		{
 			const Weapon *weapon = it.GetWeapon();
@@ -79,11 +79,11 @@ namespace {
 OutfitterPanel::OutfitterPanel(PlayerInfo &player, Sale<Outfit> stock)
 	: ShopPanel(player, true), outfitter(stock)
 {
-	for(const pair<const string, Outfit> &it : GameData::Outfits())
+	for(const std::pair<const std::string, Outfit> &it : GameData::Outfits())
 		catalog[it.second.Category()].push_back(it.first);
 
-	for(pair<const string, vector<string>> &it : catalog)
-		sort(it.second.begin(), it.second.end(), BySeriesAndIndex<Outfit>());
+	for(std::pair<const std::string, std::vector<std::string>> &it : catalog)
+		std::sort(it.second.begin(), it.second.end(), BySeriesAndIndex<Outfit>());
 
 	for(auto &ship : player.Ships())
 		if(ship->GetPlanet() == planet)
@@ -122,7 +122,7 @@ int OutfitterPanel::VisibilityCheckboxesSize() const
 
 
 
-bool OutfitterPanel::HasItem(const string &name) const
+bool OutfitterPanel::HasItem(const std::string &name) const
 {
 	const Outfit *outfit = GameData::Outfits().Get(name);
 	if(showForSale && (outfitter.Has(outfit) || player.Stock(outfit) > 0))
@@ -146,7 +146,7 @@ bool OutfitterPanel::HasItem(const string &name) const
 
 
 
-void OutfitterPanel::DrawItem(const string &name, const Point &point)
+void OutfitterPanel::DrawItem(const std::string &name, const Point &point)
 {
 	const Outfit *outfit = GameData::Outfits().Get(name);
 	zones.emplace_back(point, Point(OUTFIT_SIZE, OUTFIT_SIZE), outfit);
@@ -168,7 +168,7 @@ void OutfitterPanel::DrawItem(const string &name, const Point &point)
 	bool highlightDifferences = false;
 	if(playerShip || isLicense || mapSize)
 	{
-		int minCount = numeric_limits<int>::max();
+		int minCount = std::numeric_limits<int>::max();
 		int maxCount = 0;
 		if(isLicense)
 			minCount = maxCount = player.HasLicense(LicenseRoot(name));
@@ -180,28 +180,28 @@ void OutfitterPanel::DrawItem(const string &name, const Point &point)
 		else
 		{
 			highlightDifferences = true;
-			string firstModelName;
+			std::string firstModelName;
 			for(const Ship *ship : playerShips)
 			{
 				// Highlight differences in installed outfit counts only when all selected ships are of the same model.
-				string modelName = ship->TrueModelName();
+				std::string modelName = ship->TrueModelName();
 				if(firstModelName.empty())
 					firstModelName = modelName;
 				else
 					highlightDifferences &= (modelName == firstModelName);
 				int count = ship->OutfitCount(outfit);
-				minCount = min(minCount, count);
-				maxCount = max(maxCount, count);
+				minCount = std::min(minCount, count);
+				maxCount = std::max(maxCount, count);
 			}
 		}
 
 		if(maxCount)
 		{
-			string label = "installed: " + to_string(minCount);
+			std::string label = "installed: " + std::to_string(minCount);
 			Color color = bright;
 			if(maxCount > minCount)
 			{
-				label += " - " + to_string(maxCount);
+				label += " - " + std::to_string(maxCount);
 				if(highlightDifferences)
 					color = highlight;
 			}
@@ -214,25 +214,25 @@ void OutfitterPanel::DrawItem(const string &name, const Point &point)
 	// Don't show the "in stock" amount if the outfit has an unlimited stock.
 	int stock = 0;
 	if(!outfitter.Has(outfit))
-		stock = max(0, player.Stock(outfit));
+		stock = std::max(0, player.Stock(outfit));
 	int cargo = player.Cargo().Get(outfit);
 	int storage = player.Storage().Get(outfit);
 
-	string message;
+	std::string message;
 	if(cargo && storage && stock)
-		message = "cargo+stored: " + to_string(cargo + storage) + ", in stock: " + to_string(stock);
+		message = "cargo+stored: " + std::to_string(cargo + storage) + ", in stock: " + std::to_string(stock);
 	else if(cargo && storage)
-		message = "in cargo: " + to_string(cargo) + ", in storage: " + to_string(storage);
+		message = "in cargo: " + std::to_string(cargo) + ", in storage: " + std::to_string(storage);
 	else if(cargo && stock)
-		message = "in cargo: " + to_string(cargo) + ", in stock: " + to_string(stock);
+		message = "in cargo: " + std::to_string(cargo) + ", in stock: " + std::to_string(stock);
 	else if(storage && stock)
-		message = "in storage: " + to_string(storage) + ", in stock: " + to_string(stock);
+		message = "in storage: " + std::to_string(storage) + ", in stock: " + std::to_string(stock);
 	else if(cargo)
-		message = "in cargo: " + to_string(cargo);
+		message = "in cargo: " + std::to_string(cargo);
 	else if(storage)
-		message = "in storage: " + to_string(storage);
+		message = "in storage: " + std::to_string(storage);
 	else if(stock)
-		message = "in stock: " + to_string(stock);
+		message = "in stock: " + std::to_string(stock);
 	else if(!outfitter.Has(outfit))
 		message = "(not sold here)";
 	if(!message.empty())
@@ -262,7 +262,7 @@ int OutfitterPanel::DetailWidth() const
 
 double OutfitterPanel::DrawDetails(const Point &center)
 {
-	string selectedItem = "Nothing Selected";
+	std::string selectedItem = "Nothing Selected";
 	const Font &font = FontSet::Get(14);
 
 	double heightOffset = 20.;
@@ -274,7 +274,7 @@ double OutfitterPanel::DrawDetails(const Point &center)
 
 		const Sprite *thumbnail = selectedOutfit->Thumbnail();
 		const float tileSize = thumbnail
-			? max(thumbnail->Height(), static_cast<float>(TileSize()))
+			? std::max(thumbnail->Height(), static_cast<float>(TileSize()))
 			: static_cast<float>(TileSize());
 		const Point thumbnailCenter(center.X(), center.Y() + 20 + static_cast<int>(tileSize / 2));
 		const Point startPoint(center.X() - INFOBAR_WIDTH / 2 + 20, center.Y() + 20 + tileSize);
@@ -306,7 +306,7 @@ double OutfitterPanel::DrawDetails(const Point &center)
 			// Calculate the ClickZone for the description and add it.
 			const Point descriptionDimensions(INFOBAR_WIDTH, descriptionOffset);
 			const Point descriptionCenter(center.X(), startPoint.Y() + descriptionOffset / 2);
-			ClickZone<string> collapseDescription = ClickZone<string>(
+			ClickZone<std::string> collapseDescription = ClickZone<std::string>(
 				descriptionCenter, descriptionDimensions, DESCRIPTION);
 			categoryZones.emplace_back(collapseDescription);
 		}
@@ -392,7 +392,7 @@ ShopPanel::BuyResult OutfitterPanel::CanBuy(bool onlyOwned) const
 			"but this " + planet->Noun() + " does not sell them.";
 	}
 	// Add system to accumulate reasons why an outfit cannot be bought
-	vector<string> errors;
+	std::vector<std::string> errors;
 	// Check if you need to pay, and can't afford it.
 	if(!onlyOwned)
 	{
@@ -419,7 +419,7 @@ ShopPanel::BuyResult OutfitterPanel::CanBuy(bool onlyOwned) const
 		double mass = selectedOutfit->Mass();
 		double freeCargo = player.Cargo().FreePrecise();
 		if(mass && freeCargo < mass)
-			errors.push_back("You cannot " + string(onlyOwned ? "load" : "buy") + " this outfit, because it takes up "
+			errors.push_back("You cannot " + std::string(onlyOwned ? "load" : "buy") + " this outfit, because it takes up "
 				+ Format::CargoString(mass, "mass") + " and your fleet has "
 				+ Format::CargoString(freeCargo, "cargo space") + " free.");
 	}
@@ -497,8 +497,8 @@ ShopPanel::BuyResult OutfitterPanel::CanBuy(bool onlyOwned) const
 		return errors[0];
 	else
 	{
-		string errorMessage = "There are several reasons why you cannot " +
-			string(onlyOwned ? "install" : "buy") + " this outfit:\n";
+		std::string errorMessage = "There are several reasons why you cannot " +
+			std::string(onlyOwned ? "install" : "buy") + " this outfit:\n";
 		for(size_t i = 0; i < errors.size(); ++i)
 			errorMessage += "- " + errors[i] + "\n";
 		return errorMessage;
@@ -513,7 +513,7 @@ void OutfitterPanel::Buy(bool onlyOwned)
 	if(licenseCost)
 	{
 		player.Accounts().AddCredits(-licenseCost);
-		for(const string &licenseName : selectedOutfit->Licenses())
+		for(const std::string &licenseName : selectedOutfit->Licenses())
 			if(!player.HasLicense(licenseName))
 				player.AddLicense(licenseName);
 	}
@@ -563,7 +563,7 @@ void OutfitterPanel::Buy(bool onlyOwned)
 		}
 
 		// Find the ships with the fewest number of these outfits.
-		const vector<Ship *> shipsToOutfit = GetShipsToOutfit(true);
+		const std::vector<Ship *> shipsToOutfit = GetShipsToOutfit(true);
 
 		for(Ship *ship : shipsToOutfit)
 		{
@@ -637,7 +637,7 @@ void OutfitterPanel::Sell(bool toStorage)
 
 	// Get the ships that have the most of this outfit installed.
 	// If there are no ships that have this outfit, then sell from storage.
-	const vector<Ship *> shipsToOutfit = GetShipsToOutfit();
+	const std::vector<Ship *> shipsToOutfit = GetShipsToOutfit();
 
 	if(!shipsToOutfit.empty())
 	{
@@ -673,9 +673,9 @@ void OutfitterPanel::Sell(bool toStorage)
 			{
 				// Determine how many of this ammo I must sell to also sell the launcher.
 				int mustSell = 0;
-				for(const pair<const char *, double> &it : ship->Attributes().Attributes())
+				for(const std::pair<const char *, double> &it : ship->Attributes().Attributes())
 					if(it.second < 0.)
-						mustSell = max<int>(mustSell, it.second / ammo->Get(it.first));
+						mustSell = std::max<int>(mustSell, it.second / ammo->Get(it.first));
 
 				if(mustSell)
 				{
@@ -707,7 +707,7 @@ void OutfitterPanel::Sell(bool toStorage)
 
 void OutfitterPanel::FailSell(bool toStorage) const
 {
-	const string &verb = toStorage ? "uninstall" : "sell";
+	const std::string &verb = toStorage ? "uninstall" : "sell";
 	if(!planet || !selectedOutfit)
 		return;
 	else if(selectedOutfit->Get("map"))
@@ -729,7 +729,7 @@ void OutfitterPanel::FailSell(bool toStorage) const
 		else
 		{
 			for(const Ship *ship : playerShips)
-				for(const pair<const char *, double> &it : selectedOutfit->Attributes())
+				for(const std::pair<const char *, double> &it : selectedOutfit->Attributes())
 					if(ship->Attributes().Get(it.first) < it.second)
 					{
 						for(const auto &sit : ship->Outfits())
@@ -872,7 +872,7 @@ void OutfitterPanel::DrawOutfit(const Outfit &outfit, const Point &center, bool 
 	SpriteShader::Draw(thumbnail, center);
 
 	// Draw the outfit name.
-	const string &name = outfit.DisplayName();
+	const std::string &name = outfit.DisplayName();
 	const Font &font = FontSet::Get(14);
 	Point offset(-.5 * OUTFIT_SIZE, -.5 * OUTFIT_SIZE + 10.);
 	font.Draw({name, {OUTFIT_SIZE, Alignment::CENTER, Truncate::MIDDLE}},
@@ -881,23 +881,23 @@ void OutfitterPanel::DrawOutfit(const Outfit &outfit, const Point &center, bool 
 
 
 
-bool OutfitterPanel::IsLicense(const string &name) const
+bool OutfitterPanel::IsLicense(const std::string &name) const
 {
 	return name.ends_with(" License");
 }
 
 
 
-bool OutfitterPanel::HasLicense(const string &name) const
+bool OutfitterPanel::HasLicense(const std::string &name) const
 {
 	return (IsLicense(name) && player.HasLicense(LicenseRoot(name)));
 }
 
 
 
-string OutfitterPanel::LicenseRoot(const string &name) const
+std::string OutfitterPanel::LicenseRoot(const std::string &name) const
 {
-	static const string &LICENSE = " License";
+	static const std::string &LICENSE = " License";
 	return name.substr(0, name.length() - LICENSE.length());
 }
 
@@ -910,8 +910,8 @@ void OutfitterPanel::CheckRefill()
 	checkedRefill = true;
 
 	int count = 0;
-	map<const Outfit *, int> needed;
-	for(const shared_ptr<Ship> &ship : player.Ships())
+	std::map<const Outfit *, int> needed;
+	for(const std::shared_ptr<Ship> &ship : player.Ships())
 	{
 		// Skip ships in other systems and those that were unable to land in-system.
 		if(ship->GetSystem() != player.GetSystem() || ship->IsDisabled())
@@ -921,7 +921,7 @@ void OutfitterPanel::CheckRefill()
 		auto toRefill = GetRefillableAmmunition(*ship);
 		for(const Outfit *outfit : toRefill)
 		{
-			int amount = ship->Attributes().CanAdd(*outfit, numeric_limits<int>::max());
+			int amount = ship->Attributes().CanAdd(*outfit, std::numeric_limits<int>::max());
 			if(amount > 0)
 			{
 				bool available = outfitter.Has(outfit) || player.Stock(outfit) > 0;
@@ -936,14 +936,14 @@ void OutfitterPanel::CheckRefill()
 	for(auto &it : needed)
 	{
 		// Don't count cost of anything installed from cargo or storage.
-		it.second = max(0, it.second - player.Cargo().Get(it.first) - player.Storage().Get(it.first));
+		it.second = std::max(0, it.second - player.Cargo().Get(it.first) - player.Storage().Get(it.first));
 		if(!outfitter.Has(it.first))
-			it.second = min(it.second, max(0, player.Stock(it.first)));
+			it.second = std::min(it.second, std::max(0, player.Stock(it.first)));
 		cost += player.StockDepreciation().Value(it.first, day, it.second);
 	}
 	if(!needed.empty() && cost < player.Accounts().Credits())
 	{
-		string message = "Do you want to reload all the ammunition for your ship";
+		std::string message = "Do you want to reload all the ammunition for your ship";
 		message += (count == 1) ? "?" : "s?";
 		if(cost)
 			message += " It will cost " + Format::CreditString(cost) + ".";
@@ -955,7 +955,7 @@ void OutfitterPanel::CheckRefill()
 
 void OutfitterPanel::Refill()
 {
-	for(const shared_ptr<Ship> &ship : player.Ships())
+	for(const std::shared_ptr<Ship> &ship : player.Ships())
 	{
 		// Skip ships in other systems and those that were unable to land in-system.
 		if(ship->GetSystem() != player.GetSystem() || ship->IsDisabled())
@@ -964,7 +964,7 @@ void OutfitterPanel::Refill()
 		auto toRefill = GetRefillableAmmunition(*ship);
 		for(const Outfit *outfit : toRefill)
 		{
-			int neededAmmo = ship->Attributes().CanAdd(*outfit, numeric_limits<int>::max());
+			int neededAmmo = ship->Attributes().CanAdd(*outfit, std::numeric_limits<int>::max());
 			if(neededAmmo > 0)
 			{
 				// Fill first from any stockpiles in storage.
@@ -974,7 +974,7 @@ void OutfitterPanel::Refill()
 				const int fromCargo = player.Cargo().Remove(outfit, neededAmmo);
 				neededAmmo -= fromCargo;
 				// Then, buy at reduced (or full) price.
-				int available = outfitter.Has(outfit) ? neededAmmo : min<int>(neededAmmo, max<int>(0, player.Stock(outfit)));
+				int available = outfitter.Has(outfit) ? neededAmmo : std::min<int>(neededAmmo, std::max<int>(0, player.Stock(outfit)));
 				if(neededAmmo && available > 0)
 				{
 					int64_t price = player.StockDepreciation().Value(outfit, day, available);
@@ -991,10 +991,10 @@ void OutfitterPanel::Refill()
 
 // Determine which ships of the selected ships should be referenced in this
 // iteration of Buy / Sell.
-const vector<Ship *> OutfitterPanel::GetShipsToOutfit(bool isBuy) const
+const std::vector<Ship *> OutfitterPanel::GetShipsToOutfit(bool isBuy) const
 {
-	vector<Ship *> shipsToOutfit;
-	int compareValue = isBuy ? numeric_limits<int>::max() : 0;
+	std::vector<Ship *> shipsToOutfit;
+	int compareValue = isBuy ? std::numeric_limits<int>::max() : 0;
 	int compareMod = 2 * isBuy - 1;
 	for(Ship *ship : playerShips)
 	{
@@ -1017,7 +1017,7 @@ const vector<Ship *> OutfitterPanel::GetShipsToOutfit(bool isBuy) const
 
 
 
-int OutfitterPanel::FindItem(const string &text) const
+int OutfitterPanel::FindItem(const std::string &text) const
 {
 	int bestIndex = 9999;
 	int bestItem = -1;

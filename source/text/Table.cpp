@@ -24,7 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 
 
@@ -156,7 +156,7 @@ void Table::Draw(const char *text) const
 
 
 
-void Table::Draw(const string &text) const
+void Table::Draw(const std::string &text) const
 {
 	Draw(text, nullptr, color);
 }
@@ -172,7 +172,7 @@ void Table::Draw(const char *text, const Color &color) const
 
 
 
-void Table::Draw(const string &text, const Color &color) const
+void Table::Draw(const std::string &text, const Color &color) const
 {
 	Draw(text, nullptr, color);
 }
@@ -207,14 +207,14 @@ void Table::DrawCustom(const DisplayText &text, const Color &color) const
 
 
 
-void Table::DrawTruncatedPair(const string &left, const Color &leftColor, const string &right, const Color &rightColor,
+void Table::DrawTruncatedPair(const std::string &left, const Color &leftColor, const std::string &right, const Color &rightColor,
 	Truncate strategy, bool truncateRightColumn) const
 {
 	// Compute the width of the non-truncated string, and the margin we have for the possibly-large text.
 	const auto colWidth = it->layout.width;
 	const auto textWidth = font->FormattedWidth({truncateRightColumn ? left : right, {colWidth}});
 	constexpr auto PAD = 5;
-	const auto remainder = max(colWidth - PAD - textWidth, 0);
+	const auto remainder = std::max(colWidth - PAD - textWidth, 0);
 
 	auto lhs = Layout(truncateRightColumn ? colWidth : remainder, Alignment::LEFT, strategy);
 	auto rhs = Layout(truncateRightColumn ? remainder : colWidth, Alignment::RIGHT, strategy);
@@ -306,7 +306,7 @@ Table::Column::Column(double offset, Layout layout) noexcept
 
 
 
-void Table::Draw(const string &text, const Layout *special, const Color &color) const
+void Table::Draw(const std::string &text, const Layout *special, const Color &color) const
 {
 	if(font && !columns.empty())
 	{

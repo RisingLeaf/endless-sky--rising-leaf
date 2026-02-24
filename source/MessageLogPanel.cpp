@@ -32,7 +32,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "UI.h"
 #include "text/WrappedText.h"
 
-using namespace std;
+
 
 namespace {
 	const double PAD = 10.;
@@ -96,7 +96,7 @@ void MessageLogPanel::Draw()
 				messageLine.Draw(pos, category->LogColor());
 		}
 
-		maxScroll = max(0., scroll - pos.Y() + Screen::Top());
+		maxScroll = std::max(0., scroll - pos.Y() + Screen::Top());
 	}
 
 	if(importantOnly)
@@ -139,7 +139,7 @@ bool MessageLogPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comman
 
 bool MessageLogPanel::Drag(double dx, double dy)
 {
-	scroll = max(0., min(maxScroll, scroll + dy));
+	scroll = std::max(0., std::min(maxScroll, scroll + dy));
 
 	return true;
 }

@@ -35,10 +35,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <set>
 #include <stdexcept>
 
-using namespace std;
+
 
 namespace {
-	const auto STATUS_TO_TEXT = map<Test::Status, const string> {
+	const auto STATUS_TO_TEXT = std::map<Test::Status, const std::string> {
 		{Test::Status::ACTIVE, "active"},
 		{Test::Status::BROKEN, "broken"},
 		{Test::Status::KNOWN_FAILURE, "known failure"},
@@ -46,7 +46,7 @@ namespace {
 		{Test::Status::PARTIAL, "partial"},
 	};
 
-	const auto STEPTYPE_TO_TEXT = map<Test::TestStep::Type, const string> {
+	const auto STEPTYPE_TO_TEXT = std::map<Test::TestStep::Type, const std::string> {
 		{Test::TestStep::Type::APPLY, "apply"},
 		{Test::TestStep::Type::ASSERT, "assert"},
 		{Test::TestStep::Type::BRANCH, "branch"},
@@ -59,19 +59,19 @@ namespace {
 	};
 
 	template<class K, class... Args>
-	string ExpectedOptions(const map<K, const string, Args...> &m)
+	std::string ExpectedOptions(const std::map<K, const std::string, Args...> &m)
 	{
 		if(m.empty())
 			return "no options supported";
 
-		string beginning = "expected \"" + m.begin()->second;
+		std::string beginning = "expected \"" + m.begin()->second;
 		auto lastValidIt = prev(m.end());
 		// Handle maps with just 1 element.
 		if(lastValidIt == m.begin())
 			return beginning + "\"";
 
 		return accumulate(next(m.begin()), lastValidIt, beginning,
-			[](string a, const pair<K, const string> &b) -> string
+			[](std::string a, const std::pair<K, const std::string> &b) -> std::string
 			{
 				return std::move(a) + "\", \"" + b.second;
 			})
@@ -100,9 +100,9 @@ namespace {
 		return SDL_PushEvent(&event);
 	}
 
-	string ShipToString(const Ship &ship)
+	std::string ShipToString(const Ship &ship)
 	{
-		string description = "name: " + ship.GivenName();
+		std::string description = "name: " + ship.GivenName();
 		const System *system = ship.GetSystem();
 		const Planet *planet = ship.GetPlanet();
 		description += ", system: " + (system ? system->TrueName() : "<not set>");
@@ -129,7 +129,7 @@ void Test::TestStep::LoadInput(const DataNode &node)
 {
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(key == "key")
 		{
 			for(int i = 1; i < child.Size(); ++i)
@@ -137,7 +137,7 @@ void Test::TestStep::LoadInput(const DataNode &node)
 
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
+				const std::string &grandKey = grand.Token(0);
 				if(grandKey == "shift")
 					modKeys |= SDL_KMOD_SHIFT;
 				else if(grandKey == "alt")
@@ -152,8 +152,8 @@ void Test::TestStep::LoadInput(const DataNode &node)
 		{
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
-				static const string BAD_AXIS_INPUT = "Error: Pointer axis input without coordinate:";
+				const std::string &grandKey = grand.Token(0);
+				static const std::string BAD_AXIS_INPUT = "Error: Pointer axis input without coordinate:";
 				if(grandKey == "X")
 				{
 					if(grand.Size() < 2)
@@ -204,9 +204,9 @@ void Test::LoadSequence(const DataNode &node, const ConditionsStore *playerCondi
 
 	for(const DataNode &child : node)
 	{
-		const string &typeName = child.Token(0);
+		const std::string &typeName = child.Token(0);
 		auto it = find_if(STEPTYPE_TO_TEXT.begin(), STEPTYPE_TO_TEXT.end(),
-			[&typeName](const pair<TestStep::Type, const string> &e) {
+			[&typeName](const std::pair<TestStep::Type, const std::string> &e) {
 				return e.second == typeName;
 			});
 		if(it == STEPTYPE_TO_TEXT.end())
@@ -291,7 +291,7 @@ void Test::LoadSequence(const DataNode &node, const ConditionsStore *playerCondi
 			case TestStep::Type::NAVIGATE:
 				for(const DataNode &grand : child)
 				{
-					const string &grandKey = grand.Token(0);
+					const std::string &grandKey = grand.Token(0);
 					bool grandHasValue = grand.Size() >= 2;
 					if(grandKey == "travel" && grandHasValue)
 						step.travelPlan.push_back(GameData::Systems().Get(grand.Token(1)));
@@ -348,7 +348,7 @@ void Test::Load(const DataNode &node, const ConditionsStore *playerConditions)
 	}
 	// Validate if the testname contains valid characters.
 	if(node.Token(1).find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 _-")
-		!= string::npos)
+		!= std::string::npos)
 	{
 		node.PrintTrace("Error: Unsupported character(s) in test name:");
 		return;
@@ -357,12 +357,12 @@ void Test::Load(const DataNode &node, const ConditionsStore *playerConditions)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(key == "status" && child.Size() >= 2)
 		{
-			const string &statusText = child.Token(1);
+			const std::string &statusText = child.Token(1);
 			auto it = find_if(STATUS_TO_TEXT.begin(), STATUS_TO_TEXT.end(),
-				[&statusText](const pair<Status, const string> &e) {
+				[&statusText](const std::pair<Status, const std::string> &e) {
 					return e.second == statusText;
 				});
 			if(it != STATUS_TO_TEXT.end())
@@ -392,7 +392,7 @@ void Test::Load(const DataNode &node, const ConditionsStore *playerConditions)
 
 
 
-const string &Test::Name() const
+const std::string &Test::Name() const
 {
 	return name;
 }
@@ -448,8 +448,8 @@ void Test::Step(TestContext &context, PlayerInfo &player, Command &commandToGive
 	context.branchesSinceGameStep.clear();
 
 	const ConditionsStore *playerConditions = &player.Conditions();
-	const set<const System *> *visitedSystems = &player.VisitedSystems();
-	const set<const Planet *> *visitedPlanets = &player.VisitedPlanets();
+	const std::set<const System *> *visitedSystems = &player.VisitedSystems();
+	const std::set<const Planet *> *visitedPlanets = &player.VisitedPlanets();
 	while(context.callstack.back().step < steps.size() && !continueGameLoop)
 	{
 		const TestStep &stepToRun = steps[context.callstack.back().step];
@@ -494,8 +494,8 @@ void Test::Step(TestContext &context, PlayerInfo &player, Command &commandToGive
 				break;
 			case TestStep::Type::DEBUG:
 				// Print debugging output directly to the terminal.
-				cout << stepToRun.nameOrLabel << endl;
-				cout.flush();
+				std::cout << stepToRun.nameOrLabel << std::endl;
+				std::cout.flush();
 				++(context.callstack.back().step);
 				break;
 			case TestStep::Type::INJECT:
@@ -514,7 +514,7 @@ void Test::Step(TestContext &context, PlayerInfo &player, Command &commandToGive
 				{
 					// TODO: handle keys also in-flight (as single inputset)
 					// TODO: combine keys with mouse-inputs
-					for(const string &key : stepToRun.inputKeys)
+					for(const std::string &key : stepToRun.inputKeys)
 						if(!KeyInputToEvent(key.c_str(), stepToRun.modKeys))
 							Fail(context, player, "key \"" + key + + "\" input towards SDL eventqueue failed");
 				}
@@ -541,7 +541,7 @@ void Test::Step(TestContext &context, PlayerInfo &player, Command &commandToGive
 
 
 
-const string &Test::StatusText() const
+const std::string &Test::StatusText() const
 {
 	return STATUS_TO_TEXT.at(status);
 }
@@ -549,9 +549,9 @@ const string &Test::StatusText() const
 
 
 // Get the names of the conditions relevant for this test.
-set<string> Test::RelevantConditions() const
+std::set<std::string> Test::RelevantConditions() const
 {
-	set<string> conditionNames;
+	std::set<std::string> conditionNames;
 	for(const auto &step : steps)
 	{
 		switch(step.stepType)
@@ -588,9 +588,9 @@ set<string> Test::RelevantConditions() const
 
 
 // Fail the test using the given message as reason.
-void Test::Fail(const TestContext &context, const PlayerInfo &player, const string &testFailReason) const
+void Test::Fail(const TestContext &context, const PlayerInfo &player, const std::string &testFailReason) const
 {
-	string message = "Test failed";
+	std::string message = "Test failed";
 	if(!testFailReason.empty())
 		message += ": " + testFailReason;
 	message += "\n";
@@ -598,13 +598,13 @@ void Test::Fail(const TestContext &context, const PlayerInfo &player, const stri
 	Logger::LogError(message);
 
 	// Print the callstack if we have any.
-	string stackMessage = "Call-stack:\n";
+	std::string stackMessage = "Call-stack:\n";
 	if(context.callstack.empty())
 		stackMessage += "  No callstack info at moment of failure.";
 
 	for(auto i = context.callstack.rbegin(); i != context.callstack.rend(); ++i)
 	{
-		stackMessage += "- \"" + i->test->Name() + "\", step: " + to_string(1 + i->step);
+		stackMessage += "- \"" + i->test->Name() + "\", step: " + std::to_string(1 + i->step);
 		if(i->step < i->test->steps.size())
 			stackMessage += " (" + STEPTYPE_TO_TEXT.at(((i->test->steps)[i->step]).stepType) + ")";
 		stackMessage += "\n";
@@ -617,7 +617,7 @@ void Test::Fail(const TestContext &context, const PlayerInfo &player, const stri
 		Logger::LogError("No flagship at the moment of failure.");
 	else
 	{
-		string shipsOverview = "flagship " + ShipToString(*flagship) + "\n";
+		std::string shipsOverview = "flagship " + ShipToString(*flagship) + "\n";
 		int escorts = 0;
 		int escortsNotPrinted = 0;
 		for(auto &&ptr : flagship->GetEscorts())
@@ -631,16 +631,16 @@ void Test::Fail(const TestContext &context, const PlayerInfo &player, const stri
 				++escortsNotPrinted;
 		}
 		if(escortsNotPrinted > 0)
-			shipsOverview += "(plus " + to_string(escortsNotPrinted) + " additional escorts)\n";
+			shipsOverview += "(plus " + std::to_string(escortsNotPrinted) + " additional escorts)\n";
 		Logger::LogError(shipsOverview);
 	}
 
 	// Print all conditions that are used in the test.
-	string conditions;
+	std::string conditions;
 	for(const auto &it : RelevantConditions())
 	{
 		const auto &val = player.Conditions().Get(it);
-		conditions += "Condition: \"" + it + "\" = " + to_string(val) + "\n";
+		conditions += "Condition: \"" + it + "\" = " + std::to_string(val) + "\n";
 	}
 
 	if(!conditions.empty())
@@ -653,16 +653,16 @@ void Test::Fail(const TestContext &context, const PlayerInfo &player, const stri
 	if(status >= Status::KNOWN_FAILURE)
 		throw known_failure_tag{};
 
-	// Throwing a runtime_error is kinda rude, but works for this version of
+	// Throwing a std::runtime_error is kinda rude, but works for this version of
 	// the tester. Might want to add a menuPanels.QuitError() function in
 	// a later version (which can set a non-zero exitcode and exit properly).
-	throw runtime_error(message);
+	throw std::runtime_error(message);
 }
 
 
 
 void Test::UnexpectedSuccessResult() const
 {
-	throw runtime_error("Unexpected test result: Test marked with status '" + StatusText()
+	throw std::runtime_error("Unexpected test result: Test marked with status '" + StatusText()
 		+ "' was not expected to finish successfully.\n");
 }

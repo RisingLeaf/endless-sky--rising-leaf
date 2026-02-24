@@ -22,10 +22,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cmath>
 
-using namespace std;
+
 
 namespace {
-	void Push(vector<float> &v, const Point &pos, float s, float t, float frame, float alpha)
+	void Push(std::vector<float> &v, const Point &pos, float s, float t, float frame, float alpha)
 	{
 		v.push_back(pos.X());
 		v.push_back(pos.Y());
@@ -87,7 +87,7 @@ void BatchDrawList::Draw() const
 {
 	BatchShader::Bind();
 
-	for(const pair<const Sprite * const, vector<float>> &it : data)
+	for(const std::pair<const Sprite * const, std::vector<float>> &it : data)
 		BatchShader::Add(it.first, isHighDPI, it.second);
 }
 
@@ -121,8 +121,8 @@ bool BatchDrawList::Add(const Body &body, Point position, float clip)
 	if(Cull(body, position))
 		return false;
 
-	// Get the data vector for this particular sprite.
-	vector<float> &v = data[body.GetSprite()];
+	// Get the data std::vector for this particular sprite.
+	std::vector<float> &v = data[body.GetSprite()];
 	// The sprite frame is the same for every vertex.
 	float frame = body.GetFrame(step);
 

@@ -28,11 +28,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <sstream>
 
-using namespace std;
+
 
 namespace {
 	// A default string to return if somehow the current state does not exist in the state map.
-	static const string ILLEGAL = "(ILLEGAL STATE)";
+	static const std::string ILLEGAL = "(ILLEGAL STATE)";
 }
 
 
@@ -72,10 +72,10 @@ void StartConditions::Load(const DataNode &node, const ConditionsStore *globalCo
 			continue;
 
 		// Otherwise, we should try to parse it.
-		const string &key = child.Token((add || remove) ? 1 : 0);
+		const std::string &key = child.Token((add || remove) ? 1 : 0);
 		int valueIndex = (add || remove) ? 2 : 1;
 		bool hasValue = (child.Size() > valueIndex);
-		const string &value = child.Token(hasValue ? valueIndex : 0);
+		const std::string &value = child.Token(hasValue ? valueIndex : 0);
 
 		if(remove)
 		{
@@ -171,7 +171,7 @@ void StartConditions::Load(const DataNode &node, const ConditionsStore *globalCo
 		identifier = node.Token(1);
 	else if(identifier.empty())
 	{
-		stringstream addr;
+		std::stringstream addr;
 		addr << unlocked.displayName << " " << this;
 		identifier = addr.str();
 	}
@@ -196,7 +196,7 @@ void StartConditions::FinishLoading()
 	unlocked.credits = Format::Credits(GetAccounts().Credits());
 	unlocked.debt = Format::Credits(GetAccounts().TotalDebt());
 
-	string reason = GetConversation().Validate();
+	std::string reason = GetConversation().Validate();
 	if(!GetConversation().IsValidIntro() || !reason.empty())
 		Logger::LogError("Warning: The start scenario \"" + Identifier() + "\" (named \""
 			+ unlocked.displayName + "\") has an invalid starting conversation."
@@ -235,7 +235,7 @@ const ConditionAssignments &StartConditions::GetConditions() const noexcept
 
 
 
-const vector<Ship> &StartConditions::Ships() const noexcept
+const std::vector<Ship> &StartConditions::Ships() const noexcept
 {
 	return ships;
 }
@@ -259,7 +259,7 @@ const Sprite *StartConditions::GetThumbnail() const noexcept
 
 
 
-const string &StartConditions::GetDisplayName() const noexcept
+const std::string &StartConditions::GetDisplayName() const noexcept
 {
 	auto it = infoByState.find(state);
 	return it == infoByState.end() ? ILLEGAL : it->second.displayName;
@@ -267,7 +267,7 @@ const string &StartConditions::GetDisplayName() const noexcept
 
 
 
-const string &StartConditions::GetDescription() const noexcept
+const std::string &StartConditions::GetDescription() const noexcept
 {
 	auto it = infoByState.find(state);
 	return it == infoByState.end() ? ILLEGAL : it->second.description;
@@ -275,7 +275,7 @@ const string &StartConditions::GetDescription() const noexcept
 
 
 
-const string &StartConditions::GetPlanetName() const noexcept
+const std::string &StartConditions::GetPlanetName() const noexcept
 {
 	auto it = infoByState.find(state);
 	return it == infoByState.end() ? ILLEGAL : it->second.planet;
@@ -283,7 +283,7 @@ const string &StartConditions::GetPlanetName() const noexcept
 
 
 
-const string &StartConditions::GetSystemName() const noexcept
+const std::string &StartConditions::GetSystemName() const noexcept
 {
 	auto it = infoByState.find(state);
 	return it == infoByState.end() ? ILLEGAL : it->second.system;
@@ -291,7 +291,7 @@ const string &StartConditions::GetSystemName() const noexcept
 
 
 
-const string &StartConditions::GetDateString() const noexcept
+const std::string &StartConditions::GetDateString() const noexcept
 {
 	auto it = infoByState.find(state);
 	if(it == infoByState.end())
@@ -303,7 +303,7 @@ const string &StartConditions::GetDateString() const noexcept
 
 
 
-const string &StartConditions::GetCredits() const noexcept
+const std::string &StartConditions::GetCredits() const noexcept
 {
 	auto it = infoByState.find(state);
 	return it == infoByState.end() ? ILLEGAL : it->second.credits;
@@ -311,7 +311,7 @@ const string &StartConditions::GetCredits() const noexcept
 
 
 
-const string &StartConditions::GetDebt() const noexcept
+const std::string &StartConditions::GetDebt() const noexcept
 {
 	auto it = infoByState.find(state);
 	return it == infoByState.end() ? ILLEGAL : it->second.debt;
@@ -365,10 +365,10 @@ void StartConditions::LoadState(const DataNode &node, StartState state)
 
 bool StartConditions::LoadStateChild(const DataNode &child, StartInfo &info, bool &clearDescription, bool isAdd)
 {
-	const string &key = child.Token(isAdd ? 1 : 0);
+	const std::string &key = child.Token(isAdd ? 1 : 0);
 	int valueIndex = (isAdd) ? 2 : 1;
 	bool hasValue = (child.Size() > valueIndex);
-	const string &value = child.Token(hasValue ? valueIndex : 0);
+	const std::string &value = child.Token(hasValue ? valueIndex : 0);
 
 	if(key == "name" && hasValue)
 		info.displayName = value;

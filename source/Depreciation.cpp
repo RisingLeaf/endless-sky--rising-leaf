@@ -25,7 +25,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
+
 
 namespace {
 	// Methods to retrieve depreciation constants from gamerules.
@@ -50,7 +50,7 @@ namespace {
 	}
 
 	// Names for the two kinds of depreciation records.
-	string NAME[2] = {"fleet depreciation", "stock depreciation"};
+	std::string NAME[2] = {"fleet depreciation", "stock depreciation"};
 }
 
 
@@ -78,7 +78,7 @@ void Depreciation::Load(const DataNode &node)
 			continue;
 
 		// Figure out which record we're modifying.
-		map<int, int> &entry = isShip ?
+		std::map<int, int> &entry = isShip ?
 			ships[GameData::Ships().Get(child.Token(1))] :
 			outfits[GameData::Outfits().Get(child.Token(1))];
 
@@ -97,7 +97,7 @@ void Depreciation::Save(DataWriter &out, int day) const
 	out.Write(NAME[isStock]);
 	out.BeginChild();
 	{
-		using ShipElement = pair<const Ship *const, map<int, int>>;
+		using ShipElement = std::pair<const Ship *const, std::map<int, int>>;
 		WriteSorted(ships,
 			[](const ShipElement *lhs, const ShipElement *rhs)
 				{ return lhs->first->TrueModelName() < rhs->first->TrueModelName(); },
@@ -116,7 +116,7 @@ void Depreciation::Save(DataWriter &out, int day) const
 				}
 				out.EndChild();
 			});
-		using OutfitElement = pair<const Outfit *const, map<int, int>>;
+		using OutfitElement = std::pair<const Outfit *const, std::map<int, int>>;
 		WriteSorted(outfits,
 			[](const OutfitElement *lhs, const OutfitElement *rhs)
 				{ return lhs->first->TrueName() < rhs->first->TrueName(); },
@@ -146,12 +146,12 @@ bool Depreciation::IsLoaded() const
 
 
 // If no records have been loaded, initialize with an entire fleet.
-void Depreciation::Init(const vector<shared_ptr<Ship>> &fleet, int day)
+void Depreciation::Init(const std::vector<std::shared_ptr<Ship>> &fleet, int day)
 {
 	// If this is called, this is a player's fleet, not a planet's stock.
 	isStock = false;
 	// Every ship and outfit in the given fleet starts out with no depreciation.
-	for(const shared_ptr<Ship> &ship : fleet)
+	for(const std::shared_ptr<Ship> &ship : fleet)
 	{
 		const Ship *base = GameData::Ships().Get(ship->TrueModelName());
 		++ships[base][day];
@@ -229,12 +229,12 @@ void Depreciation::Buy(const Outfit *outfit, int day, Depreciation *source)
 
 
 // Get the value of an entire fleet.
-int64_t Depreciation::Value(const vector<shared_ptr<Ship>> &fleet, int day, bool chassisOnly) const
+int64_t Depreciation::Value(const std::vector<std::shared_ptr<Ship>> &fleet, int day, bool chassisOnly) const
 {
-	map<const Ship *, int> shipCount;
-	map<const Outfit *, int> outfitCount;
+	std::map<const Ship *, int> shipCount;
+	std::map<const Outfit *, int> outfitCount;
 
-	for(const shared_ptr<Ship> &ship : fleet)
+	for(const std::shared_ptr<Ship> &ship : fleet)
 	{
 		const Ship *base = GameData::Ships().Get(ship->TrueModelName());
 		++shipCount[base];
@@ -299,7 +299,7 @@ int64_t Depreciation::Value(const Outfit *outfit, int day, int count) const
 
 // "Sell" an item, removing it from the given record and returning the base
 // day for its depreciation.
-int Depreciation::Sell(map<int, int> &record) const
+int Depreciation::Sell(std::map<int, int> &record) const
 {
 	// If we're a planet, we start by selling the oldest, cheapest thing.
 	auto it = (isStock ? record.begin() : --record.end());
@@ -317,14 +317,14 @@ int Depreciation::Sell(map<int, int> &record) const
 
 
 // Calculate depreciation for some number of items.
-double Depreciation::Depreciate(const map<int, int> &record, int day, int count) const
+double Depreciation::Depreciate(const std::map<int, int> &record, int day, int count) const
 {
 	if(record.empty())
 		return count * DefaultDepreciation();
 
 	// Depending on whether this is a planet's stock or a player's fleet, we
 	// should either start with the oldest item, or the newest.
-	map<int, int>::const_iterator it = (isStock ? record.begin() : --record.end());
+	std::map<int, int>::const_iterator it = (isStock ? record.begin() : --record.end());
 
 	double sum = 0.;
 	while(true)
@@ -332,7 +332,7 @@ double Depreciation::Depreciate(const map<int, int> &record, int day, int count)
 		// Check whether there are enough items in this particular bin to use up
 		// the entire remaining count, and add the depreciation amount for
 		// however many items from this bin we can use.
-		int used = min(it->second, count);
+		int used = std::min(it->second, count);
 		count -= used;
 		sum += used * Depreciate(day - it->first);
 		// Bail out if we've counted enough items.

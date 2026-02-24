@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../Screen.h"
 #include "ImageBuffer.h"
 
-using namespace std;
+
 
 namespace
 {
@@ -48,10 +48,10 @@ namespace
 } // namespace
 
 
-Sprite::Sprite(const string &name) : name(name) {}
+Sprite::Sprite(const std::string &name) : name(name) {}
 
 
-const string &Sprite::Name() const { return name; }
+const std::string &Sprite::Name() const { return name; }
 
 
 // Add the given frames, optionally uploading them. The given buffer will be cleared afterwards.

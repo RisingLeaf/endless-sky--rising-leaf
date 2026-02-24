@@ -19,15 +19,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <map>
 
-using namespace std;
+
 
 namespace {
-	map<int, Font> fonts;
+	std::map<int, Font> fonts;
 }
 
 
 
-void FontSet::Add(const filesystem::path &path, int size)
+void FontSet::Add(const std::filesystem::path &path, int size)
 {
 	if(!fonts.contains(size))
 		fonts[size].Load(path);

@@ -22,27 +22,27 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <limits>
 
-using namespace std;
+
 
 namespace {
 	// Trace out outlines from an image frame.
-	void Trace(const ImageBuffer &image, int frame, vector<vector<Point>> &raw, const string &fileName)
+	void Trace(const ImageBuffer &image, int frame, std::vector<std::vector<Point>> &raw, const std::string &fileName)
 	{
 		const uint32_t on = 0xFF000000;
 		const int width = image.Width();
 		const int height = image.Height();
 		const int numPixels = width * height;
 		const uint32_t *begin = image.Pixels() + frame * numPixels;
-		auto LogError = [width, height, fileName](string reason)
+		auto LogError = [width, height, fileName](std::string reason)
 		{
-			Logger::LogError("Unable to create mask for " + to_string(width) + "x" + to_string(height)
+			Logger::LogError("Unable to create mask for " + std::to_string(width) + "x" + std::to_string(height)
 				+ " px image " + fileName + ": " + std::move(reason));
 		};
 		raw.clear();
 
-		auto hasOutline = vector<bool>(numPixels, false);
-		vector<int> directions;
-		vector<Point> points;
+		auto hasOutline = std::vector<bool>(numPixels, false);
+		std::vector<int> directions;
+		std::vector<Point> points;
 		int start = 0;
 		while(start < numPixels)
 		{
@@ -112,7 +112,7 @@ namespace {
 					if(d == firstD)
 					{
 						isAlone = true;
-						LogError("lone point found at (" + to_string(p[0]) + ", " + to_string(p[1]) + ")");
+						LogError("lone point found at (" + std::to_string(p[0]) + ", " + std::to_string(p[1]) + ")");
 						break;
 					}
 				}
@@ -167,7 +167,7 @@ namespace {
 	}
 
 
-	void SmoothAndCenter(vector<Point> &raw, Point size)
+	void SmoothAndCenter(std::vector<Point> &raw, Point size)
 	{
 		// Smooth out the outline by averaging neighboring points.
 		Point prev = raw.back();
@@ -178,7 +178,7 @@ namespace {
 			// Since we'll always be using these sprites at 50% scale, do that
 			// scaling here.
 			prev *= .25;
-			swap(prev, p);
+			std::swap(prev, p);
 		}
 	}
 
@@ -195,13 +195,13 @@ namespace {
 			// Find out how far along the line the tangent to p intersects.
 			double u = b.Dot(p) / length;
 			// If it is beyond one of the endpoints, use that endpoint.
-			p -= max(0., min(1., u)) * b;
+			p -= std::max(0., std::min(1., u)) * b;
 		}
 		return p.LengthSquared();
 	}
 
 
-	void Simplify(const vector<Point> &p, int first, int last, vector<Point> &result)
+	void Simplify(const std::vector<Point> &p, int first, int last, std::vector<Point> &result)
 	{
 		// Find the most divergent point.
 		double dmax = 0.;
@@ -238,7 +238,7 @@ namespace {
 
 
 	// Simplify the given outline using the Ramer-Douglas-Peucker algorithm.
-	vector<Point> Simplify(const vector<Point> &raw)
+	std::vector<Point> Simplify(const std::vector<Point> &raw)
 	{
 		// Out of all the top-most and bottom-most pixels, find the ones that
 		// are closest to the center of the image.
@@ -256,7 +256,7 @@ namespace {
 				top = i;
 		}
 
-		auto result = vector<Point>{};
+		auto result = std::vector<Point>{};
 		if(top != bottom)
 		{
 			result.push_back(raw[top]);
@@ -269,11 +269,11 @@ namespace {
 
 
 	// Find the radius of the object.
-	double ComputeRadius(const vector<Point> &outline)
+	double ComputeRadius(const std::vector<Point> &outline)
 	{
 		double radius = 0.;
 		for(const Point &p : outline)
-			radius = max(radius, p.LengthSquared());
+			radius = std::max(radius, p.LengthSquared());
 		return sqrt(radius);
 	}
 }
@@ -281,12 +281,12 @@ namespace {
 
 
 // Construct a mask from the alpha channel of an RGBA-formatted image.
-void Mask::Create(const ImageBuffer &image, int frame, const string &fileName)
+void Mask::Create(const ImageBuffer &image, int frame, const std::string &fileName)
 {
 	outlines.clear();
 	radius = 0.;
 
-	vector<vector<Point>> raw;
+	std::vector<std::vector<Point>> raw;
 	Trace(image, frame, raw, fileName);
 	if(raw.empty())
 		return;
@@ -301,7 +301,7 @@ void Mask::Create(const ImageBuffer &image, int frame, const string &fileName)
 		if(outline.size() <= 2)
 			continue;
 
-		radius = max(radius, ComputeRadius(outline));
+		radius = std::max(radius, ComputeRadius(outline));
 		outlines.push_back(std::move(outline));
 		outlines.back().shrink_to_fit();
 	}
@@ -401,7 +401,7 @@ bool Mask::WithinRing(Point point, Angle facing, double inner, double outer) con
 // Find out how close the given point is to the mask.
 double Mask::Range(Point point, Angle facing) const
 {
-	double range = numeric_limits<double>::infinity();
+	double range = std::numeric_limits<double>::infinity();
 	if(!IsLoaded())
 		return range;
 
@@ -412,7 +412,7 @@ double Mask::Range(Point point, Angle facing) const
 
 	for(auto &&outline : outlines)
 		for(auto &&p : outline)
-			range = min(range, p.Distance(point));
+			range = std::min(range, p.Distance(point));
 
 	return range;
 }
@@ -427,7 +427,7 @@ double Mask::Radius() const
 
 
 // Get the individual outlines that comprise this mask.
-const vector<vector<Point>> &Mask::Outlines() const
+const std::vector<std::vector<Point>> &Mask::Outlines() const
 {
 	return outlines;
 }
@@ -479,10 +479,10 @@ double Mask::Intersection(Point sA, Point vA) const
 				double uB = vA.Cross(vS);
 				double uA = vB.Cross(vS);
 				// If the intersection occurs somewhere within this segment of the
-				// outline, find out how far along the query vector it occurs and
+				// outline, find out how far along the query std::vector it occurs and
 				// remember it if it is the closest so far.
 				if((uB >= 0.) & (uB < cross) & (uA >= 0.))
-					closest = min(closest, uA / cross);
+					closest = std::min(closest, uA / cross);
 			}
 
 			prev = next;

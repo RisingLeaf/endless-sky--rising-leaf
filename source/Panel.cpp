@@ -28,7 +28,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "shader/SpriteShader.h"
 #include "UI.h"
 
-using namespace std;
+
 
 
 
@@ -92,7 +92,7 @@ void Panel::ClearZones()
 
 
 // Add a clickable zone to the panel.
-void Panel::AddZone(const Rectangle &rect, const function<void()> &fun)
+void Panel::AddZone(const Rectangle &rect, const std::function<void()> &fun)
 {
 	// The most recently added zone will typically correspond to what was drawn
 	// most recently, so it should be on top.
@@ -365,13 +365,13 @@ int Panel::Modifier()
 
 // Display the given help message if it has not yet been shown
 // (or if force is set to true). Return true if the message was displayed.
-bool Panel::DoHelp(const string &name, bool force) const
+bool Panel::DoHelp(const std::string &name, bool force) const
 {
-	string preference = "help: " + name;
+	std::string preference = "help: " + name;
 	if(!force && Preferences::Has(preference))
 		return false;
 
-	const string &message = GameData::HelpMessage(name);
+	const std::string &message = GameData::HelpMessage(name);
 	if(message.empty())
 		return false;
 
@@ -390,14 +390,14 @@ void Panel::SetUI(UI *ui)
 
 
 
-const vector<shared_ptr<Panel>> &Panel::GetChildren()
+const std::vector<std::shared_ptr<Panel>> &Panel::GetChildren()
 {
 	return children;
 }
 
 
 
-void Panel::AddChild(const shared_ptr<Panel> &panel)
+void Panel::AddChild(const std::shared_ptr<Panel> &panel)
 {
 	childrenToAdd.push_back(panel);
 }

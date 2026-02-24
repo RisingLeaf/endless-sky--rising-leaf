@@ -22,7 +22,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <utility>
 
-using namespace std;
+
 
 
 
@@ -35,7 +35,7 @@ ConditionsStore::ConditionsStore(const DataNode &node)
 
 
 // Constructor where a number of initial manually-set values are set.
-ConditionsStore::ConditionsStore(initializer_list<pair<string, int64_t>> initialConditions)
+ConditionsStore::ConditionsStore(std::initializer_list<std::pair<std::string, int64_t>> initialConditions)
 {
 	for(const auto &it : initialConditions)
 		Set(it.first, it.second);
@@ -44,7 +44,7 @@ ConditionsStore::ConditionsStore(initializer_list<pair<string, int64_t>> initial
 
 
 // Constructor where a number of initial manually-set values are set.
-ConditionsStore::ConditionsStore(const map<string, int64_t> &initialConditions)
+ConditionsStore::ConditionsStore(const std::map<std::string, int64_t> &initialConditions)
 {
 	for(const auto &it : initialConditions)
 		Set(it.first, it.second);
@@ -56,7 +56,7 @@ void ConditionsStore::Load(const DataNode &node)
 {
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(!DataNode::IsConditionName(key))
 			child.PrintTrace("Invalid condition during savegame-load:");
 		Set(key, (child.Size() >= 2) ? child.Value(1) : 1);
@@ -91,7 +91,7 @@ void ConditionsStore::Save(DataWriter &out) const
 // Get a condition from the Conditions-Store. Retrieves both conditions
 // that were directly set (primary conditions) as well as conditions
 // derived from other data-structures (derived conditions).
-int64_t ConditionsStore::Get(const string &name) const
+int64_t ConditionsStore::Get(const std::string &name) const
 {
 	// Look for a relevant entry, either the exact entry, or a prefixed provider.
 	const ConditionEntry *ce = GetEntry(name);
@@ -113,21 +113,21 @@ int64_t ConditionsStore::Get(const string &name) const
 
 
 
-void ConditionsStore::Add(const string &name, int64_t value)
+void ConditionsStore::Add(const std::string &name, int64_t value)
 {
 	(*this)[name] += value;
 }
 
 
 
-void ConditionsStore::Set(const string &name, int64_t value)
+void ConditionsStore::Set(const std::string &name, int64_t value)
 {
 	(*this)[name] = value;
 }
 
 
 
-ConditionEntry &ConditionsStore::operator[](const string &name)
+ConditionEntry &ConditionsStore::operator[](const std::string &name)
 {
 	// Search for an exact match and return it if it exists.
 	auto it = storage.find(name);
@@ -166,7 +166,7 @@ int64_t ConditionsStore::PrimariesSize() const
 
 
 
-ConditionEntry *ConditionsStore::GetEntry(const string &name)
+ConditionEntry *ConditionsStore::GetEntry(const std::string &name)
 {
 	// Avoid code-duplication between const and non-const function.
 	return const_cast<ConditionEntry *>(const_cast<const ConditionsStore *>(this)->GetEntry(name));
@@ -174,7 +174,7 @@ ConditionEntry *ConditionsStore::GetEntry(const string &name)
 
 
 
-const ConditionEntry *ConditionsStore::GetEntry(const string &name) const
+const ConditionEntry *ConditionsStore::GetEntry(const std::string &name) const
 {
 	if(storage.empty())
 		return nullptr;

@@ -22,12 +22,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <numeric>
 
-using namespace std;
+
 
 
 
 namespace {
-	const auto ASSIGN_OP_TO_TEXT = map<ConditionAssignments::AssignOp, const string> {
+	const auto ASSIGN_OP_TO_TEXT = std::map<ConditionAssignments::AssignOp, const std::string> {
 		{ConditionAssignments::AssignOp::ASSIGN, "="},
 		{ConditionAssignments::AssignOp::ADD, "+="},
 		{ConditionAssignments::AssignOp::SUB, "-="},
@@ -95,7 +95,7 @@ void ConditionAssignments::Apply() const
 	if(IsEmpty())
 		return;
 	if(!conditions)
-		throw runtime_error("Unable to Apply ConditionAssignments without a pointer to a ConditionsStore!");
+		throw std::runtime_error("Unable to Apply ConditionAssignments without a pointer to a ConditionsStore!");
 	ConditionsStore &conditionsStore = *const_cast<ConditionsStore *>(conditions);
 	for(const Assignment &assignment : assignments)
 	{
@@ -116,13 +116,13 @@ void ConditionAssignments::Apply() const
 				ce = static_cast<int64_t>(ce) * newValue;
 				break;
 			case AssignOp::DIV:
-				ce = newValue ? static_cast<int64_t>(ce) / newValue : numeric_limits<int64_t>::max();
+				ce = newValue ? static_cast<int64_t>(ce) / newValue : std::numeric_limits<int64_t>::max();
 				break;
 			case AssignOp::LT:
-				ce = min(static_cast<int64_t>(ce), newValue);
+				ce = std::min(static_cast<int64_t>(ce), newValue);
 				break;
 			case AssignOp::GT:
-				ce = max(static_cast<int64_t>(ce), newValue);
+				ce = std::max(static_cast<int64_t>(ce), newValue);
 				break;
 		}
 	}
@@ -130,13 +130,13 @@ void ConditionAssignments::Apply() const
 
 
 
-set<string> ConditionAssignments::RelevantConditions() const
+std::set<std::string> ConditionAssignments::RelevantConditions() const
 {
-	set<string> result;
+	std::set<std::string> result;
 	for(const Assignment &assignment : assignments)
 	{
 		result.insert(assignment.conditionToAssignTo);
-		for(const string &cs : assignment.expressionToEvaluate.RelevantConditions())
+		for(const std::string &cs : assignment.expressionToEvaluate.RelevantConditions())
 			result.insert(cs);
 	}
 	return result;
@@ -144,7 +144,7 @@ set<string> ConditionAssignments::RelevantConditions() const
 
 
 
-void ConditionAssignments::AddSetCondition(const string &name, const ConditionsStore *conditions)
+void ConditionAssignments::AddSetCondition(const std::string &name, const ConditionsStore *conditions)
 {
 	this->conditions = conditions;
 	assignments.emplace_back(name, AssignOp::ASSIGN, ConditionSet(1, conditions));
@@ -155,7 +155,7 @@ void ConditionAssignments::AddSetCondition(const string &name, const ConditionsS
 void ConditionAssignments::Add(const DataNode &node, const ConditionsStore *conditions)
 {
 	this->conditions = conditions;
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	if(key == "set" || key == "clear")
 	{
 		if(node.Size() != 2 || !DataNode::IsConditionName(node.Token(1)))
@@ -180,9 +180,9 @@ void ConditionAssignments::Add(const DataNode &node, const ConditionsStore *cond
 	{
 		// Parse the assignment operator.
 		AssignOp ao = AssignOp::ASSIGN;
-		const string assignOpString = node.Token(1);
+		const std::string assignOpString = node.Token(1);
 		auto it = find_if(ASSIGN_OP_TO_TEXT.begin(), ASSIGN_OP_TO_TEXT.end(),
-			[&assignOpString](const pair<AssignOp, const string> &e) {
+			[&assignOpString](const std::pair<AssignOp, const std::string> &e) {
 				return e.second == assignOpString;
 			});
 		if(it != ASSIGN_OP_TO_TEXT.end())
@@ -214,7 +214,7 @@ void ConditionAssignments::Add(const DataNode &node, const ConditionsStore *cond
 
 
 
-ConditionAssignments::Assignment::Assignment(string conditionToAssignTo, AssignOp assignOperator,
+ConditionAssignments::Assignment::Assignment(std::string conditionToAssignTo, AssignOp assignOperator,
 	ConditionSet expressionToEvaluate) : conditionToAssignTo(conditionToAssignTo), assignOperator(assignOperator),
 	expressionToEvaluate(expressionToEvaluate)
 {

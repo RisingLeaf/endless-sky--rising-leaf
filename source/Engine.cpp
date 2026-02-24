@@ -79,7 +79,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <string>
 
-using namespace std;
+
 
 namespace {
 	int RadarType(const Ship &ship, int step)
@@ -109,21 +109,21 @@ namespace {
 			[](const auto &obj) { return obj.ShouldBeRemoved(); }); };
 
 	template<class Type>
-	void Append(vector<Type> &objects, vector<Type> &added)
+	void Append(std::vector<Type> &objects, std::vector<Type> &added)
 	{
 		objects.insert(objects.end(), make_move_iterator(added.begin()), make_move_iterator(added.end()));
 		added.clear();
 	}
 
 	// Author the given message from the given ship.
-	void SendMessage(const shared_ptr<const Ship> &ship, const string &message)
+	void SendMessage(const std::shared_ptr<const Ship> &ship, const std::string &message)
 	{
 		if(message.empty())
 			return;
 
 		// If this ship has no name, show its model name instead.
-		string tag;
-		const string &gov = ship->GetGovernment()->DisplayName();
+		std::string tag;
+		const std::string &gov = ship->GetGovernment()->DisplayName();
 		if(!ship->GivenName().empty())
 			tag = gov + " " + ship->Noun() + " \"" + ship->GivenName() + "\": ";
 		else
@@ -145,8 +145,8 @@ namespace {
 		return FlareCurve(ship.ThrustHeldFraction(kind)) * ship.Zoom();
 	}
 
-	void DrawFlareSprites(const Ship &ship, DrawList &draw, const vector<Ship::EnginePoint> &enginePoints,
-		const vector<pair<Body, int>> &flareSprites, uint8_t side, bool reverse)
+	void DrawFlareSprites(const Ship &ship, DrawList &draw, const std::vector<Ship::EnginePoint> &enginePoints,
+		const std::vector<std::pair<Body, int>> &flareSprites, uint8_t side, bool reverse)
 	{
 		Point thrustScale = ScaledFlareCurve(ship, reverse ? Ship::ThrustKind::REVERSE : Ship::ThrustKind::FORWARD);
 		Point leftTurnScale = ScaledFlareCurve(ship, Ship::ThrustKind::LEFT);
@@ -160,7 +160,7 @@ namespace {
 			Angle gimbal = Angle(gimbalDirection * point.gimbal.Degrees());
 			Angle flareAngle = ship.Facing() + point.facing + gimbal;
 			Point pos = ship.Facing().Rotate(point) * ship.Zoom() + ship.Position();
-			auto DrawFlares = [&draw, &pos, &ship, &flareAngle, &point](const pair<Body, int> &it, const Point &scale)
+			auto DrawFlares = [&draw, &pos, &ship, &flareAngle, &point](const std::pair<Body, int> &it, const Point &scale)
 			{
 				// If multiple engines with the same flare are installed, draw up to
 				// three copies of the flare sprite.
@@ -279,13 +279,13 @@ Engine::Engine(PlayerInfo &player)
 		{
 			draw[currentCalcBuffer].Add(object);
 
-			double r = max(2., object.Radius() * .03 + .5);
+			double r = std::max(2., object.Radius() * .03 + .5);
 			radar[currentCalcBuffer].Add(object.RadarType(flagship), object.Position(), r, r - 1.);
 		}
 
 	// Add all neighboring systems that the player has seen to the radar.
 	const System *targetSystem = flagship ? flagship->GetTargetSystem() : nullptr;
-	const set<const System *> &links = (flagship && flagship->JumpNavigation().HasJumpDrive()) ?
+	const std::set<const System *> &links = (flagship && flagship->JumpNavigation().HasJumpDrive()) ?
 		player.GetSystem()->JumpNeighbors(flagship->JumpNavigation().JumpRange()) : player.GetSystem()->Links();
 	for(const System *system : links)
 		if(player.HasSeen(*system))
@@ -318,13 +318,13 @@ void Engine::Place()
 
 	// Add the player's flagship and escorts to the list of ships. The TakeOff()
 	// code already took care of loading up fighters and assigning parents.
-	for(const shared_ptr<Ship> &ship : player.Ships())
+	for(const std::shared_ptr<Ship> &ship : player.Ships())
 		if(!ship->IsParked() && ship->GetSystem())
 			ships.push_back(ship);
 
 	// Add NPCs to the list of ships. Fighters have to be assigned to carriers,
 	// and all but "uninterested" ships should follow the player.
-	shared_ptr<Ship> flagship = player.FlagshipPtr();
+	std::shared_ptr<Ship> flagship = player.FlagshipPtr();
 
 	// Update the active NPCs for missions based on the player's conditions.
 	player.UpdateMissionNPCs();
@@ -345,7 +345,7 @@ void Engine::Place()
 
 	// Give each non-carried, special ship we just added a random heading and position.
 	// (While carried by a parent, ships will not be present in `Engine::ships`.)
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 	{
 		Point pos;
 		Angle angle = Angle::Random();
@@ -405,15 +405,15 @@ void Engine::Place()
 // Add NPC ships to the known ships. These may have been freshly instantiated
 // from an accepted assisting/boarding mission, or from existing missions when
 // the player departs a planet.
-void Engine::Place(const list<NPC> &npcs, const shared_ptr<Ship> &flagship)
+void Engine::Place(const std::list<NPC> &npcs, const std::shared_ptr<Ship> &flagship)
 {
 	for(const NPC &npc : npcs)
 	{
 		if(!npc.ShouldSpawn())
 			continue;
 
-		map<string, map<Ship *, int>> carriers;
-		for(const shared_ptr<Ship> &ship : npc.Ships())
+		std::map<std::string, std::map<Ship *, int>> carriers;
+		for(const std::shared_ptr<Ship> &ship : npc.Ships())
 		{
 			// Skip ships that have been destroyed.
 			if(ship->IsDestroyed() || ship->IsDisabled())
@@ -425,7 +425,7 @@ void Engine::Place(const list<NPC> &npcs, const shared_ptr<Ship> &flagship)
 				ship->UnloadBays();
 				for(const auto &cat : GameData::GetCategory(CategoryType::BAY))
 				{
-					const string &bayType = cat.Name();
+					const std::string &bayType = cat.Name();
 					int baysTotal = ship->BaysTotal(bayType);
 					if(baysTotal)
 						carriers[bayType][&*ship] = baysTotal;
@@ -433,8 +433,8 @@ void Engine::Place(const list<NPC> &npcs, const shared_ptr<Ship> &flagship)
 			}
 		}
 
-		shared_ptr<Ship> npcFlagship;
-		for(const shared_ptr<Ship> &ship : npc.Ships())
+		std::shared_ptr<Ship> npcFlagship;
+		for(const std::shared_ptr<Ship> &ship : npc.Ships())
 		{
 			// Skip ships that have been destroyed.
 			if(ship->IsDestroyed())
@@ -442,14 +442,14 @@ void Engine::Place(const list<NPC> &npcs, const shared_ptr<Ship> &flagship)
 
 			// Avoid the exploit where the player can wear down an NPC's
 			// crew by attrition over the course of many days.
-			ship->AddCrew(max(0, ship->RequiredCrew() - ship->Crew()));
+			ship->AddCrew(std::max(0, ship->RequiredCrew() - ship->Crew()));
 			if(!ship->IsDisabled())
 				ship->Recharge();
 
 			if(ship->CanBeCarried())
 			{
 				bool docked = false;
-				const string &bayType = ship->Attributes().Category();
+				const std::string &bayType = ship->Attributes().Category();
 				for(auto &it : carriers[bayType])
 					if(it.second && it.first->Carry(ship))
 					{
@@ -500,7 +500,7 @@ void Engine::Step(bool isActive)
 	queue.ProcessSyncTasks();
 
 	// The calculation thread was paused by MainPanel before calling this function, so it is safe to access things.
-	const shared_ptr<Ship> flagship = player.FlagshipPtr();
+	const std::shared_ptr<Ship> flagship = player.FlagshipPtr();
 	const StellarObject *object = player.GetStellarObject();
 	if(object)
 		camera.SnapTo(object->Position());
@@ -559,11 +559,11 @@ void Engine::Step(bool isActive)
 			static const double MAX_SPEED = .05;
 			static const double MIN_SPEED = .002;
 
-			double zoomRatio = max(MIN_SPEED, min(MAX_SPEED, abs(log2(zoom.base) - log2(zoomTarget)) * ZOOM_SPEED));
+			double zoomRatio = std::max(MIN_SPEED, std::min(MAX_SPEED, abs(log2(zoom.base) - log2(zoomTarget)) * ZOOM_SPEED));
 			if(zoom.base < zoomTarget)
-				nextZoom.base = min(zoomTarget, zoom.base * (1. + zoomRatio));
+				nextZoom.base = std::min(zoomTarget, zoom.base * (1. + zoomRatio));
 			else if(zoom.base > zoomTarget)
-				nextZoom.base = max(zoomTarget, zoom.base * (1. / (1. + zoomRatio)));
+				nextZoom.base = std::max(zoomTarget, zoom.base * (1. / (1. + zoomRatio)));
 		}
 		if(flagship && flagship->Zoom() < 1.)
 		{
@@ -644,7 +644,7 @@ void Engine::Step(bool isActive)
 		doFlash = false;
 	}
 	else if(flash)
-		flash = max(0., flash * .99 - .002);
+		flash = std::max(0., flash * .99 - .002);
 
 	targets.clear();
 
@@ -667,12 +667,12 @@ void Engine::Step(bool isActive)
 				const System *system = it->GetSystem();
 				escorts.Add(*it, system == currentSystem, player.KnowsName(*system), fleetIsJumping, isSelected);
 			}
-	for(const shared_ptr<Ship> &escort : player.Ships())
+	for(const std::shared_ptr<Ship> &escort : player.Ships())
 		if(!escort->IsParked() && escort != flagship && !escort->IsDestroyed())
 		{
 			// Check if this escort is selected.
 			bool isSelected = false;
-			for(const weak_ptr<Ship> &ptr : player.SelectedShips())
+			for(const std::weak_ptr<Ship> &ptr : player.SelectedShips())
 				if(ptr.lock() == escort)
 				{
 					isSelected = true;
@@ -695,7 +695,7 @@ void Engine::Step(bool isActive)
 			{
 				Point pos = projectile.Position() - camera.Center();
 				if(projectile.MissileStrength() && projectile.GetGovernment()->IsEnemy()
-						&& (pos.Length() < max(Screen::Width(), Screen::Height()) * .5 / zoom))
+						&& (pos.Length() < std::max(Screen::Width(), Screen::Height()) * .5 / zoom))
 					missileLabels.emplace_back(AlertLabel(pos, projectile, flagship, zoom));
 			}
 		// Create overlays for flagship turrets with blindspots.
@@ -760,16 +760,16 @@ void Engine::Step(bool isActive)
 			info.SetBar("fuel", flagship->Fuel());
 		info.SetBar("energy", flagship->Energy());
 		double heat = flagship->Heat();
-		info.SetBar("heat", min(1., heat));
+		info.SetBar("heat", std::min(1., heat));
 		// If heat is above 100%, draw a second overlaid bar to indicate the
 		// total heat level.
 		if(heat > 1.)
-			info.SetBar("overheat", min(1., heat - 1.));
+			info.SetBar("overheat", std::min(1., heat - 1.));
 		if(flagship->IsOverheated() && (uiStep / 20) % 2)
-			info.SetBar("overheat blink", min(1., heat));
+			info.SetBar("overheat blink", std::min(1., heat));
 		info.SetBar("shields", flagship->Shields());
 		info.SetBar("hull", flagship->Hull(), 20.);
-		info.SetBar("disabled hull", min(flagship->Hull(), flagship->DisabledHull()), 20.);
+		info.SetBar("disabled hull", std::min(flagship->Hull(), flagship->DisabledHull()), 20.);
 	}
 	info.SetString("credits",
 		Format::CreditString(player.Accounts().Credits()));
@@ -777,11 +777,11 @@ void Engine::Step(bool isActive)
 	if(flagship && flagship->GetTargetStellar() && !isJumping)
 	{
 		const StellarObject *object = flagship->GetTargetStellar();
-		string navigationMode = flagship->Commands().Has(Command::LAND) ? "Landing on:" :
+		std::string navigationMode = flagship->Commands().Has(Command::LAND) ? "Landing on:" :
 			object->GetPlanet() && object->GetPlanet()->CanLand(*flagship) ? "Can land on:" :
 			"Cannot land on:";
 		info.SetString("navigation mode", navigationMode);
-		const string &name = object->DisplayName();
+		const std::string &name = object->DisplayName();
 		info.SetString("destination", name);
 
 		targets.push_back({
@@ -806,8 +806,8 @@ void Engine::Step(bool isActive)
 	}
 	// Use the radar that was just populated. (The draw tick-tock has not
 	// yet been toggled, but it will be at the end of this function.)
-	shared_ptr<const Ship> target;
-	shared_ptr<const Minable> targetAsteroid;
+	std::shared_ptr<const Ship> target;
+	std::shared_ptr<const Minable> targetAsteroid;
 	targetVector = Point();
 	if(flagship)
 	{
@@ -838,7 +838,7 @@ void Engine::Step(bool isActive)
 			info.SetCondition("range display");
 			info.SetBar("target hull", targetAsteroid->Hull(), 20.);
 			int targetRange = round(targetAsteroid->Position().Distance(flagship->Position()));
-			info.SetString("target range", to_string(targetRange));
+			info.SetString("target range", std::to_string(targetRange));
 		}
 	}
 	else
@@ -870,7 +870,7 @@ void Engine::Step(bool isActive)
 		{
 			info.SetBar("target shields", target->Shields());
 			info.SetBar("target hull", target->Hull(), 20.);
-			info.SetBar("target disabled hull", min(target->Hull(), target->DisabledHull()), 20.);
+			info.SetBar("target disabled hull", std::min(target->Hull(), target->DisabledHull()), 20.);
 
 			// The target area will be a square, with sides proportional to the average
 			// of the width and the height of the sprite.
@@ -905,7 +905,7 @@ void Engine::Step(bool isActive)
 			// If they do, then use strategic range display.
 			if(tacticalRange || strategicRange || rangeFinder)
 			{
-				info.SetString("target range", to_string(static_cast<int>(round(targetRange))));
+				info.SetString("target range", std::to_string(static_cast<int>(round(targetRange))));
 				if(strategicRange)
 					info.SetCondition("strategic range display");
 				else
@@ -918,7 +918,7 @@ void Engine::Step(bool isActive)
 			bool scrutable = !target->Attributes().Get("inscrutable");
 			if((targetRange <= crewScanRange && scrutable) || (crewScanRange && target->IsYours()))
 			{
-				info.SetString("target crew", to_string(target->Crew()));
+				info.SetString("target crew", std::to_string(target->Crew()));
 				if(accelerationScanRange || velocityScanRange)
 					info.SetCondition("mobility crew display");
 				else
@@ -928,27 +928,27 @@ void Engine::Step(bool isActive)
 			{
 				info.SetCondition("target energy display");
 				int energy = round(target->Energy() * target->Attributes().Get("energy capacity"));
-				info.SetString("target energy", to_string(energy));
+				info.SetString("target energy", std::to_string(energy));
 			}
 			if((targetRange <= fuelScanRange && scrutable) || (fuelScanRange && target->IsYours()))
 			{
 				info.SetCondition("target fuel display");
 				int fuel = round(target->Fuel() * target->Attributes().Get("fuel capacity"));
-				info.SetString("target fuel", to_string(fuel));
+				info.SetString("target fuel", std::to_string(fuel));
 			}
 			if((targetRange <= thermalScanRange && scrutable) || (thermalScanRange && target->IsYours()))
 			{
 				info.SetCondition("target thermal display");
 				int heat = round(100. * target->Heat());
-				info.SetString("target heat", to_string(heat) + "%");
+				info.SetString("target heat", std::to_string(heat) + "%");
 			}
 			if((targetRange <= weaponScanRange && scrutable) || (weaponScanRange && target->IsYours()))
 			{
 				info.SetCondition("target weapon range display");
 				int turretRange = round(target->GetAICache().TurretRange());
-				info.SetString("target turret", to_string(turretRange) + " ");
+				info.SetString("target turret", std::to_string(turretRange) + " ");
 				int gunRange = round(target->GetAICache().GunRange());
-				info.SetString("target gun", to_string(gunRange) + " ");
+				info.SetString("target gun", std::to_string(gunRange) + " ");
 			}
 			const bool mobilityScan = maneuverScanRange || velocityScanRange || accelerationScanRange;
 			if((targetRange <= crewScanRange && targetRange <= maneuverScanRange && scrutable)
@@ -957,26 +957,26 @@ void Engine::Step(bool isActive)
 			{
 				info.SetCondition("turn while combined");
 				int turnRate = round(60 * target->TrueTurnRate());
-				info.SetString("target turnrate", to_string(turnRate) + " ");
+				info.SetString("target turnrate", std::to_string(turnRate) + " ");
 			}
 			else if((targetRange >= crewScanRange && targetRange <= maneuverScanRange && scrutable)
 				|| (maneuverScanRange && target->IsYours() && !tacticalRange && !crewScanRange))
 			{
 				info.SetCondition("turn while not combined");
 				int turnRate = round(60 * target->TrueTurnRate());
-				info.SetString("target turnrate", to_string(turnRate) + " ");
+				info.SetString("target turnrate", std::to_string(turnRate) + " ");
 			}
 			if((targetRange <= accelerationScanRange && scrutable) || (accelerationScanRange && target->IsYours()))
 			{
 				info.SetCondition("target velocity display");
 				int presentSpeed = round(60 * target->CurrentSpeed());
-				info.SetString("target velocity", to_string(presentSpeed) + " ");
+				info.SetString("target velocity", std::to_string(presentSpeed) + " ");
 			}
 			if((targetRange <= velocityScanRange && scrutable) || (velocityScanRange && target->IsYours()))
 			{
 				info.SetCondition("target acceleration display");
 				int presentAcceleration = 3600 * target->TrueAcceleration();
-				info.SetString("target acceleration", to_string(presentAcceleration) + " ");
+				info.SetString("target acceleration", std::to_string(presentAcceleration) + " ");
 			}
 		}
 	}
@@ -985,16 +985,16 @@ void Engine::Step(bool isActive)
 	if(target && target->IsTargetable() && target->GetSystem() == currentSystem
 		&& (flagship->CargoScanFraction() || flagship->OutfitScanFraction()))
 	{
-		double width = max(target->Width(), target->Height());
+		double width = std::max(target->Width(), target->Height());
 		Point pos = target->Position() - camera.Center();
 		const bool outfitInRange = pos.LengthSquared() <= (flagship->Attributes().Get("outfit scan power") * 10000);
 		const Status::Type outfitOverlayType = outfitInRange ? Status::Type::SCAN : Status::Type::SCAN_OUT_OF_RANGE;
 		statuses.emplace_back(pos, flagship->OutfitScanFraction(), 0.,
-			0., 10. + max(20., width * .5), outfitOverlayType, 1.f, Angle(pos).Degrees() + 180.);
+			0., 10. + std::max(20., width * .5), outfitOverlayType, 1.f, Angle(pos).Degrees() + 180.);
 		const bool cargoInRange = pos.LengthSquared() <= (flagship->Attributes().Get("cargo scan power") * 10000);
 		const Status::Type cargoOverlayType = cargoInRange ? Status::Type::SCAN : Status::Type::SCAN_OUT_OF_RANGE;
 		statuses.emplace_back(pos, 0., flagship->CargoScanFraction(),
-			0., 10. + max(20., width * .5), cargoOverlayType, 1.f, Angle(pos).Degrees() + 180.);
+			0., 10. + std::max(20., width * .5), cargoOverlayType, 1.f, Angle(pos).Degrees() + 180.);
 	}
 	// Handle any events that change the selected ships.
 	if(groupSelect >= 0)
@@ -1025,7 +1025,7 @@ void Engine::Step(bool isActive)
 		doClick = doClick && !player.SelectShips(clickBox, hasShift);
 		if(doClick)
 		{
-			const vector<const Ship *> &stack = escorts.Click(clickPoint);
+			const std::vector<const Ship *> &stack = escorts.Click(clickPoint);
 			if(!stack.empty())
 				doClick = !player.SelectShips(stack, hasShift);
 			else
@@ -1034,9 +1034,9 @@ void Engine::Step(bool isActive)
 	}
 
 	// Draw crosshairs on all the selected ships.
-	for(const weak_ptr<Ship> &selected : player.SelectedShips())
+	for(const std::weak_ptr<Ship> &selected : player.SelectedShips())
 	{
-		shared_ptr<Ship> ship = selected.lock();
+		std::shared_ptr<Ship> ship = selected.lock();
 		if(ship && ship != target && !ship->IsParked() && ship->GetSystem() == player.GetSystem()
 				&& !ship->IsDestroyed() && ship->Zoom() > 0.)
 		{
@@ -1061,7 +1061,7 @@ void Engine::Step(bool isActive)
 		if(flagship && scanRangeMetric && !flagship->IsHyperspacing())
 		{
 			bool scanComplete = true;
-			for(const shared_ptr<Minable> &minable : asteroids.Minables())
+			for(const std::shared_ptr<Minable> &minable : asteroids.Minables())
 			{
 				Point offset = minable->Position() - camera.Center();
 				// Use the squared length, as we used the squared scan range.
@@ -1136,7 +1136,7 @@ void Engine::GiveCommand(const Command &command)
 
 // Pass the list of game events to MainPanel for handling by the player, and any
 // UI element generation.
-list<ShipEvent> &Engine::Events()
+std::list<ShipEvent> &Engine::Events()
 {
 	return events;
 }
@@ -1198,7 +1198,7 @@ void Engine::Draw() const
 		if(it.outer > 0.)
 			RingShader::Draw(pos, radius + 3., 1.5f, it.outer,
 				Color::Multiply(it.alpha, color[colorIndex]), 0.f, it.angle);
-		double dashes = (it.type >= Status::Type::SCAN) ? 0. : 20. * min<double>(1., zoom);
+		double dashes = (it.type >= Status::Type::SCAN) ? 0. : 20. * std::min<double>(1., zoom);
 		colorIndex += static_cast<int>(Status::Type::COUNT);
 		if(it.inner > 0.)
 			RingShader::Draw(pos, radius, 1.5f, it.inner,
@@ -1242,10 +1242,10 @@ void Engine::Draw() const
 	Rectangle messageBox = hud->GetBox("messages");
 	bool messagesReversed = hud->GetValue("messages reversed");
 	double animationDuration = hud->GetValue("message animation duration");
-	const vector<Messages::Entry> &messages = Messages::Get(uiStep, animationDuration);
+	const std::vector<Messages::Entry> &messages = Messages::Get(uiStep, animationDuration);
 	auto messageAnimation = [animationDuration](double age) -> double
 	{
-		return max(0., 1. - pow((age - animationDuration) / animationDuration, 2));
+		return std::max(0., 1. - pow((age - animationDuration) / animationDuration, 2));
 	};
 	auto naturalDecay = [animationDuration](int age) -> float
 	{
@@ -1281,7 +1281,7 @@ void Engine::Draw() const
 			if(messagePoint.Y() < messageBox.Top())
 				break;
 		}
-		float alpha = isAnimating ? isDying ? min<double>(messageAnimation(age), naturalDecay(naturalAge))
+		float alpha = isAnimating ? isDying ? std::min<double>(messageAnimation(age), naturalDecay(naturalAge))
 			: messageAnimation(age) : naturalDecay(age);
 		messageLine.Draw(messagePoint, it->category->MainColor().Additive(alpha));
 	}
@@ -1344,7 +1344,7 @@ void Engine::Draw() const
 
 	if(Preferences::Has("Show CPU / GPU load"))
 	{
-		string loadString = to_string(lround(load * 100.)) + "% CPU";
+		std::string loadString = std::to_string(lround(load * 100.)) + "% CPU";
 		Color color = *colors.Get("medium");
 		font.Draw(loadString,
 			Point(-10 - font.Width(loadString), Screen::Height() * -.5 + 5.), color);
@@ -1647,11 +1647,11 @@ void Engine::CalculateStep()
 	// Draw the asteroids and minables.
 	asteroids.Draw(draw[currentCalcBuffer], newCamera.Center(), zoom);
 	// Draw the flotsam.
-	for(const shared_ptr<Flotsam> &it : flotsam)
+	for(const std::shared_ptr<Flotsam> &it : flotsam)
 		draw[currentCalcBuffer].Add(*it);
 	// Draw the ships. Skip the flagship, then draw it on top of all the others.
 	bool showFlagship = false;
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(ship->GetSystem() == playerSystem && ship->HasSprite())
 		{
 			if(ship.get() != flagship)
@@ -1752,7 +1752,7 @@ void Engine::CalculateUnpaused(const Ship *flagship, const System *playerSystem)
 	bool flagshipIsTargetable = (flagship && flagship->IsTargetable());
 	bool flagshipBecameTargetable = flagshipWasUntargetable && flagshipIsTargetable;
 	// Then, move the other ships.
-	for(const shared_ptr<Ship> &it : ships)
+	for(const std::shared_ptr<Ship> &it : ships)
 	{
 		if(it == player.FlagshipPtr())
 			continue;
@@ -1768,7 +1768,7 @@ void Engine::CalculateUnpaused(const Ship *flagship, const System *playerSystem)
 	if(!wasHyperspacing && flagship && flagship->IsEnteringHyperspace())
 	{
 		bool isJumping = flagship->IsUsingJumpDrive();
-		const map<const Sound *, int> &jumpSounds = isJumping
+		const std::map<const Sound *, int> &jumpSounds = isJumping
 			? flagship->Attributes().JumpSounds() : flagship->Attributes().HyperSounds();
 		if(flagship->Attributes().Get("silent jumps"))
 		{
@@ -1810,7 +1810,7 @@ void Engine::CalculateUnpaused(const Ship *flagship, const System *playerSystem)
 
 	// Move the flotsam. This must happen after the ships move, because flotsam
 	// checks if any ship has picked it up.
-	for(const shared_ptr<Flotsam> &it : flotsam)
+	for(const std::shared_ptr<Flotsam> &it : flotsam)
 		it->Move(newVisuals);
 	PrunePointers(flotsam);
 
@@ -1865,7 +1865,7 @@ void Engine::CalculateUnpaused(const Ship *flagship, const System *playerSystem)
 		DoWeather(weather);
 
 	// Check for flotsam collection (collisions with ships).
-	for(const shared_ptr<Flotsam> &it : flotsam)
+	for(const std::shared_ptr<Flotsam> &it : flotsam)
 		DoCollection(*it);
 
 	// Now that flotsam collection is done, clear the cache of ships with
@@ -1873,7 +1873,7 @@ void Engine::CalculateUnpaused(const Ship *flagship, const System *playerSystem)
 	hasTractorBeam.clear();
 
 	// Check for ship scanning.
-	for(const shared_ptr<Ship> &it : ships)
+	for(const std::shared_ptr<Ship> &it : ships)
 		DoScanning(it);
 }
 
@@ -1881,7 +1881,7 @@ void Engine::CalculateUnpaused(const Ship *flagship, const System *playerSystem)
 
 // Move a ship. Also determine if the ship should generate hyperspace sounds or
 // boarding events, fire weapons, and launch fighters.
-void Engine::MoveShip(const shared_ptr<Ship> &ship)
+void Engine::MoveShip(const std::shared_ptr<Ship> &ship)
 {
 	// Various actions a ship could have taken last frame may have impacted the accuracy of cached values.
 	// Therefore, determine with any information needs recalculated and cache it.
@@ -1931,7 +1931,7 @@ void Engine::MoveShip(const shared_ptr<Ship> &ship)
 		// Did this ship just begin hyperspacing?
 		if(wasHere && !wasHyperspacing && ship->IsHyperspacing())
 		{
-			const map<const Sound *, int> &jumpSounds = isJump
+			const std::map<const Sound *, int> &jumpSounds = isJump
 				? ship->Attributes().JumpOutSounds() : ship->Attributes().HyperOutSounds();
 			if(ship->Attributes().Get("silent jumps"))
 			{
@@ -1947,7 +1947,7 @@ void Engine::MoveShip(const shared_ptr<Ship> &ship)
 		// Did this ship just jump into the player's system?
 		if(!wasHere && flagship && ship->GetSystem() == flagship->GetSystem())
 		{
-			const map<const Sound *, int> &jumpSounds = isJump
+			const std::map<const Sound *, int> &jumpSounds = isJump
 				? ship->Attributes().JumpInSounds() : ship->Attributes().HyperInSounds();
 			if(ship->Attributes().Get("silent jumps"))
 			{
@@ -1964,7 +1964,7 @@ void Engine::MoveShip(const shared_ptr<Ship> &ship)
 	// Boarding:
 	bool autoPlunder = !ship->IsYours();
 	// The player should not become a docked passenger on some other ship, but AI ships may.
-	shared_ptr<Ship> victim = ship->Board(autoPlunder, isFlagship);
+	std::shared_ptr<Ship> victim = ship->Board(autoPlunder, isFlagship);
 	if(victim)
 		eventQueue.emplace_back(ship, victim,
 			ship->GetGovernment()->IsEnemy(victim->GetGovernment()) ?
@@ -1994,7 +1994,7 @@ void Engine::MoveShip(const shared_ptr<Ship> &ship)
 void Engine::FillCollisionSets()
 {
 	shipCollisions.Clear(step);
-	for(const shared_ptr<Ship> &it : ships)
+	for(const std::shared_ptr<Ship> &it : ships)
 		if(it->GetSystem() == player.GetSystem() && it->Zoom() == 1.)
 			shipCollisions.Add(*it);
 
@@ -2063,8 +2063,8 @@ void Engine::SpawnPersons()
 		if(sum < 0)
 		{
 			const System *source = nullptr;
-			shared_ptr<Ship> parent;
-			for(const shared_ptr<Ship> &ship : person.Ships())
+			std::shared_ptr<Ship> parent;
+			for(const std::shared_ptr<Ship> &ship : person.Ships())
 			{
 				ship->Recharge();
 				if(ship->GivenName().empty())
@@ -2119,7 +2119,7 @@ void Engine::SendHails()
 	if(Random::Int(600) || player.IsDead() || ships.empty())
 		return;
 
-	vector<shared_ptr<const Ship>> canSend;
+	std::vector<std::shared_ptr<const Ship>> canSend;
 	canSend.reserve(ships.size());
 
 	// When deciding who will send a hail, only consider ships that can send hails.
@@ -2133,7 +2133,7 @@ void Engine::SendHails()
 
 	// Randomly choose a ship to send the hail.
 	unsigned i = Random::Int(canSend.size());
-	shared_ptr<const Ship> source = canSend[i];
+	std::shared_ptr<const Ship> source = canSend[i];
 
 	// Generate a random hail message.
 	SendMessage(source, source->GetHail(player.GetSubstitutions()));
@@ -2278,8 +2278,8 @@ void Engine::HandleMouseClicks()
 
 	// Check for clicks on ships in this system.
 	double clickRange = 50.;
-	shared_ptr<Ship> clickTarget;
-	for(shared_ptr<Ship> &ship : ships)
+	std::shared_ptr<Ship> clickTarget;
+	for(std::shared_ptr<Ship> &ship : ships)
 		if(ship->GetSystem() == playerSystem && &*ship != flagship && ship->IsTargetable())
 		{
 			Point position = ship->Position() - flagship->Position();
@@ -2320,7 +2320,7 @@ void Engine::HandleMouseClicks()
 	{
 		// If the click was not on any ship, check if it was on a minable.
 		double scanRange = 100. * sqrt(flagship->Attributes().Get("asteroid scan power"));
-		for(const shared_ptr<Minable> &minable : asteroids.Minables())
+		for(const std::shared_ptr<Minable> &minable : asteroids.Minables())
 		{
 			Point position = minable->Position() - flagship->Position();
 			if(position.Length() > scanRange)
@@ -2388,7 +2388,7 @@ void Engine::DoCollisions(Projectile &projectile)
 	// The asteroids can collide with projectiles, the same as any other
 	// object. If the asteroid turns out to be closer than the ship, it
 	// shields the ship (unless the projectile has a blast radius).
-	vector<Collision> collisions;
+	std::vector<Collision> collisions;
 	const Government *gov = projectile.GetGovernment();
 	const Weapon &weapon = projectile.GetWeapon();
 
@@ -2399,7 +2399,7 @@ void Engine::DoCollisions(Projectile &projectile)
 		// "Phasing" projectiles that have a target will never hit any other ship.
 		// They also don't care whether the weapon has "no ship collisions" on, as
 		// otherwise a phasing projectile would never hit anything.
-		shared_ptr<Ship> target = projectile.TargetPtr();
+		std::shared_ptr<Ship> target = projectile.TargetPtr();
 		if(target)
 		{
 			Point offset = projectile.Position() - target->Position();
@@ -2414,8 +2414,8 @@ void Engine::DoCollisions(Projectile &projectile)
 		double triggerRadius = weapon.TriggerRadius();
 		if(triggerRadius)
 		{
-			vector<Body *> inRadius;
-			inRadius.reserve(min(static_cast<vector<Body *>::size_type>(triggerRadius), ships.size()));
+			std::vector<Body *> inRadius;
+			inRadius.reserve(std::min(static_cast<std::vector<Body *>::size_type>(triggerRadius), ships.size()));
 			shipCollisions.Circle(projectile.Position(), triggerRadius, inRadius);
 			for(const Body *body : inRadius)
 			{
@@ -2451,7 +2451,7 @@ void Engine::DoCollisions(Projectile &projectile)
 		CollisionType collisionType = collision.GetCollisionType();
 		double range = collision.IntersectionRange();
 
-		shared_ptr<Ship> shipHit;
+		std::shared_ptr<Ship> shipHit;
 		if(hit && collisionType == CollisionType::SHIP)
 			shipHit = reinterpret_cast<Ship *>(hit)->shared_from_this();
 
@@ -2479,7 +2479,7 @@ void Engine::DoCollisions(Projectile &projectile)
 			// "safe" weapon.
 			Point hitPos = projectile.Position() + range * projectile.Velocity();
 			bool isSafe = weapon.IsSafe();
-			vector<Body *> blastCollisions;
+			std::vector<Body *> blastCollisions;
 			blastCollisions.reserve(32);
 			shipCollisions.Circle(hitPos, blastRadius, blastCollisions);
 			for(Body *body : blastCollisions)
@@ -2554,7 +2554,7 @@ void Engine::DoWeather(Weather &weather)
 		// Get all ship bodies that are touching a ring defined by the hazard's min
 		// and max ranges at the hazard's origin. Any ship touching this ring takes
 		// hazard damage.
-		vector<Body *> affectedShips;
+		std::vector<Body *> affectedShips;
 		if(hazard->SystemWide())
 			affectedShips = shipCollisions.All();
 		else
@@ -2577,7 +2577,7 @@ void Engine::DoCollection(Flotsam &flotsam)
 {
 	// Check if any ship can pick up this flotsam. Cloaked ships without "cloaked pickup" cannot act.
 	Ship *collector = nullptr;
-	vector<Body *> pickupShips;
+	std::vector<Body *> pickupShips;
 	pickupShips.reserve(16);
 	shipCollisions.Circle(flotsam.Position(), 5., pickupShips);
 	for(Body *body : pickupShips)
@@ -2656,11 +2656,11 @@ void Engine::DoCollection(Flotsam &flotsam)
 		return;
 
 	// One of your ships picked up this flotsam. Describe who it was.
-	string name = (collectorIsFlagship ? "You" :
+	std::string name = (collectorIsFlagship ? "You" :
 			"Your " + collector->Noun() + " \"" + collector->GivenName() + "\"") + " picked up ";
 	// Describe what they collected from this flotsam.
-	string commodity;
-	string message;
+	std::string commodity;
+	std::string message;
 	if(flotsam.OutfitType())
 	{
 		const Outfit *outfit = flotsam.OutfitType();
@@ -2670,7 +2670,7 @@ void Engine::DoCollection(Flotsam &flotsam)
 			player.Harvest(outfit);
 		}
 		else
-			message = name + to_string(amount) + " "
+			message = name + std::to_string(amount) + " "
 				+ (amount == 1 ? outfit->DisplayName() : outfit->PluralName()) + ".";
 	}
 	else
@@ -2690,7 +2690,7 @@ void Engine::DoCollection(Flotsam &flotsam)
 
 	int free = collector->Cargo().Free();
 	int total = 0;
-	for(const shared_ptr<Ship> &ship : player.Ships())
+	for(const std::shared_ptr<Ship> &ship : player.Ships())
 		if(!ship->IsDestroyed() && !ship->IsParked() && ship->GetSystem() == player.GetSystem())
 			total += ship->Cargo().Free();
 
@@ -2706,12 +2706,12 @@ void Engine::DoCollection(Flotsam &flotsam)
 
 // Scanning can't happen in the same loop as ship movement because it relies on
 // all the ships already being in their final position for this step.
-void Engine::DoScanning(const shared_ptr<Ship> &ship)
+void Engine::DoScanning(const std::shared_ptr<Ship> &ship)
 {
 	int scan = ship->Scan(player);
 	if(scan)
 	{
-		shared_ptr<Ship> target = ship->GetTargetShip();
+		std::shared_ptr<Ship> target = ship->GetTargetShip();
 		if(target && target->IsTargetable())
 			eventQueue.emplace_back(ship, target, scan);
 	}
@@ -2729,7 +2729,7 @@ void Engine::FillRadar()
 	for(const StellarObject &object : playerSystem->Objects())
 		if(object.HasSprite())
 		{
-			double r = max(2., object.Radius() * .03 + .5);
+			double r = std::max(2., object.Radius() * .03 + .5);
 			radar[currentCalcBuffer].Add(object.RadarType(flagship), object.Position(), r, r - 1.);
 		}
 
@@ -2737,7 +2737,7 @@ void Engine::FillRadar()
 	if(flagship)
 	{
 		const System *targetSystem = flagship->GetTargetSystem();
-		const set<const System *> &links = (flagship->JumpNavigation().HasJumpDrive()) ?
+		const std::set<const System *> &links = (flagship->JumpNavigation().HasJumpDrive()) ?
 			playerSystem->JumpNeighbors(flagship->JumpNavigation().JumpRange()) : playerSystem->Links();
 		for(const System *system : links)
 			if(player.HasSeen(*system))
@@ -2757,7 +2757,7 @@ void Engine::FillRadar()
 
 	// Add ships. Also check if hostile ships have newly appeared.
 	bool hasHostiles = false;
-	for(shared_ptr<Ship> &ship : ships)
+	for(std::shared_ptr<Ship> &ship : ships)
 		if(ship->GetSystem() == playerSystem)
 		{
 			// Do not show cloaked ships on the radar, except the player's ships, and those who should show on radar.
@@ -2888,11 +2888,11 @@ void Engine::DrawShipSprites(const Ship &ship)
 
 // If a ship just damaged another ship, update information on who has asked the
 // player for assistance (and ask for assistance if appropriate).
-void Engine::DoGrudge(const shared_ptr<Ship> &target, const Government *attacker)
+void Engine::DoGrudge(const std::shared_ptr<Ship> &target, const Government *attacker)
 {
 	if(attacker->IsPlayer())
 	{
-		shared_ptr<const Ship> previous = grudge[target->GetGovernment()].lock();
+		std::shared_ptr<const Ship> previous = grudge[target->GetGovernment()].lock();
 		if(previous && previous->CanSendHail(player))
 		{
 			grudge[target->GetGovernment()].reset();
@@ -2908,7 +2908,7 @@ void Engine::DoGrudge(const shared_ptr<Ship> &target, const Government *attacker
 	// someone has already said "thank you" today.
 	if(grudge.contains(attacker))
 	{
-		shared_ptr<const Ship> previous = grudge[attacker].lock();
+		std::shared_ptr<const Ship> previous = grudge[attacker].lock();
 		// If the previous ship is destroyed, or was able to send a
 		// "thank you" already, skip sending a new thanks.
 		if(!previous || previous->CanSendHail(player))
@@ -2928,7 +2928,7 @@ void Engine::DoGrudge(const shared_ptr<Ship> &target, const Government *attacker
 	// Check the relative strength of this ship and its attackers.
 	double attackerStrength = 0.;
 	int attackerCount = 0;
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(ship->GetGovernment() == attacker && ship->GetTargetShip() == target)
 		{
 			++attackerCount;
@@ -2947,7 +2947,7 @@ void Engine::DoGrudge(const shared_ptr<Ship> &target, const Government *attacker
 
 	grudge[attacker] = target;
 	grudgeTime = 120;
-	string message;
+	std::string message;
 	if(target->GetPersonality().IsDaring())
 	{
 		message = "Please assist us in ";
@@ -2980,14 +2980,14 @@ void Engine::CreateStatusOverlays()
 	const System *currentSystem = player.GetSystem();
 	const auto flagship = player.FlagshipPtr();
 
-	static const set<Preferences::OverlayType> overlayTypes = {
+	static const std::set<Preferences::OverlayType> overlayTypes = {
 		Preferences::OverlayType::FLAGSHIP,
 		Preferences::OverlayType::ESCORT,
 		Preferences::OverlayType::ENEMY,
 		Preferences::OverlayType::NEUTRAL
 	};
 
-	map<Preferences::OverlayType, Preferences::OverlayState> overlaySettings;
+	std::map<Preferences::OverlayType, Preferences::OverlayState> overlaySettings;
 
 	for(const auto &it : overlayTypes)
 		overlaySettings[it] = Preferences::StatusOverlaysState(it);
@@ -3018,7 +3018,7 @@ void Engine::CreateStatusOverlays()
 
 
 
-void Engine::EmplaceStatusOverlay(const shared_ptr<Ship> &it, Preferences::OverlayState overlaySetting,
+void Engine::EmplaceStatusOverlay(const std::shared_ptr<Ship> &it, Preferences::OverlayState overlaySetting,
 	Status::Type type, double cloak)
 {
 	if(overlaySetting == Preferences::OverlayState::OFF)
@@ -3027,7 +3027,7 @@ void Engine::EmplaceStatusOverlay(const shared_ptr<Ship> &it, Preferences::Overl
 	if(overlaySetting == Preferences::OverlayState::DAMAGED && !it->IsDamaged())
 		return;
 
-	double width = min(it->Width(), it->Height());
+	double width = std::min(it->Width(), it->Height());
 	float alpha = 1.f;
 	if(overlaySetting == Preferences::OverlayState::ON_HIT)
 	{
@@ -3047,5 +3047,5 @@ void Engine::EmplaceStatusOverlay(const shared_ptr<Ship> &it, Preferences::Overl
 		cloak *= 0.6;
 
 	statuses.emplace_back(it->Position() - camera.Center(), it->Shields(), it->Hull(),
-		min(it->Hull(), it->DisabledHull()), max(20., width * .5), type, alpha * (1. - cloak));
+		std::min(it->Hull(), it->DisabledHull()), std::max(20., width * .5), type, alpha * (1. - cloak));
 }

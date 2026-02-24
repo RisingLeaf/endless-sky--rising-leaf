@@ -36,7 +36,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <thread>
 #include <vector>
 
-using namespace std;
+
 
 namespace {
 	// This class represents a new sound source that is queued to be added. This
@@ -55,8 +55,8 @@ namespace {
 	void Move(const AudioPlayer &player, QueueEntry entry)
 	{
 		Point angle = entry.sum / entry.weight;
-		// The source should be along the vector (angle.X(), angle.Y(), -1).
-		// The length of the vector should be sqrt(1 / weight).
+		// The source should be along the std::vector (angle.X(), angle.Y(), -1).
+		// The length of the std::vector should be sqrt(1 / weight).
 		double scale = sqrt(1. / (entry.weight * (angle.LengthSquared() + 1.)));
 		player.Move(angle.X() * scale, angle.Y() * scale, -scale);
 	}
@@ -66,7 +66,7 @@ namespace {
 
 
 	// Mutex to make sure different threads don't modify the audio at the same time.
-	mutex audioMutex;
+	std::mutex audioMutex;
 
 	// OpenAL settings.
 	ALCdevice *device = nullptr;
@@ -75,35 +75,35 @@ namespace {
 
 	// We keep track of the volume levels requested, and the volume levels
 	// currently set in OpenAL.
-	map<SoundCategory, double> volume{{SoundCategory::MASTER, .125}};
-	map<SoundCategory, double> cachedVolume;
+	std::map<SoundCategory, double> volume{{SoundCategory::MASTER, .125}};
+	std::map<SoundCategory, double> cachedVolume;
 
 	// This queue keeps track of sounds that have been requested to play. Each
 	// added sound is "deferred" until the next audio position update to make
 	// sure that all sounds from a given frame start at the same time.
-	map<const Sound *, QueueEntry> soundQueue;
-	map<const Sound *, QueueEntry> deferred;
-	thread::id mainThreadID;
+	std::map<const Sound *, QueueEntry> soundQueue;
+	std::map<const Sound *, QueueEntry> deferred;
+	std::thread::id mainThreadID;
 
 	// Sound resources that have been loaded from files.
-	map<string, Sound> sounds;
+	std::map<std::string, Sound> sounds;
 
 	/// The active audio sources
-	vector<shared_ptr<AudioPlayer>> players;
+	std::vector<std::shared_ptr<AudioPlayer>> players;
 	/// The looping players for reuse. Looping sources always have the Fade effect.
-	map<const Sound *, shared_ptr<AudioPlayer>> loopingPlayers;
+	std::map<const Sound *, std::shared_ptr<AudioPlayer>> loopingPlayers;
 
 	// Queue and thread for loading sound files in the background.
-	map<string, filesystem::path> loadQueue;
-	thread loadThread;
+	std::map<std::string, std::filesystem::path> loadQueue;
+	std::thread loadThread;
 
 	// The current position of the "listener," i.e. the center of the screen.
 	Point listener;
 
 	// The active music player, if there is one. This player is also present in 'player'.
 	// In the current implementation, the supplier of the music source is always a Fade.
-	shared_ptr<AudioPlayer> musicPlayer;
-	string currentTrack;
+	std::shared_ptr<AudioPlayer> musicPlayer;
+	std::string currentTrack;
 
 	// The number of Pause vs Resume requests received.
 	int pauseChangeCount = 0;
@@ -118,7 +118,7 @@ namespace {
 
 
 // Begin loading sounds (in a separate thread).
-void Audio::Init(const vector<filesystem::path> &sources)
+void Audio::Init(const std::vector<std::filesystem::path> &sources)
 {
 	device = alcOpenDevice(nullptr);
 	if(!device)
@@ -130,9 +130,9 @@ void Audio::Init(const vector<filesystem::path> &sources)
 
 	// If we don't make it to this point, no audio will be played.
 	isInitialized = true;
-	mainThreadID = this_thread::get_id();
+	mainThreadID = std::this_thread::get_id();
 
-	// The listener is looking "into" the screen. This orientation vector is
+	// The listener is looking "into" the screen. This orientation std::vector is
 	// used to determine what sounds should be in the right or left speaker.
 	ALfloat zero[3] = {0., 0., 0.};
 	ALfloat orientation[6] = {0., 0., -1., 0., 1., 0.};
@@ -150,19 +150,19 @@ void Audio::Init(const vector<filesystem::path> &sources)
 
 
 // Get all the sound files in the game data and all plugins.
-void Audio::LoadSounds(const vector<filesystem::path> &sources)
+void Audio::LoadSounds(const std::vector<std::filesystem::path> &sources)
 {
 	for(const auto &source : sources)
 	{
-		filesystem::path root = source / "sounds";
-		vector<filesystem::path> files = Files::RecursiveList(root);
+		std::filesystem::path root = source / "sounds";
+		std::vector<std::filesystem::path> files = Files::RecursiveList(root);
 		for(const auto &path : files)
 		{
 			if(path.extension() == ".wav")
 			{
 				// The "name" of the sound is its full path within the "sounds/"
 				// folder, without the ".wav" or "~.wav" suffix.
-				string name = (path.parent_path() / path.stem()).lexically_relative(root).generic_string();
+				std::string name = (path.parent_path() / path.stem()).lexically_relative(root).generic_string();
 				if(name.ends_with('~'))
 					name.resize(name.length() - 1);
 				loadQueue[name] = path;
@@ -171,7 +171,7 @@ void Audio::LoadSounds(const vector<filesystem::path> &sources)
 	}
 	// Begin loading the files.
 	if(!loadQueue.empty())
-		loadThread = thread(&Load);
+		loadThread = std::thread(&Load);
 }
 
 
@@ -194,7 +194,7 @@ void Audio::CheckReferences(bool parseOnly)
 // Report the progress of loading sounds.
 double Audio::GetProgress()
 {
-	unique_lock<mutex> lock(audioMutex);
+	std::unique_lock<std::mutex> lock(audioMutex);
 
 	if(loadQueue.empty())
 		return 1.;
@@ -220,16 +220,16 @@ double Audio::Volume(SoundCategory category)
 // Set the volume (to a value between 0 and 1).
 void Audio::SetVolume(double level, SoundCategory category)
 {
-	volume[category] = clamp(level, 0., 1.);
+	volume[category] = std::clamp(level, 0., 1.);
 }
 
 
 
 // Get a pointer to the named sound. The name is the path relative to the
 // "sound/" folder, and without ~ if it's on the end, or the extension.
-const Sound *Audio::Get(const string &name)
+const Sound *Audio::Get(const std::string &name)
 {
-	unique_lock<mutex> lock(audioMutex);
+	std::unique_lock<std::mutex> lock(audioMutex);
 	return &sounds[name];
 }
 
@@ -269,11 +269,11 @@ void Audio::Play(const Sound *sound, const Point &position, SoundCategory catego
 
 	// Place sounds from the main thread directly into the queue. They are from
 	// the UI, and the Engine may not be running right now to call Update().
-	if(this_thread::get_id() == mainThreadID)
+	if(std::this_thread::get_id() == mainThreadID)
 		soundQueue[sound].Add(position - listener, category);
 	else
 	{
-		unique_lock<mutex> lock(audioMutex);
+		std::unique_lock<std::mutex> lock(audioMutex);
 		deferred[sound].Add(position - listener, category);
 	}
 }
@@ -281,7 +281,7 @@ void Audio::Play(const Sound *sound, const Point &position, SoundCategory catego
 
 
 // Play the given music. An empty string means to play nothing.
-void Audio::PlayMusic(const string &name)
+void Audio::PlayMusic(const std::string &name)
 {
 	if(!isInitialized)
 		return;
@@ -299,7 +299,7 @@ void Audio::PlayMusic(const string &name)
 	{
 		Fade *fade = new Fade();
 		fade->AddSource(Music::CreateSupplier(name, true));
-		musicPlayer = shared_ptr<AudioPlayer>(new MusicPlayer(unique_ptr<AudioSupplier>{fade}));
+		musicPlayer = std::shared_ptr<AudioPlayer>(new MusicPlayer(std::unique_ptr<AudioSupplier>{fade}));
 		musicPlayer->Init();
 		musicPlayer->SetVolume(Volume(SoundCategory::MUSIC));
 		musicPlayer->Play();
@@ -412,12 +412,12 @@ void Audio::Step(bool isFastForward)
 	// not correspond to an existing source.
 	for(const auto &[sound, entry] : soundQueue)
 	{
-		unique_ptr<AudioSupplier> supplier = sound->CreateSupplier();
+		std::unique_ptr<AudioSupplier> supplier = sound->CreateSupplier();
 		supplier->Set3x(isFastForward);
-		shared_ptr<AudioPlayer> player;
+		std::shared_ptr<AudioPlayer> player;
 		if(sound->IsLooping())
 		{
-			unique_ptr<Fade> fade = make_unique<Fade>();
+			std::unique_ptr<Fade> fade = std::make_unique<Fade>();
 			fade->AddSource(std::move(supplier));
 			player = make_shared<AudioPlayer>(entry.category, std::move(fade));
 			loopingPlayers.emplace(sound, player);
@@ -445,7 +445,7 @@ void Audio::Quit()
 {
 	// First, check if sounds are still being loaded in a separate thread, and
 	// if so interrupt that thread and wait for it to quit.
-	unique_lock<mutex> lock(audioMutex);
+	std::unique_lock<std::mutex> lock(audioMutex);
 	if(!loadQueue.empty())
 		loadQueue.clear();
 	if(loadThread.joinable())
@@ -502,13 +502,13 @@ namespace {
 	// Thread entry point for loading sounds.
 	void Load()
 	{
-		string name;
-		filesystem::path path;
+		std::string name;
+		std::filesystem::path path;
 		Sound *sound;
 		while(true)
 		{
 			{
-				unique_lock<mutex> lock(audioMutex);
+				std::unique_lock<std::mutex> lock(audioMutex);
 				// If this is not the first time through, remove the previous item
 				// in the queue. This is a signal that it has been loaded, so we
 				// must not remove it until after loading the file.

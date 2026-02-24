@@ -1163,7 +1163,7 @@ position, direction and velocity are all specified in absolute terms:
     ma_engine_listener_set_position(&engine, listenerIndex, worldPosX, worldPosY, worldPosZ);
     ```
 
-The direction of the listener represents it's forward vector. The listener's up vector can also be
+The direction of the listener represents it's forward std::vector. The listener's up std::vector can also be
 specified and defaults to +1 on the Y axis.
 
     ```c
@@ -5189,7 +5189,7 @@ typedef struct
 {
     ma_spatializer_listener_config config;
     ma_atomic_vec3f position;  /* The absolute position of the listener. */
-    ma_atomic_vec3f direction; /* The direction the listener is facing. The world up vector is config.worldUp. */
+    ma_atomic_vec3f direction; /* The direction the listener is facing. The world up std::vector is config.worldUp. */
     ma_atomic_vec3f velocity;
     ma_bool32 isEnabled;
 
@@ -11712,7 +11712,7 @@ IMPLEMENTATION
 /* Begin globally disabled warnings. */
 #if defined(_MSC_VER)
     #pragma warning(push)
-    #pragma warning(disable:4752)   /* found Intel(R) Advanced Vector Extensions; consider using /arch:AVX */
+    #pragma warning(disable:4752)   /* found Intel(R) Advanced std::vector Extensions; consider using /arch:AVX */
     #pragma warning(disable:4049)   /* compiler limit : terminating line number emission */
 #endif
 
@@ -51673,7 +51673,7 @@ static float ma_attenuation_exponential(float distance, float minDistance, float
 /*
 Doppler Effect calculation taken from the OpenAL spec, with two main differences:
 
-  1) The source to listener vector will have already been calculated at an earlier step so we can
+  1) The source to listener std::vector will have already been calculated at an earlier step so we can
      just use that directly. We need only the position of the source relative to the origin.
 
   2) We don't scale by a frequency because we actually just want the ratio which we'll plug straight
@@ -52508,7 +52508,7 @@ MA_API ma_result ma_spatializer_process_pcm_frames(ma_spatializer* pSpatializer,
 
         To determine the direction of the sound relative to a speaker I'm using dot products. Each speaker is given a
         direction. For example, the left channel in a stereo system will be -1 on the X axis and the right channel will
-        be +1 on the X axis. A dot product is performed against the direction vector of the channel and the normalized
+        be +1 on the X axis. A dot product is performed against the direction std::vector of the channel and the normalized
         position of the sound.
         */
 
@@ -52944,14 +52944,14 @@ MA_API void ma_spatializer_get_relative_position_and_direction(const ma_spatiali
         listenerDirection    = ma_spatializer_listener_get_direction(pListener);
 
         /*
-        We need to calculate the right vector from our forward and up vectors. This is done with
+        We need to calculate the right std::vector from our forward and up vectors. This is done with
         a cross product.
         */
         axisZ = ma_vec3f_normalize(listenerDirection);                                  /* Normalization required here because we can't trust the caller. */
-        axisX = ma_vec3f_normalize(ma_vec3f_cross(axisZ, pListener->config.worldUp));   /* Normalization required here because the world up vector may not be perpendicular with the forward vector. */
+        axisX = ma_vec3f_normalize(ma_vec3f_cross(axisZ, pListener->config.worldUp));   /* Normalization required here because the world up std::vector may not be perpendicular with the forward std::vector. */
 
         /*
-        The calculation of axisX above can result in a zero-length vector if the listener is
+        The calculation of axisX above can result in a zero-length std::vector if the listener is
         looking straight up on the Y axis. We'll need to fall back to a +X in this case so that
         the calculations below don't fall apart. This is where a quaternion based listener and
         sound orientation would come in handy.

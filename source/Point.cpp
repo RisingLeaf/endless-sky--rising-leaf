@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #else
 #include <algorithm>
 #include <cmath>
-using namespace std;
+
 #endif
 
 
@@ -257,7 +257,7 @@ void Point::Set(double x, double y)
 
 
 
-// Operations that treat this point as a vector from (0, 0):
+// Operations that treat this point as a std::vector from (0, 0):
 double Point::Dot(const Point &point) const
 {
 #ifdef __SSE3__
@@ -387,7 +387,7 @@ Point min(const Point &p, const Point &q)
 #ifdef __SSE2__
 	return Point(_mm_min_pd(p.v, q.v));
 #else
-	return Point(min(p.x, q.x), min(p.y, q.y));
+	return Point(std::min(p.x, q.x), std::min(p.y, q.y));
 #endif
 }
 
@@ -399,14 +399,14 @@ Point max(const Point &p, const Point &q)
 #ifdef __SSE2__
 	return Point(_mm_max_pd(p.v, q.v));
 #else
-	return Point(max(p.x, q.x), max(p.y, q.y));
+	return Point(std::max(p.x, q.x), std::max(p.y, q.y));
 #endif
 }
 
 
 
 #ifdef __SSE2__
-// Private constructor, using a vector.
+// Private constructor, using a std::vector.
 inline Point::Point(const __m128d &v)
 	: v(v)
 {

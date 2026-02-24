@@ -23,10 +23,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cstring>
 #include <utility>
 
-using namespace std;
 
 
-Mp3Supplier::Mp3Supplier(shared_ptr<iostream> data, bool looping) : AsyncAudioSupplier(std::move(data), looping) {}
+
+Mp3Supplier::Mp3Supplier(std::shared_ptr<std::iostream> data, bool looping) : AsyncAudioSupplier(std::move(data), looping) {}
 
 
 void Mp3Supplier::Decode()

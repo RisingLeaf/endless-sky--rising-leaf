@@ -65,14 +65,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <windows.h>
 #endif
 
-using namespace std;
+
 
 void         PrintHelp();
 void         PrintVersion();
 void         GameLoop(PlayerInfo         &player,
                       TaskQueue          &queue,
                       const Conversation &conversation,
-                      const string       &testToRun,
+                      const std::string       &testToRun,
                       bool                debugMode);
 Conversation LoadConversation(const PlayerInfo &player);
 void         PrintTestsTable();
@@ -97,22 +97,22 @@ int main(int argc, char *argv[])
   bool         printTests  = false;
   bool         printData   = false;
   bool         noTestMute  = false;
-  string       testToRunName;
+  std::string       testToRunName;
 
   // Whether the game has encountered errors while loading.
   bool hasErrors = false;
   // Ensure that we log errors to the errors.txt file.
   Logger::SetLogErrorCallback(
-      [&hasErrors](const string &errorMessage)
+      [&hasErrors](const std::string &errorMessage)
       {
-        static const string PARSING_PREFIX = "Parsing: ";
+        static const std::string PARSING_PREFIX = "Parsing: ";
         if(errorMessage.substr(0, PARSING_PREFIX.length()) != PARSING_PREFIX) hasErrors = true;
         Files::LogErrorToFile(errorMessage);
       });
 
   for(const char *const *it = argv + 1; *it; ++it)
   {
-    string arg = *it;
+    std::string arg = *it;
     if(arg == "-h" || arg == "--help")
     {
       PrintHelp();
@@ -181,7 +181,7 @@ int main(int argc, char *argv[])
         while(GameData::GetProgress() < 1.)
         {
           queue.ProcessSyncTasks();
-          this_thread::yield();
+          std::this_thread::yield();
         }
         if(GameData::IsLoaded())
         {
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
       // Reference check the universe, as known to the player. If no player found,
       // then check the default state of the universe.
       if(!player.LoadRecent()) GameData::CheckReferences();
-      cout << "Parse completed with " << (hasErrors ? "at least one" : "no") << " error(s)." << endl;
+      std::cout << "Parse completed with " << (hasErrors ? "at least one" : "no") << " error(s)." << std::endl;
       if(checkAssets) Audio::Quit();
       return hasErrors;
     }
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
   {
     // This is not an error. Simply exit successfully.
   }
-  catch(const exception &error)
+  catch(const std::exception &error)
   {
     Audio::Quit();
     GameWindow::ExitWithError(error.what(), !isTesting);
@@ -261,7 +261,7 @@ int main(int argc, char *argv[])
 void GameLoop(PlayerInfo         &player,
               TaskQueue          &queue,
               const Conversation &conversation,
-              const string       &testToRunName,
+              const std::string       &testToRunName,
               bool                debugMode)
 {
   // gamePanels is used for the main panel where you fly your spaceship.
@@ -320,7 +320,7 @@ void GameLoop(PlayerInfo         &player,
               !gamePanels.IsEmpty() && gamePanels.Top()->IsInterruptible())
       {
         // User pressed the Menu key.
-        menuPanels.Push(shared_ptr<Panel>(new MenuPanel(player, gamePanels)));
+        menuPanels.Push(std::shared_ptr<Panel>(new MenuPanel(player, gamePanels)));
         UI::PlaySound(UI::UISound::NORMAL);
       }
       else if(event.type == SDL_EVENT_QUIT) menuPanels.Quit();
@@ -361,7 +361,7 @@ void GameLoop(PlayerInfo         &player,
     while(!menuPanels.IsDone())
     {
       if(toggleTimeout) --toggleTimeout;
-      chrono::steady_clock::time_point start = chrono::steady_clock::now();
+      std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
 
       ProcessEvents();
 
@@ -396,7 +396,7 @@ void GameLoop(PlayerInfo         &player,
       {
         if(frameRate > 10)
         {
-          frameRate = max(frameRate - 5, 10);
+          frameRate = std::max(frameRate - 5, 10);
           timer.SetFrameRate(frameRate);
         }
       }
@@ -404,7 +404,7 @@ void GameLoop(PlayerInfo         &player,
       {
         if(frameRate < 60)
         {
-          frameRate = min(frameRate + 5, 60);
+          frameRate = std::min(frameRate + 5, 60);
           timer.SetFrameRate(frameRate);
         }
 
@@ -456,7 +456,7 @@ void GameLoop(PlayerInfo         &player,
       timer.Wait();
 
       // If the player ended this frame in-game, count the elapsed time as played time.
-      if(menuPanels.IsEmpty()) player.AddPlayTime(chrono::steady_clock::now() - start);
+      if(menuPanels.IsEmpty()) player.AddPlayTime(std::chrono::steady_clock::now() - start);
     }
   }
   // Game loop when running the game as part of an integration test.
@@ -521,39 +521,39 @@ void GameLoop(PlayerInfo         &player,
 
 void PrintHelp()
 {
-  cerr << endl;
-  cerr << "Command line options:" << endl;
-  cerr << "    -h, --help: print this help message." << endl;
-  cerr << "    -v, --version: print version information." << endl;
-  cerr << "    -t, --talk: read and display a conversation from STDIN." << endl;
-  cerr << "    -r, --resources <path>: load resources from given directory." << endl;
-  cerr << "    -c, --config <path>: save user's files to given directory." << endl;
-  cerr << "    -d, --debug: turn on debugging features (e.g. Caps Lock slows down instead of speeds up)." << endl;
-  cerr << "    -p, --parse-save: load the most recent saved game and inspect it for content errors." << endl;
-  cerr << "    --parse-assets: load all game data, images, and sounds,"
+  std::cerr << std::endl;
+  std::cerr << "Command line options:" << std::endl;
+  std::cerr << "    -h, --help: print this help message." << std::endl;
+  std::cerr << "    -v, --version: print version information." << std::endl;
+  std::cerr << "    -t, --talk: read and display a conversation from STDIN." << std::endl;
+  std::cerr << "    -r, --resources <path>: load resources from given directory." << std::endl;
+  std::cerr << "    -c, --config <path>: save user's files to given directory." << std::endl;
+  std::cerr << "    -d, --debug: turn on debugging features (e.g. Caps Lock slows down instead of speeds up)." << std::endl;
+  std::cerr << "    -p, --parse-save: load the most recent saved game and inspect it for content errors." << std::endl;
+  std::cerr << "    --parse-assets: load all game data, images, and sounds,"
           " and the latest save game, and inspect data for errors."
-       << endl;
-  cerr << "    --tests: print table of available tests, then exit." << endl;
-  cerr << "    --test <name>: run given test from resources directory." << endl;
-  cerr << "    --nomute: don't mute the game while running tests." << endl;
+       << std::endl;
+  std::cerr << "    --tests: print table of available tests, then exit." << std::endl;
+  std::cerr << "    --test <name>: run given test from resources directory." << std::endl;
+  std::cerr << "    --nomute: don't mute the game while running tests." << std::endl;
   PrintData::Help();
-  cerr << endl;
-  cerr << "Report bugs to: <https://github.com/endless-sky/endless-sky/issues>" << endl;
-  cerr << "Home page: <https://endless-sky.github.io>" << endl;
-  cerr << endl;
+  std::cerr << std::endl;
+  std::cerr << "Report bugs to: <https://github.com/endless-sky/endless-sky/issues>" << std::endl;
+  std::cerr << "Home page: <https://endless-sky.github.io>" << std::endl;
+  std::cerr << std::endl;
 }
 
 
 void PrintVersion()
 {
-  cerr << endl;
-  cerr << "Endless Sky ver. 0.10.17-alpha" << endl;
-  cerr << "License GPLv3+: GNU GPL version 3 or later: <https://gnu.org/licenses/gpl.html>" << endl;
-  cerr << "This is free software: you are free to change and redistribute it." << endl;
-  cerr << "There is NO WARRANTY, to the extent permitted by law." << endl;
-  cerr << endl;
-  cerr << GameWindow::SDLVersions() << endl;
-  cerr << endl;
+  std::cerr << std::endl;
+  std::cerr << "Endless Sky ver. 0.10.17-alpha" << std::endl;
+  std::cerr << "License GPLv3+: GNU GPL version 3 or later: <https://gnu.org/licenses/gpl.html>" << std::endl;
+  std::cerr << "This is free software: you are free to change and redistribute it." << std::endl;
+  std::cerr << "There is NO WARRANTY, to the extent permitted by law." << std::endl;
+  std::cerr << std::endl;
+  std::cerr << GameWindow::SDLVersions() << std::endl;
+  std::cerr << std::endl;
 }
 
 
@@ -561,7 +561,7 @@ Conversation LoadConversation(const PlayerInfo &player)
 {
   const ConditionsStore *conditions = &player.Conditions();
   Conversation           conversation;
-  DataFile               file(cin);
+  DataFile               file(std::cin);
   for(const DataNode &node : file)
     if(node.Token(0) == "conversation")
     {
@@ -569,7 +569,7 @@ Conversation LoadConversation(const PlayerInfo &player)
       break;
     }
 
-  map<string, string> subs = {{"<bunks>", "[N]"},
+  std::map<std::string, std::string> subs = {{"<bunks>", "[N]"},
                               {"<cargo>", "[N tons of Commodity]"},
                               {"<commodity>", "[Commodity]"},
                               {"<date>", "[Day Mon Year]"},
@@ -597,8 +597,8 @@ void PrintTestsTable()
 {
   for(auto &it : GameData::Tests())
     if(it.second.GetStatus() != Test::Status::PARTIAL && it.second.GetStatus() != Test::Status::BROKEN)
-      cout << it.second.Name() << '\n';
-  cout.flush();
+      std::cout << it.second.Name() << '\n';
+  std::cout.flush();
 }
 
 

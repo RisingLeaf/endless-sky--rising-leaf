@@ -42,11 +42,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <utility>
 
-using namespace std;
 
 
 
-HailPanel::HailPanel(PlayerInfo &player, const shared_ptr<Ship> &ship, function<void(const Government *)> bribeCallback)
+
+HailPanel::HailPanel(PlayerInfo &player, const std::shared_ptr<Ship> &ship, std::function<void(const Government *)> bribeCallback)
 	: player(player), ship(ship), bribeCallback(std::move(bribeCallback)), facing(ship->Facing())
 {
 	Audio::Pause();
@@ -113,7 +113,7 @@ HailPanel::HailPanel(PlayerInfo &player, const shared_ptr<Ship> &ship, function<
 			SetMessage("Hang on, we'll be there in a minute.");
 		else if(canGiveFuel || canRepair)
 		{
-			string helpOffer = "Looks like you've gotten yourself into a bit of trouble. "
+			std::string helpOffer = "Looks like you've gotten yourself into a bit of trouble. "
 				"Would you like us to ";
 			if(canGiveFuel && canRepair)
 				helpOffer += "patch you up and give you some fuel?";
@@ -233,7 +233,7 @@ void HailPanel::Draw()
 	const Sprite *sprite = ship ? ship->GetSprite() : object->GetSprite();
 
 	// Draw the sprite, rotated, scaled, and swizzled as necessary.
-	float zoom = min(2.f, 400.f / max(sprite->Width(), sprite->Height()));
+	float zoom = std::min(2.f, 400.f / std::max(sprite->Width(), sprite->Height()));
 	Point center(-170., -10.);
 
 	DrawList draw;
@@ -435,7 +435,7 @@ void HailPanel::SetBribe(double scale)
 {
 	// Find the total value of your fleet.
 	int64_t value = 0;
-	for(const shared_ptr<Ship> &it : player.Ships())
+	for(const std::shared_ptr<Ship> &it : player.Ships())
 		value += it->Cost();
 
 	if(value <= 0)
@@ -446,7 +446,7 @@ void HailPanel::SetBribe(double scale)
 
 
 
-void HailPanel::SetMessage(const string &text)
+void HailPanel::SetMessage(const std::string &text)
 {
 	message = text;
 	if(!message.empty())

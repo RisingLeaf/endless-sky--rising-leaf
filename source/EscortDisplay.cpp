@@ -29,7 +29,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <set>
 
-using namespace std;
+
 
 
 
@@ -57,7 +57,7 @@ void EscortDisplay::Draw(const Rectangle &bounds) const
 	const int width = element->GetValue("width");
 
 	// Figure out how much space there is for the icons.
-	int maxColumns = max(1., bounds.Width() / width);
+	int maxColumns = std::max(1., bounds.Width() / width);
 	MergeStacks(maxColumns * bounds.Height());
 	icons.sort();
 	stacks.clear();
@@ -129,13 +129,13 @@ void EscortDisplay::Draw(const Rectangle &bounds) const
 		if(escort.ships.size() > 1)
 		{
 			info.SetCondition("multiple");
-			info.SetString("count", to_string(escort.ships.size()));
+			info.SetString("count", std::to_string(escort.ships.size()));
 		}
 
 		// Draw the status bars.
 		for(int i = 0; i < 5; ++i)
 		{
-			static const string levels[5][2] = {
+			static const std::string levels[5][2] = {
 				{"shields high", "shields low"},
 				{"hull high", "hull low"},
 				{"energy high", "energy low"},
@@ -157,13 +157,13 @@ void EscortDisplay::Draw(const Rectangle &bounds) const
 
 // Check if the given point is a click on an escort icon. If so, return the
 // stack of ships represented by the icon. Otherwise, return an empty stack.
-const vector<const Ship *> &EscortDisplay::Click(const Point &point) const
+const std::vector<const Ship *> &EscortDisplay::Click(const Point &point) const
 {
 	for(unsigned i = 0; i < zones.size(); ++i)
 		if(zones[i].Contains(point))
 			return stacks[i];
 
-	static const vector<const Ship *> empty;
+	static const std::vector<const Ship *> empty;
 	return empty;
 }
 
@@ -180,7 +180,7 @@ EscortDisplay::Icon::Icon(const Ship &ship, bool isHere, bool systemNameKnown, b
 	isSelected(isSelected),
 	cost(ship.Cost()),
 	system((!isHere && ship.GetSystem()) ? (systemNameKnown ? ship.GetSystem()->DisplayName() : "???") : ""),
-	low{ship.Shields(), ship.Hull(), ship.Energy(), min(ship.Heat(), 1.), ship.Fuel()},
+	low{ship.Shields(), ship.Hull(), ship.Energy(), std::min(ship.Heat(), 1.), ship.Fuel()},
 	high(low),
 	ships(1, &ship)
 {
@@ -219,8 +219,8 @@ void EscortDisplay::Icon::Merge(const Icon &other)
 
 	for(unsigned i = 0; i < low.size(); ++i)
 	{
-		low[i] = min(low[i], other.low[i]);
-		high[i] = max(high[i], other.high[i]);
+		low[i] = std::min(low[i], other.low[i]);
+		high[i] = std::max(high[i], other.high[i]);
 	}
 	ships.insert(ships.end(), other.ships.begin(), other.ships.end());
 }
@@ -232,7 +232,7 @@ void EscortDisplay::MergeStacks(int maxHeight) const
 	if(icons.empty())
 		return;
 
-	set<const Sprite *> unstackable;
+	std::set<const Sprite *> unstackable;
 	while(true)
 	{
 		Icon *cheapest = nullptr;
@@ -251,12 +251,12 @@ void EscortDisplay::MergeStacks(int maxHeight) const
 
 		// Merge together each group of escorts that have this icon and are in
 		// the same system and have the same attitude towards the player.
-		map<const bool, map<string, Icon *>> merged;
+		std::map<const bool, std::map<std::string, Icon *>> merged;
 
 		// The "cheapest" element in the list may be removed to merge it with an
 		// earlier ship of the same type, so store a copy of its sprite pointer:
 		const Sprite *sprite = cheapest->sprite;
-		list<Icon>::iterator it = icons.begin();
+		std::list<Icon>::iterator it = icons.begin();
 		while(it != icons.end())
 		{
 			if(it->sprite != sprite)

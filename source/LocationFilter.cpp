@@ -32,10 +32,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <mutex>
 
-using namespace std;
+
 
 namespace {
-	bool SetsIntersect(const set<string> &a, const set<string> &b)
+	bool SetsIntersect(const std::set<std::string> &a, const std::set<std::string> &b)
 	{
 		// Quickest way to find out if two sets contain common elements: iterate
 		// through both of them in sorted order.
@@ -53,7 +53,7 @@ namespace {
 		}
 		return false;
 	}
-	bool SetsIntersect(const set<const Outfit *> &a, const set<const Outfit *> &b)
+	bool SetsIntersect(const std::set<const Outfit *> &a, const std::set<const Outfit *> &b)
 	{
 		auto ait = a.begin();
 		auto bit = b.begin();
@@ -76,8 +76,8 @@ namespace {
 	{
 		// This function should only ever be called from the main thread, but
 		// just to be sure, use mutex protection on the static locals.
-		static mutex distanceMutex;
-		lock_guard<mutex> lock(distanceMutex);
+		static std::mutex distanceMutex;
+		std::lock_guard<std::mutex> lock(distanceMutex);
 
 		static const System *previousCenter = center;
 		static DistanceMap distance(
@@ -110,7 +110,7 @@ namespace {
 
 	// Check that at least one neighbor of the hub system matches, for each of the neighbor filters.
 	// False if at least one filter fails to match, true if all filters find at least one match.
-	bool MatchesNeighborFilters(const list<LocationFilter> &neighborFilters, const System *hub, const System *origin)
+	bool MatchesNeighborFilters(const std::list<LocationFilter> &neighborFilters, const System *hub, const System *origin)
 	{
 		for(const LocationFilter &filter : neighborFilters)
 		{
@@ -129,7 +129,7 @@ namespace {
 
 	// Validity check for this filter's sets. Only one element must be valid.
 	template<class T>
-	bool CheckValidity(const set<const T *> &c)
+	bool CheckValidity(const std::set<const T *> &c)
 	{
 		return c.empty() || any_of(c.begin(), c.end(),
 			[](const T *item) noexcept -> bool
@@ -137,7 +137,7 @@ namespace {
 				return item->IsValid();
 			});
 	}
-	bool CheckValidity(const list<LocationFilter> &l)
+	bool CheckValidity(const std::list<LocationFilter> &l)
 	{
 		return l.empty() || any_of(l.begin(), l.end(),
 			[](const LocationFilter &f) noexcept -> bool
@@ -145,7 +145,7 @@ namespace {
 				return f.IsValid();
 			});
 	}
-	bool CheckValidity(const list<set<const Outfit *>> &l)
+	bool CheckValidity(const std::list<std::set<const Outfit *>> &l)
 	{
 		if(l.empty())
 			return true;
@@ -162,16 +162,16 @@ namespace {
 
 
 // Construct and Load() at the same time.
-LocationFilter::LocationFilter(const DataNode &node, const set<const System *> *visitedSystems,
-	const set<const Planet *> *visitedPlanets)
+LocationFilter::LocationFilter(const DataNode &node, const std::set<const System *> *visitedSystems,
+	const std::set<const Planet *> *visitedPlanets)
 {
 	Load(node, visitedSystems, visitedPlanets);
 }
 
 
 
-void LocationFilter::Load(const DataNode &node, const set<const System *> *visitedSystems,
-	const set<const Planet *> *visitedPlanets)
+void LocationFilter::Load(const DataNode &node, const std::set<const System *> *visitedSystems,
+	const std::set<const Planet *> *visitedPlanets)
 {
 	for(const DataNode &child : node)
 	{
@@ -179,10 +179,10 @@ void LocationFilter::Load(const DataNode &node, const set<const System *> *visit
 		// neighboring system. If the token is alone on a line, it
 		// introduces many lines of this type of filter. Otherwise, this
 		// child is a normal LocationFilter line.
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(key == "not" || key == "neighbor")
 		{
-			list<LocationFilter> &filters = ((key == "not") ? notFilters : neighborFilters);
+			std::list<LocationFilter> &filters = ((key == "not") ? notFilters : neighborFilters);
 			filters.emplace_back();
 			if(child.Size() == 1)
 				filters.back().Load(child, visitedSystems, visitedPlanets);
@@ -249,7 +249,7 @@ void LocationFilter::Save(DataWriter &out) const
 			out.Write("attributes");
 			out.BeginChild();
 			{
-				for(const string &name : it)
+				for(const std::string &name : it)
 					out.Write(name);
 			}
 			out.EndChild();
@@ -269,7 +269,7 @@ void LocationFilter::Save(DataWriter &out) const
 			out.Write("category");
 			out.BeginChild();
 			{
-				for(const string &category : shipCategory)
+				for(const std::string &category : shipCategory)
 					out.Write(category);
 			}
 			out.EndChild();
@@ -322,7 +322,7 @@ bool LocationFilter::IsValid() const
 	if(!shipCategory.empty())
 	{
 		// At least one desired category must be valid.
-		set<string> categoriesSet;
+		std::set<std::string> categoriesSet;
 		for(const auto &category : GameData::GetCategory(CategoryType::SHIP))
 			categoriesSet.insert(category.Name());
 		if(!SetsIntersect(shipCategory, categoriesSet))
@@ -348,7 +348,7 @@ bool LocationFilter::Matches(const Planet *planet, const System *origin) const
 	if(planetIsVisited)
 	{
 		if(!visitedPlanets)
-			throw runtime_error("LocationFilter::Matches called with a null pointer to the player's visited planets!");
+			throw std::runtime_error("LocationFilter::Matches called with a null pointer to the player's visited planets!");
 		if(!visitedPlanets->contains(planet))
 			return false;
 	}
@@ -362,7 +362,7 @@ bool LocationFilter::Matches(const Planet *planet, const System *origin) const
 
 	if(!planets.empty() && !planets.contains(planet))
 		return false;
-	for(const set<string> &attr : attributes)
+	for(const std::set<std::string> &attr : attributes)
 		if(!SetsIntersect(attr, planet->Attributes()))
 			return false;
 
@@ -371,7 +371,7 @@ bool LocationFilter::Matches(const Planet *planet, const System *origin) const
 			return false;
 
 	// If outfits are specified, make sure they can be bought here.
-	for(const set<const Outfit *> &outfitList : outfits)
+	for(const std::set<const Outfit *> &outfitList : outfits)
 		if(!SetsIntersect(outfitList, planet->OutfitterStock()))
 			return false;
 
@@ -407,11 +407,11 @@ bool LocationFilter::Matches(const Ship &ship) const
 	if(!attributes.empty())
 	{
 		// Create a set from the positive-valued attributes of this ship.
-		set<string> shipAttributes;
+		std::set<std::string> shipAttributes;
 		for(const auto &attr : ship.Attributes().Attributes())
 			if(attr.second > 0.)
 				shipAttributes.insert(shipAttributes.end(), attr.first);
-		for(const set<string> &attr : attributes)
+		for(const std::set<std::string> &attr : attributes)
 			if(!SetsIntersect(attr, shipAttributes))
 				return false;
 	}
@@ -419,7 +419,7 @@ bool LocationFilter::Matches(const Ship &ship) const
 	if(!outfits.empty())
 	{
 		// Create a set from all installed and carried outfits.
-		set<const Outfit *> shipOutfits;
+		std::set<const Outfit *> shipOutfits;
 		for(const auto &oit : ship.Outfits())
 			if(oit.second > 0)
 				shipOutfits.insert(shipOutfits.end(), oit.first);
@@ -481,7 +481,7 @@ LocationFilter LocationFilter::SetOrigin(const System *origin) const
 const System *LocationFilter::PickSystem(const System *origin) const
 {
 	// Find a planet that satisfies the filter.
-	vector<const System *> options;
+	std::vector<const System *> options;
 	for(const auto &it : GameData::Systems())
 	{
 		const System &system = it.second;
@@ -500,7 +500,7 @@ const System *LocationFilter::PickSystem(const System *origin) const
 const Planet *LocationFilter::PickPlanet(const System *origin, bool hasClearance, bool requireSpaceport) const
 {
 	// Find a planet that satisfies the filter.
-	vector<const Planet *> options;
+	std::vector<const Planet *> options;
 	for(const auto &it : GameData::Planets())
 	{
 		const Planet &planet = it.second;
@@ -522,17 +522,17 @@ const Planet *LocationFilter::PickPlanet(const System *origin, bool hasClearance
 
 
 // Load one particular line of conditions.
-void LocationFilter::LoadChild(const DataNode &child, const set<const System *> *visitedSystems,
-	const set<const Planet *> *visitedPlanets)
+void LocationFilter::LoadChild(const DataNode &child, const std::set<const System *> *visitedSystems,
+	const std::set<const Planet *> *visitedPlanets)
 {
 	if(!visitedSystems || !visitedPlanets)
-		throw runtime_error("LocationFilters must be provided pointers to the player's visited systems and planets.");
+		throw std::runtime_error("LocationFilters must be provided pointers to the player's visited systems and planets.");
 	this->visitedSystems = visitedSystems;
 	this->visitedPlanets = visitedPlanets;
 
 	bool isNot = (child.Token(0) == "not" || child.Token(0) == "neighbor");
 	int valueIndex = 1 + isNot;
-	const string &key = child.Token(valueIndex - 1);
+	const std::string &key = child.Token(valueIndex - 1);
 	if(key == "not" || key == "neighbor")
 		child.PrintTrace("Error: Skipping unsupported use of 'not' and 'neighbor'."
 			" These keywords must be nested if used together.");
@@ -562,7 +562,7 @@ void LocationFilter::LoadChild(const DataNode &child, const set<const System *> 
 	}
 	else if(key == "attributes")
 	{
-		attributes.push_back(set<string>());
+		attributes.push_back(std::set<std::string>());
 		for(int i = valueIndex; i < child.Size(); ++i)
 			attributes.back().insert(child.Token(i));
 		for(const DataNode &grand : child)
@@ -609,7 +609,7 @@ void LocationFilter::LoadChild(const DataNode &child, const set<const System *> 
 	}
 	else if(key == "outfits" && child.Size() >= 2 + isNot)
 	{
-		outfits.push_back(set<const Outfit *>());
+		outfits.push_back(std::set<const Outfit *>());
 		for(int i = 1 + isNot; i < child.Size(); ++i)
 			outfits.back().insert(GameData::Outfits().Get(child.Token(i)));
 		for(const DataNode &grand : child)
@@ -640,7 +640,7 @@ bool LocationFilter::Matches(const System *system, const System *origin, bool di
 	if(systemIsVisited)
 	{
 		if(!visitedSystems)
-			throw runtime_error("LocationFilter::Matches called with a null pointer to the player's visited systems!");
+			throw std::runtime_error("LocationFilter::Matches called with a null pointer to the player's visited systems!");
 		if(!visitedSystems->contains(system))
 			return false;
 	}
@@ -657,7 +657,7 @@ bool LocationFilter::Matches(const System *system, const System *origin, bool di
 		// required attributes from each set.
 		if(!attributes.empty())
 		{
-			for(const set<string> &attr : attributes)
+			for(const std::set<std::string> &attr : attributes)
 			{
 				bool matches = SetsIntersect(attr, system->Attributes());
 				for(const StellarObject &object : system->Objects())

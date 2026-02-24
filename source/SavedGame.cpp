@@ -24,18 +24,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "image/SpriteSet.h"
 #include "System.h"
 
-using namespace std;
 
 
 
-SavedGame::SavedGame(const filesystem::path &path)
+
+SavedGame::SavedGame(const std::filesystem::path &path)
 {
 	Load(path);
 }
 
 
 
-void SavedGame::Load(const filesystem::path &path)
+void SavedGame::Load(const std::filesystem::path &path)
 {
 	Clear();
 	DataFile file(path);
@@ -47,7 +47,7 @@ void SavedGame::Load(const filesystem::path &path)
 
 	for(const DataNode &node : file)
 	{
-		const string &key = node.Token(0);
+		const std::string &key = node.Token(0);
 		bool hasValue = node.Size() >= 2;
 		if(key == "pilot" && node.Size() >= 3)
 			name = node.Token(1) + " " + node.Token(2);
@@ -84,7 +84,7 @@ void SavedGame::Load(const filesystem::path &path)
 		{
 			for(const DataNode &child : node)
 			{
-				const string &childKey = child.Token(0);
+				const std::string &childKey = child.Token(0);
 				bool childHasValue = child.Size() >= 2;
 				if(childKey == "name" && childHasValue)
 					shipName = child.Token(1);
@@ -97,7 +97,7 @@ void SavedGame::Load(const filesystem::path &path)
 
 
 
-const filesystem::path &SavedGame::Path() const
+const std::filesystem::path &SavedGame::Path() const
 {
 	return path;
 }
@@ -129,42 +129,42 @@ void SavedGame::Clear()
 
 
 
-const string &SavedGame::Name() const
+const std::string &SavedGame::Name() const
 {
 	return name;
 }
 
 
 
-const string &SavedGame::Credits() const
+const std::string &SavedGame::Credits() const
 {
 	return credits;
 }
 
 
 
-const string &SavedGame::GetDate() const
+const std::string &SavedGame::GetDate() const
 {
 	return date;
 }
 
 
 
-const string &SavedGame::GetSystem() const
+const std::string &SavedGame::GetSystem() const
 {
 	return system;
 }
 
 
 
-const string &SavedGame::GetPlanet() const
+const std::string &SavedGame::GetPlanet() const
 {
 	return planet;
 }
 
 
 
-const string &SavedGame::GetPlayTime() const
+const std::string &SavedGame::GetPlayTime() const
 {
 	return playTime;
 }
@@ -178,7 +178,7 @@ const Sprite *SavedGame::ShipSprite() const
 
 
 
-const string &SavedGame::ShipName() const
+const std::string &SavedGame::ShipName() const
 {
 	return shipName;
 }

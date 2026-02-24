@@ -17,11 +17,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Ship.h"
 
-using namespace std;
 
 
 
-ShipEvent::ShipEvent(const Government *actor, const shared_ptr<Ship> &target, int type)
+
+ShipEvent::ShipEvent(const Government *actor, const std::shared_ptr<Ship> &target, int type)
 	: actorGovernment(actor), target(target), type(type)
 {
 	if(target)
@@ -30,7 +30,7 @@ ShipEvent::ShipEvent(const Government *actor, const shared_ptr<Ship> &target, in
 
 
 
-ShipEvent::ShipEvent(const shared_ptr<Ship> &actor, const shared_ptr<Ship> &target, int type)
+ShipEvent::ShipEvent(const std::shared_ptr<Ship> &actor, const std::shared_ptr<Ship> &target, int type)
 	: actor(actor), target(target), type(type)
 {
 	if(actor)
@@ -41,7 +41,7 @@ ShipEvent::ShipEvent(const shared_ptr<Ship> &actor, const shared_ptr<Ship> &targ
 
 
 
-const shared_ptr<Ship> &ShipEvent::Actor() const
+const std::shared_ptr<Ship> &ShipEvent::Actor() const
 {
 	return actor;
 }
@@ -55,7 +55,7 @@ const Government *ShipEvent::ActorGovernment() const
 
 
 
-const shared_ptr<Ship> &ShipEvent::Target() const
+const std::shared_ptr<Ship> &ShipEvent::Target() const
 {
 	return target;
 }

@@ -44,11 +44,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 class System;
 
-using namespace std;
+
 
 namespace {
 	// Label for the description field of the detail pane.
-	const string DESCRIPTION = "description";
+	const std::string DESCRIPTION = "description";
 }
 
 
@@ -59,7 +59,7 @@ ShipyardPanel::ShipyardPanel(PlayerInfo &player, Sale<Ship> stock)
 	for(const auto &it : GameData::Ships())
 		catalog[it.second.Attributes().Category()].push_back(it.first);
 
-	for(pair<const string, vector<string>> &it : catalog)
+	for(std::pair<const std::string, std::vector<std::string>> &it : catalog)
 		sort(it.second.begin(), it.second.end(), BySeriesAndIndex<Ship>());
 }
 
@@ -82,7 +82,7 @@ int ShipyardPanel::TileSize() const
 
 
 
-bool ShipyardPanel::HasItem(const string &name) const
+bool ShipyardPanel::HasItem(const std::string &name) const
 {
 	const Ship *ship = GameData::Ships().Get(name);
 	return shipyard.Has(ship);
@@ -90,7 +90,7 @@ bool ShipyardPanel::HasItem(const string &name) const
 
 
 
-void ShipyardPanel::DrawItem(const string &name, const Point &point)
+void ShipyardPanel::DrawItem(const std::string &name, const Point &point)
 {
 	const Ship *ship = GameData::Ships().Get(name);
 	zones.emplace_back(point, Point(SHIP_SIZE, SHIP_SIZE), ship);
@@ -118,7 +118,7 @@ int ShipyardPanel::DetailWidth() const
 
 double ShipyardPanel::DrawDetails(const Point &center)
 {
-	string selectedItem = "No Ship Selected";
+	std::string selectedItem = "No Ship Selected";
 	const Font &font = FontSet::Get(14);
 
 	double heightOffset = 20.;
@@ -136,7 +136,7 @@ double ShipyardPanel::DrawDetails(const Point &center)
 		const Sprite *shipSprite = selectedShip->GetSprite();
 		if(shipSprite)
 		{
-			const float spriteScale = min(1.f, (INFOBAR_WIDTH - 60.f) / max(shipSprite->Width(), shipSprite->Height()));
+			const float spriteScale = std::min(1.f, (INFOBAR_WIDTH - 60.f) / std::max(shipSprite->Width(), shipSprite->Height()));
 			const Swizzle *swizzle = selectedShip->CustomSwizzle()
 				? selectedShip->CustomSwizzle() : GameData::PlayerGovernment()->GetSwizzle();
 			SpriteShader::Draw(shipSprite, spriteCenter, spriteScale, swizzle);
@@ -164,7 +164,7 @@ double ShipyardPanel::DrawDetails(const Point &center)
 			// Calculate the ClickZone for the description and add it.
 			const Point descriptionDimensions(INFOBAR_WIDTH, descriptionOffset);
 			const Point descriptionCenter(center.X(), startPoint.Y() + descriptionOffset / 2);
-			const ClickZone<string> collapseDescription = ClickZone<string>(
+			const ClickZone<std::string> collapseDescription = ClickZone<std::string>(
 				descriptionCenter, descriptionDimensions, DESCRIPTION);
 			categoryZones.emplace_back(collapseDescription);
 		}
@@ -211,7 +211,7 @@ ShopPanel::BuyResult ShipyardPanel::CanBuy(bool onlyOwned) const
 
 		if(player.Accounts().Credits() >= cost)
 		{
-			string ship = (player.Ships().size() == 1) ? "your current ship" : "some of your ships";
+			std::string ship = (player.Ships().size() == 1) ? "your current ship" : "some of your ships";
 			return "You do not have enough credits to buy this ship. "
 				"If you want to buy it, you must sell " + ship + " first.";
 		}
@@ -238,7 +238,7 @@ void ShipyardPanel::Buy(bool onlyOwned)
 		return;
 
 	modifier = Modifier();
-	string message;
+	std::string message;
 	if(licenseCost)
 		message = "Note: you will need to pay " + Format::CreditString(licenseCost)
 			+ " for the licenses required to operate this ship, in addition to its cost."
@@ -269,7 +269,7 @@ void ShipyardPanel::Sell(bool toStorage)
 
 	int count = playerShips.size();
 	int initialCount = count;
-	string message;
+	std::string message;
 	if(!toStorage)
 		message = "Sell the ";
 	else if(count == 1)
@@ -301,11 +301,11 @@ void ShipyardPanel::Sell(bool toStorage)
 		for(int i = 1; i < MAX_LIST - 1; ++i)
 			message += (*it++)->GivenName() + ",\n";
 
-		message += "and " + to_string(count - (MAX_LIST - 1)) + " other ships";
+		message += "and " + std::to_string(count - (MAX_LIST - 1)) + " other ships";
 	}
 	// To allow calculating the sale price of all the ships in the list,
-	// temporarily copy into a shared_ptr vector:
-	vector<shared_ptr<Ship>> toSell;
+	// temporarily copy into a shared_ptr std::vector:
+	std::vector<std::shared_ptr<Ship>> toSell;
 	for(const auto &it : playerShips)
 		toSell.push_back(it->shared_from_this());
 	int64_t total = player.FleetDepreciation().Value(toSell, day, toStorage);
@@ -330,13 +330,13 @@ bool ShipyardPanel::CanSellMultiple() const
 
 
 
-void ShipyardPanel::BuyShip(const string &name)
+void ShipyardPanel::BuyShip(const std::string &name)
 {
 	int64_t licenseCost = LicenseCost(&selectedShip->Attributes());
 	if(licenseCost)
 	{
 		player.Accounts().AddCredits(-licenseCost);
-		for(const string &licenseName : selectedShip->Attributes().Licenses())
+		for(const std::string &licenseName : selectedShip->Attributes().Licenses())
 			if(!player.HasLicense(licenseName))
 				player.AddLicense(licenseName);
 	}
@@ -345,11 +345,11 @@ void ShipyardPanel::BuyShip(const string &name)
 	{
 		// If no name is given, choose a random name. Otherwise, if buying
 		// multiple ships, append a number to the given ship name.
-		string shipName = name;
+		std::string shipName = name;
 		if(name.empty())
 			shipName = GameData::Phrases().Get("civilian")->Get();
 		else if(modifier > 1)
-			shipName += " " + to_string(i);
+			shipName += " " + std::to_string(i);
 
 		player.BuyShip(selectedShip, shipName);
 	}
@@ -382,7 +382,7 @@ void ShipyardPanel::SellShip(bool toStorage)
 		player.SellShip(ship, toStorage);
 	playerShips.clear();
 	playerShip = nullptr;
-	for(const shared_ptr<Ship> &ship : player.Ships())
+	for(const std::shared_ptr<Ship> &ship : player.Ships())
 		if(ship->GetSystem() == player.GetSystem() && !ship->IsDisabled())
 		{
 			playerShip = ship.get();
@@ -392,7 +392,7 @@ void ShipyardPanel::SellShip(bool toStorage)
 		playerShips.insert(playerShip);
 }
 
-int ShipyardPanel::FindItem(const string &text) const
+int ShipyardPanel::FindItem(const std::string &text) const
 {
 	int bestIndex = 9999;
 	int bestItem = -1;

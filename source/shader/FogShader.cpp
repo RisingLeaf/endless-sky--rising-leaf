@@ -29,7 +29,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "GameWindow.h"
 #include "graphics/graphics_layer.h"
 
-using namespace std;
+
 
 namespace {
 	// Scale of the mask image:
@@ -125,7 +125,7 @@ void FogShader::Draw(const Point &center, double zoom, const PlayerInfo &player)
 		previousRows = rows;
 
 		// This buffer will hold the mask image.
-		auto buffer = vector<unsigned char>(static_cast<size_t>(rows) * columns, LIMIT);
+		auto buffer = std::vector<unsigned char>(static_cast<size_t>(rows) * columns, LIMIT);
 
 		// For each system the player knows about, its "distance" pixel in the
 		// buffer should be set to 0.
@@ -147,19 +147,19 @@ void FogShader::Draw(const Point &center, double zoom, const PlayerInfo &player)
 		// opposite direction. Once these two passes are done, each value is equal
 		for(int y = 1; y < rows; ++y)
 			for(int x = 1; x < columns; ++x)
-				buffer[x + y * columns] = min<int>(buffer[x + y * columns], min(
-					ORTH + min(buffer[(x - 1) + y * columns], buffer[x + (y - 1) * columns]),
-					DIAG + min(buffer[(x - 1) + (y - 1) * columns], buffer[(x + 1) + (y - 1) * columns])));
+				buffer[x + y * columns] = std::min<int>(buffer[x + y * columns], std::min(
+					ORTH + std::min(buffer[(x - 1) + y * columns], buffer[x + (y - 1) * columns]),
+					DIAG + std::min(buffer[(x - 1) + (y - 1) * columns], buffer[(x + 1) + (y - 1) * columns])));
 		for(int y = rows - 2; y >= 0; --y)
 			for(int x = columns - 2; x >= 0; --x)
-				buffer[x + y * columns] = min<int>(buffer[x + y * columns], min(
-					ORTH + min(buffer[(x + 1) + y * columns], buffer[x + (y + 1) * columns]),
-					DIAG + min(buffer[(x - 1) + (y + 1) * columns], buffer[(x + 1) + (y + 1) * columns])));
+				buffer[x + y * columns] = std::min<int>(buffer[x + y * columns], std::min(
+					ORTH + std::min(buffer[(x + 1) + y * columns], buffer[x + (y + 1) * columns]),
+					DIAG + std::min(buffer[(x - 1) + (y + 1) * columns], buffer[(x + 1) + (y + 1) * columns])));
 
 		// Stretch the distance values so there is no shading up to about 200 pixels
 		// away, then it transitions somewhat quickly.
 		for(unsigned char &value : buffer)
-			value = max(0, min(LIMIT, (value - 60) * 4));
+			value = std::max(0, std::min(LIMIT, (value - 60) * 4));
 		const void *data = &buffer.front();
 
 		// Set up the OpenGL texture if it doesn't exist yet.

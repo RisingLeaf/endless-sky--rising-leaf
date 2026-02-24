@@ -54,7 +54,7 @@ public:
 	double Disruption() const noexcept;
 	double Slowing() const noexcept;
 
-	// Hit force applied as a point vector.
+	// Hit force applied as a point std::vector.
 	const Point &HitForce() const noexcept;
 
 

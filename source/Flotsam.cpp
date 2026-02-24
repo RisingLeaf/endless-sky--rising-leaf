@@ -26,7 +26,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cmath>
 
-using namespace std;
+
 
 
 
@@ -35,7 +35,7 @@ const int Flotsam::TONS_PER_BOX = 5;
 
 
 // Constructors for flotsam carrying either a commodity or an outfit.
-Flotsam::Flotsam(const string &commodity, int count, const Government *sourceGovernment)
+Flotsam::Flotsam(const std::string &commodity, int count, const Government *sourceGovernment)
 	: commodity(commodity), count(count), sourceGovernment(sourceGovernment)
 {
 	lifetime = Random::Int(3600) + 7200;
@@ -79,7 +79,7 @@ void Flotsam::Place(const Ship &source, size_t bayIndex)
 
 
 // Place flotsam coming from something other than a ship. Optionally specify
-// the maximum relative velocity, or the exact relative velocity as a vector.
+// the maximum relative velocity, or the exact relative velocity as a std::vector.
 void Flotsam::Place(const Body &source, double maxVelocity)
 {
 	Place(source, Angle::Random().Unit() * (maxVelocity * Random::Real()));
@@ -106,7 +106,7 @@ void Flotsam::Place(const Body &source, const Point &dv)
 
 
 // Move the object one time-step forward.
-void Flotsam::Move(vector<Visual> &visuals)
+void Flotsam::Move(std::vector<Visual> &visuals)
 {
 	position += velocity;
 	velocity *= drag;
@@ -154,7 +154,7 @@ const Government *Flotsam::SourceGovernment() const
 
 
 // This is what the flotsam contains:
-const string &Flotsam::CommodityType() const
+const std::string &Flotsam::CommodityType() const
 {
 	return commodity;
 }

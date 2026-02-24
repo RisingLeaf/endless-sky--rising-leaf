@@ -17,7 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "DataNode.h"
 
-using namespace std;
+
 
 
 
@@ -41,7 +41,7 @@ void DistanceCalculationSettings::Load(const DataNode &node)
 {
 	for(const auto &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		if(key == "no wormholes")
 			wormholeStrategy = WormholeStrategy::NONE;
 		else if(key == "only unrestricted wormholes")

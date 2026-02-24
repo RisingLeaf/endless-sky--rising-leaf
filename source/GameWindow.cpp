@@ -34,7 +34,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <dwmapi.h>
 #endif
 
-using namespace std;
+
 
 namespace
 {
@@ -51,7 +51,7 @@ namespace
   // Logs SDL errors and returns true if found
   bool checkSDLerror()
   {
-    string message = SDL_GetError();
+    std::string message = SDL_GetError();
     if(!message.empty())
     {
       Logger::LogError("(SDL message: \"" + message + "\")");
@@ -71,12 +71,12 @@ SDL_Window *GameWindow::GetWindow() { return mainWindow; }
 GraphicsTypes::GraphicsInstance *GameWindow::GetInstance() { return Instance.get(); }
 
 
-string GameWindow::SDLVersions()
+std::string GameWindow::SDLVersions()
 {
   constexpr int built  = SDL_VERSION;
   const int     linked = SDL_GetVersion();
 
-  return "Compiled against SDL v" + to_string(built) + "\nUsing SDL v" + to_string(linked);
+  return "Compiled against SDL v" + std::to_string(built) + "\nUsing SDL v" + std::to_string(linked);
 }
 
 
@@ -123,7 +123,7 @@ bool GameWindow::Init(bool headless)
     return false;
   }
   if(mode->refresh_rate && mode->refresh_rate < 60)
-    Logger::LogError("Warning: low monitor frame rate detected (" + to_string(mode->refresh_rate) +
+    Logger::LogError("Warning: low monitor frame rate detected (" + std::to_string(mode->refresh_rate) +
                      ")."
                      " The game will run more slowly.");
 
@@ -133,8 +133,8 @@ bool GameWindow::Init(bool headless)
   const int maxWidth  = mode->w;
   const int maxHeight = mode->h;
   if(maxWidth < minWidth || maxHeight < minHeight)
-    Logger::LogError("Monitor resolution is too small! Minimal requirement is " + to_string(minWidth) + 'x' + to_string(minHeight) + ", while your resolution is " + to_string(maxWidth) + 'x' +
-                     to_string(maxHeight) + '.');
+    Logger::LogError("Monitor resolution is too small! Minimal requirement is " + std::to_string(minWidth) + 'x' + std::to_string(minHeight) + ", while your resolution is " + std::to_string(maxWidth) + 'x' +
+                     std::to_string(maxHeight) + '.');
 
   int windowWidth  = maxWidth - 100;
   int windowHeight = maxHeight - 100;
@@ -143,8 +143,8 @@ bool GameWindow::Init(bool headless)
   if(Screen::RawWidth() && Screen::RawHeight())
   {
     // Load the previously saved window dimensions.
-    windowWidth  = min(windowWidth, Screen::RawWidth());
-    windowHeight = min(windowHeight, Screen::RawHeight());
+    windowWidth  = std::min(windowWidth, Screen::RawWidth());
+    windowHeight = std::min(windowHeight, Screen::RawHeight());
   }
 
   // Settings that must be declared before the window creation.
@@ -276,7 +276,7 @@ void GameWindow::ToggleFullscreen()
 }
 
 
-void GameWindow::ExitWithError(const string &message, bool doPopUp)
+void GameWindow::ExitWithError(const std::string &message, bool doPopUp)
 {
   // Print the error message in the terminal and the error file.
   Logger::LogError(message);

@@ -27,7 +27,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
+
 
 namespace {
 	// Construct a list of all outfits for sale in this system and its linked neighbors.
@@ -48,9 +48,9 @@ namespace {
 
 	// Construct a list of varying numbers of outfits that were either specified for
 	// this fleet directly, or are sold in this system or its linked neighbors.
-	vector<const Outfit *> OutfitChoices(const set<const Shop<Outfit> *> &outfitters, const System *hub, int maxSize)
+	std::vector<const Outfit *> OutfitChoices(const std::set<const Shop<Outfit> *> &outfitters, const System *hub, int maxSize)
 	{
-		auto outfits = vector<const Outfit *>();
+		auto outfits = std::vector<const Outfit *>();
 		if(maxSize > 0)
 		{
 			auto choices = Sale<Outfit>();
@@ -95,14 +95,14 @@ namespace {
 	}
 
 	// Add a random commodity from the list to the ship's cargo.
-	void AddRandomCommodity(Ship &ship, int freeSpace, const vector<string> &commodities)
+	void AddRandomCommodity(Ship &ship, int freeSpace, const std::vector<std::string> &commodities)
 	{
 		int index = Random::Int(GameData::Commodities().size());
 		if(!commodities.empty())
 		{
 			// If a list of possible commodities was given, pick one of them at
 			// random and then double-check that it's a valid commodity name.
-			const string &name = commodities[Random::Int(commodities.size())];
+			const std::string &name = commodities[Random::Int(commodities.size())];
 			for(const auto &it : GameData::Commodities())
 				if(it.name == name)
 				{
@@ -117,7 +117,7 @@ namespace {
 	}
 
 	// Add a random outfit from the list to the ship's cargo.
-	void AddRandomOutfit(Ship &ship, int freeSpace, const vector<const Outfit *> &outfits)
+	void AddRandomOutfit(Ship &ship, int freeSpace, const std::vector<const Outfit *> &outfits)
 	{
 		if(outfits.empty())
 			return;
@@ -141,7 +141,7 @@ void FleetCargo::Load(const DataNode &node)
 
 void FleetCargo::LoadSingle(const DataNode &node)
 {
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	if(node.Size() < 2)
 		node.PrintTrace("Error: Expected key to have a value:");
 	else if(key == "cargo")

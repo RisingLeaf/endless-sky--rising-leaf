@@ -46,7 +46,7 @@ public:
 	// Add an object. If "inner" is 0 it is a dot; otherwise, it is a ring. The
 	// given position should be in world units (not shrunk to radar units).
 	void Add(int type, Point position, double outer, double inner = 0.);
-	// Add a pointer, pointing in the direction of the given vector.
+	// Add a pointer, pointing in the direction of the given std::vector.
 	void AddPointer(int type, const Point &position);
 	// Add a viewport vertex indicating the extent of what can be seen on screen.
 	void AddViewportBoundary(const Point &vertex);

@@ -109,7 +109,7 @@ private:
 private:
 	class LineRepeat {
 	public:
-		// Vector to apply to get to the next start point for the next iteration.
+		// std::vector to apply to get to the next start point for the next iteration.
 		Point repeatStart;
 		Point repeatEndOrAnchor;
 

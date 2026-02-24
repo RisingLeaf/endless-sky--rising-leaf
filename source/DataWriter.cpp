@@ -18,18 +18,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "DataNode.h"
 #include "Files.h"
 
-using namespace std;
+
 
 
 
 // This string constant is just used for remembering what string needs to be
 // written before the next token - either the full indentation or this, a space:
-const string DataWriter::space = " ";
+const std::string DataWriter::space = " ";
 
 
 
 // Constructor, specifying the file to save.
-DataWriter::DataWriter(const filesystem::path &path)
+DataWriter::DataWriter(const std::filesystem::path &path)
 	: DataWriter()
 {
 	this->path = path;
@@ -56,7 +56,7 @@ DataWriter::~DataWriter()
 
 
 // Save the contents to a file.
-void DataWriter::SaveToPath(const filesystem::path &filepath)
+void DataWriter::SaveToPath(const std::filesystem::path &filepath)
 {
 	Files::Write(filepath, out.str());
 }
@@ -64,7 +64,7 @@ void DataWriter::SaveToPath(const filesystem::path &filepath)
 
 
 // Get the contents as a string.
-string DataWriter::SaveToString() const
+std::string DataWriter::SaveToString() const
 {
 	return out.str();
 }
@@ -119,7 +119,7 @@ void DataWriter::EndChild()
 
 
 // Write a comment line, at the current indentation level.
-void DataWriter::WriteComment(const string &str)
+void DataWriter::WriteComment(const std::string &str)
 {
 	out << *before << "# " << str;
 	Write();
@@ -130,13 +130,13 @@ void DataWriter::WriteComment(const string &str)
 // Write a token, given as a character string.
 void DataWriter::WriteToken(const char *a)
 {
-	WriteToken(string(a));
+	WriteToken(std::string(a));
 }
 
 
 
 // Write a token, given as a string object.
-void DataWriter::WriteToken(const string &a)
+void DataWriter::WriteToken(const std::string &a)
 {
 	out << *before;
 	out << Quote(a);
@@ -148,7 +148,7 @@ void DataWriter::WriteToken(const string &a)
 
 
 
-string DataWriter::Quote(const string &a)
+std::string DataWriter::Quote(const std::string &a)
 {
 	// Figure out what kind of quotation marks need to be used for this string.
 	bool hasSpace = any_of(a.begin(), a.end(), [](unsigned char c) { return isspace(c); });

@@ -21,7 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <utility>
 
-using namespace std;
+
 
 namespace {
 	constexpr int STRIDE = 4;
@@ -35,16 +35,16 @@ void Swizzle::Load(const DataNode &node)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 
 		// The corresponding row of the matrix for each channel name.
-		static const array<pair<string, int>, 4> channels = {{
+		static const std::array<std::pair<std::string, int>, 4> channels = {{
 			{"red", 0},
 			{"green", 1},
 			{"blue", 2},
 			{"alpha", 3}
 		}};
-		auto channel = find_if(channels.cbegin(), channels.cend(), [key](const auto &kv)
+		auto channel = std::find_if(channels.cbegin(), channels.cend(), [key](const auto &kv)
 		{
 			return kv.first == key;
 		});
@@ -53,7 +53,7 @@ void Swizzle::Load(const DataNode &node)
 			// Fill in the row of the matrix for the channel.
 			// We subtract one to account for the name being in the node.
 			int channelStartIndex = channel->second * STRIDE;
-			int elementNum = min(child.Size() - 1, 4);
+			int elementNum = std::min(child.Size() - 1, 4);
 			for(int i = 0; i < elementNum; i++)
 				matrix[channelStartIndex + i] = child.Value(i + 1);
 		}
@@ -77,7 +77,7 @@ bool Swizzle::IsLoaded() const
 
 
 
-const string &Swizzle::Name() const
+const std::string &Swizzle::Name() const
 {
 	return name;
 }
@@ -108,7 +108,7 @@ const float *Swizzle::MatrixPtr() const
 Color Swizzle::Apply(const Color &to) const
 {
 	const float *colorPtr = to.Get();
-	array<float, 4> newColor = {0, 0, 0, 0};
+	std::array<float, 4> newColor = {0, 0, 0, 0};
 
 	// Manual matrix multiply into newColor.
 	for(int i = 0; i < 4; i++)
@@ -134,7 +134,7 @@ const Swizzle *Swizzle::None()
 
 
 
-Swizzle::Swizzle(bool identity, bool loaded, bool overrideMask, array<float, 16> matrix)
+Swizzle::Swizzle(bool identity, bool loaded, bool overrideMask, std::array<float, 16> matrix)
 	: identity(identity), loaded(loaded), overrideMask(overrideMask), matrix(matrix)
 {
 }

@@ -26,7 +26,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
+
 
 namespace {
 	// Given the probability of losing a lock in five tries, check randomly
@@ -120,7 +120,7 @@ Projectile::Projectile(Point position, const Weapon *weapon)
 
 
 // This returns false if it is time to delete this projectile.
-void Projectile::Move(vector<Visual> &visuals, vector<Projectile> &projectiles)
+void Projectile::Move(std::vector<Visual> &visuals, std::vector<Projectile> &projectiles)
 {
 	if(--lifetime <= 0)
 	{
@@ -186,7 +186,7 @@ void Projectile::Move(vector<Visual> &visuals, vector<Projectile> &projectiles)
 		confusionDirection = Random::Int(2) ? -1 : 1;
 	if(target && homing && hasLock)
 	{
-		// Vector d is the direction we want to turn towards.
+		// std::vector d is the direction we want to turn towards.
 		Point d = target->Position() - position;
 		Point unit = d.Unit();
 		double drag = weapon->Drag();
@@ -203,7 +203,7 @@ void Projectile::Move(vector<Visual> &visuals, vector<Projectile> &projectiles)
 				// velocity normal to the distance between them.
 				Point normal(unit.Y(), -unit.X());
 				double vN = normal.Dot(target->Velocity());
-				double vT = sqrt(max(0., trueVelocity * trueVelocity - vN * vN));
+				double vT = sqrt(std::max(0., trueVelocity * trueVelocity - vN * vN));
 				d = vT * unit + vN * normal;
 			}
 			else
@@ -282,7 +282,7 @@ void Projectile::Move(vector<Visual> &visuals, vector<Projectile> &projectiles)
 
 // This projectile hit something. Create the explosion, if any. This also
 // marks the projectile as needing deletion if it has run out of hits.
-void Projectile::Explode(vector<Visual> &visuals, double intersection, Point hitVelocity)
+void Projectile::Explode(std::vector<Visual> &visuals, double intersection, Point hitVelocity)
 {
 	// Offset the placement position of effects by the projectile's velocity while
 	// also accounting for the intersection clipping. Hit effects should appear from
@@ -368,7 +368,7 @@ const Government *Projectile::TargetGovernment() const
 
 
 
-shared_ptr<Ship> Projectile::TargetPtr() const
+std::shared_ptr<Ship> Projectile::TargetPtr() const
 {
 	return targetShip.lock();
 }
@@ -416,7 +416,7 @@ void Projectile::CheckLock(const Ship &target)
 		{
 			double distance = position.Distance(target.Position());
 			double jammingRange = 500. + sqrt(opticalJamming) * 500.;
-			double rangeFraction = min(1., distance / jammingRange);
+			double rangeFraction = std::min(1., distance / jammingRange);
 			opticalJamming = (1. - rangeFraction) * opticalJamming;
 		}
 		double targetMass = target.Mass();
@@ -437,7 +437,7 @@ void Projectile::CheckLock(const Ship &target)
 		double multiplier = 1.;
 		if(distance <= shortRange)
 			multiplier = 2. - distance / shortRange;
-		double lockChance = weapon->InfraredTracking() * min(1., target.Heat() * multiplier);
+		double lockChance = weapon->InfraredTracking() * std::min(1., target.Heat() * multiplier);
 		double probability = lockChance / (RELOCK_RATE - (lockChance * RELOCK_RATE) + lockChance);
 		hasLock |= Check(probability, base);
 	}
@@ -454,7 +454,7 @@ void Projectile::CheckLock(const Ship &target)
 		{
 			double distance = position.Distance(target.Position());
 			double jammingRange = 500. + sqrt(radarJamming) * 500.;
-			double rangeFraction = min(1., distance / jammingRange);
+			double rangeFraction = std::min(1., distance / jammingRange);
 			radarJamming = (1. - rangeFraction) * radarJamming;
 		}
 		double lockChance = weapon->RadarTracking() / (1. + radarJamming);

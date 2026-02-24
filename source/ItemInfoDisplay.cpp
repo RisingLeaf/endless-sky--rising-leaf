@@ -17,7 +17,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "text/Alignment.h"
 #include "Color.h"
-#include "shader/FillShader.h"
 #include "text/FontSet.h"
 #include "text/Format.h"
 #include "GameData.h"
@@ -26,9 +25,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "text/Table.h"
 
 #include <algorithm>
-#include <cmath>
 
-using namespace std;
 
 
 
@@ -114,16 +111,16 @@ void ItemInfoDisplay::ClearHover()
 
 
 
-void ItemInfoDisplay::UpdateDescription(const string &text, const vector<string> &licenses, bool isShip)
+void ItemInfoDisplay::UpdateDescription(const std::string &text, const std::vector<std::string> &licenses, bool isShip)
 {
 	if(licenses.empty())
 		description.Wrap(text);
 	else
 	{
-		static const string NOUN[2] = {"outfit", "ship"};
-		string fullText = text + "\tTo purchase this " + NOUN[isShip] + " you must have ";
-		fullText += Format::List<vector, string>(licenses,
-			[](const string &name)
+		static const std::string NOUN[2] = {"outfit", "ship"};
+		std::string fullText = text + "\tTo purchase this " + NOUN[isShip] + " you must have ";
+		fullText += Format::List<std::vector, std::string>(licenses,
+			[](const std::string &name)
 			{
 				bool isVoweled = false;
 				for(const char &c : "aeiou")
@@ -146,7 +143,7 @@ void ItemInfoDisplay::UpdateDescription(const string &text, const vector<string>
 
 
 
-Point ItemInfoDisplay::Draw(Point point, const vector<string> &labels, const vector<string> &values) const
+Point ItemInfoDisplay::Draw(Point point, const std::vector<std::string> &labels, const std::vector<std::string> &values) const
 {
 	// Add ten pixels of padding at the top.
 	point.Y() += 10.;
@@ -179,7 +176,7 @@ Point ItemInfoDisplay::Draw(Point point, const vector<string> &labels, const vec
 
 
 
-void ItemInfoDisplay::CheckHover(const Table &table, const string &label) const
+void ItemInfoDisplay::CheckHover(const Table &table, const std::string &label) const
 {
 	if(!hasHover)
 		return;

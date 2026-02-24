@@ -16,25 +16,25 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "ConditionEntry.h"
 
 
-using namespace std;
 
 
 
-ConditionEntry::ConditionEntry(const string &name)
+
+ConditionEntry::ConditionEntry(const std::string &name)
 	: name(name), value(0), providingEntry(nullptr)
 {
 }
 
 
 
-const string &ConditionEntry::Name() const
+const std::string &ConditionEntry::Name() const
 {
 	return name;
 }
 
 
 
-const string ConditionEntry::NameWithoutPrefix() const
+const std::string ConditionEntry::NameWithoutPrefix() const
 {
 	// If we have a provider, and that provider has a main-entry, then we have prefix.
 	if(providingEntry)
@@ -125,7 +125,7 @@ ConditionEntry &ConditionEntry::operator-=(int64_t val)
 
 
 
-void ConditionEntry::ProvidePrefixed(function<int64_t(const ConditionEntry &)> getFunction)
+void ConditionEntry::ProvidePrefixed(std::function<int64_t(const ConditionEntry &)> getFunction)
 {
 	this->getFunction = std::move(getFunction);
 	this->providingEntry = this;
@@ -133,8 +133,8 @@ void ConditionEntry::ProvidePrefixed(function<int64_t(const ConditionEntry &)> g
 
 
 
-void ConditionEntry::ProvidePrefixed(function<int64_t(const ConditionEntry &)> getFunction,
-	function<void(ConditionEntry &, int64_t)> setFunction)
+void ConditionEntry::ProvidePrefixed(std::function<int64_t(const ConditionEntry &)> getFunction,
+	std::function<void(ConditionEntry &, int64_t)> setFunction)
 {
 	ProvidePrefixed(getFunction);
 	this->setFunction = std::move(setFunction);
@@ -142,7 +142,7 @@ void ConditionEntry::ProvidePrefixed(function<int64_t(const ConditionEntry &)> g
 
 
 
-void ConditionEntry::ProvideNamed(function<int64_t(const ConditionEntry &)> getFunction)
+void ConditionEntry::ProvideNamed(std::function<int64_t(const ConditionEntry &)> getFunction)
 {
 	this->getFunction = std::move(getFunction);
 	this->providingEntry = nullptr;
@@ -150,8 +150,8 @@ void ConditionEntry::ProvideNamed(function<int64_t(const ConditionEntry &)> getF
 
 
 
-void ConditionEntry::ProvideNamed(function<int64_t(const ConditionEntry &)> getFunction,
-	function<void(ConditionEntry &, int64_t)> setFunction)
+void ConditionEntry::ProvideNamed(std::function<int64_t(const ConditionEntry &)> getFunction,
+	std::function<void(ConditionEntry &, int64_t)> setFunction)
 {
 	ProvideNamed(getFunction);
 	this->setFunction = std::move(setFunction);

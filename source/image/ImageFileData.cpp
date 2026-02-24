@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cmath>
 
-using namespace std;
+
 
 namespace {
 	// Check if the given character is a valid blending mode.
@@ -34,10 +34,10 @@ namespace {
 
 
 
-ImageFileData::ImageFileData(const filesystem::path &path, const filesystem::path &source)
+ImageFileData::ImageFileData(const std::filesystem::path &path, const std::filesystem::path &source)
 	: path(path), extension(Format::LowerCase(path.extension().string()))
 {
-	string name = (path.lexically_relative(source).parent_path() / path.stem()).generic_string();
+	std::string name = (path.lexically_relative(source).parent_path() / path.stem()).generic_string();
 	if(name.ends_with("@2x"))
 	{
 		is2x = true;

@@ -30,7 +30,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "shader/SpriteShader.h"
 #include "Weapon.h"
 
-using namespace std;
+
 
 
 
@@ -69,7 +69,7 @@ void AmmoDisplay::Update(const Ship &flagship)
 				* flagship.Attributes().Get("fuel capacity");
 			double fuelAmmoCount = remaining / secWeapon->FiringFuel();
 			// Decide what remaining ammunition value to display.
-			ammoCount = (ammoCount == -1. ? fuelAmmoCount : min(ammoCount, fuelAmmoCount));
+			ammoCount = (ammoCount == -1. ? fuelAmmoCount : std::min(ammoCount, fuelAmmoCount));
 		}
 		ammo[outfit] = ammoCount;
 	}
@@ -118,7 +118,7 @@ void AmmoDisplay::Draw(const Rectangle &ammoBox, const Point &iconDim) const
 		if(it.second < 0)
 			continue;
 
-		string amount = Format::AmmoCount(it.second);
+		std::string amount = Format::AmmoCount(it.second);
 		Point textPos = pos + textOff + Point(-font.Width(amount), 0.);
 		font.Draw(amount, textPos, isSelected ? selectedColor : unselectedColor);
 	}

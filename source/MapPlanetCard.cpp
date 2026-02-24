@@ -34,7 +34,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "System.h"
 #include "text/WrappedText.h"
 
-using namespace std;
+
 
 namespace {
 	bool hasGovernments = false;
@@ -51,7 +51,7 @@ MapPlanetCard::MapPlanetCard(const StellarObject &object, unsigned number, bool 
 	hasShipyard = planet->HasShipyard();
 	hasOutfitter = planet->HasOutfitter();
 	governmentName = planet->GetGovernment()->DisplayName();
-	string systemGovernmentName = planet->GetSystem()->GetGovernment()->DisplayName();
+	std::string systemGovernmentName = planet->GetSystem()->GetGovernment()->DisplayName();
 	if(governmentName != "Uninhabited" && governmentName != systemGovernmentName)
 		hasGovernments = true;
 
@@ -80,7 +80,7 @@ MapPlanetCard::MapPlanetCard(const StellarObject &object, unsigned number, bool 
 
 	const Interface *planetCardInterface = GameData::Interfaces().Get("map planet card");
 	const float planetIconMaxSize = static_cast<float>(planetCardInterface->GetValue("planet icon max size"));
-	spriteScale = min(.5f, min(planetIconMaxSize / sprite->Width(), planetIconMaxSize / sprite->Height()));
+	spriteScale = std::min(.5f, std::min(planetIconMaxSize / sprite->Width(), planetIconMaxSize / sprite->Height()));
 }
 
 
@@ -246,7 +246,7 @@ bool MapPlanetCard::IsSelected() const
 
 double MapPlanetCard::AvailableSpace() const
 {
-	return min(AvailableBottomSpace(), AvailableTopSpace());
+	return std::min(AvailableBottomSpace(), AvailableTopSpace());
 }
 
 
@@ -296,7 +296,7 @@ void MapPlanetCard::Highlight(double availableSpace) const
 double MapPlanetCard::AvailableTopSpace() const
 {
 	const double height = Height();
-	return min(height, max(0., (number + 1) * height - parent->GetScroll()));
+	return std::min(height, std::max(0., (number + 1) * height - parent->GetScroll()));
 }
 
 
@@ -306,6 +306,6 @@ double MapPlanetCard::AvailableBottomSpace() const
 	const Interface *mapInterface = GameData::Interfaces().Get("map detail panel");
 	double maxPlanetPanelHeight = mapInterface->GetValue("max planet panel height");
 
-	return min(Height(), max(0., Screen::Top() +
-		min(MapDetailPanel::PlanetPanelHeight(), maxPlanetPanelHeight) - yCoordinate));
+	return std::min(Height(), std::max(0., Screen::Top() +
+		std::min(MapDetailPanel::PlanetPanelHeight(), maxPlanetPanelHeight) - yCoordinate));
 }

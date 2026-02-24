@@ -23,11 +23,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../Mission.h"
 #include "../UniverseObjects.h"
 
-using namespace std;
 
 
 
-const string &TestData::Name() const
+
+const std::string &TestData::Name() const
 {
 	return dataSetName;
 }
@@ -35,7 +35,7 @@ const string &TestData::Name() const
 
 
 // Loader to load the generic test-data entry
-void TestData::Load(const DataNode &node, const filesystem::path &sourceDataFilePath)
+void TestData::Load(const DataNode &node, const std::filesystem::path &sourceDataFilePath)
 {
 	sourceDataFile = sourceDataFilePath;
 	if(node.Size() < 2)
@@ -68,7 +68,7 @@ void TestData::Load(const DataNode &node, const filesystem::path &sourceDataFile
 
 // Inject the test-data to the proper location.
 bool TestData::Inject(const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets) const
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets) const
 {
 	// Check if we have the required data to inject.
 	if(dataSetName.empty() || sourceDataFile.empty())
@@ -125,7 +125,7 @@ bool TestData::InjectSavegame() const
 
 
 bool TestData::InjectMission(const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets) const
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets) const
 {
 	const DataFile sourceData(sourceDataFile);
 	// Get the contents node in the test data.

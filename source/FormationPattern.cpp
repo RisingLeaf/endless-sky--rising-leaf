@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cmath>
 
-using namespace std;
+
 
 
 FormationPattern::PositionIterator::PositionIterator(const FormationPattern &pattern,
@@ -151,13 +151,13 @@ void FormationPattern::Load(const DataNode &node)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "flippable" && hasValue)
 		{
 			for(int i = 1; i < child.Size(); ++i)
 			{
-				const string &value = child.Token(i);
+				const std::string &value = child.Token(i);
 				if(value == "x")
 					flippableX = true;
 				else if(value == "y")
@@ -197,7 +197,7 @@ void FormationPattern::Load(const DataNode &node)
 
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
+				const std::string &grandKey = grand.Token(0);
 				bool grandHasValue = grand.Size() >= 2;
 				if(grandKey == "start" && grand.Size() >= 3)
 					line.start.Set(grand.Value(1), grand.Value(2));
@@ -226,7 +226,7 @@ void FormationPattern::Load(const DataNode &node)
 					LineRepeat &repeat = line.repeats.emplace_back();
 					for(const DataNode &great : grand)
 					{
-						const string &greatKey = great.Token(0);
+						const std::string &greatKey = great.Token(0);
 						bool greatHasValue = great.Size() >= 2;
 						if(greatKey == "start" && great.Size() >= 3)
 							repeat.repeatStart.Set(great.Value(1), great.Value(2));
@@ -253,14 +253,14 @@ void FormationPattern::Load(const DataNode &node)
 
 
 
-const string &FormationPattern::TrueName() const
+const std::string &FormationPattern::TrueName() const
 {
 	return trueName;
 }
 
 
 
-void FormationPattern::SetTrueName(const string &name)
+void FormationPattern::SetTrueName(const std::string &name)
 {
 	this->trueName = name;
 }

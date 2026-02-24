@@ -22,7 +22,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <iterator>
 
-using namespace std;
+
 
 
 
@@ -80,7 +80,7 @@ double ShipJumpNavigation::JumpFuel(const System *destination) const
 
 	// If no destination is given, return the maximum fuel per jump.
 	if(!destination)
-		return max(JumpDriveFuel(), HyperdriveFuel());
+		return std::max(JumpDriveFuel(), HyperdriveFuel());
 
 	return GetCheapestJumpType(currentSystem, destination).second;
 }
@@ -118,20 +118,20 @@ double ShipJumpNavigation::JumpDriveFuel(double distance) const
 
 // Get the cheapest jump method and its cost for a jump to the destination system.
 // If no jump method is possible, returns JumpType::None with a jump cost of 0.
-pair<JumpType, double> ShipJumpNavigation::GetCheapestJumpType(const System *destination) const
+std::pair<JumpType, double> ShipJumpNavigation::GetCheapestJumpType(const System *destination) const
 {
 	if(!currentSystem || !destination)
-		return make_pair(JumpType::NONE, 0.);
+		return std::make_pair(JumpType::NONE, 0.);
 	return GetCheapestJumpType(currentSystem, destination);
 }
 
 
 
 // Get the cheapest jump method between the two given systems.
-pair<JumpType, double> ShipJumpNavigation::GetCheapestJumpType(const System *from, const System *to) const
+std::pair<JumpType, double> ShipJumpNavigation::GetCheapestJumpType(const System *from, const System *to) const
 {
 	if(!from || !to)
-		return make_pair(JumpType::NONE, 0.);
+		return std::make_pair(JumpType::NONE, 0.);
 	bool linked = from->Links().contains(to);
 	double hyperFuelNeeded = HyperdriveFuel();
 	// If these two systems are linked, or if the system we're jumping from has its own jump range,
@@ -141,11 +141,11 @@ pair<JumpType, double> ShipJumpNavigation::GetCheapestJumpType(const System *fro
 			? 0. : distance);
 	bool canJump = jumpFuelNeeded && (linked || !from->JumpRange() || from->JumpRange() >= distance);
 	if(linked && hasHyperdrive && (!canJump || hyperFuelNeeded <= jumpFuelNeeded))
-		return make_pair(JumpType::HYPERDRIVE, hyperFuelNeeded);
+		return std::make_pair(JumpType::HYPERDRIVE, hyperFuelNeeded);
 	else if(hasJumpDrive && canJump)
-		return make_pair(JumpType::JUMP_DRIVE, jumpFuelNeeded);
+		return std::make_pair(JumpType::JUMP_DRIVE, jumpFuelNeeded);
 	else
-		return make_pair(JumpType::NONE, 0.);
+		return std::make_pair(JumpType::NONE, 0.);
 }
 
 
@@ -212,7 +212,7 @@ void ShipJumpNavigation::ParseOutfit(const Outfit &outfit)
 		// Prevent a drive with a high jump base mass on a ship with a low mass from pushing the total
 		// cost too low. Put a floor at 1, as a floor of 0 would be assumed later on to mean you can't jump.
 		// If and when explicit 0s are allowed for fuel cost, this floor can become 0.
-		return max(1., baseCost + massCost);
+		return std::max(1., baseCost + massCost);
 	};
 
 	if(outfit.Get("hyperdrive") && (!hasScramDrive || outfit.Get("scram drive")))

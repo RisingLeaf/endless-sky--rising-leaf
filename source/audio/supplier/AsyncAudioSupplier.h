@@ -41,7 +41,7 @@ protected:
 	virtual void Decode() = 0;
 
 	void AwaitBufferSpace();
-	/// Adds data to the output buffer, then clears the given sample vector.
+	/// Adds data to the output buffer, then clears the given sample std::vector.
 	/// If the supplier is done, pads the output buffer to a full chunk with silence.
 	void AddBufferData(std::vector<sample_t> &samples);
 	/// Pads the buffer to a full output chunk with silence.

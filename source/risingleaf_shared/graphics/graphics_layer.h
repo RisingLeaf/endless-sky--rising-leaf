@@ -148,19 +148,6 @@ namespace graphics_layer
 
   public:
     TextureHandle() = default;
-    explicit TextureHandle(const GraphicsTypes::GraphicsInstance *instance,
-                           std::string_view                       path,
-                           bool                                   bpd          = false,
-                           GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::REPEAT,
-                           GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
-    explicit TextureHandle(const GraphicsTypes::GraphicsInstance *instance,
-                           const std::vector<std::string_view>   &paths,
-                           GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::REPEAT,
-                           GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
-    explicit TextureHandle(const GraphicsTypes::GraphicsInstance *instance,
-                           const std::vector<std::string>        &paths,
-                           GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::REPEAT,
-                           GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
     TextureHandle(const GraphicsTypes::GraphicsInstance *instance,
                   const void                            *data,
                   int                                    width,

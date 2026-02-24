@@ -20,7 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <shared_mutex>
 #include <string>
 
-using namespace std;
+
 
 
 
@@ -28,25 +28,25 @@ using namespace std;
 // given string but has static storage duration.
 const char *StringInterner::Intern(const char *key)
 {
-	static set<string> interned;
-	static shared_mutex m;
+	static std::set<std::string> interned;
+	static std::shared_mutex m;
 
 	// Search using a shared lock, allows parallel access by multiple threads.
 	{
-		shared_lock readLock(m);
+		std::shared_lock readLock(m);
 		auto it = interned.find(key);
 		if(it != interned.end())
 			return it->c_str();
 	}
 
 	// Insert using an exclusive lock, if needed. Blocks all parallel access.
-	unique_lock writeLock(m);
+	std::unique_lock writeLock(m);
 	return interned.insert(key).first->c_str();
 }
 
 
 
-const char *StringInterner::Intern(const string key)
+const char *StringInterner::Intern(const std::string key)
 {
 	return Intern(key.c_str());
 }

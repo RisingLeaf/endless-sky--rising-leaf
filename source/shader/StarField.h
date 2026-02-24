@@ -20,6 +20,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <vector>
 
+#include "graphics/graphics_layer.h"
+
 class Body;
 class Interface;
 class Sprite;
@@ -71,17 +73,6 @@ private:
 	mutable double transparency = 0.;
 	std::vector<Body> haze[2];
 
-	const Shader *shader;
-	// GLuint vao;
-	// GLuint vbo;
-	//
-	// GLuint offsetI;
-	// GLuint sizeI;
-	// GLuint cornerI;
-	//
-	// GLuint scaleI;
-	// GLuint rotateI;
-	// GLuint elongationI;
-	// GLuint translateI;
-	// GLuint brightnessI;
+	Shader shader = Shader("starfield shader");
+  graphics_layer::ObjectHandle vertices;
 };

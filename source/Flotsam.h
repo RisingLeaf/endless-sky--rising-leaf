@@ -52,7 +52,7 @@ public:
 	// instead of the center of the ship.
 	void Place(const Ship &source, size_t bayIndex);
 	// Place flotsam coming from something other than a ship. Optionally specify
-	// the maximum relative velocity, or the exact relative velocity as a vector.
+	// the maximum relative velocity, or the exact relative velocity as a std::vector.
 	void Place(const Body &source, double maxVelocity = .5);
 	void Place(const Body &source, const Point &dv);
 

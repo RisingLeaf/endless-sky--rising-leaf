@@ -36,7 +36,7 @@ public:
 	// Erase the given element.
 	void Erase(const char *key);
 
-	// Expose certain functions from the underlying vector:
+	// Expose certain functions from the underlying std::vector:
 	using std::vector<std::pair<const char *, double>>::empty;
 	using std::vector<std::pair<const char *, double>>::begin;
 	using std::vector<std::pair<const char *, double>>::end;

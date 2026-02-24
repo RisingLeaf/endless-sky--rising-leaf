@@ -23,7 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <cmath>
 
-using namespace std;
+
 
 
 
@@ -157,7 +157,7 @@ void DrawList::Push(const Body &body, Point pos, Point blur, double cloak, const
 	item.transform[2] = -uh.X();
 	item.transform[3] = -uh.Y();
 
-	// Calculate the blur vector, in texture coordinates.
+	// Calculate the blur std::vector, in texture coordinates.
 	blur *= zoom;
 	item.blur[0] = unit.Cross(blur) / (width * 4.);
 	item.blur[1] = -unit.Dot(blur) / (height * 4.);

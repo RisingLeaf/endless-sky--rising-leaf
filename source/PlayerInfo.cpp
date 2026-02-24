@@ -58,30 +58,30 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <sstream>
 #include <stdexcept>
 
-using namespace std;
+
 
 namespace {
 	// Move the flagship to the start of your list of ships. It does not make sense
 	// that the flagship would change if you are reunited with a different ship that
 	// was higher up the list.
-	void MoveFlagshipBegin(vector<shared_ptr<Ship>> &ships, const shared_ptr<Ship> &flagship)
+	void MoveFlagshipBegin(std::vector<std::shared_ptr<Ship>> &ships, const std::shared_ptr<Ship> &flagship)
 	{
 		if(!flagship)
 			return;
 
 		// Find the current location of the flagship.
-		auto it = find(ships.begin(), ships.end(), flagship);
+		auto it = std::find(ships.begin(), ships.end(), flagship);
 		if(it != ships.begin() && it != ships.end())
 		{
 			// Move all ships before the flagship one position backwards (which overwrites
 			// the flagship at its position).
-			move_backward(ships.begin(), it, next(it));
+			std::move_backward(ships.begin(), it, std::next(it));
 			// Re-add the flagship at the beginning of the list.
 			ships[0] = flagship;
 		}
 	}
 
-	string EntryToString(SystemEntry entryType)
+	std::string EntryToString(SystemEntry entryType)
 	{
 		switch(entryType)
 		{
@@ -97,7 +97,7 @@ namespace {
 		}
 	}
 
-	SystemEntry StringToEntry(const string &entry)
+	SystemEntry StringToEntry(const std::string &entry)
 	{
 		if(entry == "hyperdrive")
 			return SystemEntry::HYPERDRIVE;
@@ -109,7 +109,7 @@ namespace {
 	}
 
 	// Sort the given list of missions in the order they should be offered.
-	void SortMissions(list<Mission> &missions, bool hasPriorityMissions, unsigned nonBlockingMissions)
+	void SortMissions(std::list<Mission> &missions, bool hasPriorityMissions, unsigned nonBlockingMissions)
 	{
 		if(missions.empty())
 			return;
@@ -219,7 +219,7 @@ void PlayerInfo::New(const StartConditions &start)
 
 
 // Load player information from a saved game file.
-void PlayerInfo::Load(const filesystem::path &path)
+void PlayerInfo::Load(const std::filesystem::path &path)
 {
 	// Make sure any previously loaded data is cleared.
 	Clear();
@@ -228,15 +228,15 @@ void PlayerInfo::Load(const filesystem::path &path)
 	// Missions and ships are referred to by string UUIDs.
 	// Any mission cargo or passengers that were in the player's system will not be recorded here,
 	// as that can be safely redistributed from the player's overall CargoHold to any ships in their system.
-	map<string, map<string, int>> missionCargoToDistribute;
-	map<string, map<string, int>> missionPassengersToDistribute;
+	std::map<std::string, std::map<std::string, int>> missionCargoToDistribute;
+	std::map<std::string, std::map<std::string, int>> missionPassengersToDistribute;
 
 	filePath = path.string();
 	// Strip anything after the "~" from snapshots, so that the file we save
 	// will be the auto-save, not the snapshot.
 	size_t pos = filePath.find('~');
 	size_t namePos = filePath.length() - Files::Name(filePath).length();
-	if(pos != string::npos && pos > namePos)
+	if(pos != std::string::npos && pos > namePos)
 		filePath = filePath.substr(0, pos) + ".txt";
 
 	// The player may have bribed their current planet in the last session. Ensure
@@ -249,7 +249,7 @@ void PlayerInfo::Load(const filesystem::path &path)
 	DataFile file(path);
 	for(const DataNode &child : file)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		// Basic player information and persistent UI settings:
 		if(key == "pilot" && child.Size() >= 3)
@@ -303,7 +303,7 @@ void PlayerInfo::Load(const filesystem::path &path)
 		else if(key == "ship")
 		{
 			// Ships owned by the player have various special characteristics:
-			ships.push_back(make_shared<Ship>(child, &conditions));
+			ships.push_back(std::make_shared<Ship>(child, &conditions));
 			ships.back()->SetIsSpecial();
 			ships.back()->SetIsYours();
 			// Defer finalizing this ship until we have processed all changes to game state.
@@ -360,7 +360,7 @@ void PlayerInfo::Load(const filesystem::path &path)
 		}
 		else if((key == "mission cargo" || key == "mission passengers") && child.HasChildren())
 		{
-			map<string, map<string, int>> &toDistribute = (key == "mission cargo")
+			std::map<std::string, std::map<std::string, int>> &toDistribute = (key == "mission cargo")
 					? missionCargoToDistribute : missionPassengersToDistribute;
 			for(const DataNode &grand : child)
 				if(grand.Token(0) == "player ships" && grand.HasChildren())
@@ -453,8 +453,8 @@ void PlayerInfo::Load(const filesystem::path &path)
 	// cargo and passengers.
 	UpdateCargoCapacities();
 
-	auto DistributeMissionCargo = [](const map<string, map<string, int>> &toDistribute, const list<Mission> &missions,
-			vector<shared_ptr<Ship>> &ships, CargoHold &cargo, bool passengers) -> void
+	auto DistributeMissionCargo = [](const std::map<std::string, std::map<std::string, int>> &toDistribute, const std::list<Mission> &missions,
+			std::vector<std::shared_ptr<Ship>> &ships, CargoHold &cargo, bool passengers) -> void
 	{
 		for(const auto &it : toDistribute)
 		{
@@ -466,7 +466,7 @@ void PlayerInfo::Load(const filesystem::path &path)
 				for(const auto &shipCargo : it.second)
 				{
 					auto shipIt = find_if(ships.begin(), ships.end(),
-							[&shipCargo](const shared_ptr<Ship> &ship) { return ship->UUID().ToString() == shipCargo.first; });
+							[&shipCargo](const std::shared_ptr<Ship> &ship) { return ship->UUID().ToString() == shipCargo.first; });
 					if(shipIt != ships.end())
 					{
 						Ship *destination = shipIt->get();
@@ -494,7 +494,7 @@ void PlayerInfo::Load(const filesystem::path &path)
 // Load the most recently saved player (if any). Returns false when no save was loaded.
 bool PlayerInfo::LoadRecent()
 {
-	string recentPath = Files::Read(Files::Config() / "recent.txt");
+	std::string recentPath = Files::Read(Files::Config() / "recent.txt");
 	// Trim trailing whitespace (including newlines) from the path.
 	while(!recentPath.empty() && recentPath.back() <= ' ')
 		recentPath.pop_back();
@@ -527,14 +527,14 @@ void PlayerInfo::Save() const
 		SavedGame saved(filePath);
 		if(saved.GetDate() != date.ToString())
 		{
-			string root = filePath.substr(0, filePath.length() - 4);
+			std::string root = filePath.substr(0, filePath.length() - 4);
 			const int previousCount = Preferences::GetPreviousSaveCount();
-			const string rootPrevious = root + "~~previous-";
+			const std::string rootPrevious = root + "~~previous-";
 			for(int i = previousCount - 1; i > 0; --i)
 			{
-				const string toMove = rootPrevious + to_string(i) + ".txt";
+				const std::string toMove = rootPrevious + std::to_string(i) + ".txt";
 				if(Files::Exists(toMove))
-					Files::Move(toMove, rootPrevious + to_string(i + 1) + ".txt");
+					Files::Move(toMove, rootPrevious + std::to_string(i + 1) + ".txt");
 			}
 			if(Files::Exists(filePath))
 				Files::Move(filePath, rootPrevious + "1.txt");
@@ -555,9 +555,9 @@ void PlayerInfo::Save() const
 // Get the base file name for the player, without the ".txt" extension. This
 // will usually be "<first> <last>", but may be different if multiple players
 // exist with the same name, in which case a number is appended.
-string PlayerInfo::Identifier() const
+std::string PlayerInfo::Identifier() const
 {
-	string name = Files::Name(filePath);
+	std::string name = Files::Name(filePath);
 	return (name.length() < 4) ? "" : name.substr(0, name.length() - 4);
 }
 
@@ -568,7 +568,7 @@ void PlayerInfo::StartTransaction()
 	assert(!transactionSnapshot && "Starting PlayerInfo transaction while one is already active");
 
 	// Create in-memory DataWriter and save to it.
-	transactionSnapshot = make_unique<DataWriter>();
+	transactionSnapshot = std::make_unique<DataWriter>();
 	Save(*transactionSnapshot);
 }
 
@@ -583,12 +583,12 @@ void PlayerInfo::FinishTransaction()
 
 
 // Apply the given set of changes to the game data.
-void PlayerInfo::AddChanges(list<DataNode> &changes, bool instantChanges)
+void PlayerInfo::AddChanges(std::list<DataNode> &changes, bool instantChanges)
 {
 	bool changedSystems = false;
 	for(const DataNode &change : changes)
 	{
-		const string &key = change.Token(0);
+		const std::string &key = change.Token(0);
 		changedSystems |= (key == "system");
 		changedSystems |= (key == "link");
 		changedSystems |= (key == "unlink");
@@ -626,7 +626,7 @@ void PlayerInfo::AddEvent(GameEvent event, const Date &date)
 	if(date <= this->date)
 	{
 		GameEvent eventCopy = event;
-		list<DataNode> eventChanges = {eventCopy.Apply(*this)};
+		std::list<DataNode> eventChanges = {eventCopy.Apply(*this)};
 		if(!eventChanges.empty())
 			AddChanges(eventChanges, true);
 	}
@@ -640,7 +640,7 @@ void PlayerInfo::AddEvent(GameEvent event, const Date &date)
 
 
 // Mark this player as dead, and handle the changes to the player's fleet.
-void PlayerInfo::Die(int response, const shared_ptr<Ship> &capturer)
+void PlayerInfo::Die(int response, const std::shared_ptr<Ship> &capturer)
 {
 	isDead = true;
 	// The player loses access to all their ships if they die on a planet.
@@ -679,7 +679,7 @@ void PlayerInfo::Die(int response, const shared_ptr<Ship> &capturer)
 			// TODO: perhaps allow missions to set the new government.
 			flagship->SetGovernment(GameData::Governments().Get("Independent"));
 			// Your escorts do not follow it, nor does it wait for them.
-			for(const shared_ptr<Ship> &ship : ships)
+			for(const std::shared_ptr<Ship> &ship : ships)
 				ship->SetParent(nullptr);
 		}
 		// Remove the flagship from the player's ship list.
@@ -700,7 +700,7 @@ bool PlayerInfo::IsDead() const
 
 
 // Get the player's first name.
-const string &PlayerInfo::FirstName() const
+const std::string &PlayerInfo::FirstName() const
 {
 	return firstName;
 }
@@ -708,7 +708,7 @@ const string &PlayerInfo::FirstName() const
 
 
 // Get the player's last name.
-const string &PlayerInfo::LastName() const
+const std::string &PlayerInfo::LastName() const
 {
 	return lastName;
 }
@@ -716,12 +716,12 @@ const string &PlayerInfo::LastName() const
 
 
 // Set the player's name. This will also set the saved game file name.
-void PlayerInfo::SetName(const string &first, const string &last)
+void PlayerInfo::SetName(const std::string &first, const std::string &last)
 {
 	firstName = first;
 	lastName = last;
 
-	string fileName = first + " " + last;
+	std::string fileName = first + " " + last;
 
 	// If there are multiple pilots with the same name, append a number to the
 	// pilot name to generate a unique file name.
@@ -729,9 +729,9 @@ void PlayerInfo::SetName(const string &first, const string &last)
 	int index = 0;
 	while(true)
 	{
-		string path = filePath;
+		std::string path = filePath;
 		if(index++)
-			path += " " + to_string(index);
+			path += " " + std::to_string(index);
 		path += ".txt";
 
 		if(!Files::Exists(path))
@@ -763,7 +763,7 @@ void PlayerInfo::AdvanceDate(int amount)
 
 		// Check if any special events should happen today.
 		auto it = gameEvents.begin();
-		list<DataNode> eventChanges;
+		std::list<DataNode> eventChanges;
 		while(it != gameEvents.end() && date >= it->GetDate())
 		{
 			GameEvent event = *it;
@@ -787,7 +787,7 @@ void PlayerInfo::AdvanceDate(int amount)
 		DoAccounting();
 	}
 	// Reset the reload counters for all your ships.
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		ship->GetArmament().ReloadAll();
 
 	// Recalculate how many days you have left for deadline missions.
@@ -868,7 +868,7 @@ const StellarObject *PlayerInfo::GetStellarObject() const
 	if(!system || !planet)
 		return nullptr;
 
-	double closestDistance = numeric_limits<double>::infinity();
+	double closestDistance = std::numeric_limits<double>::infinity();
 	const StellarObject *closestObject = nullptr;
 	for(const StellarObject &object : system->Objects())
 		if(object.GetPlanet() == planet)
@@ -922,7 +922,7 @@ int64_t PlayerInfo::Salaries() const
 		crew = flagship->Crew() - flagship->RequiredCrew();
 
 	// A ship that is "parked" remains on a planet and requires no salaries.
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(!ship->IsParked() && !ship->IsDestroyed())
 			crew += ship->RequiredCrew();
 	if(!crew)
@@ -946,23 +946,23 @@ PlayerInfo::FleetBalance PlayerInfo::MaintenanceAndReturns() const
 	// will be counted twice.
 	for(const auto &outfit : Cargo().Outfits())
 	{
-		b.maintenanceCosts += max<int64_t>(0, outfit.first->Get("maintenance costs")) * outfit.second;
-		b.assetsReturns += max<int64_t>(0, outfit.first->Get("income")) * outfit.second;
+		b.maintenanceCosts += std::max<int64_t>(0, outfit.first->Get("maintenance costs")) * outfit.second;
+		b.assetsReturns += std::max<int64_t>(0, outfit.first->Get("income")) * outfit.second;
 	}
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(!ship->IsDestroyed())
 		{
-			b.maintenanceCosts += max<int64_t>(0, ship->Attributes().Get("maintenance costs"));
-			b.assetsReturns += max<int64_t>(0, ship->Attributes().Get("income"));
+			b.maintenanceCosts += std::max<int64_t>(0, ship->Attributes().Get("maintenance costs"));
+			b.assetsReturns += std::max<int64_t>(0, ship->Attributes().Get("income"));
 			for(const auto &outfit : ship->Cargo().Outfits())
 			{
-				b.maintenanceCosts += max<int64_t>(0, outfit.first->Get("maintenance costs")) * outfit.second;
-				b.assetsReturns += max<int64_t>(0, outfit.first->Get("income")) * outfit.second;
+				b.maintenanceCosts += std::max<int64_t>(0, outfit.first->Get("maintenance costs")) * outfit.second;
+				b.assetsReturns += std::max<int64_t>(0, outfit.first->Get("income")) * outfit.second;
 			}
 			if(!ship->IsParked())
 			{
-				b.maintenanceCosts += max<int64_t>(0, ship->Attributes().Get("operating costs"));
-				b.assetsReturns += max<int64_t>(0, ship->Attributes().Get("operating income"));
+				b.maintenanceCosts += std::max<int64_t>(0, ship->Attributes().Get("operating costs"));
+				b.assetsReturns += std::max<int64_t>(0, ship->Attributes().Get("operating income"));
 			}
 		}
 	return b;
@@ -970,28 +970,28 @@ PlayerInfo::FleetBalance PlayerInfo::MaintenanceAndReturns() const
 
 
 
-void PlayerInfo::AddLicense(const string &name)
+void PlayerInfo::AddLicense(const std::string &name)
 {
 	licenses.insert(name);
 }
 
 
 
-void PlayerInfo::RemoveLicense(const string &name)
+void PlayerInfo::RemoveLicense(const std::string &name)
 {
 	licenses.erase(name);
 }
 
 
 
-bool PlayerInfo::HasLicense(const string &name) const
+bool PlayerInfo::HasLicense(const std::string &name) const
 {
 	return licenses.contains(name);
 }
 
 
 
-const set<string> &PlayerInfo::Licenses() const
+const std::set<std::string> &PlayerInfo::Licenses() const
 {
 	return licenses;
 }
@@ -1017,14 +1017,14 @@ Ship *PlayerInfo::Flagship()
 
 
 // Determine which ship is the flagship and return the shared pointer to it.
-const shared_ptr<Ship> &PlayerInfo::FlagshipPtr()
+const std::shared_ptr<Ship> &PlayerInfo::FlagshipPtr()
 {
 	if(!flagship)
 	{
 		bool clearance = false;
 		if(planet)
 			clearance = planet->CanLand() || HasClearance();
-		for(const shared_ptr<Ship> &it : ships)
+		for(const std::shared_ptr<Ship> &it : ships)
 		{
 			if(it->IsParked())
 				continue;
@@ -1041,14 +1041,14 @@ const shared_ptr<Ship> &PlayerInfo::FlagshipPtr()
 		}
 	}
 
-	static const shared_ptr<Ship> empty;
+	static const std::shared_ptr<Ship> empty;
 	return (flagship && flagship->IsYours()) ? flagship : empty;
 }
 
 
 
 // Access the full list of ships that the player owns.
-const vector<shared_ptr<Ship>> &PlayerInfo::Ships() const
+const std::vector<std::shared_ptr<Ship>> &PlayerInfo::Ships() const
 {
 	return ships;
 }
@@ -1058,14 +1058,14 @@ const vector<shared_ptr<Ship>> &PlayerInfo::Ships() const
 // Inspect the flightworthiness of the player's active fleet, individually and
 // as a whole, to determine which ships cannot travel with the group.
 // Returns a mapping of ships to the reason their flight check failed.
-map<const shared_ptr<Ship>, vector<string>> PlayerInfo::FlightCheck() const
+std::map<const std::shared_ptr<Ship>, std::vector<std::string>> PlayerInfo::FlightCheck() const
 {
 	// Count of all bay types in the active fleet.
-	auto bayCount = map<string, size_t>{};
+	auto bayCount = std::map<std::string, size_t>{};
 	// Classification of the present ships by category. Parked ships are ignored.
-	auto categoryCount = map<string, vector<shared_ptr<Ship>>>{};
+	auto categoryCount = std::map<std::string, std::vector<std::shared_ptr<Ship>>>{};
 
-	auto flightChecks = map<const shared_ptr<Ship>, vector<string>>{};
+	auto flightChecks = std::map<const std::shared_ptr<Ship>, std::vector<std::string>>{};
 	for(const auto &ship : ships)
 		if(ship->GetSystem() && ship->GetPlanet() && !ship->IsParked())
 		{
@@ -1118,11 +1118,11 @@ map<const shared_ptr<Ship>, vector<string>> PlayerInfo::FlightCheck() const
 				// Include the lack of bay availability amongst any other
 				// warnings for this carriable ship.
 				auto it = flightChecks.find(carriable);
-				string warning = "no bays?";
+				std::string warning = "no bays?";
 				if(it != flightChecks.end())
 					it->second.emplace_back(warning);
 				else
-					flightChecks.emplace(carriable, vector<string>{warning});
+					flightChecks.emplace(carriable, std::vector<std::string>{warning});
 			}
 		}
 	}
@@ -1132,7 +1132,7 @@ map<const shared_ptr<Ship>, vector<string>> PlayerInfo::FlightCheck() const
 
 
 // Add a captured ship to your fleet.
-void PlayerInfo::AddShip(const shared_ptr<Ship> &ship)
+void PlayerInfo::AddShip(const std::shared_ptr<Ship> &ship)
 {
 	ships.push_back(ship);
 	ship->SetIsSpecial();
@@ -1144,7 +1144,7 @@ void PlayerInfo::AddShip(const shared_ptr<Ship> &ship)
 
 
 // Adds a ship of the given model with the given name to the player's fleet.
-void PlayerInfo::BuyShip(const Ship *model, const string &name)
+void PlayerInfo::BuyShip(const Ship *model, const std::string &name)
 {
 	if(!model)
 		return;
@@ -1170,7 +1170,7 @@ void PlayerInfo::BuyShip(const Ship *model, const string &name)
 
 
 // Because this ship is being gifted, it costs nothing and starts fully depreciated.
-const Ship *PlayerInfo::GiftShip(const Ship *model, const string &name, const string &id)
+const Ship *PlayerInfo::GiftShip(const Ship *model, const std::string &name, const std::string &id)
 {
 	if(!model)
 		return nullptr;
@@ -1247,7 +1247,7 @@ void PlayerInfo::TakeShip(const Ship *shipToTake, const Ship *model, bool takeOu
 					{
 						auto outfit = model->Outfits().find(it.first);
 						if(outfit != model->Outfits().end())
-							amountToTake = max(it.second, outfit->second);
+							amountToTake = std::max(it.second, outfit->second);
 					}
 					stock[it.first] += it.second - amountToTake;
 				}
@@ -1260,7 +1260,7 @@ void PlayerInfo::TakeShip(const Ship *shipToTake, const Ship *model, bool takeOu
 
 
 
-vector<shared_ptr<Ship>>::iterator PlayerInfo::DisownShip(const Ship *selected)
+std::vector<std::shared_ptr<Ship>>::iterator PlayerInfo::DisownShip(const Ship *selected)
 {
 	for(auto it = ships.begin(); it != ships.end(); ++it)
 		if(it->get() == selected)
@@ -1293,7 +1293,7 @@ void PlayerInfo::ParkShip(const Ship *selected, bool isParked)
 
 
 // Rename the given ship.
-void PlayerInfo::RenameShip(const Ship *selected, const string &name)
+void PlayerInfo::RenameShip(const Ship *selected, const std::string &name)
 {
 	for(auto &ship : ships)
 		if(ship.get() == selected)
@@ -1317,7 +1317,7 @@ void PlayerInfo::ReorderShip(int fromIndex, int toIndex)
 		return;
 
 	// Reorder the list.
-	shared_ptr<Ship> ship = ships[fromIndex];
+	std::shared_ptr<Ship> ship = ships[fromIndex];
 	auto oldFirstShip = ships[0];
 	ships.erase(ships.begin() + fromIndex);
 	ships.insert(ships.begin() + toIndex, ship);
@@ -1329,9 +1329,9 @@ void PlayerInfo::ReorderShip(int fromIndex, int toIndex)
 
 
 
-void PlayerInfo::SetShipOrder(const vector<shared_ptr<Ship>> &newOrder)
+void PlayerInfo::SetShipOrder(const std::vector<std::shared_ptr<Ship>> &newOrder)
 {
-	// Check if the incoming vector contains the same elements
+	// Check if the incoming std::vector contains the same elements
 	if(is_permutation(ships.begin(), ships.end(), newOrder.begin()))
 	{
 		Ship *oldFirstShip = ships.front().get();
@@ -1343,18 +1343,18 @@ void PlayerInfo::SetShipOrder(const vector<shared_ptr<Ship>> &newOrder)
 		flagship.reset();
 	}
 	else
-		throw runtime_error("Cannot reorder ships because the new order does not contain the same ships");
+		throw std::runtime_error("Cannot reorder ships because the new order does not contain the same ships");
 }
 
 
 
 // Find out how attractive the player's fleet is to pirates. Aside from a
 // heavy freighter, no single ship should attract extra pirate attention.
-pair<double, double> PlayerInfo::RaidFleetFactors() const
+std::pair<double, double> PlayerInfo::RaidFleetFactors() const
 {
 	double attraction = 0.;
 	double deterrence = 0.;
-	for(const shared_ptr<Ship> &ship : Ships())
+	for(const std::shared_ptr<Ship> &ship : Ships())
 	{
 		if(ship->IsParked() || ship->IsDestroyed())
 			continue;
@@ -1363,7 +1363,7 @@ pair<double, double> PlayerInfo::RaidFleetFactors() const
 		deterrence += ship->Deterrence();
 	}
 
-	return make_pair(attraction, deterrence);
+	return std::make_pair(attraction, deterrence);
 }
 
 
@@ -1377,7 +1377,7 @@ double PlayerInfo::RaidFleetAttraction(const RaidFleet &raid, const System *syst
 	{
 		// The player's base attraction to a fleet is determined by their fleet attraction minus
 		// their fleet deterrence, minus whatever the minimum attraction of this raid fleet is.
-		pair<double, double> factors = RaidFleetFactors();
+		std::pair<double, double> factors = RaidFleetFactors();
 		// If there is a maximum attraction for this fleet, and we are above it, it will not spawn.
 		if(raid.MaxAttraction() > 0 && factors.first > raid.MaxAttraction())
 			return 0;
@@ -1402,7 +1402,7 @@ double PlayerInfo::RaidFleetAttraction(const RaidFleet &raid, const System *syst
 				}
 			}
 	}
-	return max(0., min(1., attraction));
+	return std::max(0., std::min(1., attraction));
 }
 
 
@@ -1433,7 +1433,7 @@ CargoHold &PlayerInfo::Storage()
 
 
 // Get planetary storage information for all planets (for map and overviews).
-const map<const Planet *, CargoHold> &PlayerInfo::PlanetaryStorage() const
+const std::map<const Planet *, CargoHold> &PlayerInfo::PlanetaryStorage() const
 {
 	return planetaryStorage;
 }
@@ -1441,7 +1441,7 @@ const map<const Planet *, CargoHold> &PlayerInfo::PlanetaryStorage() const
 
 
 // Adjust the cost basis for the given commodity.
-void PlayerInfo::AdjustBasis(const string &commodity, int64_t adjustment)
+void PlayerInfo::AdjustBasis(const std::string &commodity, int64_t adjustment)
 {
 	costBasis[commodity] += adjustment;
 }
@@ -1450,7 +1450,7 @@ void PlayerInfo::AdjustBasis(const string &commodity, int64_t adjustment)
 
 // Get the cost basis for some number of tons of the given commodity. Each ton
 // of the commodity that you own is assumed to have the same basis.
-int64_t PlayerInfo::GetBasis(const string &commodity, int tons) const
+int64_t PlayerInfo::GetBasis(const std::string &commodity, int tons) const
 {
 	// Handle cost basis even when not landed on a planet.
 	int total = cargo.Get(commodity);
@@ -1474,7 +1474,7 @@ void PlayerInfo::UpdateCargoCapacities()
 	int size = 0;
 	int bunks = 0;
 	flagship = FlagshipPtr();
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(ship->GetPlanet() == planet && !ship->IsParked())
 		{
 			size += ship->Attributes().Get("cargo space");
@@ -1505,8 +1505,8 @@ void PlayerInfo::Land(UI *ui)
 		travelDestination = nullptr;
 
 	// Remove any ships that have been destroyed or captured.
-	map<string, int> lostCargo;
-	vector<shared_ptr<Ship>>::iterator it = ships.begin();
+	std::map<std::string, int> lostCargo;
+	std::vector<std::shared_ptr<Ship>>::iterator it = ships.begin();
 	while(it != ships.end())
 	{
 		if((*it)->IsDestroyed() || !(*it)->IsYours())
@@ -1528,14 +1528,14 @@ void PlayerInfo::Land(UI *ui)
 	}
 
 	// "Unload" all fighters, so they will get recharged, etc.
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		ship->UnloadBays();
 
 	// Ships that are landed with you on the planet should fully recharge.
 	// Those in remote systems restore what they can without landing.
 	bool clearance = HasClearance();
 	const bool canUseServices = planet->CanUseServices();
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(!ship->IsParked() && !ship->IsDisabled())
 		{
 			if(ship->GetSystem() == system)
@@ -1599,7 +1599,7 @@ void PlayerInfo::Land(UI *ui)
 	// do not name them all (since this would overflow the screen).
 	else if(ui && !inactiveMissions.empty())
 	{
-		string message = "These active missions or jobs were deactivated due to a missing definition"
+		std::string message = "These active missions or jobs were deactivated due to a missing definition"
 			" - perhaps you recently removed a plugin?\n";
 		auto mit = inactiveMissions.rbegin();
 		int named = 0;
@@ -1609,7 +1609,7 @@ void PlayerInfo::Land(UI *ui)
 			++mit;
 		}
 		if(mit != inactiveMissions.rend())
-			message += " and " + to_string(distance(mit, inactiveMissions.rend())) + " more.\n";
+			message += " and " + std::to_string(distance(mit, inactiveMissions.rend())) + " more.\n";
 		message += "They will be reactivated when the necessary plugin is reinstalled.";
 		ui->Push(new Dialog(message));
 	}
@@ -1623,7 +1623,7 @@ void PlayerInfo::Land(UI *ui)
 		if(added > 0)
 		{
 			flagship->AddCrew(added);
-			Messages::Add({"You hire " + to_string(added) + (added == 1
+			Messages::Add({"You hire " + std::to_string(added) + (added == 1
 				? " extra crew member to fill your now-empty bunk."
 				: " extra crew members to fill your now-empty bunks."),
 				GameData::MessageCategories().Get("normal")});
@@ -1661,7 +1661,7 @@ bool PlayerInfo::TakeOff(UI *ui, const bool distributeCargo)
 	GameData::ResetPersons();
 
 	// Store the total cargo counts in case we need to adjust cost bases below.
-	map<string, int> originalTotals = cargo.Commodities();
+	std::map<std::string, int> originalTotals = cargo.Commodities();
 
 	// Move the flagship to the start of the list of ships and ensure that all
 	// escorts know which ship is acting as flagship.
@@ -1669,7 +1669,7 @@ bool PlayerInfo::TakeOff(UI *ui, const bool distributeCargo)
 
 	// Recharge any ships that can be recharged, and load available cargo.
 	const bool canUseServices = planet->CanUseServices();
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(!ship->IsParked() && !ship->IsDisabled())
 		{
 			// Recalculate the weapon cache in case a mass-less change had an effect.
@@ -1689,7 +1689,7 @@ bool PlayerInfo::TakeOff(UI *ui, const bool distributeCargo)
 
 	if(cargo.Passengers())
 	{
-		int extra = min(cargo.Passengers(), flagship->Crew() - flagship->RequiredCrew());
+		int extra = std::min(cargo.Passengers(), flagship->Crew() - flagship->RequiredCrew());
 		if(extra)
 		{
 			flagship->AddCrew(-extra);
@@ -1697,7 +1697,7 @@ bool PlayerInfo::TakeOff(UI *ui, const bool distributeCargo)
 				Messages::Add({"You fired a crew member to free up a bunk for a passenger.",
 					GameData::MessageCategories().Get("normal")});
 			else
-				Messages::Add({"You fired " + to_string(extra) + " crew members to free up bunks for passengers.",
+				Messages::Add({"You fired " + std::to_string(extra) + " crew members to free up bunks for passengers.",
 					GameData::MessageCategories().Get("normal")});
 			flagship->Cargo().SetBunks(flagship->Attributes().Get("bunks") - flagship->Crew());
 			cargo.TransferAll(flagship->Cargo());
@@ -1712,14 +1712,14 @@ bool PlayerInfo::TakeOff(UI *ui, const bool distributeCargo)
 			Messages::Add({"You fired a crew member because you have no bunk for them.",
 				GameData::MessageCategories().Get("normal")});
 		else
-			Messages::Add({"You fired " + to_string(extra) + " crew members because you have no bunks for them.",
+			Messages::Add({"You fired " + std::to_string(extra) + " crew members because you have no bunks for them.",
 				GameData::MessageCategories().Get("normal")});
 		flagship->Cargo().SetBunks(flagship->Attributes().Get("bunks") - flagship->Crew());
 	}
 
 	// For each active, carriable ship you own, try to find an active ship that has a bay for it.
-	auto carriers = vector<Ship *>{};
-	auto toLoad = vector<shared_ptr<Ship>>{};
+	auto carriers = std::vector<Ship *>{};
+	auto toLoad = std::vector<std::shared_ptr<Ship>>{};
 	for(auto &ship : ships)
 		if(!ship->IsParked() && !ship->IsDisabled())
 		{
@@ -1735,8 +1735,8 @@ bool PlayerInfo::TakeOff(UI *ui, const bool distributeCargo)
 		{
 			// Order carried ships such that those requiring bays are loaded first. For
 			// jump-capable carried ships, prefer loading those with a shorter range.
-			stable_sort(toLoad.begin(), toLoad.end(),
-				[](const shared_ptr<Ship> &a, const shared_ptr<Ship> &b)
+			std::stable_sort(toLoad.begin(), toLoad.end(),
+				[](const std::shared_ptr<Ship> &a, const std::shared_ptr<Ship> &b)
 				{
 					return a->JumpsRemaining() < b->JumpsRemaining();
 				});
@@ -1754,7 +1754,7 @@ bool PlayerInfo::TakeOff(UI *ui, const bool distributeCargo)
 		if(uncarried)
 		{
 			// The remaining uncarried ships are launched alongside the player.
-			string message = (uncarried > 1) ? "Some escorts were" : "One escort was";
+			std::string message = (uncarried > 1) ? "Some escorts were" : "One escort was";
 			Messages::Add({message + " unable to dock with a carrier.", GameData::MessageCategories().Get("normal")});
 		}
 	}
@@ -1762,7 +1762,7 @@ bool PlayerInfo::TakeOff(UI *ui, const bool distributeCargo)
 	// By now, all cargo should have been divvied up among your ships. So, any
 	// mission cargo or passengers left behind cannot be carried, and those
 	// missions have aborted.
-	vector<const Mission *> missionsToRemove;
+	std::vector<const Mission *> missionsToRemove;
 	for(const auto &it : cargo.MissionCargo())
 		if(it.second)
 		{
@@ -1843,7 +1843,7 @@ bool PlayerInfo::TakeOff(UI *ui, const bool distributeCargo)
 	{
 		// Report how much excess cargo was sold (and what profit you earned),
 		// and how many tons of outfits were stored.
-		ostringstream out;
+		std::ostringstream out;
 		out << "You ";
 		if(sold)
 		{
@@ -1876,7 +1876,7 @@ void PlayerInfo::PoolCargo()
 	// temporarily uncap the player's cargo and bunk capacity.
 	cargo.SetSize(-1);
 	cargo.SetBunks(-1);
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(ship->GetPlanet() == planet && !ship->IsParked())
 			ship->Cargo().TransferAll(cargo);
 	UpdateCargoCapacities();
@@ -1898,7 +1898,7 @@ const CargoHold &PlayerInfo::DistributeCargo()
 		cargo.TransferAll(flagship->Cargo(), prioritySetting == Preferences::FlagshipSpacePriority::BOTH);
 
 	// Distribute the remaining cargo among the escorts.
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(!ship->IsParked() && !ship->IsDisabled() && ship->GetPlanet() == planet && ship != flagship)
 		{
 			ship->Cargo().SetBunks(ship->Attributes().Get("bunks") - ship->RequiredCrew());
@@ -1921,7 +1921,7 @@ double PlayerInfo::GetPlayTime() const noexcept
 
 
 
-void PlayerInfo::AddPlayTime(chrono::nanoseconds timeVal)
+void PlayerInfo::AddPlayTime(std::chrono::nanoseconds timeVal)
 {
 	playTime += timeVal.count() * .000000001;
 }
@@ -1929,7 +1929,7 @@ void PlayerInfo::AddPlayTime(chrono::nanoseconds timeVal)
 
 
 // Get the player's logbook.
-const map<Date, BookEntry> &PlayerInfo::Logbook() const
+const std::map<Date, BookEntry> &PlayerInfo::Logbook() const
 {
 	return logbook;
 }
@@ -1943,21 +1943,21 @@ void PlayerInfo::AddLogEntry(const BookEntry &logbookEntry)
 
 
 
-const map<string, map<string, BookEntry>> &PlayerInfo::SpecialLogs() const
+const std::map<std::string, std::map<std::string, BookEntry>> &PlayerInfo::SpecialLogs() const
 {
 	return specialLogs;
 }
 
 
 
-void PlayerInfo::AddSpecialLog(const string &category, const string &heading, const BookEntry &logbookEntry)
+void PlayerInfo::AddSpecialLog(const std::string &category, const std::string &heading, const BookEntry &logbookEntry)
 {
 	specialLogs[category][heading].Add(logbookEntry);
 }
 
 
 
-void PlayerInfo::RemoveSpecialLog(const string &category, const string &heading)
+void PlayerInfo::RemoveSpecialLog(const std::string &category, const std::string &heading)
 {
 	auto it = specialLogs.find(category);
 	if(it == specialLogs.end())
@@ -1970,7 +1970,7 @@ void PlayerInfo::RemoveSpecialLog(const string &category, const string &heading)
 
 
 
-void PlayerInfo::RemoveSpecialLog(const string &type)
+void PlayerInfo::RemoveSpecialLog(const std::string &type)
 {
 	auto it = specialLogs.find(type);
 	if(it != specialLogs.end())
@@ -1987,7 +1987,7 @@ bool PlayerInfo::HasLogs() const
 
 
 // Get the list of active missions.
-const list<Mission> &PlayerInfo::Missions() const
+const std::list<Mission> &PlayerInfo::Missions() const
 {
 	return missions;
 }
@@ -1995,7 +1995,7 @@ const list<Mission> &PlayerInfo::Missions() const
 
 
 // Get the list of ordinary jobs that are available on the job board.
-const list<Mission> &PlayerInfo::AvailableJobs() const
+const std::list<Mission> &PlayerInfo::AvailableJobs() const
 {
 	return availableJobs;
 }
@@ -2033,7 +2033,7 @@ void PlayerInfo::CacheMissionInformation(Mission &mission, const DistanceMap &he
 	if(daysLeft > 0 && Preferences::Has("Deadline blink by distance")
 		&& here.HasRoute(*mission.Destination()->GetSystem()))
 	{
-		set<const System *> toVisit;
+		std::set<const System *> toVisit;
 		for(const Planet *stopover : mission.Stopovers())
 		{
 			if(here.HasRoute(*stopover->GetSystem()))
@@ -2053,7 +2053,7 @@ void PlayerInfo::CacheMissionInformation(Mission &mission, const DistanceMap &he
 		for(int i = 0; i < systemCount; ++i)
 		{
 			const System *closest;
-			int minimalDist = numeric_limits<int>::max();
+			int minimalDist = std::numeric_limits<int>::max();
 			for(const System *sys : toVisit)
 				if(distance.Days(*sys) < minimalDist)
 				{
@@ -2142,7 +2142,7 @@ void PlayerInfo::ToggleSortSeparatePossible()
 void PlayerInfo::SortAvailable()
 {
 	// Destinations: planets OR system. Only counting them, so the type doesn't matter.
-	set<const void *> destinations;
+	std::set<const void *> destinations;
 	if(availableSortType == CONVENIENT)
 	{
 		for(const Mission &mission : Missions())
@@ -2321,7 +2321,7 @@ Mission *PlayerInfo::MissionToOffer(Mission::Location location)
 
 // Check if any of the game's missions can be offered from this ship, given its
 // relationship with the player. If none offer, return nullptr.
-Mission *PlayerInfo::BoardingMission(const shared_ptr<Ship> &ship)
+Mission *PlayerInfo::BoardingMission(const std::shared_ptr<Ship> &ship)
 {
 	// Do not create missions from existing mission NPC's, or the player's ships.
 	if(ship->IsSpecial())
@@ -2393,7 +2393,7 @@ Mission *PlayerInfo::EnteringMission()
 
 
 
-bool PlayerInfo::CaptureOverriden(const shared_ptr<Ship> &ship) const
+bool PlayerInfo::CaptureOverriden(const std::shared_ptr<Ship> &ship) const
 {
 	if(ship->IsCapturable())
 		return false;
@@ -2425,14 +2425,14 @@ void PlayerInfo::ClearActiveInFlightMission()
 // show that message.
 void PlayerInfo::HandleBlockedMissions(Mission::Location location, UI *ui)
 {
-	list<Mission> &missionList = availableMissions.empty() ? availableBoardingMissions : availableMissions;
+	std::list<Mission> &missionList = availableMissions.empty() ? availableBoardingMissions : availableMissions;
 	if(ships.empty() || missionList.empty())
 		return;
 
 	for(auto &it : missionList)
 		if(it.IsAtLocation(location) && it.CanOffer(*this) && !it.CanAccept(*this))
 		{
-			string message = it.BlockedMessage(*this);
+			std::string message = it.BlockedMessage(*this);
 			if(!message.empty())
 			{
 				ui->Push(new Dialog(message));
@@ -2452,7 +2452,7 @@ void PlayerInfo::HandleBlockedEnteringMissions(UI *ui)
 	{
 		if(!it->HasSpace(*flagship))
 		{
-			string message = it->BlockedMessage(*this);
+			std::string message = it->BlockedMessage(*this);
 			// Remove this mission from the list so that the MainPanel stops
 			// trying to offer it.
 			it = availableEnteringMissions.erase(it);
@@ -2474,7 +2474,7 @@ void PlayerInfo::HandleBlockedEnteringMissions(UI *ui)
 // conversation ended.
 void PlayerInfo::MissionCallback(int response)
 {
-	list<Mission> &missionList = availableMissions.empty() ?
+	std::list<Mission> &missionList = availableMissions.empty() ?
 		(availableEnteringMissions.empty() ? availableBoardingMissions : availableEnteringMissions) : availableMissions;
 	if(missionList.empty())
 		return;
@@ -2550,7 +2550,7 @@ void PlayerInfo::RemoveMission(Mission::Trigger trigger, const Mission &mission,
 
 			it->Do(trigger, *this, ui);
 			cargo.RemoveMissionCargo(&mission);
-			for(shared_ptr<Ship> &ship : ships)
+			for(std::shared_ptr<Ship> &ship : ships)
 				ship->Cargo().RemoveMissionCargo(&mission);
 			return;
 		}
@@ -2580,7 +2580,7 @@ void PlayerInfo::HandleEvent(const ShipEvent &event, UI *ui)
 		{
 			auto &rating = conditions["combat rating"];
 			static const int64_t maxRating = 2000000000;
-			rating = min(maxRating, rating + (event.Target()->Cost() + 250000) / 500000);
+			rating = std::min(maxRating, rating + (event.Target()->Cost() + 250000) / 500000);
 		}
 
 	for(Mission &mission : missions)
@@ -2610,16 +2610,16 @@ const ConditionsStore &PlayerInfo::Conditions() const
 
 
 // Uuid for the gifted ships, with the ship class follow by the names they had when they were gifted to the player.
-const map<string, EsUuid> &PlayerInfo::GiftedShips() const
+const std::map<std::string, EsUuid> &PlayerInfo::GiftedShips() const
 {
 	return giftedShips;
 }
 
 
 
-map<string, string> PlayerInfo::GetSubstitutions() const
+std::map<std::string, std::string> PlayerInfo::GetSubstitutions() const
 {
-	map<string, string> subs;
+	std::map<std::string, std::string> subs;
 	GameData::GetTextReplacements().Substitutions(subs);
 	AddPlayerSubstitutions(subs);
 	return subs;
@@ -2627,7 +2627,7 @@ map<string, string> PlayerInfo::GetSubstitutions() const
 
 
 
-void PlayerInfo::AddPlayerSubstitutions(map<string, string> &subs) const
+void PlayerInfo::AddPlayerSubstitutions(std::map<std::string, std::string> &subs) const
 {
 	subs["<first>"] = FirstName();
 	subs["<last>"] = LastName();
@@ -2667,7 +2667,7 @@ bool PlayerInfo::SetTribute(const Planet *planet, int64_t payment)
 
 
 
-bool PlayerInfo::SetTribute(const string &planetTrueName, int64_t payment)
+bool PlayerInfo::SetTribute(const std::string &planetTrueName, int64_t payment)
 {
 	const Planet *planet = GameData::Planets().Find(planetTrueName);
 	if(!planet)
@@ -2679,7 +2679,7 @@ bool PlayerInfo::SetTribute(const string &planetTrueName, int64_t payment)
 
 
 // Get a list of all tribute that the player receives.
-const map<const Planet *, int64_t> &PlayerInfo::GetTribute() const
+const std::map<const Planet *, int64_t> &PlayerInfo::GetTribute() const
 {
 	return tributeReceived;
 }
@@ -2693,7 +2693,7 @@ int64_t PlayerInfo::GetTributeTotal() const
 		tributeReceived.begin(),
 		tributeReceived.end(),
 		0,
-		[](int64_t value, const map<const Planet *, int64_t>::value_type &tribute)
+		[](int64_t value, const std::map<const Planet *, int64_t>::value_type &tribute)
 		{
 			return value + tribute.second;
 		}
@@ -2833,14 +2833,14 @@ void PlayerInfo::Unvisit(const Planet &planet)
 
 
 
-const set<const System *> &PlayerInfo::VisitedSystems() const
+const std::set<const System *> &PlayerInfo::VisitedSystems() const
 {
 	return visitedSystems;
 }
 
 
 
-const set<const Planet *> &PlayerInfo::VisitedPlanets() const
+const std::set<const Planet *> &PlayerInfo::VisitedPlanets() const
 {
 	return visitedPlanets;
 }
@@ -2857,7 +2857,7 @@ bool PlayerInfo::HasMapped(int mapSize, bool mapMinables) const
 
 		if(mapMinables)
 			for(const Outfit *outfit : system->Payloads())
-				if(!harvested.contains(make_pair(system, outfit)))
+				if(!harvested.contains(std::make_pair(system, outfit)))
 					return false;
 	}
 
@@ -2876,7 +2876,7 @@ void PlayerInfo::Map(int mapSize, bool mapMinables)
 
 		if(mapMinables)
 			for(const Outfit *outfit : system->Payloads())
-				harvested.insert(make_pair(system, outfit));
+				harvested.insert(std::make_pair(system, outfit));
 	}
 }
 
@@ -2891,14 +2891,14 @@ bool PlayerInfo::HasTravelPlan() const
 
 
 // Access the player's travel plan.
-const vector<const System *> &PlayerInfo::TravelPlan() const
+const std::vector<const System *> &PlayerInfo::TravelPlan() const
 {
 	return travelPlan;
 }
 
 
 
-vector<const System *> &PlayerInfo::TravelPlan()
+std::vector<const System *> &PlayerInfo::TravelPlan()
 {
 	return travelPlan;
 }
@@ -2937,7 +2937,7 @@ void PlayerInfo::SetTravelDestination(const Planet *planet)
 
 
 // Check which secondary weapons the player has selected.
-const set<const Outfit *> &PlayerInfo::SelectedSecondaryWeapons() const
+const std::set<const Outfit *> &PlayerInfo::SelectedSecondaryWeapons() const
 {
 	return selectedWeapons;
 }
@@ -3026,7 +3026,7 @@ void PlayerInfo::ToggleAnySecondary(const Outfit *outfit)
 
 
 // Escorts currently selected for giving orders.
-const vector<weak_ptr<Ship>> &PlayerInfo::SelectedShips() const
+const std::vector<std::weak_ptr<Ship>> &PlayerInfo::SelectedShips() const
 {
 	return selectedShips;
 }
@@ -3045,7 +3045,7 @@ bool PlayerInfo::SelectShips(const Rectangle &box, bool hasShift)
 	bool first = !hasShift;
 
 	bool matched = false;
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(!ship->IsDestroyed() && !ship->IsParked() && ship->GetSystem() == system && ship.get() != Flagship()
 				&& box.Contains(ship->Position()))
 		{
@@ -3057,7 +3057,7 @@ bool PlayerInfo::SelectShips(const Rectangle &box, bool hasShift)
 
 
 
-bool PlayerInfo::SelectShips(const vector<const Ship *> &stack, bool hasShift)
+bool PlayerInfo::SelectShips(const std::vector<const Ship *> &stack, bool hasShift)
 {
 	// If shift is not held down, replace the current selection.
 	if(!hasShift)
@@ -3069,7 +3069,7 @@ bool PlayerInfo::SelectShips(const vector<const Ship *> &stack, bool hasShift)
 	// Loop through all the player's ships and check which of them are in the
 	// given stack.
 	bool matched = false;
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 	{
 		auto it = find(stack.begin(), stack.end(), ship.get());
 		if(it != stack.end())
@@ -3092,7 +3092,7 @@ void PlayerInfo::SelectShip(const Ship *ship, bool hasShift)
 		selectedShips.clear();
 
 	bool first = !hasShift;
-	for(const shared_ptr<Ship> &it : ships)
+	for(const std::shared_ptr<Ship> &it : ships)
 		if(it.get() == ship)
 			SelectShip(it, &first);
 }
@@ -3122,12 +3122,12 @@ void PlayerInfo::SelectGroup(int group, bool hasShift)
 	if(Flagship() && Flagship()->GetTargetShip())
 	{
 		oldTarget = Flagship()->GetTargetShip().get();
-		Flagship()->SetTargetShip(shared_ptr<Ship>());
+		Flagship()->SetTargetShip(std::shared_ptr<Ship>());
 	}
 	if(hasShift)
 	{
 		bool allWereSelected = true;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(groups[ship.get()] & bit)
 			{
 				auto it = selectedShips.begin();
@@ -3147,7 +3147,7 @@ void PlayerInfo::SelectGroup(int group, bool hasShift)
 
 	// Now, go through and add any ships in the group to the selection. Even if
 	// shift is held they won't be added twice, because we removed them above.
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		if(groups[ship.get()] & bit)
 		{
 			selectedShips.push_back(ship);
@@ -3158,12 +3158,12 @@ void PlayerInfo::SelectGroup(int group, bool hasShift)
 
 
 
-void PlayerInfo::SetGroup(int group, const set<Ship *> *newShips)
+void PlayerInfo::SetGroup(int group, const std::set<Ship *> *newShips)
 {
 	int bit = (1 << group);
 	int mask = ~bit;
 	// First, remove any of your ships that are in the group.
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		groups[ship.get()] &= mask;
 	// Then, add all the currently selected ships to the group.
 	if(newShips)
@@ -3173,9 +3173,9 @@ void PlayerInfo::SetGroup(int group, const set<Ship *> *newShips)
 	}
 	else
 	{
-		for(const weak_ptr<Ship> &ptr : selectedShips)
+		for(const std::weak_ptr<Ship> &ptr : selectedShips)
 		{
-			shared_ptr<Ship> ship = ptr.lock();
+			std::shared_ptr<Ship> ship = ptr.lock();
 			if(ship)
 				groups[ship.get()] |= bit;
 		}
@@ -3184,12 +3184,12 @@ void PlayerInfo::SetGroup(int group, const set<Ship *> *newShips)
 
 
 
-set<Ship *> PlayerInfo::GetGroup(int group)
+std::set<Ship *> PlayerInfo::GetGroup(int group)
 {
 	int bit = (1 << group);
-	set<Ship *> result;
+	std::set<Ship *> result;
 
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 	{
 		auto it = groups.find(ship.get());
 		if(it != groups.end() && (it->second & bit))
@@ -3202,7 +3202,7 @@ set<Ship *> PlayerInfo::GetGroup(int group)
 
 // Keep track of any outfits that you have sold since landing. These will be
 // available to buy back until you take off.
-const map<const Outfit *, int> &PlayerInfo::GetStock() const
+const std::map<const Outfit *, int> &PlayerInfo::GetStock() const
 {
 	return stock;
 }
@@ -3264,19 +3264,19 @@ const Depreciation &PlayerInfo::StockDepreciation() const
 void PlayerInfo::Harvest(const Outfit *type)
 {
 	if(type && system)
-		harvested.insert(make_pair(system, type));
+		harvested.insert(std::make_pair(system, type));
 }
 
 
 
-const set<pair<const System *, const Outfit *>> &PlayerInfo::Harvested() const
+const std::set<std::pair<const System *, const Outfit *>> &PlayerInfo::Harvested() const
 {
 	return harvested;
 }
 
 
 
-const pair<const System *, Point> &PlayerInfo::GetEscortDestination() const
+const std::pair<const System *, Point> &PlayerInfo::GetEscortDestination() const
 {
 	return interstellarEscortDestination;
 }
@@ -3333,7 +3333,7 @@ void PlayerInfo::SetMapZoom(int level)
 
 
 // Get the set of collapsed categories for the named panel.
-set<string> &PlayerInfo::Collapsed(const string &name)
+std::set<std::string> &PlayerInfo::Collapsed(const std::string &name)
 {
 	return collapsed[name];
 }
@@ -3403,8 +3403,8 @@ void PlayerInfo::ValidateLoad()
 	// If a system was not specified in the player data, use the flagship's system.
 	if(!planet && !ships.empty())
 	{
-		string warning = "Warning: no planet specified for player";
-		auto it = find_if(ships.begin(), ships.end(), [](const shared_ptr<Ship> &ship) noexcept -> bool
+		std::string warning = "Warning: no planet specified for player";
+		auto it = find_if(ships.begin(), ships.end(), [](const std::shared_ptr<Ship> &ship) noexcept -> bool
 			{ return ship->GetPlanet() && ship->GetPlanet()->IsValid() && !ship->IsParked() && ship->CanBeFlagship(); });
 		if(it != ships.end())
 		{
@@ -3481,13 +3481,13 @@ void PlayerInfo::ValidateLoad()
 				conditions["unverified start scenario"] = true;
 		}
 		else
-			throw runtime_error("Unable to set a starting scenario for an existing pilot. (No valid \"start\" "
+			throw std::runtime_error("Unable to set a starting scenario for an existing pilot. (No valid \"start\" "
 				"nodes were found in data files or loaded plugins--make sure you've installed the game properly.)");
 	}
 
 	// Validate the missions that were loaded. Active-but-invalid missions are removed from
 	// the standard mission list, effectively pausing them until necessary data is restored.
-	auto mit = stable_partition(missions.begin(), missions.end(), mem_fn(&Mission::IsValid));
+	auto mit = stable_partition(missions.begin(), missions.end(), std::mem_fn(&Mission::IsValid));
 	if(mit != missions.end())
 		inactiveMissions.splice(inactiveMissions.end(), missions, mit, missions.end());
 
@@ -3508,7 +3508,7 @@ void PlayerInfo::RegisterDerivedConditions()
 	conditions["month"].ProvideNamed([this](const ConditionEntry &ce) { return date.Month(); });
 	conditions["year"].ProvideNamed([this](const ConditionEntry &ce) { return date.Year(); });
 	conditions["weekday: "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
-		string day = ce.NameWithoutPrefix();
+		std::string day = ce.NameWithoutPrefix();
 		int number = date.WeekdayNumberOffset();
 		if(day == "saturday")
 			return number == 0;
@@ -3540,25 +3540,25 @@ void PlayerInfo::RegisterDerivedConditions()
 	static constexpr int64_t limit = static_cast<int64_t>(1) << 62;
 
 	conditions["net worth"].ProvideNamed([this](const ConditionEntry &ce) {
-		return min(limit, max(-limit, accounts.NetWorth())); });
+		return std::min(limit, std::max(-limit, accounts.NetWorth())); });
 	conditions["credits"].ProvideNamed([this](const ConditionEntry &ce) {
-		return min(limit, accounts.Credits()); });
+		return std::min(limit, accounts.Credits()); });
 	conditions["unpaid mortgages"].ProvideNamed([this](const ConditionEntry &ce) {
-		return min(limit, accounts.TotalDebt("Mortgage")); });
+		return std::min(limit, accounts.TotalDebt("Mortgage")); });
 	conditions["unpaid fines"].ProvideNamed([this](const ConditionEntry &ce) {
-		return min(limit, accounts.TotalDebt("Fine")); });
+		return std::min(limit, accounts.TotalDebt("Fine")); });
 	conditions["unpaid debts"].ProvideNamed([this](const ConditionEntry &ce) {
-		return min(limit, accounts.TotalDebt("Debt")); });
+		return std::min(limit, accounts.TotalDebt("Debt")); });
 	conditions["unpaid salaries"].ProvideNamed([this](const ConditionEntry &ce) {
-		return min(limit, accounts.CrewSalariesOwed()); });
+		return std::min(limit, accounts.CrewSalariesOwed()); });
 	conditions["unpaid maintenance"].ProvideNamed([this](const ConditionEntry &ce) {
-		return min(limit, accounts.MaintenanceDue()); });
+		return std::min(limit, accounts.MaintenanceDue()); });
 	conditions["credit score"].ProvideNamed([this](const ConditionEntry &ce) {
 		return accounts.CreditScore(); });
 
 	// Read/write assets and debts.
 	conditions["salary: "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
-		const map<string, int64_t> &si = accounts.SalariesIncome();
+		const std::map<std::string, int64_t> &si = accounts.SalariesIncome();
 		auto it = si.find(ce.NameWithoutPrefix());
 		if(it == si.end())
 			return 0;
@@ -3603,7 +3603,7 @@ void PlayerInfo::RegisterDerivedConditions()
 	conditions["flagship disabled"].ProvideNamed([this](const ConditionEntry &ce) -> bool {
 		return flagship && flagship->IsDisabled(); });
 
-	auto shipAttributeHelper = [](const Ship *ship, const string &attribute, bool base) -> int64_t
+	auto shipAttributeHelper = [](const Ship *ship, const std::string &attribute, bool base) -> int64_t
 	{
 		if(!ship)
 			return 0;
@@ -3644,7 +3644,7 @@ void PlayerInfo::RegisterDerivedConditions()
 			return 0;
 		if(GetPlanet())
 			Logger::LogError("Warning: Use of \"flagship bays free\" condition while landed is unstable behavior.");
-		const vector<Ship::Bay> &bays = flagship->Bays();
+		const std::vector<Ship::Bay> &bays = flagship->Bays();
 		return count_if(bays.begin(), bays.end(), [](const Ship::Bay &bay) { return !bay.ship; }); });
 
 	conditions["flagship mass"].ProvideNamed([this](const ConditionEntry &ce) -> int64_t {
@@ -3658,9 +3658,9 @@ void PlayerInfo::RegisterDerivedConditions()
 
 	conditions["ship base attribute: "].ProvidePrefixed([this, shipAttributeHelper](const ConditionEntry &ce) ->
 	int64_t {
-		string attribute = ce.NameWithoutPrefix();
+		std::string attribute = ce.NameWithoutPrefix();
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 		{
 			// Destroyed and parked ships aren't checked.
 			// If not on a planet, the ship's system must match.
@@ -3674,9 +3674,9 @@ void PlayerInfo::RegisterDerivedConditions()
 		return retVal; });
 	conditions["ship base attribute (all): "].ProvidePrefixed([this, shipAttributeHelper](const ConditionEntry &ce) ->
 	int64_t {
-		string attribute = ce.NameWithoutPrefix();
+		std::string attribute = ce.NameWithoutPrefix();
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 		{
 			if(ship->IsDestroyed())
 				continue;
@@ -3688,9 +3688,9 @@ void PlayerInfo::RegisterDerivedConditions()
 			// If the player isn't landed then there can be no parked ships local to them.
 			if(!planet)
 				return 0;
-			string attribute = ce.NameWithoutPrefix();
+			std::string attribute = ce.NameWithoutPrefix();
 			int64_t retVal = 0;
-			for(const shared_ptr<Ship> &ship : ships)
+			for(const std::shared_ptr<Ship> &ship : ships)
 			{
 				if(!ship->IsParked() || ship->GetPlanet() != planet)
 					continue;
@@ -3698,9 +3698,9 @@ void PlayerInfo::RegisterDerivedConditions()
 			}
 			return retVal; });
 	conditions["ship attribute: "].ProvidePrefixed([this, shipAttributeHelper](const ConditionEntry &ce) -> int64_t {
-		string attribute = ce.NameWithoutPrefix();
+		std::string attribute = ce.NameWithoutPrefix();
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 		{
 			// Destroyed and parked ships aren't checked.
 			// If not on a planet, the ship's system must match.
@@ -3713,9 +3713,9 @@ void PlayerInfo::RegisterDerivedConditions()
 		}
 		return retVal; });
 	conditions["ship attribute (all): "].ProvidePrefixed([this, shipAttributeHelper](const ConditionEntry &ce) -> int64_t {
-		string attribute = ce.NameWithoutPrefix();
+		std::string attribute = ce.NameWithoutPrefix();
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 		{
 			if(ship->IsDestroyed())
 				continue;
@@ -3727,9 +3727,9 @@ void PlayerInfo::RegisterDerivedConditions()
 			// If the player isn't landed then there can be no parked ships local to them.
 			if(!planet)
 				return 0;
-			string attribute = ce.NameWithoutPrefix();
+			std::string attribute = ce.NameWithoutPrefix();
 			int64_t retVal = 0;
-			for(const shared_ptr<Ship> &ship : ships)
+			for(const std::shared_ptr<Ship> &ship : ships)
 			{
 				if(!ship->IsParked() || ship->GetPlanet() != planet)
 					continue;
@@ -3778,7 +3778,7 @@ void PlayerInfo::RegisterDerivedConditions()
 	});
 	conditions["player strength"].ProvideNamed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t strength = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 			strength += ship->Strength();
 		return strength;
 	});
@@ -3786,25 +3786,25 @@ void PlayerInfo::RegisterDerivedConditions()
 	// Special conditions for cargo and passenger space.
 	conditions["cargo space"].ProvideNamed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsParked() && !ship->IsDisabled() && ship->GetActualSystem() == system)
 				retVal += ship->Attributes().Get("cargo space");
 		return retVal; });
 	conditions["passenger space"].ProvideNamed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsParked() && !ship->IsDisabled() && ship->GetActualSystem() == system)
 				retVal += ship->Attributes().Get("bunks") - ship->RequiredCrew();
 		return retVal; });
 	conditions["cargo space free"].ProvideNamed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsParked() && !ship->IsDisabled() && ship->GetActualSystem() == system)
 				retVal += ship->Cargo().Free();
 		return retVal; });
 	conditions["passenger space free"].ProvideNamed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsParked() && !ship->IsDisabled() && ship->GetActualSystem() == system)
 				retVal += ship->Cargo().BunksFree();
 		return retVal; });
@@ -3830,8 +3830,8 @@ void PlayerInfo::RegisterDerivedConditions()
 	// (e.g. Heavy Warships).
 	conditions["ships: "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		string category = ce.NameWithoutPrefix();
-		for(const shared_ptr<Ship> &ship : ships)
+		std::string category = ce.NameWithoutPrefix();
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsParked() && !ship->IsDisabled() && ship->GetActualSystem() == system
 					&& !category.compare(ship->Attributes().Category()))
 				++retVal;
@@ -3839,16 +3839,16 @@ void PlayerInfo::RegisterDerivedConditions()
 	// The number of ships the player has of the given category anywhere in their fleet.
 	conditions["ships (all): "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		string category = ce.NameWithoutPrefix();
-		for(const shared_ptr<Ship> &ship : ships)
+		std::string category = ce.NameWithoutPrefix();
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsDestroyed() && !category.compare(ship->Attributes().Category()))
 				++retVal;
 		return retVal; });
 	// The number of ships the player has of the given model active and present.
 	conditions["ship model: "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		string model = ce.NameWithoutPrefix();
-		for(const shared_ptr<Ship> &ship : ships)
+		std::string model = ce.NameWithoutPrefix();
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsParked() && !ship->IsDisabled() && ship->GetActualSystem() == system
 					&& !model.compare(ship->TrueModelName()))
 				++retVal;
@@ -3856,22 +3856,22 @@ void PlayerInfo::RegisterDerivedConditions()
 	// The number of ships that the player has of the given model anywhere in their fleet.
 	conditions["ship model (all): "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		string model = ce.NameWithoutPrefix();
-		for(const shared_ptr<Ship> &ship : ships)
+		std::string model = ce.NameWithoutPrefix();
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsDestroyed() && !model.compare(ship->TrueModelName()))
 				++retVal;
 		return retVal; });
 	// The total number of ships the player has active and present.
 	conditions["total ships"].ProvideNamed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsParked() && !ship->IsDisabled() && ship->GetActualSystem() == system)
 				++retVal;
 		return retVal; });
 	// The total number of ships the player has anywhere.
 	conditions["total ships (all)"].ProvideNamed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsDestroyed())
 				++retVal;
 		return retVal; });
@@ -3892,7 +3892,7 @@ void PlayerInfo::RegisterDerivedConditions()
 			if(it != planetaryStorage.end())
 				retVal += it->second.Get(outfit);
 		}
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 		{
 			// Destroyed and parked ships aren't checked.
 			// If not on a planet, the ship's system must match.
@@ -3914,7 +3914,7 @@ void PlayerInfo::RegisterDerivedConditions()
 		if(!outfit)
 			return 0;
 		int64_t retVal = Cargo().Get(outfit);
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 		{
 			if(ship->IsDestroyed())
 				continue;
@@ -3933,7 +3933,7 @@ void PlayerInfo::RegisterDerivedConditions()
 		if(!outfit)
 			return 0;
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 		{
 			// Destroyed and parked ships aren't checked.
 			// If not on a planet, the ship's system must match.
@@ -3957,7 +3957,7 @@ void PlayerInfo::RegisterDerivedConditions()
 		if(!outfit)
 			return 0;
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 		{
 			if(!ship->IsParked() || ship->GetPlanet() != planet)
 				continue;
@@ -3972,7 +3972,7 @@ void PlayerInfo::RegisterDerivedConditions()
 		if(!outfit)
 			return 0;
 		int64_t retVal = 0;
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsDestroyed())
 				retVal += ship->OutfitCount(outfit);
 		return retVal;
@@ -3997,7 +3997,7 @@ void PlayerInfo::RegisterDerivedConditions()
 		int64_t retVal = 0;
 		if(planet)
 			retVal += Cargo().Get(outfit);
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 		{
 			// If not on a planet, parked ships in system don't count.
 			// If on a planet, the ship's planet must match.
@@ -4017,7 +4017,7 @@ void PlayerInfo::RegisterDerivedConditions()
 		int64_t retVal = 0;
 		if(planet)
 			retVal += Cargo().Get(outfit);
-		for(const shared_ptr<Ship> &ship : ships)
+		for(const std::shared_ptr<Ship> &ship : ships)
 			if(!ship->IsDestroyed())
 				retVal += ship->Cargo().Get(outfit);
 		return retVal;
@@ -4089,7 +4089,7 @@ void PlayerInfo::RegisterDerivedConditions()
 	conditions["flagship planet attribute: "].ProvidePrefixed([this](const ConditionEntry &ce) -> bool {
 		if(!flagship || !flagship->GetPlanet())
 			return false;
-		string attribute = ce.NameWithoutPrefix();
+		std::string attribute = ce.NameWithoutPrefix();
 		return flagship->GetPlanet()->Attributes().contains(attribute); });
 
 	// Read only exploration conditions.
@@ -4156,7 +4156,7 @@ void PlayerInfo::RegisterDerivedConditions()
 	// your reputation with the government is negative or if the government has been provoked.
 	// Governments that have been bribed will not count as an enemy.
 	conditions["enemy: "].ProvidePrefixed([](const ConditionEntry &ce) -> int64_t {
-		string govName = ce.NameWithoutPrefix();
+		std::string govName = ce.NameWithoutPrefix();
 		auto gov = GameData::Governments().Get(govName);
 		if(!gov)
 			return 0;
@@ -4165,14 +4165,14 @@ void PlayerInfo::RegisterDerivedConditions()
 	// Read/write government reputation conditions.
 	// The erase function is still default (since we cannot erase government conditions).
 	conditions["reputation: "].ProvidePrefixed([](const ConditionEntry &ce) -> int64_t {
-		string govName = ce.NameWithoutPrefix();
+		std::string govName = ce.NameWithoutPrefix();
 		auto gov = GameData::Governments().Get(govName);
 		if(!gov)
 			return 0;
 		return gov->Reputation();
 	}, [](ConditionEntry &ce, int64_t value) -> void
 	{
-		string govName = ce.NameWithoutPrefix();
+		std::string govName = ce.NameWithoutPrefix();
 		auto gov = GameData::Governments().Get(govName);
 		if(!gov)
 			return;
@@ -4189,7 +4189,7 @@ void PlayerInfo::RegisterDerivedConditions()
 	// calling "roll: max roll" would provide a value from the same range.
 	// Returns 0 if the input condition's value is <= 1.
 	conditions["roll: "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
-		string input = ce.NameWithoutPrefix();
+		std::string input = ce.NameWithoutPrefix();
 		int64_t value = 0;
 		if(DataNode::IsNumber(input))
 			value = static_cast<int64_t>(DataNode::Value(input));
@@ -4207,7 +4207,7 @@ void PlayerInfo::RegisterDerivedConditions()
 
 	// Global conditions setters and getters:
 	conditions["global: "].ProvidePrefixed([](const ConditionEntry &ce) -> int64_t {
-		string globalCondition = ce.NameWithoutPrefix();
+		std::string globalCondition = ce.NameWithoutPrefix();
 		return GameData::GlobalConditions().Get(globalCondition);
 	}, [](ConditionEntry &ce, int64_t value)
 	{
@@ -4237,7 +4237,7 @@ void PlayerInfo::CreateMissions()
 
 		if(mission.CanOffer(*this))
 		{
-			list<Mission> &missions =
+			std::list<Mission> &missions =
 				mission.IsAtLocation(Mission::JOB) ? availableJobs : availableMissions;
 
 			missions.push_back(mission.Instantiate(*this));
@@ -4264,14 +4264,14 @@ void PlayerInfo::StepMissions(UI *ui)
 	// being registered, e.g. by self-destruct:
 	for(Mission &mission : missions)
 		for(const NPC &npc : mission.NPCs())
-			for(const shared_ptr<Ship> &ship : npc.Ships())
+			for(const std::shared_ptr<Ship> &ship : npc.Ships())
 				if(ship->IsDestroyed())
 					mission.Do(ShipEvent(nullptr, ship, ShipEvent::DESTROY), *this, ui);
 
 	// Check missions for status changes from landing.
-	string visitText;
+	std::string visitText;
 	int missionVisits = 0;
-	auto substitutions = map<string, string>{
+	auto substitutions = std::map<std::string, std::string>{
 		{"<first>", firstName},
 		{"<last>", lastName}
 	};
@@ -4339,11 +4339,11 @@ void PlayerInfo::StepMissions(UI *ui)
 
 	// Search for any missions that have failed but for which we are still
 	// holding on to some cargo.
-	set<const Mission *> active;
+	std::set<const Mission *> active;
 	for(const Mission &it : missions)
 		active.insert(&it);
 
-	vector<const Mission *> missionsToRemove;
+	std::vector<const Mission *> missionsToRemove;
 	for(const auto &it : cargo.MissionCargo())
 		if(!active.contains(it.first))
 			missionsToRemove.push_back(it.first);
@@ -4369,13 +4369,13 @@ void PlayerInfo::Autosave() const
 	if(!CanBeSaved() || filePath.length() < 4)
 		return;
 
-	string path = filePath.substr(0, filePath.length() - 4) + "~autosave.txt";
+	std::string path = filePath.substr(0, filePath.length() - 4) + "~autosave.txt";
 	Save(path);
 }
 
 
 
-void PlayerInfo::Save(const string &filePath) const
+void PlayerInfo::Save(const std::string &filePath) const
 {
 	if(transactionSnapshot)
 		transactionSnapshot->SaveToPath(filePath);
@@ -4468,7 +4468,7 @@ void PlayerInfo::Save(DataWriter &out) const
 	out.WriteComment("What you own:");
 
 	// Save all the data for all the player's ships.
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 	{
 		ship->Save(out);
 		auto it = groups.find(ship.get());
@@ -4498,7 +4498,7 @@ void PlayerInfo::Save(DataWriter &out) const
 		out.Write("licenses");
 		out.BeginChild();
 		{
-			for(const string &license : licenses)
+			for(const std::string &license : licenses)
 				out.Write(license);
 		}
 		out.EndChild();
@@ -4524,7 +4524,7 @@ void PlayerInfo::Save(DataWriter &out) const
 		out.Write("stock");
 		out.BeginChild();
 		{
-			using StockElement = pair<const Outfit *const, int>;
+			using StockElement = std::pair<const Outfit *const, int>;
 			WriteSorted(stock,
 				[](const StockElement *lhs, const StockElement *rhs)
 					{ return lhs->first->TrueName() < rhs->first->TrueName(); },
@@ -4549,8 +4549,8 @@ void PlayerInfo::Save(DataWriter &out) const
 		mission.Save(out);
 	for(const Mission &mission : inactiveMissions)
 		mission.Save(out);
-	map<string, map<string, int>> offWorldMissionCargo;
-	map<string, map<string, int>> offWorldMissionPassengers;
+	std::map<std::string, std::map<std::string, int>> offWorldMissionCargo;
+	std::map<std::string, std::map<std::string, int>> offWorldMissionPassengers;
 	for(const auto &it : ships)
 	{
 		const Ship &ship = *it;
@@ -4562,7 +4562,7 @@ void PlayerInfo::Save(DataWriter &out) const
 		for(const auto &passengers : ship.Cargo().PassengerList())
 			offWorldMissionPassengers[passengers.first->UUID().ToString()][ship.UUID().ToString()] = passengers.second;
 	}
-	auto SaveMissionCargoDistribution = [&out](const map<string, map<string, int>> &toSave, bool passengers) -> void
+	auto SaveMissionCargoDistribution = [&out](const std::map<std::string, std::map<std::string, int>> &toSave, bool passengers) -> void
 	{
 		if(passengers)
 			out.Write("mission passengers");
@@ -4661,7 +4661,7 @@ void PlayerInfo::Save(DataWriter &out) const
 		out.Write("harvested");
 		out.BeginChild();
 		{
-			using HarvestLog = pair<const System *, const Outfit *>;
+			using HarvestLog = std::pair<const System *, const Outfit *>;
 			WriteSorted(harvested,
 				[](const HarvestLog *lhs, const HarvestLog *rhs) -> bool
 				{
@@ -4747,7 +4747,7 @@ void PlayerInfo::Fine(UI *ui)
 	if(!gov->CanEnforce(planet))
 		return;
 
-	pair<const Conversation *, string> message = gov->Fine(*this, 0, nullptr, planet->Security());
+	std::pair<const Conversation *, std::string> message = gov->Fine(*this, 0, nullptr, planet->Security());
 	if(!message.second.empty())
 	{
 		if(message.second == "atrocity")
@@ -4785,10 +4785,10 @@ void PlayerInfo::SetFlagship(Ship &other)
 	flagship = other.shared_from_this();
 
 	// Make sure your ships all know who the flagship is.
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 	{
 		bool shouldFollowFlagship = (ship != flagship && !ship->IsParked());
-		ship->SetParent(shouldFollowFlagship ? flagship : shared_ptr<Ship>());
+		ship->SetParent(shouldFollowFlagship ? flagship : std::shared_ptr<Ship>());
 	}
 
 	// Move the flagship to the beginning to the list of ships.
@@ -4797,7 +4797,7 @@ void PlayerInfo::SetFlagship(Ship &other)
 	// Make sure your flagship is not included in the escort selection.
 	for(auto it = selectedShips.begin(); it != selectedShips.end(); )
 	{
-		shared_ptr<Ship> ship = it->lock();
+		std::shared_ptr<Ship> ship = it->lock();
 		if(!ship || ship == flagship)
 			it = selectedShips.erase(it);
 		else
@@ -4821,7 +4821,7 @@ void PlayerInfo::HandleFlagshipParking(Ship *oldFirstShip, Ship *newFirstShip)
 
 
 // Helper function to update the ship selection.
-void PlayerInfo::SelectShip(const shared_ptr<Ship> &ship, bool *first)
+void PlayerInfo::SelectShip(const std::shared_ptr<Ship> &ship, bool *first)
 {
 	// Make sure this ship is not already selected.
 	auto it = selectedShips.begin();
@@ -4844,7 +4844,7 @@ void PlayerInfo::SelectShip(const shared_ptr<Ship> &ship, bool *first)
 
 
 // Instantiate the given model and add it to the player's fleet.
-void PlayerInfo::AddStockShip(const Ship *model, const string &name)
+void PlayerInfo::AddStockShip(const Ship *model, const std::string &name)
 {
 	ships.push_back(make_shared<Ship>(*model));
 	ships.back()->SetGivenName(!name.empty() ? name : GameData::Phrases().Get("civilian")->Get());
@@ -4862,7 +4862,7 @@ void PlayerInfo::ForgetGiftedShip(const Ship &oldShip, bool failsMissions)
 {
 	const EsUuid &id = oldShip.UUID();
 	auto shipToForget = find_if(giftedShips.begin(), giftedShips.end(),
-		[&id](const pair<const string, EsUuid> &shipId) { return shipId.second == id; });
+		[&id](const std::pair<const std::string, EsUuid> &shipId) { return shipId.second == id; });
 	if(shipToForget != giftedShips.end())
 	{
 		if(failsMissions)
@@ -4887,7 +4887,7 @@ bool PlayerInfo::CanBeSaved() const
 void PlayerInfo::DoAccounting()
 {
 	// Check what salaries and tribute the player receives.
-	map<string, int64_t> income;
+	std::map<std::string, std::int64_t> income;
 	int64_t salariesIncome = accounts.SalariesIncomeTotal();
 	if(salariesIncome)
 		income["salary"] = salariesIncome;
@@ -4899,8 +4899,8 @@ void PlayerInfo::DoAccounting()
 		income["based on outfits and ships"] = balance.assetsReturns;
 	if(!income.empty())
 	{
-		string message = "You receive " + Format::List<map, string, int64_t>(income,
-			[](const pair<string, int64_t> &it)
+		std::string message = "You receive " + Format::List<std::map, std::string, int64_t>(income,
+			[](const std::pair<std::string, int64_t> &it)
 			{
 				return Format::CreditString(it.second) + ' ' + it.first;
 			}) + '.';
@@ -4911,12 +4911,12 @@ void PlayerInfo::DoAccounting()
 	// For accounting, keep track of the player's net worth. This is for
 	// calculation of yearly income to determine maximum mortgage amounts.
 	int64_t assets = depreciation.Value(ships, date.DaysSinceEpoch());
-	for(const shared_ptr<Ship> &ship : ships)
+	for(const std::shared_ptr<Ship> &ship : ships)
 		assets += ship->Cargo().Value(system);
 
 	// Have the player pay salaries, mortgages, etc. and print a message that
 	// summarizes the payments that were made.
-	string message = accounts.Step(assets, Salaries(), balance.maintenanceCosts);
+	std::string message = accounts.Step(assets, Salaries(), balance.maintenanceCosts);
 	if(!message.empty())
 		Messages::Add({message, GameData::MessageCategories().Get("force log")});
 }

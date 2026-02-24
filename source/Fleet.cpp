@@ -33,12 +33,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <functional>
 #include <iterator>
 
-using namespace std;
+
 
 namespace {
 	// Generate an offset magnitude that will sample from an annulus (planets)
 	// or a circle (systems without inhabited planets).
-	double OffsetFrom(const pair<Point, double> &center)
+	double OffsetFrom(const std::pair<Point, double> &center)
 	{
 		// If the center has a radius, then position ships further away.
 		double minimumOffset = center.second ? 1. : 0.;
@@ -81,7 +81,7 @@ void Fleet::Load(const DataNode &node)
 		}
 
 		// If this line is an add or remove, the key is the token at index 1.
-		const string &key = child.Token(add || remove);
+		const std::string &key = child.Token(add || remove);
 
 		if(key == "government" && hasValue)
 			government = GameData::Governments().Get(child.Token(1));
@@ -93,7 +93,7 @@ void Fleet::Load(const DataNode &node)
 				fighterNames = GameData::Phrases().Get(child.Token(1));
 			for(const DataNode &grand : child)
 			{
-				const string &fighterKey = grand.Token(0);
+				const std::string &fighterKey = grand.Token(0);
 				if(fighterKey == "names" && grand.Size() >= 2)
 					fighterNames = GameData::Phrases().Get(grand.Token(1));
 				else if(fighterKey == "personality")
@@ -119,7 +119,7 @@ void Fleet::Load(const DataNode &node)
 				resetVariants = false;
 				variants.clear();
 			}
-			int weight = (child.Size() >= add + 2) ? max<int>(1, child.Value(add + 1)) : 1;
+			int weight = (child.Size() >= add + 2) ? std::max<int>(1, child.Value(add + 1)) : 1;
 			variants.emplace_back(weight, child);
 		}
 		else if(key == "variant")
@@ -171,8 +171,8 @@ void Fleet::RemoveInvalidVariants()
 		return;
 
 	Logger::LogError("Warning: " + (fleetName.empty() ? "unnamed fleet" : "fleet \"" + fleetName + "\"")
-		+ ": Removing " + to_string(count) + " invalid " + (count > 1 ? "variants" : "variant")
-		+ " (" + to_string(total - variants.TotalWeight()) + " of " + to_string(total) + " weight)");
+		+ ": Removing " + std::to_string(count) + " invalid " + (count > 1 ? "variants" : "variant")
+		+ " (" + std::to_string(total - variants.TotalWeight()) + " of " + std::to_string(total) + " weight)");
 }
 
 
@@ -186,13 +186,13 @@ const Government *Fleet::GetGovernment() const
 
 
 // Choose a fleet to be created during flight, and have it enter the system via jump or planetary departure.
-void Fleet::Enter(const System &system, list<shared_ptr<Ship>> &ships, const Planet *planet) const
+void Fleet::Enter(const System &system, std::list<std::shared_ptr<Ship>> &ships, const Planet *planet) const
 {
 	if(variants.empty() || personality.IsDerelict())
 		return;
 
 	// Pick a fleet variant to instantiate.
-	const vector<const Ship *> &variantShips = variants.Get().Ships();
+	const std::vector<const Ship *> &variantShips = variants.Get().Ships();
 	if(variantShips.empty())
 		return;
 
@@ -210,7 +210,7 @@ void Fleet::Enter(const System &system, list<shared_ptr<Ship>> &ships, const Pla
 	{
 		// Where this fleet can come from depends on whether it is friendly to any
 		// planets in this system and whether it has jump drives.
-		vector<const System *> linkVector;
+		std::vector<const System *> linkVector;
 		// Find out what the "best" jump method the fleet has is. Assume that if the
 		// others don't have that jump method, they are being carried as fighters.
 		// That is, content creators should avoid creating fleets with a mix of jump
@@ -250,7 +250,7 @@ void Fleet::Enter(const System &system, list<shared_ptr<Ship>> &ships, const Pla
 		}
 
 		// Find all the inhabited planets this fleet could take off from.
-		vector<const StellarObject *> stellarVector;
+		std::vector<const StellarObject *> stellarVector;
 		if(!personality.IsSurveillance())
 			for(const StellarObject &object : system.Objects())
 				if(object.HasValidPlanet() && object.GetPlanet()->IsInhabited()
@@ -304,7 +304,7 @@ void Fleet::Enter(const System &system, list<shared_ptr<Ship>> &ships, const Pla
 			// Search the stellar object associated with the given planet.
 			// If there are many possible candidates (for example for ringworlds),
 			// then choose a random one.
-			vector<const StellarObject *> stellarObjects;
+			std::vector<const StellarObject *> stellarObjects;
 			for(const auto &object : system.Objects())
 				if(object.GetPlanet() == planet)
 					stellarObjects.push_back(&object);
@@ -323,7 +323,7 @@ void Fleet::Enter(const System &system, list<shared_ptr<Ship>> &ships, const Pla
 
 
 		// To take off from the planet, all non-carried ships must be able to access it.
-		if(planet->IsUnrestricted() || all_of(placed.cbegin(), placed.cend(), [&](const shared_ptr<Ship> &ship)
+		if(planet->IsUnrestricted() || all_of(placed.cbegin(), placed.cend(), [&](const std::shared_ptr<Ship> &ship)
 				{ return ship->GetParent() || planet->IsAccessible(ship.get()); }))
 		{
 			position = object->Position();
@@ -336,14 +336,14 @@ void Fleet::Enter(const System &system, list<shared_ptr<Ship>> &ships, const Pla
 			if(source == target)
 				return;
 			// Otherwise, have the fleet arrive here from the target system.
-			swap(source, target);
+			std::swap(source, target);
 			planet = nullptr;
 		}
 	}
 
 	// Place all the ships in the chosen fleet variant.
-	shared_ptr<Ship> flagship;
-	for(shared_ptr<Ship> &ship : placed)
+	std::shared_ptr<Ship> flagship;
+	for(std::shared_ptr<Ship> &ship : placed)
 	{
 		// If this is a carried fighter, no need to position it.
 		if(ship->GetParent())
@@ -379,13 +379,13 @@ void Fleet::Enter(const System &system, list<shared_ptr<Ship>> &ships, const Pla
 
 // Place one of the variants in the given system, already "in action." If the carried flag is set,
 // only uncarried ships will be added to the list (as any carriables will be stored in bays).
-void Fleet::Place(const System &system, list<shared_ptr<Ship>> &ships, bool carried, bool addCargo) const
+void Fleet::Place(const System &system, std::list<std::shared_ptr<Ship>> &ships, bool carried, bool addCargo) const
 {
 	if(variants.empty())
 		return;
 
 	// Pick a fleet variant to instantiate.
-	const vector<const Ship *> &variantShips = variants.Get().Ships();
+	const std::vector<const Ship *> &variantShips = variants.Get().Ships();
 	if(variantShips.empty())
 		return;
 
@@ -393,9 +393,9 @@ void Fleet::Place(const System &system, list<shared_ptr<Ship>> &ships, bool carr
 	auto center = ChooseCenter(system);
 
 	// Place all the ships in the chosen fleet variant.
-	shared_ptr<Ship> flagship;
-	vector<shared_ptr<Ship>> placed = Instantiate(variantShips);
-	for(shared_ptr<Ship> &ship : placed)
+	std::shared_ptr<Ship> flagship;
+	std::vector<std::shared_ptr<Ship>> placed = Instantiate(variantShips);
+	for(std::shared_ptr<Ship> &ship : placed)
 	{
 		// If this is a fighter and someone can carry it, no need to position it.
 		if(carried && PlaceFighter(ship, placed))
@@ -444,7 +444,7 @@ const System *Fleet::Enter(const System &system, Ship &ship, const System *sourc
 	// Choose which system this ship is coming from.
 	if(!source)
 	{
-		vector<const System *> validSystems;
+		std::vector<const System *> validSystems;
 		for(const System *link : system.Links())
 			if(!ship.IsRestrictedFrom(*link))
 				validSystems.emplace_back(link);
@@ -482,16 +482,16 @@ void Fleet::Place(const System &system, Ship &ship)
 
 int64_t Fleet::Strength() const
 {
-	return variants.Average(mem_fn(&Variant::Strength));
+	return variants.Average(std::mem_fn(&Variant::Strength));
 }
 
 
 
 // Obtain a positional reference and the radius of the object at that position (e.g. a planet).
 // Spaceport status can be modified during normal gameplay, so this information is not cached.
-pair<Point, double> Fleet::ChooseCenter(const System &system)
+std::pair<Point, double> Fleet::ChooseCenter(const System &system)
 {
-	auto centers = vector<pair<Point, double>>();
+	auto centers = std::vector<std::pair<Point, double>>();
 	for(const StellarObject &object : system.Objects())
 		if(object.HasValidPlanet() && object.GetPlanet()->IsInhabited())
 			centers.emplace_back(object.Position(), object.Radius());
@@ -503,9 +503,9 @@ pair<Point, double> Fleet::ChooseCenter(const System &system)
 
 
 
-vector<shared_ptr<Ship>> Fleet::Instantiate(const vector<const Ship *> &ships) const
+std::vector<std::shared_ptr<Ship>> Fleet::Instantiate(const std::vector<const Ship *> &ships) const
 {
-	vector<shared_ptr<Ship>> placed;
+	std::vector<std::shared_ptr<Ship>> placed;
 	for(const Ship *model : ships)
 	{
 		// At least one of this variant's ships is valid, but we should avoid spawning any that are not defined.
@@ -537,12 +537,12 @@ vector<shared_ptr<Ship>> Fleet::Instantiate(const vector<const Ship *> &ships) c
 
 
 
-bool Fleet::PlaceFighter(const shared_ptr<Ship> &fighter, vector<shared_ptr<Ship>> &placed) const
+bool Fleet::PlaceFighter(const std::shared_ptr<Ship> &fighter, std::vector<std::shared_ptr<Ship>> &placed) const
 {
 	if(!fighter->CanBeCarried())
 		return false;
 
-	for(const shared_ptr<Ship> &parent : placed)
+	for(const std::shared_ptr<Ship> &parent : placed)
 		if(parent->Carry(fighter))
 			return true;
 

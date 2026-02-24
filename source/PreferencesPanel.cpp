@@ -48,50 +48,50 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 namespace {
 	// Settings that require special handling.
-	const string ZOOM_FACTOR = "Main zoom factor";
+	const std::string ZOOM_FACTOR = "Main zoom factor";
 	const int ZOOM_FACTOR_MIN = 100;
 	const int ZOOM_FACTOR_MAX = 200;
 	const int ZOOM_FACTOR_INCREMENT = 10;
-	const string VIEW_ZOOM_FACTOR = "View zoom factor";
-	const string AUTO_AIM_SETTING = "Automatic aiming";
-	const string AUTO_FIRE_SETTING = "Automatic firing";
-	const string SCREEN_MODE_SETTING = "Screen mode";
-	const string VSYNC_SETTING = "VSync";
-	const string CAMERA_ACCELERATION = "Camera acceleration";
-	const string LARGE_GRAPHICS_REDUCTION = "Reduce large graphics";
-	const string CLOAK_OUTLINE = "Cloaked ship outlines";
-	const string STATUS_OVERLAYS_ALL = "Show status overlays";
-	const string STATUS_OVERLAYS_FLAGSHIP = "   Show flagship overlay";
-	const string STATUS_OVERLAYS_ESCORT = "   Show escort overlays";
-	const string STATUS_OVERLAYS_ENEMY = "   Show enemy overlays";
-	const string STATUS_OVERLAYS_NEUTRAL = "   Show neutral overlays";
-	const string TURRET_OVERLAYS = "Turret overlays";
-	const string EXPEND_AMMO = "Escorts expend ammo";
-	const string FLOTSAM_SETTING = "Flotsam collection";
-	const string TURRET_TRACKING = "Turret tracking";
-	const string FOCUS_PREFERENCE = "Turrets focus fire";
-	const string REACTIVATE_HELP = "Reactivate first-time help";
-	const string SCROLL_SPEED = "Scroll speed";
-	const string TOOLTIP_ACTIVATION = "Tooltip activation time";
-	const string FIGHTER_REPAIR = "Repair fighters in";
-	const string FLAGSHIP_SPACE_PRIORITY = "Prioritize flagship use";
-	const string SHIP_OUTLINES = "Ship outlines in shops";
-	const string DATE_FORMAT = "Date format";
-	const string NOTIFY_ON_DEST = "Notify on destination";
-	const string BOARDING_PRIORITY = "Boarding target priority";
-	const string TARGET_ASTEROIDS_BASED_ON = "Target asteroid based on";
-	const string BACKGROUND_PARALLAX = "Parallax background";
-	const string EXTENDED_JUMP_EFFECTS = "Extended jump effects";
-	const string ALERT_INDICATOR = "Alert indicator";
-	const string MINIMAP_DISPLAY = "Show mini-map";
-	const string HUD_SHIP_OUTLINES = "Ship outlines in HUD";
+	const std::string VIEW_ZOOM_FACTOR = "View zoom factor";
+	const std::string AUTO_AIM_SETTING = "Automatic aiming";
+	const std::string AUTO_FIRE_SETTING = "Automatic firing";
+	const std::string SCREEN_MODE_SETTING = "Screen mode";
+	const std::string VSYNC_SETTING = "VSync";
+	const std::string CAMERA_ACCELERATION = "Camera acceleration";
+	const std::string LARGE_GRAPHICS_REDUCTION = "Reduce large graphics";
+	const std::string CLOAK_OUTLINE = "Cloaked ship outlines";
+	const std::string STATUS_OVERLAYS_ALL = "Show status overlays";
+	const std::string STATUS_OVERLAYS_FLAGSHIP = "   Show flagship overlay";
+	const std::string STATUS_OVERLAYS_ESCORT = "   Show escort overlays";
+	const std::string STATUS_OVERLAYS_ENEMY = "   Show enemy overlays";
+	const std::string STATUS_OVERLAYS_NEUTRAL = "   Show neutral overlays";
+	const std::string TURRET_OVERLAYS = "Turret overlays";
+	const std::string EXPEND_AMMO = "Escorts expend ammo";
+	const std::string FLOTSAM_SETTING = "Flotsam collection";
+	const std::string TURRET_TRACKING = "Turret tracking";
+	const std::string FOCUS_PREFERENCE = "Turrets focus fire";
+	const std::string REACTIVATE_HELP = "Reactivate first-time help";
+	const std::string SCROLL_SPEED = "Scroll speed";
+	const std::string TOOLTIP_ACTIVATION = "Tooltip activation time";
+	const std::string FIGHTER_REPAIR = "Repair fighters in";
+	const std::string FLAGSHIP_SPACE_PRIORITY = "Prioritize flagship use";
+	const std::string SHIP_OUTLINES = "Ship outlines in shops";
+	const std::string DATE_FORMAT = "Date format";
+	const std::string NOTIFY_ON_DEST = "Notify on destination";
+	const std::string BOARDING_PRIORITY = "Boarding target priority";
+	const std::string TARGET_ASTEROIDS_BASED_ON = "Target asteroid based on";
+	const std::string BACKGROUND_PARALLAX = "Parallax background";
+	const std::string EXTENDED_JUMP_EFFECTS = "Extended jump effects";
+	const std::string ALERT_INDICATOR = "Alert indicator";
+	const std::string MINIMAP_DISPLAY = "Show mini-map";
+	const std::string HUD_SHIP_OUTLINES = "Ship outlines in HUD";
 #ifdef _WIN32
-	const string TITLE_BAR_THEME = "Title bar theme";
-	const string WINDOW_ROUNDING = "Window rounding";
+	const std::string TITLE_BAR_THEME = "Title bar theme";
+	const std::string WINDOW_ROUNDING = "Window rounding";
 #endif
 
 	// How many pages of controls and settings there are.
@@ -102,7 +102,7 @@ namespace {
 	const int SETTINGS_PAGE_COUNT = 2;
 #endif
 
-	const map<string, SoundCategory> volumeBars = {
+	const std::map<std::string, SoundCategory> volumeBars = {
 		{"volume", SoundCategory::MASTER},
 		{"music volume", SoundCategory::MUSIC},
 		{"ui volume", SoundCategory::UI},
@@ -195,7 +195,7 @@ void PreferencesPanel::Draw()
 	if(currentSettingsPage + 1 < SETTINGS_PAGE_COUNT)
 		info.SetCondition("show next settings");
 	GameData::Interfaces().Get("menu background")->Draw(info, this);
-	string pageName = (page == 'c' ? "controls" : page == 's' ? "settings" : page == 'p' ? "plugins" : "audio");
+	std::string pageName = (page == 'c' ? "controls" : page == 's' ? "settings" : page == 'p' ? "plugins" : "audio");
 	GameData::Interfaces().Get(pageName)->Draw(info, this);
 	GameData::Interfaces().Get("preferences")->Draw(info, this);
 
@@ -451,18 +451,18 @@ bool PreferencesPanel::Scroll(double dx, double dy)
 		{
 			int speed = Preferences::ScrollSpeed();
 			if(dy < 0.)
-				speed = max(10, speed - 10);
+				speed = std::max(10, speed - 10);
 			else
-				speed = min(60, speed + 10);
+				speed = std::min(60, speed + 10);
 			Preferences::SetScrollSpeed(speed);
 		}
 		else if(hoverItem == TOOLTIP_ACTIVATION)
 		{
 			int steps = Preferences::TooltipActivation();
 			if(dy < 0.)
-				steps = max(0, steps - 20);
+				steps = std::max(0, steps - 20);
 			else
-				steps = min(120, steps + 20);
+				steps = std::min(120, steps + 20);
 			Preferences::SetTooltipActivation(steps);
 			for(auto &panel : GetUI()->Stack())
 				panel->UpdateTooltipActivation();
@@ -523,7 +523,7 @@ void PreferencesPanel::Resize()
 	{
 		const Interface *pluginUi = GameData::Interfaces().Get("plugins");
 		Rectangle pluginListBox = pluginUi->GetBox("plugin list");
-		pluginListClip = make_unique<RenderBuffer>(pluginListBox.Dimensions());
+		pluginListClip = std::make_unique<RenderBuffer>(pluginListBox.Dimensions());
 		RenderPluginDescription(selectedPlugin);
 	}
 }
@@ -574,7 +574,7 @@ void PreferencesPanel::DrawControls()
 	//   lines should be drawn on this page.
 	// * The namespace variable CONTROLS_PAGE_COUNT should be updated to the max
 	//   page count (count of '\n' characters plus one).
-	static const string CATEGORIES[] = {
+	static const std::string CATEGORIES[] = {
 		"Keyboard Navigation",
 		"Fleet",
 		"\t",
@@ -583,7 +583,7 @@ void PreferencesPanel::DrawControls()
 		"\n",
 		"Interface"
 	};
-	const string *category = CATEGORIES;
+	const std::string *category = CATEGORIES;
 	static const Command COMMANDS[] = {
 		Command::NONE,
 		Command::FORWARD,
@@ -633,7 +633,7 @@ void PreferencesPanel::DrawControls()
 	int page = 0;
 	for(const Command &command : COMMANDS)
 	{
-		string categoryString;
+		std::string categoryString;
 		if(!command)
 		{
 			if(category != end(CATEGORIES))
@@ -737,7 +737,7 @@ void PreferencesPanel::DrawSettings()
 	//   entries.
 	// * The namespace variable SETTINGS_PAGE_COUNT should be updated to the max
 	//   page count (count of '\n' characters plus one).
-	static const string SETTINGS[] = {
+	static const std::string SETTINGS[] = {
 		"Display",
 		ZOOM_FACTOR,
 		VIEW_ZOOM_FACTOR,
@@ -821,7 +821,7 @@ void PreferencesPanel::DrawSettings()
 
 	bool isCategory = true;
 	int page = 0;
-	for(const string &setting : SETTINGS)
+	for(const std::string &setting : SETTINGS)
 	{
 		// Check if this is a page break.
 		if(setting == "\n")
@@ -866,16 +866,16 @@ void PreferencesPanel::DrawSettings()
 		// Get the "on / off" text for this setting. Setting "isOn"
 		// draws the setting "bright" (i.e. the setting is active).
 		bool isOn = Preferences::Has(setting);
-		string text;
+		std::string text;
 		if(setting == ZOOM_FACTOR)
 		{
 			isOn = Screen::UserZoom() == Screen::Zoom();
-			text = to_string(Screen::UserZoom());
+			text = std::to_string(Screen::UserZoom());
 		}
 		else if(setting == VIEW_ZOOM_FACTOR)
 		{
 			isOn = true;
-			text = to_string(static_cast<int>(100. * Preferences::ViewZoom()));
+			text = std::to_string(static_cast<int>(100. * Preferences::ViewZoom()));
 		}
 		else if(setting == SCREEN_MODE_SETTING)
 		{
@@ -1007,7 +1007,7 @@ void PreferencesPanel::DrawSettings()
 		else if(setting == REACTIVATE_HELP)
 		{
 			// Check how many help messages have been displayed.
-			const map<string, string> &help = GameData::HelpTemplates();
+			const std::map<std::string, std::string> &help = GameData::HelpTemplates();
 			int shown = 0;
 			int total = 0;
 			for(const auto &it : help)
@@ -1015,8 +1015,8 @@ void PreferencesPanel::DrawSettings()
 				// Don't count certain special help messages that are always
 				// active for new players.
 				bool special = false;
-				const string SPECIAL_HELP[] = {"basics", "lost"};
-				for(const string &str : SPECIAL_HELP)
+				const std::string SPECIAL_HELP[] = {"basics", "lost"};
+				for(const std::string &str : SPECIAL_HELP)
 					if(it.first.find(str) == 0)
 						special = true;
 
@@ -1028,7 +1028,7 @@ void PreferencesPanel::DrawSettings()
 			}
 
 			if(shown)
-				text = to_string(shown) + " / " + to_string(total);
+				text = std::to_string(shown) + " / " + std::to_string(total);
 			else
 			{
 				isOn = true;
@@ -1038,7 +1038,7 @@ void PreferencesPanel::DrawSettings()
 		else if(setting == SCROLL_SPEED)
 		{
 			isOn = true;
-			text = to_string(Preferences::ScrollSpeed());
+			text = std::to_string(Preferences::ScrollSpeed());
 		}
 		else if(setting == TOOLTIP_ACTIVATION)
 		{
@@ -1108,7 +1108,7 @@ void PreferencesPanel::DrawPlugins()
 
 	// Switch render target to pluginListClip. Until target is destroyed or
 	// deactivated, all opengl commands will be drawn there instead.
-	auto target = pluginListClip->SetTarget();
+	pluginListClip->SetTarget();
 	Rectangle pluginListBox = pluginUI->GetBox("plugin list");
 
 	Table table;
@@ -1151,8 +1151,7 @@ void PreferencesPanel::DrawPlugins()
 			table.Draw(plugin.name, plugin.enabled ? medium : dim);
 	}
 
-	// Switch back to normal opengl operations.
-	target.Deactivate();
+	pluginListClip->Deactivate();
 
 	pluginListClip->SetFadePadding(
 		pluginListScroll.IsScrollAtMin() ? 0 : 20,
@@ -1217,7 +1216,7 @@ void PreferencesPanel::DrawPlugins()
 
 
 // Render the named plugin description into the pluginDescriptionBuffer.
-void PreferencesPanel::RenderPluginDescription(const string &pluginName)
+void PreferencesPanel::RenderPluginDescription(const std::string &pluginName)
 {
 	const Plugin *plugin = Plugins::Get().Find(pluginName);
 	if(plugin)
@@ -1247,7 +1246,7 @@ void PreferencesPanel::RenderPluginDescription(const Plugin &plugin)
 
 	WrappedText wrap(font);
 	wrap.SetWrapWidth(box.Width());
-	static const string EMPTY = "(No description given.)";
+	static const std::string EMPTY = "(No description given.)";
 	wrap.Wrap(plugin.aboutText.empty() ? EMPTY : plugin.CreateDescription());
 
 	descriptionHeight += wrap.Height();
@@ -1257,9 +1256,9 @@ void PreferencesPanel::RenderPluginDescription(const Plugin &plugin)
 	if(descriptionHeight < box.Height())
 		descriptionHeight = box.Height();
 	pluginDescriptionScroll.SetMaxValue(descriptionHeight);
-	pluginDescriptionBuffer = make_unique<RenderBuffer>(Point(box.Width(), descriptionHeight));
+	pluginDescriptionBuffer = std::make_unique<RenderBuffer>(Point(box.Width(), descriptionHeight));
 	// Redirect all drawing commands into the offscreen buffer.
-	auto target = pluginDescriptionBuffer->SetTarget();
+	pluginDescriptionBuffer->SetTarget();
 
 	Point top(pluginDescriptionBuffer->Left(), pluginDescriptionBuffer->Top());
 	if(sprite)
@@ -1270,7 +1269,7 @@ void PreferencesPanel::RenderPluginDescription(const Plugin &plugin)
 	}
 
 	wrap.Draw(top, medium);
-	target.Deactivate();
+	pluginDescriptionBuffer->Deactivate();
 }
 
 
@@ -1312,7 +1311,7 @@ void PreferencesPanel::Exit()
 
 
 
-void PreferencesPanel::HandleSettingsString(const string &str, Point cursorPosition)
+void PreferencesPanel::HandleSettingsString(const std::string &str, Point cursorPosition)
 {
 	// For some settings, clicking the option does more than just toggle a
 	// boolean state keyed by the option's name.
@@ -1436,7 +1435,7 @@ void PreferencesPanel::HandleSettingsString(const string &str, Point cursorPosit
 
 void PreferencesPanel::HandleUp()
 {
-	selected = max(0, selected - 1);
+	selected = std::max(0, selected - 1);
 	switch(page)
 	{
 	case 's':
@@ -1463,11 +1462,11 @@ void PreferencesPanel::HandleDown()
 			selected++;
 		break;
 	case 's':
-		selected = min(selected + 1, static_cast<int>(prefZones.size() - 1));
+		selected = std::min(selected + 1, static_cast<int>(prefZones.size() - 1));
 		selectedItem = prefZones.at(selected).Value();
 		break;
 	case 'p':
-		selected = min(selected + 1, static_cast<int>(pluginZones.size() - 1));
+		selected = std::min(selected + 1, static_cast<int>(pluginZones.size() - 1));
 		selectedPlugin = pluginZones.at(selected).Value();
 		RenderPluginDescription(selectedPlugin);
 		ScrollSelectedPlugin();

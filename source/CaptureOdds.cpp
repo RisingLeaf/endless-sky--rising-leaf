@@ -22,7 +22,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <functional>
 
-using namespace std;
+
 
 
 
@@ -164,16 +164,16 @@ int CaptureOdds::Index(int attackingCrew, int defendingCrew) const
 
 
 
-// Generate a vector with the total power of the given ship's crew when any
+// Generate a std::vector with the total power of the given ship's crew when any
 // number of them are left, either for attacking or for defending.
-vector<double> CaptureOdds::Power(const Ship &ship, bool isDefender)
+std::vector<double> CaptureOdds::Power(const Ship &ship, bool isDefender)
 {
-	vector<double> power;
+	std::vector<double> power;
 	if(!ship.Crew())
 		return power;
 
 	// Check for any outfits that assist with attacking or defending:
-	const string attribute = (isDefender ? "capture defense" : "capture attack");
+	const std::string attribute = (isDefender ? "capture defense" : "capture attack");
 	const double crewPower = (isDefender ?
 		ship.GetGovernment()->CrewDefense() : ship.GetGovernment()->CrewAttack());
 
@@ -186,9 +186,9 @@ vector<double> CaptureOdds::Power(const Ship &ship, bool isDefender)
 			power.insert(power.end(), it.second, value);
 	}
 	// Use the best weapons first.
-	sort(power.begin(), power.end(), greater<double>());
+	sort(power.begin(), power.end(), std::greater<double>());
 
-	// Resize the vector to have exactly one entry per crew member.
+	// Resize the std::vector to have exactly one entry per crew member.
 	power.resize(ship.Crew(), 0.);
 
 	// Calculate partial sums. That is, power[N - 1] should be your total crew

@@ -19,7 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Effect.h"
 #include "Random.h"
 
-using namespace std;
+
 
 
 

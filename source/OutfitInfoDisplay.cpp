@@ -28,19 +28,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <set>
 #include <sstream>
 
-using namespace std;
+
 
 namespace {
-	const vector<pair<double, string>> SCALE_LABELS = {
-		make_pair(60., ""),
-		make_pair(60. * 60., ""),
-		make_pair(60. * 100., ""),
-		make_pair(100., "%"),
-		make_pair(100., ""),
-		make_pair(1. / 60., "s")
+	const std::vector<std::pair<double, std::string>> SCALE_LABELS = {
+		std::make_pair(60., ""),
+		std::make_pair(60. * 60., ""),
+		std::make_pair(60. * 100., ""),
+		std::make_pair(100., "%"),
+		std::make_pair(100., ""),
+		std::make_pair(1. / 60., "s")
 	};
 
-	const map<string, int> SCALE = {
+	const std::map<std::string, int> SCALE = {
 		{"active cooling", 0},
 		{"afterburner shields", 0},
 		{"afterburner hull", 0},
@@ -226,7 +226,7 @@ namespace {
 		{"disabled recovery time", 5}
 	};
 
-	const map<string, string> BOOLEAN_ATTRIBUTES = {
+	const std::map<std::string, std::string> BOOLEAN_ATTRIBUTES = {
 		{"unplunderable", "This outfit cannot be plundered."},
 		{"installable", "This is not an installable item."},
 		{"hyperdrive", "Allows you to make hyperjumps."},
@@ -243,7 +243,7 @@ namespace {
 		{"cloaked scanning", "You may scan other ships while cloaked."}
 	};
 
-	bool IsNotRequirement(const string &label)
+	bool IsNotRequirement(const std::string &label)
 	{
 		return label == "automaton" ||
 			SCALE.find(label) != SCALE.end() ||
@@ -268,7 +268,7 @@ void OutfitInfoDisplay::Update(const Outfit &outfit, const PlayerInfo &player, b
 	UpdateRequirements(outfit, player, canSell, descriptionCollapsed);
 	UpdateAttributes(outfit);
 
-	maximumHeight = max(descriptionHeight, max(requirementsHeight, attributesHeight));
+	maximumHeight = std::max(descriptionHeight, std::max(requirementsHeight, attributesHeight));
 }
 
 
@@ -299,7 +299,7 @@ void OutfitInfoDisplay::UpdateRequirements(const Outfit &outfit, const PlayerInf
 	int64_t buyValue = player.StockDepreciation().Value(&outfit, day);
 	int64_t sellValue = player.FleetDepreciation().Value(&outfit, day);
 
-	for(const string &license : outfit.Licenses())
+	for(const std::string &license : outfit.Licenses())
 	{
 		if(player.HasLicense(license))
 			continue;
@@ -317,7 +317,7 @@ void OutfitInfoDisplay::UpdateRequirements(const Outfit &outfit, const PlayerInf
 		requirementLabels.push_back("cost:");
 	else
 	{
-		ostringstream out;
+		std::ostringstream out;
 		out << "cost (" << (100 * buyValue) / cost << "%):";
 		requirementLabels.push_back(out.str());
 	}
@@ -330,7 +330,7 @@ void OutfitInfoDisplay::UpdateRequirements(const Outfit &outfit, const PlayerInf
 			requirementLabels.push_back("sells for:");
 		else
 		{
-			ostringstream out;
+			std::ostringstream out;
 			out << "sells for (" << (100 * sellValue) / cost << "%):";
 			requirementLabels.push_back(out.str());
 		}
@@ -350,7 +350,7 @@ void OutfitInfoDisplay::UpdateRequirements(const Outfit &outfit, const PlayerInf
 	requirementsHeight += 10;
 
 	bool hasContent = false;
-	static const vector<string> BEFORE = {"outfit space", "weapon capacity", "engine capacity"};
+	static const std::vector<std::string> BEFORE = {"outfit space", "weapon capacity", "engine capacity"};
 	for(const auto &attr : BEFORE)
 	{
 		if(outfit.Get(attr) < 0)
@@ -367,7 +367,7 @@ void OutfitInfoDisplay::UpdateRequirements(const Outfit &outfit, const PlayerInf
 		requirementsHeight += 10;
 	}
 
-	for(const pair<const char *, double> &it : outfit.Attributes())
+	for(const std::pair<const char *, double> &it : outfit.Attributes())
 		if(!count(BEFORE.begin(), BEFORE.end(), it.first))
 			AddRequirementAttribute(it.first, it.second);
 }
@@ -378,7 +378,7 @@ void OutfitInfoDisplay::UpdateRequirements(const Outfit &outfit, const PlayerInf
 // Any exceptions to that rule would require in-game code to handle
 // their unique properties, so when code is added to handle a new
 // attribute, this code also should also be updated.
-void OutfitInfoDisplay::AddRequirementAttribute(string label, double value)
+void OutfitInfoDisplay::AddRequirementAttribute(std::string label, double value)
 {
 	// These attributes have negative values but are not requirements
 	if(IsNotRequirement(label))
@@ -419,11 +419,11 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 	// These attributes are regularly negative on outfits, so when positive,
 	// tag them with "added" and show them first. They conveniently
 	// don't use SCALE or BOOLEAN_ATTRIBUTES.
-	static const vector<string> EXPECTED_NEGATIVE = {
+	static const std::vector<std::string> EXPECTED_NEGATIVE = {
 		"outfit space", "weapon capacity", "engine capacity", "gun ports", "turret mounts"
 	};
 
-	for(const string &attr : EXPECTED_NEGATIVE)
+	for(const std::string &attr : EXPECTED_NEGATIVE)
 	{
 		double value = outfit.Get(attr);
 		if(value <= 0)
@@ -435,14 +435,14 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 		hasNormalAttributes = true;
 	}
 
-	for(const pair<const char *, double> &it : outfit.Attributes())
+	for(const std::pair<const char *, double> &it : outfit.Attributes())
 	{
 		if(count(EXPECTED_NEGATIVE.begin(), EXPECTED_NEGATIVE.end(), it.first))
 			continue;
 
 		// Only show positive values here, with some exceptions.
 		// Negative values are usually handled as a "requirement"
-		if(static_cast<string>(it.first) == "required crew")
+		if(static_cast<std::string>(it.first) == "required crew")
 		{
 			// 'required crew' is inverted - positive values are requirements.
 			if(it.second > 0)
@@ -456,7 +456,7 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 
 		auto sit = SCALE.find(it.first);
 		double scale = (sit == SCALE.end() ? 1. : SCALE_LABELS[sit->second].first);
-		string units = (sit == SCALE.end() ? "" : SCALE_LABELS[sit->second].second);
+		std::string units = (sit == SCALE.end() ? "" : SCALE_LABELS[sit->second].second);
 
 		auto bit = BOOLEAN_ATTRIBUTES.find(it.first);
 		if(bit != BOOLEAN_ATTRIBUTES.end())
@@ -467,7 +467,7 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 		}
 		else
 		{
-			attributeLabels.emplace_back(static_cast<string>(it.first) + ":");
+			attributeLabels.emplace_back(static_cast<std::string>(it.first) + ":");
 			attributeValues.emplace_back(Format::Number(it.second * scale) + units);
 			attributesHeight += 20;
 		}
@@ -521,13 +521,13 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 		attributesHeight += 20;
 		// Identify the ranges between which the dropoff takes place.
 		attributeLabels.emplace_back("dropoff range:");
-		const pair<double, double> &ranges = weapon->DropoffRanges();
+		const std::pair<double, double> &ranges = weapon->DropoffRanges();
 		attributeValues.emplace_back(Format::Number(ranges.first)
 			+ " - " + Format::Number(ranges.second));
 		attributesHeight += 20;
 	}
 
-	static const vector<pair<string, string>> VALUE_NAMES = {
+	static const std::vector<std::pair<std::string, std::string>> VALUE_NAMES = {
 		{"shield damage", ""},
 		{"hull damage", ""},
 		{"minable damage", ""},
@@ -568,7 +568,7 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 		{"% firing shields", "%"}
 	};
 
-	vector<double> values = {
+	std::vector<double> values = {
 		weapon->ShieldDamage(),
 		weapon->HullDamage(),
 		weapon->MinableDamage() != weapon->HullDamage() ? weapon->MinableDamage() : 0.,
@@ -613,7 +613,7 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 	double reload = weapon->Reload();
 	if(reload)
 	{
-		static const string PER_SECOND = " / second:";
+		static const std::string PER_SECOND = " / second:";
 		for(unsigned i = 0; i < values.size(); ++i)
 			if(values[i])
 			{
@@ -655,14 +655,14 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 		attributeValues.emplace_back(weapon->Leading() ? "leading" : "direct");
 		attributesHeight += 20;
 	}
-	static const vector<string> PERCENT_NAMES = {
+	static const std::vector<std::string> PERCENT_NAMES = {
 		"tracking:",
 		"optical tracking:",
 		"infrared tracking:",
 		"radar tracking:",
 		"piercing:"
 	};
-	vector<double> percentValues = {
+	std::vector<double> percentValues = {
 		weapon->Tracking(),
 		weapon->OpticalTracking(),
 		weapon->InfraredTracking(),
@@ -699,7 +699,7 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 	// the values have already been added.
 	if(!isContinuous && !isContinuousBurst)
 	{
-		static const string PER_SHOT = " / shot:";
+		static const std::string PER_SHOT = " / shot:";
 		for(unsigned i = 0; i < VALUE_NAMES.size(); ++i)
 			if(values[i])
 			{
@@ -709,7 +709,7 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 			}
 	}
 
-	static const vector<string> OTHER_NAMES = {
+	static const std::vector<std::string> OTHER_NAMES = {
 		"inaccuracy:",
 		"blast radius:",
 		"missile strength:",
@@ -717,7 +717,7 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 		"tractor beam:",
 		"mining precision:",
 	};
-	vector<double> otherValues = {
+	std::vector<double> otherValues = {
 		weapon->Inaccuracy(),
 		weapon->BlastRadius(),
 		static_cast<double>(weapon->MissileStrength()),

@@ -29,7 +29,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "TextReplacements.h"
 #include "UI.h"
 
-using namespace std;
+
 
 namespace {
 	int CountInCargo(const Outfit *outfit, const PlayerInfo &player)
@@ -59,7 +59,7 @@ namespace {
 
 // Construct and Load() at the same time.
 MissionAction::MissionAction(const DataNode &node, const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
 {
 	Load(node, playerConditions, visitedSystems, visitedPlanets);
 }
@@ -67,7 +67,7 @@ MissionAction::MissionAction(const DataNode &node, const ConditionsStore *player
 
 
 void MissionAction::Load(const DataNode &node, const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
 {
 	if(node.Size() >= 2)
 		trigger = node.Token(1);
@@ -87,9 +87,9 @@ void MissionAction::Load(const DataNode &node, const ConditionsStore *playerCond
 
 
 void MissionAction::LoadSingle(const DataNode &child, const ConditionsStore *playerConditions,
-	const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+	const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
 {
-	const string &key = child.Token(0);
+	const std::string &key = child.Token(0);
 	bool hasValue = child.Size() >= 2;
 
 	if(key == "dialog")
@@ -169,7 +169,7 @@ void MissionAction::SaveBody(DataWriter &out) const
 		out.BeginChild();
 		{
 			// Break the text up into paragraphs.
-			for(const string &line : Format::Split(dialogText, "\n\t"))
+			for(const std::string &line : Format::Split(dialogText, "\n\t"))
 				out.Write(line);
 		}
 		out.EndChild();
@@ -186,7 +186,7 @@ void MissionAction::SaveBody(DataWriter &out) const
 
 // Check this template or instantiated MissionAction to see if any used content
 // is not fully defined (e.g. plugin removal, typos in names, etc.).
-string MissionAction::Validate() const
+std::string MissionAction::Validate() const
 {
 	// Any filter used to control where this action triggers must be valid.
 	if(!systemFilter.IsValid())
@@ -197,7 +197,7 @@ string MissionAction::Validate() const
 		return "stock conversation";
 
 	// Conversations must have valid actions.
-	string reason = conversation->Validate();
+	std::string reason = conversation->Validate();
 	if(!reason.empty())
 		return reason;
 
@@ -211,7 +211,7 @@ string MissionAction::Validate() const
 
 
 
-const string &MissionAction::DialogText() const
+const std::string &MissionAction::DialogText() const
 {
 	return dialogText;
 }
@@ -220,7 +220,7 @@ const string &MissionAction::DialogText() const
 
 // Check if this action can be completed right now. It cannot be completed
 // if it takes away money or outfits that the player does not have.
-bool MissionAction::CanBeDone(const PlayerInfo &player, bool isFailed, const shared_ptr<Ship> &boardingShip) const
+bool MissionAction::CanBeDone(const PlayerInfo &player, bool isFailed, const std::shared_ptr<Ship> &boardingShip) const
 {
 	if(isFailed && !runsWhenFailed && trigger != "fail")
 		return false;
@@ -299,7 +299,7 @@ bool MissionAction::CanBeDone(const PlayerInfo &player, bool isFailed, const sha
 
 
 
-bool MissionAction::RequiresGiftedShip(const string &shipId) const
+bool MissionAction::RequiresGiftedShip(const std::string &shipId) const
 {
 	for(auto &&it : action.Ships())
 		if(it.Id() == shipId)
@@ -310,7 +310,7 @@ bool MissionAction::RequiresGiftedShip(const string &shipId) const
 
 
 void MissionAction::Do(PlayerInfo &player, UI *ui, const Mission *caller, const System *destination,
-	const shared_ptr<Ship> &ship, const bool isUnique) const
+	const std::shared_ptr<Ship> &ship, const bool isUnique) const
 {
 	bool isOffer = (trigger == "offer");
 	if(!conversation->IsEmpty() && ui)
@@ -328,10 +328,10 @@ void MissionAction::Do(PlayerInfo &player, UI *ui, const Mission *caller, const 
 	}
 	else if(!dialogText.empty() && ui)
 	{
-		map<string, string> subs;
+		std::map<std::string, std::string> subs;
 		GameData::GetTextReplacements().Substitutions(subs);
 		player.AddPlayerSubstitutions(subs);
-		string text = Format::Replace(dialogText, subs);
+		std::string text = Format::Replace(dialogText, subs);
 
 		// Don't push the dialog text if this is a visit action on a nonunique
 		// mission; on visit, nonunique dialogs are handled by PlayerInfo as to
@@ -352,7 +352,7 @@ void MissionAction::Do(PlayerInfo &player, UI *ui, const Mission *caller, const 
 
 
 // Convert this validated template into a populated action.
-MissionAction MissionAction::Instantiate(map<string, string> &subs, const System *origin,
+MissionAction MissionAction::Instantiate(std::map<std::string, std::string> &subs, const System *origin,
 	int jumps, int64_t payload) const
 {
 	MissionAction result;
@@ -363,8 +363,8 @@ MissionAction MissionAction::Instantiate(map<string, string> &subs, const System
 
 	result.requiredOutfits = requiredOutfits;
 
-	string previousPayment = subs["<payment>"];
-	string previousFine = subs["<fine>"];
+	std::string previousPayment = subs["<payment>"];
+	std::string previousFine = subs["<fine>"];
 	result.action = action.Instantiate(subs, jumps, payload);
 
 	// Create any associated dialog text from phrases, or use the directly specified text.
@@ -399,7 +399,7 @@ MissionAction::MissionDialog::MissionDialog(const ExclusiveItem<Phrase> &phrase)
 
 
 
-MissionAction::MissionDialog::MissionDialog(const string &text):
+MissionAction::MissionDialog::MissionDialog(const std::string &text):
 	dialogText(text)
 {
 }
@@ -408,7 +408,7 @@ MissionAction::MissionDialog::MissionDialog(const string &text):
 
 MissionAction::MissionDialog::MissionDialog(const DataNode &node, const ConditionsStore *playerConditions)
 {
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	// Handle anonymous phrases
 	//    phrase
 	//       ...
@@ -449,7 +449,7 @@ MissionAction::MissionDialog::MissionDialog(const DataNode &node, const Conditio
 
 
 
-string MissionAction::CollapseDialog(const map<string, string> *subs) const
+std::string MissionAction::CollapseDialog(const std::map<std::string, std::string> *subs) const
 {
 	// No subs means we're determining whether the dialog is pure text.
 	// This is done at load time.
@@ -463,20 +463,20 @@ string MissionAction::CollapseDialog(const map<string, string> *subs) const
 			return Format::Replace(Phrase::ExpandPhrases(dialogText), *subs);
 	}
 
-	string resultText;
+	std::string resultText;
 	for(auto &item : dialog)
 	{
 		// When checking for a pure-text dialog, reject a dialog with conditions or phrases,
 		// An empty string return value tells the caller that this dialog isn't pure text.
 		if(!subs && (!item.condition.IsEmpty() || item.dialogText.empty()))
-			return string();
+			return std::string();
 
 		// Skip text that is disabled.
 		if(!item.condition.IsEmpty() && !item.condition.Test())
 			continue;
 
 		// Evaluate the phrase if we have one, otherwise copy the prepared text.
-		string content;
+		std::string content;
 		if(!item.dialogText.empty())
 			content = item.dialogText;
 		else if(item.dialogPhrase.IsStock() && item.dialogPhrase->IsEmpty())

@@ -20,10 +20,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <map>
 
-using namespace std;
+
 
 namespace {
-	const map<string, SoundCategory> categoryNames = {
+	const std::map<std::string, SoundCategory> categoryNames = {
 		{"ui", SoundCategory::UI},
 		{"anti-missile", SoundCategory::ANTI_MISSILE},
 		{"weapon", SoundCategory::WEAPON},
@@ -39,14 +39,14 @@ namespace {
 
 
 
-const string &Effect::TrueName() const
+const std::string &Effect::TrueName() const
 {
 	return trueName;
 }
 
 
 
-void Effect::SetTrueName(const string &name)
+void Effect::SetTrueName(const std::string &name)
 {
 	this->trueName = name;
 }
@@ -60,7 +60,7 @@ void Effect::Load(const DataNode &node)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "sprite")
 			LoadSprite(child);

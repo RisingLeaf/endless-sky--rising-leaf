@@ -26,7 +26,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 
 
@@ -64,16 +64,16 @@ void HiringPanel::Draw()
 		flagshipUnused = flagshipBunks - flagship->Crew();
 	}
 
-	info.SetString("flagship bunks", to_string(flagshipBunks));
-	info.SetString("flagship required", to_string(flagshipRequired));
-	info.SetString("flagship extra", to_string(flagshipExtra));
-	info.SetString("flagship unused", to_string(flagshipUnused));
+	info.SetString("flagship bunks", std::to_string(flagshipBunks));
+	info.SetString("flagship required", std::to_string(flagshipRequired));
+	info.SetString("flagship extra", std::to_string(flagshipExtra));
+	info.SetString("flagship unused", std::to_string(flagshipUnused));
 
 	// Sum up the statistics for all your ships. You still pay the crew of
 	// disabled or out-of-system ships, but any parked ships have no crew costs.
 	int fleetBunks = 0;
 	int fleetRequired = 0;
-	for(const shared_ptr<Ship> &ship : player.Ships())
+	for(const std::shared_ptr<Ship> &ship : player.Ships())
 		if(!ship->IsParked())
 		{
 			fleetBunks += static_cast<int>(ship->Attributes().Get("bunks"));
@@ -81,23 +81,23 @@ void HiringPanel::Draw()
 		}
 	int passengers = player.Cargo().Passengers();
 	int fleetUnused = fleetBunks - fleetRequired - flagshipExtra;
-	info.SetString("fleet bunks", to_string(fleetBunks));
-	info.SetString("fleet required", to_string(fleetRequired));
-	info.SetString("fleet unused", to_string(fleetUnused));
-	info.SetString("passengers", to_string(passengers));
+	info.SetString("fleet bunks", std::to_string(fleetBunks));
+	info.SetString("fleet required", std::to_string(fleetRequired));
+	info.SetString("fleet unused", std::to_string(fleetUnused));
+	info.SetString("passengers", std::to_string(passengers));
 
 	static const int DAILY_SALARY = 100;
 	int salary = DAILY_SALARY * (fleetRequired - (flagship ? 1 : 0));
 	int extraSalary = DAILY_SALARY * flagshipExtra;
-	info.SetString("salary required", to_string(salary));
-	info.SetString("salary extra", to_string(extraSalary));
+	info.SetString("salary required", std::to_string(salary));
+	info.SetString("salary extra", std::to_string(extraSalary));
 
 	int modifier = Modifier();
 	if(modifier > 1)
-		info.SetString("modifier", "x " + to_string(modifier));
+		info.SetString("modifier", "x " + std::to_string(modifier));
 
-	maxFire = max(flagshipExtra, 0);
-	maxHire = max(min(flagshipUnused, fleetUnused - passengers), 0);
+	maxFire = std::max(flagshipExtra, 0);
+	maxHire = std::max(std::min(flagshipUnused, fleetUnused - passengers), 0);
 
 	if(maxHire)
 		info.SetCondition("can hire");
@@ -123,12 +123,12 @@ bool HiringPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, b
 	if(key == 'h' || key == SDLK_EQUALS || key == SDLK_KP_PLUS || key == SDLK_PLUS
 		|| key == SDLK_RETURN || key == SDLK_SPACE)
 	{
-		player.Flagship()->AddCrew(min(maxHire, Modifier()));
+		player.Flagship()->AddCrew(std::min(maxHire, Modifier()));
 		player.UpdateCargoCapacities();
 	}
 	else if(key == 'f' || key == SDLK_MINUS || key == SDLK_KP_MINUS || key == SDLK_BACKSPACE || key == SDLK_DELETE)
 	{
-		player.Flagship()->AddCrew(-min(maxFire, Modifier()));
+		player.Flagship()->AddCrew(-std::min(maxFire, Modifier()));
 		player.UpdateCargoCapacities();
 	}
 	else

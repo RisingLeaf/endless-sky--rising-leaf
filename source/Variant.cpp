@@ -21,7 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 
 
@@ -35,9 +35,9 @@ Variant::Variant(const DataNode &node)
 void Variant::Load(const DataNode &node)
 {
 	if(node.Token(0) == "variant" && node.Size() >= 2)
-		weight = max<int>(1, node.Value(1));
+		weight = std::max<int>(1, node.Value(1));
 	else if(node.Token(0) == "add" && node.Size() >= 3)
-		weight = max<int>(1, node.Value(2));
+		weight = std::max<int>(1, node.Value(2));
 
 	for(const DataNode &child : node)
 	{
@@ -70,7 +70,7 @@ int Variant::Weight() const
 
 
 
-const vector<const Ship *> &Variant::Ships() const
+const std::vector<const Ship *> &Variant::Ships() const
 {
 	return ships;
 }

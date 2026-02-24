@@ -32,11 +32,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <vector>
 
-using namespace std;
 
 
 
-shared_future<void> UniverseObjects::Load(TaskQueue &queue, const vector<filesystem::path> &sources,
+
+std::shared_future<void> UniverseObjects::Load(TaskQueue &queue, const std::vector<std::filesystem::path> &sources,
 	const PlayerInfo &player, const ConditionsStore *globalConditions, bool debugMode)
 {
 	progress = 0.;
@@ -46,7 +46,7 @@ shared_future<void> UniverseObjects::Load(TaskQueue &queue, const vector<filesys
 	// function (except for calling GetProgress which is safe due to the atomic).
 	return queue.Run([this, &player, &sources, globalConditions, debugMode]() noexcept -> void
 		{
-			vector<filesystem::path> files;
+			std::vector<std::filesystem::path> files;
 			for(const auto &source : sources)
 			{
 				// Iterate through the paths starting with the last directory given. That
@@ -66,8 +66,8 @@ shared_future<void> UniverseObjects::Load(TaskQueue &queue, const vector<filesys
 
 				// Increment the atomic progress by one step.
 				// We use acquire + release to prevent any reordering.
-				auto val = progress.load(memory_order_acquire);
-				progress.store(val + step, memory_order_release);
+				auto val = progress.load(std::memory_order_acquire);
+				progress.store(val + step, std::memory_order_release);
 			}
 			FinishLoading();
 			progress = 1.;
@@ -78,7 +78,7 @@ shared_future<void> UniverseObjects::Load(TaskQueue &queue, const vector<filesys
 
 double UniverseObjects::GetProgress() const
 {
-	return progress.load(memory_order_acquire);
+	return progress.load(std::memory_order_acquire);
 }
 
 
@@ -116,13 +116,13 @@ void UniverseObjects::FinishLoading()
 	for(const auto &category : disabled)
 	{
 		if(category.first == "mission")
-			for(const string &name : category.second)
+			for(const std::string &name : category.second)
 				missions.Get(name)->NeverOffer();
 		else if(category.first == "event")
-			for(const string &name : category.second)
+			for(const std::string &name : category.second)
 				events.Get(name)->Disable();
 		else if(category.first == "person")
-			for(const string &name : category.second)
+			for(const std::string &name : category.second)
 				persons.Get(name)->NeverSpawn();
 		else
 			Logger::LogError("Unhandled \"disable\" keyword of type \"" + category.first + "\"");
@@ -139,10 +139,10 @@ void UniverseObjects::FinishLoading()
 void UniverseObjects::Change(const DataNode &node, const PlayerInfo &player)
 {
 	const ConditionsStore *playerConditions = &player.Conditions();
-	const set<const System *> *visitedSystems = &player.VisitedSystems();
-	const set<const Planet *> *visitedPlanets = &player.VisitedPlanets();
+	const std::set<const System *> *visitedSystems = &player.VisitedSystems();
+	const std::set<const Planet *> *visitedPlanets = &player.VisitedPlanets();
 
-	const string &key = node.Token(0);
+	const std::string &key = node.Token(0);
 	bool hasValue = node.Size() >= 2;
 	if(key == "fleet" && hasValue)
 		fleets.Get(node.Token(1))->Load(node);
@@ -201,12 +201,12 @@ void UniverseObjects::UpdateSystems()
 void UniverseObjects::CheckReferences()
 {
 	// Log a warning for an "undefined" class object that was never loaded from disk.
-	auto Warn = [](const string &noun, const string &name)
+	auto Warn = [](const std::string &noun, const std::string &name)
 	{
 		Logger::LogError("Warning: " + noun + " \"" + name + "\" is referred to, but not fully defined.");
 	};
 	// Class objects with a deferred definition should still get named when content is loaded.
-	auto NameIfDeferred = [](const set<string> &deferred, auto &it)
+	auto NameIfDeferred = [](const std::set<std::string> &deferred, auto &it)
 	{
 		if(deferred.contains(it.first))
 			it.second.SetTrueName(it.first);
@@ -216,13 +216,13 @@ void UniverseObjects::CheckReferences()
 		return true;
 	};
 	// Set the name of an "undefined" class object, so that it can be written to the player's save.
-	auto NameAndWarn = [=](const string &noun, auto &it)
+	auto NameAndWarn = [=](const std::string &noun, auto &it)
 	{
 		it.second.SetTrueName(it.first);
 		Warn(noun, it.first);
 	};
 	// Parse all GameEvents for object definitions.
-	auto deferred = map<string, set<string>>{};
+	auto deferred = std::map<std::string, std::set<std::string>>{};
 	for(auto &&it : events)
 	{
 		// Stock GameEvents are serialized in MissionActions by name.
@@ -329,7 +329,7 @@ void UniverseObjects::CheckReferences()
 
 
 
-void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &player,
+void UniverseObjects::LoadFile(const std::filesystem::path &path, const PlayerInfo &player,
 		const ConditionsStore *globalConditions, bool debugMode)
 {
 	// This is an ordinary file. Check to see if it is an image.
@@ -341,12 +341,12 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 		Logger::LogError("Parsing: " + path.string());
 
 	const ConditionsStore *playerConditions = &player.Conditions();
-	const set<const System *> *visitedSystems = &player.VisitedSystems();
-	const set<const Planet *> *visitedPlanets = &player.VisitedPlanets();
+	const std::set<const System *> *visitedSystems = &player.VisitedSystems();
+	const std::set<const Planet *> *visitedPlanets = &player.VisitedPlanets();
 	for(const DataNode &node : data)
 	{
 	  if(node.Tokens().empty()) continue;
-		const string &key = node.Token(0);
+		const std::string &key = node.Token(0);
 		bool hasValue = node.Size() >= 2;
 		if(key == "color" && node.Size() >= 5)
 		{
@@ -380,7 +380,7 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 			// we also update our cache of it.
 			if(node.Token(1) == "menu background")
 			{
-				lock_guard<mutex> lock(menuBackgroundMutex);
+				std::lock_guard<std::mutex> lock(menuBackgroundMutex);
 				menuBackgroundCache.Load(node);
 			}
 		}
@@ -401,7 +401,7 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 		else if(key == "ship" && hasValue)
 		{
 			// Allow multiple named variants of the same ship model.
-			const string &name = node.Token((node.Size() > 2) ? 2 : 1);
+			const std::string &name = node.Token((node.Size() > 2) ? 2 : 1);
 			ships.Get(name)->Load(node, playerConditions);
 		}
 		else if(key == "shipyard" && hasValue)
@@ -414,7 +414,7 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 				startConditions.emplace_back(node, globalConditions, playerConditions);
 			else
 			{
-				const string &identifier = node.Token(1);
+				const std::string &identifier = node.Token(1);
 				auto existingStart = find_if(startConditions.begin(), startConditions.end(),
 					[&identifier](const StartConditions &it) noexcept -> bool { return it.Identifier() == identifier; });
 				if(existingStart != startConditions.end())
@@ -441,7 +441,7 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 			const Sprite *sprite = SpriteSet::Get(node.Token(1));
 			for(const DataNode &child : node)
 			{
-				const string &childKey = child.Token(0);
+				const std::string &childKey = child.Token(0);
 				bool childHasValue = child.Size() >= 2;
 				if(childKey == "power" && childHasValue)
 					solarPower[sprite] = child.Value(1);
@@ -457,14 +457,14 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 			news.Get(node.Token(1))->Load(node, playerConditions, visitedSystems, visitedPlanets);
 		else if(key == "rating" && hasValue)
 		{
-			vector<string> &list = ratings[node.Token(1)];
+			std::vector<std::string> &list = ratings[node.Token(1)];
 			list.clear();
 			for(const DataNode &child : node)
 				list.push_back(child.Token(0));
 		}
 		else if(key == "category" && hasValue)
 		{
-			static const map<string, CategoryType> category = {
+			static const std::map<std::string, CategoryType> category = {
 				{"ship", CategoryType::SHIP},
 				{"bay type", CategoryType::BAY},
 				{"outfit", CategoryType::OUTFIT},
@@ -480,7 +480,7 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 		}
 		else if((key == "tip" || key == "help") && hasValue)
 		{
-			string &text = (key == "tip" ? tooltips : helpMessages)[node.Token(1)];
+			std::string &text = (key == "tip" ? tooltips : helpMessages)[node.Token(1)];
 			text.clear();
 			for(const DataNode &child : node)
 			{
@@ -505,8 +505,8 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 			messages.Get(node.Token(1))->Load(node);
 		else if(key == "disable" && hasValue)
 		{
-			static const set<string> canDisable = {"mission", "event", "person"};
-			const string &category = node.Token(1);
+			static const std::set<std::string> canDisable = {"mission", "event", "person"};
+			const std::string &category = node.Token(1);
 			if(canDisable.contains(category))
 			{
 				if(node.HasChildren())
@@ -528,6 +528,6 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 
 void UniverseObjects::DrawMenuBackground(Panel *panel) const
 {
-	lock_guard<mutex> lock(menuBackgroundMutex);
+	std::lock_guard<std::mutex> lock(menuBackgroundMutex);
 	menuBackgroundCache.Draw(Information(), panel);
 }

@@ -22,13 +22,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <set>
 #include <string>
 
-using namespace std;
+
 
 namespace {
-	// Perform a binary search on a sorted vector. Return the key's location (or
+	// Perform a binary search on a sorted std::vector. Return the key's location (or
 	// proper insertion spot) in the first element of the pair, and "true" in
-	// the second element if the key is already in the vector.
-	pair<size_t, bool> Search(const char *key, const vector<pair<const char *, double>> &v)
+	// the second element if the key is already in the std::vector.
+	std::pair<size_t, bool> Search(const char *key, const std::vector<std::pair<const char *, double>> &v)
 	{
 		// At each step of the search, we know the key is in [low, high).
 		size_t low = 0;
@@ -39,14 +39,14 @@ namespace {
 			size_t mid = (low + high) / 2;
 			int cmp = strcmp(key, v[mid].first);
 			if(!cmp)
-				return make_pair(mid, true);
+				return std::make_pair(mid, true);
 
 			if(cmp < 0)
 				high = mid;
 			else
 				low = mid + 1;
 		}
-		return make_pair(low, false);
+		return std::make_pair(low, false);
 	}
 }
 
@@ -54,16 +54,16 @@ namespace {
 
 double &Dictionary::operator[](const char *key)
 {
-	pair<size_t, bool> pos = Search(key, *this);
+	std::pair<size_t, bool> pos = Search(key, *this);
 	if(pos.second)
 		return data()[pos.first].second;
 
-	return insert(begin() + pos.first, make_pair(StringInterner::Intern(key), 0.))->second;
+	return insert(begin() + pos.first, std::make_pair(StringInterner::Intern(key), 0.))->second;
 }
 
 
 
-double &Dictionary::operator[](const string &key)
+double &Dictionary::operator[](const std::string &key)
 {
 	return (*this)[key.c_str()];
 }
@@ -72,13 +72,13 @@ double &Dictionary::operator[](const string &key)
 
 double Dictionary::Get(const char *key) const
 {
-	pair<size_t, bool> pos = Search(key, *this);
+	std::pair<size_t, bool> pos = Search(key, *this);
 	return (pos.second ? data()[pos.first].second : 0.);
 }
 
 
 
-double Dictionary::Get(const string &key) const
+double Dictionary::Get(const std::string &key) const
 {
 	return Get(key.c_str());
 }

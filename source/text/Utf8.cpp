@@ -21,7 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <windows.h>
 #endif
 
-using namespace std;
+
 
 namespace {
 	constexpr char32_t BOM = 0x0000FEFF;
@@ -31,7 +31,7 @@ namespace {
 
 namespace Utf8 {
 #if defined(_WIN32)
-	wstring ToUTF16(const string &input, bool isPath)
+	wstring ToUTF16(const std::string &input, bool isPath)
 	{
 		const auto page = CP_UTF8;
 		wstring result;
@@ -74,10 +74,10 @@ namespace Utf8 {
 
 
 
-	size_t NextCodePoint(const string &str, size_t pos)
+	size_t NextCodePoint(const std::string &str, size_t pos)
 	{
 		if(pos >= str.length())
-			return string::npos;
+			return std::string::npos;
 
 		for(++pos; pos < str.length(); ++pos)
 			if((str[pos] & 0x80) == 0 || (str[pos] & 0xc0) == 0xc0)
@@ -88,7 +88,7 @@ namespace Utf8 {
 
 
 	// Returns the start of the unicode code point at pos in utf8.
-	size_t CodePointStart(const string &str, size_t pos)
+	size_t CodePointStart(const std::string &str, size_t pos)
 	{
 		// 0xxxxxxx and 11?????? start a code point
 		while(pos > 0 && (str[pos] & 0x80) != 0x00 && (str[pos] & 0xc0) != 0xc0)
@@ -141,11 +141,11 @@ namespace Utf8 {
 
 	// Decodes a unicode code point in utf8.
 	// Invalid codepoints are converted to 0xFFFFFFFF.
-	char32_t DecodeCodePoint(const string &str, size_t &pos)
+	char32_t DecodeCodePoint(const std::string &str, size_t &pos)
 	{
 		if(pos >= str.length())
 		{
-			pos = string::npos;
+			pos = std::string::npos;
 			return 0;
 		}
 

@@ -23,10 +23,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 namespace {
-	const set<string> DEFINITION_NODES = {
+	const std::set<std::string> DEFINITION_NODES = {
 		"fleet",
 		"galaxy",
 		"government",
@@ -43,15 +43,15 @@ namespace {
 
 
 // Determine the universe object definitions that are defined by the given list of changes.
-map<string, set<string>> GameEvent::DeferredDefinitions(const list<DataNode> &changes)
+std::map<std::string, std::set<std::string>> GameEvent::DeferredDefinitions(const std::list<DataNode> &changes)
 {
-	auto definitions = map<string, set<string>> {};
+	auto definitions = std::map<std::string, std::set<std::string>> {};
 
 	for(auto &&node : changes)
 		if(node.Size() >= 2 && node.HasChildren() && DEFINITION_NODES.contains(node.Token(0)))
 		{
-			const string &key = node.Token(0);
-			const string &name = node.Token(1);
+			const std::string &key = node.Token(0);
+			const std::string &name = node.Token(1);
 			if(key == "system")
 			{
 				// A system is only actually defined by this change node if its position is set.
@@ -95,7 +95,7 @@ void GameEvent::Load(const DataNode &node, const ConditionsStore *playerConditio
 	}
 	isDefined = true;
 
-	static const auto allowedChanges = []() -> set<string>
+	static const auto allowedChanges = []() -> std::set<std::string>
 		{
 			auto allowed = DEFINITION_NODES;
 			// Include other modifications that cannot create new universe objects.
@@ -108,7 +108,7 @@ void GameEvent::Load(const DataNode &node, const ConditionsStore *playerConditio
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
+		const std::string &key = child.Token(0);
 		bool hasValue = child.Size() >= 2;
 		if(key == "date" && child.Size() >= 4)
 			date = Date(child.Value(1), child.Value(2), child.Value(3));
@@ -169,7 +169,7 @@ void GameEvent::Disable()
 
 
 // All events held by GameData have a name, but those loaded from a save do not.
-const string &GameEvent::TrueName() const
+const std::string &GameEvent::TrueName() const
 {
 	return trueName;
 }
@@ -177,7 +177,7 @@ const string &GameEvent::TrueName() const
 
 
 // "Stock" GameEvents require a name to be serialized with an accepted mission.
-void GameEvent::SetTrueName(const string &name)
+void GameEvent::SetTrueName(const std::string &name)
 {
 	this->trueName = name;
 }
@@ -194,7 +194,7 @@ const Date &GameEvent::GetDate() const
 // Check that this GameEvent has been loaded from a file (vs. referred to only
 // by name), and that the systems & planets it references are similarly defined.
 // Returns an empty string if it is valid. If not, a reason will be given in the string.
-string GameEvent::IsValid() const
+std::string GameEvent::IsValid() const
 {
 	// When Apply is called, we mutate the universe definition before we update
 	// the player's knowledge of the universe. Thus, to determine if a system or
@@ -224,7 +224,7 @@ void GameEvent::SetDate(const Date &date)
 
 // Apply this event's changes to the player. Returns a list of data changes that need to
 // be applied in a batch with other events that are applied at the same time.
-list<DataNode> GameEvent::Apply(PlayerInfo &player)
+std::list<DataNode> GameEvent::Apply(PlayerInfo &player)
 {
 	if(isDisabled)
 		return {};
@@ -251,7 +251,7 @@ list<DataNode> GameEvent::Apply(PlayerInfo &player)
 
 
 
-const list<DataNode> &GameEvent::Changes() const
+const std::list<DataNode> &GameEvent::Changes() const
 {
 	return changes;
 }

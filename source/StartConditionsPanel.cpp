@@ -41,7 +41,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 
 
@@ -115,7 +115,7 @@ void StartConditionsPanel::Draw()
 
 		// Partially visible entries should fade in or out.
 		double opacity = entriesContainer.Contains(zone) ? 1.
-			: min(1., max(0., min(pos.Y() - fadeInY, fadeOutY - pos.Y()) / fadeDistance));
+			: std::min(1., std::max(0., std::min(pos.Y() - fadeInY, fadeOutY - pos.Y()) / fadeDistance));
 
 		bool isHighlighted = it == startIt || (hasHover && zone.Contains(hoverPoint));
 		if(it == startIt)
@@ -145,14 +145,14 @@ bool StartConditionsPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &c
 			if(startIt == scenarios.begin())
 				startIt = scenarios.end() - 1;
 			else
-				startIt -= min(magnitude, distance(scenarios.begin(), startIt));
+				startIt -= std::min(magnitude, distance(scenarios.begin(), startIt));
 		}
 		else
 		{
 			if(startIt + 1 == scenarios.end())
 				startIt = scenarios.begin();
 			else
-				startIt += min(magnitude, distance(startIt, scenarios.end() - 1));
+				startIt += std::min(magnitude, distance(startIt, scenarios.end() - 1));
 		}
 
 		Select(startIt);
@@ -216,7 +216,7 @@ bool StartConditionsPanel::Drag(double /* dx */, double dy)
 {
 	if(entriesContainer.Contains(hoverPoint))
 	{
-		entriesScroll = max(0., min(entriesScroll - dy,
+		entriesScroll = std::max(0., std::min(entriesScroll - dy,
 			scenarios.size() * entryBox.Height() - entriesContainer.Height()));
 	}
 	else if(descriptionBox.Contains(hoverPoint))
@@ -294,7 +294,7 @@ void StartConditionsPanel::ScrollToSelected()
 	else if(desiredScroll + entryHeight > bottomOfPage)
 	{
 		// Scroll downwards (but not so far that we overscroll).
-		entriesScroll = min(maxScroll, entriesScroll + entryHeight + desiredScroll - bottomOfPage);
+		entriesScroll = std::min(maxScroll, entriesScroll + entryHeight + desiredScroll - bottomOfPage);
 	}
 }
 

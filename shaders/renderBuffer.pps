@@ -15,8 +15,6 @@ VS_BEGIN
 	vec2 tsize = spec.size * spec.srcscale;
 	vec2 tsrc  = spec.srcposition * spec.srcscale;
 	tpos = vpos * tsize + tsrc;
-	// Negative is up.
-	tpos.y = 1.0 - tpos.y;
 VS_END
 
 in_texture 2d tex;

@@ -24,7 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 
 
@@ -34,7 +34,7 @@ bool UI::Handle(const SDL_Event &event)
 {
 	bool handled = false;
 
-	vector<shared_ptr<Panel>>::iterator it = stack.end();
+	std::vector<std::shared_ptr<Panel>>::iterator it = stack.end();
 	while(it != stack.begin() && !handled)
 	{
 		--it;
@@ -97,7 +97,7 @@ void UI::StepAll()
 	PushOrPop();
 
 	// Step all the panels.
-	for(shared_ptr<Panel> &panel : stack)
+	for(std::shared_ptr<Panel> &panel : stack)
 		panel->Step();
 }
 
@@ -107,7 +107,7 @@ void UI::StepAll()
 void UI::PreDrawAll()
 {
   // Find the topmost full-screen panel. Nothing below that needs to be drawn.
-  vector<shared_ptr<Panel>>::const_iterator it = stack.end();
+  std::vector<std::shared_ptr<Panel>>::const_iterator it = stack.end();
   while(it != stack.begin())
     if((*--it)->IsFullScreen())
       break;
@@ -123,11 +123,11 @@ void UI::DrawAll()
 {
 	// First, clear all the clickable zones. New ones will be added in the
 	// course of drawing the screen.
-	for(const shared_ptr<Panel> &it : stack)
+	for(const std::shared_ptr<Panel> &it : stack)
 		it->ClearZones();
 
 	// Find the topmost full-screen panel. Nothing below that needs to be drawn.
-	vector<shared_ptr<Panel>>::const_iterator it = stack.end();
+	std::vector<std::shared_ptr<Panel>>::const_iterator it = stack.end();
 	while(it != stack.begin())
 		if((*--it)->IsFullScreen())
 			break;
@@ -138,7 +138,7 @@ void UI::DrawAll()
 
 
 
-const vector<shared_ptr<Panel>> &UI::Stack() const
+const std::vector<std::shared_ptr<Panel>> &UI::Stack() const
 {
 	return stack;
 }
@@ -148,12 +148,12 @@ const vector<shared_ptr<Panel>> &UI::Stack() const
 // Add the given panel to the stack. UI is responsible for deleting it.
 void UI::Push(Panel *panel)
 {
-	Push(shared_ptr<Panel>(panel));
+	Push(std::shared_ptr<Panel>(panel));
 }
 
 
 
-void UI::Push(const shared_ptr<Panel> &panel)
+void UI::Push(const std::shared_ptr<Panel> &panel)
 {
 	toPush.push_back(panel);
 	panel->SetUI(this);
@@ -196,7 +196,7 @@ bool UI::IsTop(const Panel *panel) const
 
 // Get the absolute top panel, even if it is not yet drawn (i.e. was pushed on
 // this Step).
-shared_ptr<Panel> UI::Top() const
+std::shared_ptr<Panel> UI::Top() const
 {
 	if(!toPush.empty())
 		return toPush.back();
@@ -204,7 +204,7 @@ shared_ptr<Panel> UI::Top() const
 	if(!stack.empty())
 		return stack.back();
 
-	return shared_ptr<Panel>();
+	return std::shared_ptr<Panel>();
 }
 
 
@@ -221,12 +221,12 @@ void UI::Reset()
 
 
 // Get the lower-most panel.
-shared_ptr<Panel> UI::Root() const
+std::shared_ptr<Panel> UI::Root() const
 {
 	if(stack.empty())
 	{
 		if(toPush.empty())
-			return shared_ptr<Panel>();
+			return std::shared_ptr<Panel>();
 
 		return toPush.front();
 	}
@@ -299,7 +299,7 @@ Point UI::GetMouse()
 
 void UI::PlaySound(UISound sound)
 {
-	string name;
+	std::string name;
 	switch(sound)
 	{
 		case UISound::NORMAL:
@@ -329,7 +329,7 @@ void UI::PlaySound(UISound sound)
 void UI::PushOrPop()
 {
 	// Handle any panels that should be added.
-	for(shared_ptr<Panel> &panel : toPush)
+	for(std::shared_ptr<Panel> &panel : toPush)
 		if(panel)
 			stack.push_back(panel);
 	toPush.clear();

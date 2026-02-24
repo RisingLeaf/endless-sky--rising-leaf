@@ -49,11 +49,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <sstream>
 
-using namespace std;
 
 
 
-PlanetPanel::PlanetPanel(PlayerInfo &player, function<void()> callback)
+
+PlanetPanel::PlanetPanel(PlayerInfo &player, std::function<void()> callback)
 	: player(player), callback(callback),
 	planet(*player.GetPlanet()), system(*player.GetSystem())
 {
@@ -62,7 +62,7 @@ PlanetPanel::PlanetPanel(PlayerInfo &player, function<void()> callback)
 	spaceport.reset(new SpaceportPanel(player));
 	hiring.reset(new HiringPanel(player));
 
-	description = make_shared<TextArea>();
+	description = std::make_shared<TextArea>();
 	description->SetFont(FontSet::Get(14));
 	description->SetColor(*GameData::Colors().Get("bright"));
 	description->SetAlignment(Alignment::JUSTIFIED);
@@ -330,7 +330,7 @@ void PlanetPanel::TakeOffIfReady()
 
 	// Check if any of the player's ships are configured in such a way that they
 	// will be impossible to fly. If so, let the player choose whether to park them.
-	ostringstream out;
+	std::ostringstream out;
 	flightChecks = player.FlightCheck();
 	if(!flightChecks.empty())
 	{
@@ -359,7 +359,7 @@ void PlanetPanel::TakeOffIfReady()
 		}
 		if(!absentCannotFly.empty())
 		{
-			string shipNames = out.str();
+			std::string shipNames = out.str();
 			// Pop back the last ", " in the string.
 			shipNames.pop_back();
 			shipNames.pop_back();
@@ -387,12 +387,12 @@ void PlanetPanel::CheckWarningsAndTakeOff()
 	const CargoHold &cargo = player.DistributeCargo();
 	// Are you overbooked? Don't count fireable flagship crew.
 	// (If your ship can't support its required crew, it is counted as having no fireable crew.)
-	const int overbooked = cargo.Passengers() - max(0, flagship->Crew() - flagship->RequiredCrew());
+	const int overbooked = cargo.Passengers() - std::max(0, flagship->Crew() - flagship->RequiredCrew());
 	const int missionCargoToSell = cargo.MissionCargoSize();
 	// Will you have to sell something other than regular cargo?
 	const int commoditiesToSell = cargo.CommoditiesSize();
 	int outfitsToSell = 0;
-	map<const Outfit *, int> uniquesToSell;
+	std::map<const Outfit *, int> uniquesToSell;
 	for(auto &it : cargo.Outfits())
 	{
 		outfitsToSell += it.second;
@@ -400,7 +400,7 @@ void PlanetPanel::CheckWarningsAndTakeOff()
 			uniquesToSell[it.first] = it.second;
 	}
 	// Have you left any unique items at the outfitter?
-	map<const Outfit *, int> leftUniques;
+	std::map<const Outfit *, int> leftUniques;
 	for(const auto &it : player.GetStock())
 		if(it.second > 0 && it.first->Attributes().Get("unique"))
 			leftUniques[it.first] = it.second;
@@ -410,7 +410,7 @@ void PlanetPanel::CheckWarningsAndTakeOff()
 	if(!flightChecks.empty())
 	{
 		// There may be multiple warnings reported, but only 3 result in a ship which cannot jump.
-		const auto jumpWarnings = set<string>{
+		const auto jumpWarnings = std::set<std::string>{
 			"no bays?", "no fuel?", "no hyperdrive?"
 		};
 		for(const auto &result : flightChecks)
@@ -425,14 +425,14 @@ void PlanetPanel::CheckWarningsAndTakeOff()
 	if(nonJumpCount > 0 || missionCargoToSell > 0 || outfitsToSell > 0 || commoditiesToSell > 0 || overbooked > 0
 		|| !leftUniques.empty())
 	{
-		ostringstream out;
-		auto ListUniques = [&out] (const map<const Outfit *, int> &uniques)
+		std::ostringstream out;
+		auto ListUniques = [&out] (const std::map<const Outfit *, int> &uniques)
 		{
 			const int detailedSize = (uniques.size() > 5 ? 4 : uniques.size());
 			auto it = uniques.begin();
 			for(int i = 0; i < detailedSize; ++i)
 			{
-				out << "\n" + to_string(it->second) + " "
+				out << "\n" + std::to_string(it->second) + " "
 					+ (it->second == 1 ? it->first->DisplayName() : it->first->PluralName());
 				++it;
 			}
@@ -441,7 +441,7 @@ void PlanetPanel::CheckWarningsAndTakeOff()
 			{
 				for( ; it != uniques.end(); ++it)
 					otherUniquesCount += it->second;
-				out << "\nand " + to_string(otherUniquesCount) + " other unique outfits.";
+				out << "\nand " + std::to_string(otherUniquesCount) + " other unique outfits.";
 			}
 			else
 				out << ".";

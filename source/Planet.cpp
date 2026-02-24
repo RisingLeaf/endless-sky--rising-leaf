@@ -31,20 +31,20 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-using namespace std;
+
 
 namespace {
-	const string WORMHOLE = "wormhole";
-	const string PLANET = "planet";
+	const std::string WORMHOLE = "wormhole";
+	const std::string PLANET = "planet";
 
 	// Planet attributes in the form "requires: <attribute>" restrict the ability of ships to land
 	// unless the ship has all required attributes.
-	void SetRequiredAttributes(const set<string> &attributes, set<string> &required)
+	void SetRequiredAttributes(const std::set<std::string> &attributes, std::set<std::string> &required)
 	{
-		static const string PREFIX = "requires: ";
-		static const string PREFIX_END = "requires:!";
+		static const std::string PREFIX = "requires: ";
+		static const std::string PREFIX_END = "requires:!";
 		required.clear();
-		for_each(attributes.lower_bound(PREFIX), attributes.lower_bound(PREFIX_END), [&](const string &attribute)
+		for_each(attributes.lower_bound(PREFIX), attributes.lower_bound(PREFIX_END), [&](const std::string &attribute)
 		{
 			required.emplace_hint(required.cend(), attribute.substr(PREFIX.length()));
 		});
@@ -65,7 +65,7 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 
 	// If this planet has been loaded before, these sets of items should be
 	// reset instead of appending to them:
-	set<string> shouldOverwrite = {"attributes", "description", "spaceport", "port"};
+	std::set<std::string> shouldOverwrite = {"attributes", "description", "spaceport", "port"};
 
 	for(const DataNode &child : node)
 	{
@@ -79,10 +79,10 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 		}
 
 		// Get the key and value (if any).
-		const string &key = child.Token((add || remove) ? 1 : 0);
+		const std::string &key = child.Token((add || remove) ? 1 : 0);
 		int valueIndex = (add || remove) ? 2 : 1;
 		bool hasValue = (child.Size() > valueIndex);
-		const string &value = child.Token(hasValue ? valueIndex : 0);
+		const std::string &value = child.Token(hasValue ? valueIndex : 0);
 
 		// Check for conditions that require clearing this key's current value.
 		// "remove <key>" means to clear the key's previous contents.
@@ -144,7 +144,7 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 					toLand = ConditionSet();
 				else if(value == "access" && child.Size() > valueIndex + 1)
 				{
-					const string &shop = child.Token(valueIndex + 1);
+					const std::string &shop = child.Token(valueIndex + 1);
 					if(shop == "shipyard")
 						toAccessShipyard = ConditionSet();
 					else if(shop == "outfitter")
@@ -226,7 +226,7 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 			bool resetFleets = !defenseFleets.empty();
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
+				const std::string &grandKey = grand.Token(0);
 				bool grandHasValue = grand.Size() >= 2;
 				if(grandKey == "threshold" && grandHasValue)
 					defenseThreshold = grand.Value(1);
@@ -265,7 +265,7 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 				toLand.Load(child, playerConditions);
 			else if(value == "access" && child.Size() > valueIndex + 1)
 			{
-				const string &shop = child.Token(valueIndex + 1);
+				const std::string &shop = child.Token(valueIndex + 1);
 				if(shop == "shipyard")
 					toAccessShipyard.Load(child, playerConditions);
 				else if(shop == "outfitter")
@@ -292,7 +292,7 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 	}
 
 	// Apply any auto-attributes to this planet depending on what it has.
-	static const vector<string> AUTO_ATTRIBUTES = {
+	static const std::vector<std::string> AUTO_ATTRIBUTES = {
 		"spaceport",
 		"port",
 		"shipyard",
@@ -375,14 +375,14 @@ bool Planet::IsValid() const
 
 
 // Get the name used for this planet in the data files.
-const string &Planet::TrueName() const
+const std::string &Planet::TrueName() const
 {
 	return trueName;
 }
 
 
 
-void Planet::SetTrueName(const string &name)
+void Planet::SetTrueName(const std::string &name)
 {
 	trueName = name;
 	if(displayName.empty())
@@ -392,7 +392,7 @@ void Planet::SetTrueName(const string &name)
 
 
 // Get the display name of the planet.
-const string &Planet::DisplayName() const
+const std::string &Planet::DisplayName() const
 {
 	return IsWormhole() ? wormhole->DisplayName() : displayName;
 }
@@ -416,7 +416,7 @@ const Sprite *Planet::Landscape() const
 
 
 // Get the name of the ambient audio to play on this planet.
-const string &Planet::MusicName() const
+const std::string &Planet::MusicName() const
 {
 	return music;
 }
@@ -424,7 +424,7 @@ const string &Planet::MusicName() const
 
 
 // Get the list of "attributes" of the planet.
-const set<string> &Planet::Attributes() const
+const std::set<std::string> &Planet::Attributes() const
 {
 	return attributes;
 }
@@ -432,12 +432,12 @@ const set<string> &Planet::Attributes() const
 
 
 // Get planet's noun descriptor from attributes
-const string &Planet::Noun() const
+const std::string &Planet::Noun() const
 {
 	if(IsWormhole())
 		return WORMHOLE;
 
-	for(const string &attribute : attributes)
+	for(const std::string &attribute : attributes)
 		if(attribute == "moon" || attribute == "station")
 			return attribute;
 
@@ -502,9 +502,9 @@ const Sale<Ship> &Planet::ShipyardStock() const
 
 // Get the list of shipyards currently available on this planet.
 // This will include conditionally available shops.
-set<const Shop<Ship> *> Planet::Shipyards() const
+std::set<const Shop<Ship> *> Planet::Shipyards() const
 {
-	set<const Shop<Ship> *> shops = shipSales;
+	std::set<const Shop<Ship> *> shops = shipSales;
 	for(const auto &shop : GameData::Shipyards())
 		if(shop.second.CanStock(this))
 			shops.insert(&shop.second);
@@ -535,9 +535,9 @@ const Sale<Outfit> &Planet::OutfitterStock() const
 
 // Get the list of outitters available on this planet.
 // This will include conditionally available shops.
-set<const Shop<Outfit> *> Planet::Outfitters() const
+std::set<const Shop<Outfit> *> Planet::Outfitters() const
 {
-	set<const Shop<Outfit> *> shops = outfitSales;
+	std::set<const Shop<Outfit> *> shops = outfitSales;
 	for(const auto &shop : GameData::Outfitters())
 		if(shop.second.CanStock(this))
 			shops.insert(&shop.second);
@@ -622,7 +622,7 @@ void Planet::RemoveSystem(const System *system)
 
 
 
-const vector<const System *> &Planet::Systems() const
+const std::vector<const System *> &Planet::Systems() const
 {
 	return systems;
 }
@@ -663,7 +663,7 @@ bool Planet::IsAccessible(const Ship *ship) const
 
 	const auto &shipAttributes = ship->Attributes();
 	return all_of(requiredAttributes.cbegin(), requiredAttributes.cend(),
-			[&](const string &attr) -> bool { return shipAttributes.Get(attr); });
+			[&](const std::string &attr) -> bool { return shipAttributes.Get(attr); });
 }
 
 
@@ -743,7 +743,7 @@ void Planet::Bribe(bool fullAccess) const
 
 
 // Demand tribute, and get the planet's response.
-string Planet::DemandTribute(PlayerInfo &player) const
+std::string Planet::DemandTribute(PlayerInfo &player) const
 {
 	const auto &playerTribute = player.GetTribute();
 	if(playerTribute.find(this) != playerTribute.end())
@@ -758,7 +758,7 @@ string Planet::DemandTribute(PlayerInfo &player) const
 	if(!isDefending)
 	{
 		isDefending = true;
-		set<const Government *> toProvoke;
+		std::set<const Government *> toProvoke;
 		for(const auto &fleet : defenseFleets)
 			toProvoke.insert(fleet->GetGovernment());
 		for(const auto &gov : toProvoke)
@@ -774,7 +774,7 @@ string Planet::DemandTribute(PlayerInfo &player) const
 
 	// The player has already demanded tribute. Have they defeated the entire defense fleet?
 	bool isDefeated = (defenseDeployed == defenseFleets.size());
-	for(const shared_ptr<Ship> &ship : defenders)
+	for(const std::shared_ptr<Ship> &ship : defenders)
 		if(!ship->IsDisabled() && !ship->IsYours())
 		{
 			isDefeated = false;
@@ -791,7 +791,7 @@ string Planet::DemandTribute(PlayerInfo &player) const
 
 
 // While being tributed, attempt to spawn the next specified defense fleet.
-void Planet::DeployDefense(list<shared_ptr<Ship>> &ships) const
+void Planet::DeployDefense(std::list<std::shared_ptr<Ship>> &ships) const
 {
 	if(!isDefending || Random::Int(60) || defenseDeployed == defenseFleets.size())
 		return;

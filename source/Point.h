@@ -23,11 +23,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 
-// Class representing a 2D point with functions for a variety of vector operations.
-// A Point can represent either a location or a vector (e.g. a velocity, or a
-// distance between two points, or a unit vector representing a direction). All
+// Class representing a 2D point with functions for a variety of std::vector operations.
+// A Point can represent either a location or a std::vector (e.g. a velocity, or a
+// distance between two points, or a unit std::vector representing a direction). All
 // basic mathematical operations that make sense for vectors are supported.
-// Internally the coordinates are stored in a SSE vector and the processor's vector
+// Internally the coordinates are stored in a SSE std::vector and the processor's std::vector
 // extensions are used to optimize all operations.
 class Point {
 public:
@@ -64,7 +64,7 @@ public:
 
 	void Set(double x, double y);
 
-	// Operations that treat this point as a vector from (0, 0):
+	// Operations that treat this point as a std::vector from (0, 0):
 	double Dot(const Point &point) const;
 	double Cross(const Point &point) const;
 
@@ -87,7 +87,7 @@ public:
 
 private:
 #ifdef __SSE2__
-	// Private constructor, using a vector.
+	// Private constructor, using a std::vector.
 	explicit Point(const __m128d &v);
 
 

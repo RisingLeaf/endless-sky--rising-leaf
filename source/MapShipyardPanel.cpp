@@ -34,7 +34,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <limits>
 #include <set>
 
-using namespace std;
+
 
 
 
@@ -98,9 +98,9 @@ const ItemInfoDisplay &MapShipyardPanel::CompareInfo() const
 
 
 
-const string &MapShipyardPanel::KeyLabel(int index) const
+const std::string &MapShipyardPanel::KeyLabel(int index) const
 {
-	static const string LABEL[4] = {
+	static const std::string LABEL[4] = {
 		"Has no shipyard",
 		"Has shipyard",
 		"Sells this ship",
@@ -141,7 +141,7 @@ void MapShipyardPanel::Compare(int index)
 double MapShipyardPanel::SystemValue(const System *system) const
 {
 	if(!system || !player.CanView(*system))
-		return numeric_limits<double>::quiet_NaN();
+		return std::numeric_limits<double>::quiet_NaN();
 
 	// If there is a shipyard with parked ships, the order of precedence is
 	// a selected parked ship, the shipyard, parked ships.
@@ -167,12 +167,12 @@ double MapShipyardPanel::SystemValue(const System *system) const
 	else if(systemShips != parkedShips.end() && !selected)
 		return .5;
 	else
-		return numeric_limits<double>::quiet_NaN();
+		return std::numeric_limits<double>::quiet_NaN();
 }
 
 
 
-int MapShipyardPanel::FindItem(const string &text) const
+int MapShipyardPanel::FindItem(const std::string &text) const
 {
 	int bestIndex = 9999;
 	int bestItem = -1;
@@ -200,7 +200,7 @@ void MapShipyardPanel::DrawItems()
 	Point corner = Screen::TopLeft() + Point(0, scroll);
 	for(const auto &cat : categories)
 	{
-		const string &category = cat.Name();
+		const std::string &category = cat.Name();
 		auto it = catalog.find(category);
 		if(it == catalog.end())
 			continue;
@@ -209,12 +209,12 @@ void MapShipyardPanel::DrawItems()
 		if(DrawHeader(corner, category))
 			continue;
 
-		for(const string &name : it->second)
+		for(const std::string &name : it->second)
 		{
 			const Ship *ship = GameData::Ships().Get(name);
-			string price = Format::CreditString(ship->Cost());
+			std::string price = Format::CreditString(ship->Cost());
 
-			string info = Format::Number(ship->MaxShields()) + " shields / ";
+			std::string info = Format::Number(ship->MaxShields()) + " shields / ";
 			info += Format::Number(ship->MaxHull()) + " hull";
 
 			bool isForSale = true;
@@ -247,7 +247,7 @@ void MapShipyardPanel::DrawItems()
 			if(!sprite)
 				sprite = ship->GetSprite();
 
-			const string parking_details =
+			const std::string parking_details =
 				onlyShowSoldHere || parkedInSystem == 0
 				? ""
 				: parkedInSystem == 1
@@ -266,7 +266,7 @@ void MapShipyardPanel::DrawItems()
 void MapShipyardPanel::Init()
 {
 	catalog.clear();
-	set<const Ship *> seen;
+	std::set<const Ship *> seen;
 	for(const auto &it : GameData::Planets())
 		if(it.second.IsValid() && player.CanView(*it.second.GetSystem()))
 			for(const Ship *ship : it.second.ShipyardStock())

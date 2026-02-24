@@ -31,9 +31,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "System.h"
 #include "UI.h"
 
-#include <cstdlib>
 
-using namespace std;
 
 namespace {
 	void DoGift(PlayerInfo &player, const Outfit *outfit, int count, UI *ui)
@@ -51,12 +49,12 @@ namespace {
 
 		Ship *flagship = player.Flagship();
 		bool isSingle = (abs(count) == 1);
-		string nameWas = (isSingle ? outfit->DisplayName() : outfit->PluralName());
+		std::string nameWas = (isSingle ? outfit->DisplayName() : outfit->PluralName());
 		if(!flagship || !count || nameWas.empty())
 			return;
 
 		nameWas += (isSingle ? " was" : " were");
-		string message;
+		std::string message;
 		if(isSingle)
 		{
 			char c = tolower(static_cast<unsigned char>(nameWas.front()));
@@ -64,7 +62,7 @@ namespace {
 			message = (isVowel ? "An " : "A ");
 		}
 		else
-			message = to_string(abs(count)) + " ";
+			message = std::to_string(abs(count)) + " ";
 
 		message += nameWas;
 		if(count > 0)
@@ -79,7 +77,7 @@ namespace {
 		int cargoCount = cargo.Get(outfit);
 		if(count < 0 && cargoCount)
 		{
-			int moved = min(cargoCount, -count);
+			int moved = std::min(cargoCount, -count);
 			count += moved;
 			cargo.Remove(outfit, moved);
 			didCargo = true;
@@ -106,7 +104,7 @@ namespace {
 			didCargo = true;
 			if(ui)
 			{
-				string special = "The " + nameWas;
+				std::string special = "The " + nameWas;
 				special += " put in your cargo hold because there is not enough space to install ";
 				special += (isSingle ? "it" : "them");
 				special += " in your ship.";
@@ -146,7 +144,7 @@ void GameAction::LoadSingle(const DataNode &child, const ConditionsStore *player
 {
 	isEmpty = false;
 
-	const string &key = child.Token(0);
+	const std::string &key = child.Token(0);
 	bool hasValue = child.Size() >= 2;
 
 	if(key == "remove" && child.Size() >= 3 && child.Token(1) == "log")
@@ -200,15 +198,15 @@ void GameAction::LoadSingle(const DataNode &child, const ConditionsStore *player
 	}
 	else if(key == "debt" && hasValue)
 	{
-		GameAction::Debt &debtEntry = debt.emplace_back(max<int64_t>(0, child.Value(1)));
+		GameAction::Debt &debtEntry = debt.emplace_back(std::max<int64_t>(0, child.Value(1)));
 		for(const DataNode &grand : child)
 		{
-			const string &grandKey = grand.Token(0);
+			const std::string &grandKey = grand.Token(0);
 			bool grandHasValue = grand.Size() >= 2;
 			if(grandKey == "term" && grandHasValue)
-				debtEntry.term = max<int>(1, grand.Value(1));
+				debtEntry.term = std::max<int>(1, grand.Value(1));
 			else if(grandKey == "interest" && grandHasValue)
-				debtEntry.interest = clamp(grand.Value(1), 0., 0.999);
+				debtEntry.interest = std::clamp(grand.Value(1), 0., 0.999);
 			else
 				grand.PrintTrace("Error: Skipping unrecognized \"debt\" attribute:");
 		}
@@ -218,8 +216,8 @@ void GameAction::LoadSingle(const DataNode &child, const ConditionsStore *player
 		int minDays = (child.Size() >= 3 ? child.Value(2) : 1);
 		int maxDays = (child.Size() >= 4 ? child.Value(3) : minDays);
 		if(maxDays < minDays)
-			swap(minDays, maxDays);
-		events[GameData::Events().Get(child.Token(1))] = make_pair(minDays, maxDays);
+			std::swap(minDays, maxDays);
+		events[GameData::Events().Get(child.Token(1))] = std::make_pair(minDays, maxDays);
 	}
 	else if(key == "music" && hasValue)
 		music = child.Token(1);
@@ -227,12 +225,12 @@ void GameAction::LoadSingle(const DataNode &child, const ConditionsStore *player
 		music = "";
 	else if(key == "mark" && hasValue)
 	{
-		set<const System *> &toMark = child.Size() == 2 ? mark : markOther[child.Token(2)];
+		std::set<const System *> &toMark = child.Size() == 2 ? mark : markOther[child.Token(2)];
 		toMark.insert(GameData::Systems().Get(child.Token(1)));
 	}
 	else if(key == "unmark" && hasValue)
 	{
-		set<const System *> &toUnmark = (child.Size() == 2) ? unmark : unmarkOther[child.Token(2)];
+		std::set<const System *> &toUnmark = (child.Size() == 2) ? unmark : unmarkOther[child.Token(2)];
 		toUnmark.insert(GameData::Systems().Get(child.Token(1)));
 	}
 	else if(key == "fail" && hasValue)
@@ -307,7 +305,7 @@ void GameAction::Save(DataWriter &out) const
 	for(const auto &[mission, unmarks] : unmarkOther)
 		for(const System *system : unmarks)
 			out.Write("unmark", system->TrueName(), mission);
-	for(const string &name : fail)
+	for(const std::string &name : fail)
 		out.Write("fail", name);
 	if(failCaller)
 		out.Write("fail");
@@ -328,12 +326,12 @@ void GameAction::Save(DataWriter &out) const
 
 // Check this template or instantiated GameAction to see if any used content
 // is not fully defined (e.g. plugin removal, typos in names, etc.).
-string GameAction::Validate() const
+std::string GameAction::Validate() const
 {
 	// Events which get activated by this action must be valid.
 	for(auto &&event : events)
 	{
-		string reason = event.first->IsValid();
+		std::string reason = event.first->IsValid();
 		if(!reason.empty())
 			return "event \"" + event.first->TrueName() + "\" - Reason: " + reason;
 	}
@@ -391,14 +389,14 @@ int64_t GameAction::Fine() const noexcept
 
 
 
-const map<const Outfit *, int> &GameAction::Outfits() const noexcept
+const std::map<const Outfit *, int> &GameAction::Outfits() const noexcept
 {
 	return giftOutfits;
 }
 
 
 
-const vector<ShipManager> &GameAction::Ships() const noexcept
+const std::vector<ShipManager> &GameAction::Ships() const noexcept
 {
 	return giftShips;
 }
@@ -513,7 +511,7 @@ void GameAction::Do(PlayerInfo &player, UI *ui, const Mission *caller) const
 
 
 
-GameAction GameAction::Instantiate(map<string, string> &subs, int jumps, int payload) const
+GameAction GameAction::Instantiate(std::map<std::string, std::string> &subs, int jumps, int payload) const
 {
 	GameAction result;
 	result.isEmpty = isEmpty;
@@ -524,7 +522,7 @@ GameAction GameAction::Instantiate(map<string, string> &subs, int jumps, int pay
 		// always greater than or equal to the first, so Random::Int() will
 		// never be called with a value less than 1.
 		int day = it.second.first + Random::Int(it.second.second - it.second.first + 1);
-		result.events[it.first] = make_pair(day, day);
+		result.events[it.first] = std::make_pair(day, day);
 	}
 
 	for(auto &&it : giftShips)
