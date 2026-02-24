@@ -37,7 +37,7 @@ Point::Point(const double x, const double y) noexcept
 // Check if the point is anything but (0, 0).
 Point::operator bool() const noexcept
 {
-	return this->operator!();
+	return !this->operator!();
 }
 
 
