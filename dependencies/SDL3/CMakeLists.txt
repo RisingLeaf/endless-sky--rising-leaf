@@ -6,4 +6,5 @@ FetchContent_Declare(
 )
 set(SDL_FRAMEWORK OFF CACHE BOOL "" FORCE)
 set(SDL_X11_XTEST OFF CACHE BOOL "" FORCE)
+set(SDL_STATIC    ON  CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(SDL3)

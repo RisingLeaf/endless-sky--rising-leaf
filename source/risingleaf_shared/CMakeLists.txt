@@ -80,7 +80,6 @@ target_include_directories(${LIB_NAME} PUBLIC
         ../
 )
 
-
 if (APPLE)
     target_include_directories(${LIB_NAME} PRIVATE ./external/metal-cpp/)
     target_include_directories(${LIB_NAME} PRIVATE ./external/metal-cpp-extensions/)
@@ -88,21 +87,8 @@ else ()
     find_package(Vulkan REQUIRED)
 endif ()
 
-
-include(FetchContent)
-FetchContent_Declare(
-        freetype
-        GIT_REPOSITORY https://gitlab.freedesktop.org/freetype/freetype.git
-        GIT_TAG VER-2-14-1
-)
-FetchContent_MakeAvailable(freetype)
-
-if (NOT APPLE)
-    find_package(Vulkan REQUIRED)
-endif ()
-
 target_include_directories(${LIB_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
-target_link_libraries(${LIB_NAME} PUBLIC freetype ${Vulkan_LIBRARY_DIRS} SDL3::SDL3)
+target_link_libraries(${LIB_NAME} PUBLIC ${Vulkan_LIBRARY_DIRS} SDL3::SDL3-static)
 
 if (APPLE)
     target_link_libraries(${LIB_NAME} PRIVATE

@@ -12,6 +12,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 set(CMAKE_BUILD_RPATH_USE_ORIGIN ON)
 
+if(APPLE)
+	set(CMAKE_OSX_DEPLOYMENT_TARGET "16.0")
+endif ()
+
 #add_compile_options(-fsanitize=address)
 #add_link_options(-fsanitize=address)
 
@@ -48,7 +52,7 @@ add_subdirectory(source)
 add_library(ExternalLibraries INTERFACE)
 target_link_libraries(EndlessSkyLib PUBLIC ExternalLibraries)
 
-target_link_libraries(ExternalLibraries INTERFACE SDL3::SDL3 avif FLAC::FLAC++ miniz OpenAL miniaudio libjpeg_turbo Threads::Threads png_static)
+target_link_libraries(ExternalLibraries INTERFACE SDL3::SDL3-static avif FLAC::FLAC++ miniz OpenAL miniaudio libjpeg_turbo Threads::Threads png_static)
 
 
 if(MINGW)

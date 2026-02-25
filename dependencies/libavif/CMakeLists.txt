@@ -4,7 +4,7 @@ FetchContent_Declare(
         GIT_REPOSITORY https://github.com/AOMediaCodec/libavif.git
         GIT_TAG v1.3.0
 )
-
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 set(AVIF_LIBYUV LOCAL CACHE STRING "" FORCE)
 
 set(AVIF_CODEC_AOM LOCAL CACHE STRING "" FORCE)
