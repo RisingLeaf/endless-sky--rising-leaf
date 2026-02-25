@@ -96,6 +96,10 @@ namespace VulkanObjects
     [[nodiscard]] uint8_t                    GetCurrentFrame() const { return CurrentFrame; }
     [[nodiscard]] VkSemaphore GetImageAvailable() const { return ImageAvailableSemaphores[CurrentFrame]; }
     [[nodiscard]] VkFence     GetFence() const { return InFlightFences[CurrentFrame]; }
+#ifndef NDEBUG
+    PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT = nullptr;
+#endif
+
   };
 } // namespace VulkanObjects
 

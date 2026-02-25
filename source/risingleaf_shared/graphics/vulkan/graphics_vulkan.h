@@ -67,8 +67,8 @@ namespace graphics_vulkan
 
   struct DrawCall
   {
-    VkPipeline Pipeline;
-    size_t     Count;
+    VkPipeline Pipeline{};
+    size_t     Count = 0;
     size_t     Start = 0;
   };
 

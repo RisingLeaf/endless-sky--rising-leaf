@@ -249,7 +249,7 @@ namespace graphics_vulkan
                               graphics_instance->DrawCalls[index].Pipeline);
             current_pipeline = graphics_instance->DrawCalls[index].Pipeline;
           }
-          vkCmdDraw(current_command_buffer, graphics_instance->DrawCalls[index].Count, 1, 0, 0);
+          vkCmdDraw(current_command_buffer, graphics_instance->DrawCalls[index].Count, 1, graphics_instance->DrawCalls[index].Start, 0);
           break;
         }
       case CommandType::DRAW_INDEXED:
@@ -334,9 +334,9 @@ void graphics_vulkan::VulkanGraphicsInstance::CreateShader(
     std::unique_ptr<GraphicsTypes::ShaderInstance> &shader_instance,
     const ShaderInfo                               &shader_info,
     const std::vector<File::ShaderString>          &shader_code,
-    const std::string_view) const
+    const std::string_view                          name) const
 {
-  shader_instance = std::make_unique<VulkanObjects::VulkanShaderInstance>(Device.get(), shader_info, shader_code);
+  shader_instance = std::make_unique<VulkanObjects::VulkanShaderInstance>(Device.get(), shader_info, shader_code, name);
 }
 
 void graphics_vulkan::VulkanGraphicsInstance::CreateBuffer(

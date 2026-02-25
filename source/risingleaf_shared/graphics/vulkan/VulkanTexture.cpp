@@ -113,7 +113,7 @@ void VulkanObjects::VulkanImageInstance::Upload(VkCommandBuffer cmd,
   void *to_data;
 
   buffer.Map(&to_data);
-  for(size_t i = start_layer; i < end_layer; i++)
+  for(size_t i = start_layer; i < end_layer + 1; i++)
     memcpy(static_cast<unsigned char *>(to_data) + i * layer_size, static_cast<const unsigned char *>(data) + i * layer_size, layer_size);
   buffer.UnMap();
 

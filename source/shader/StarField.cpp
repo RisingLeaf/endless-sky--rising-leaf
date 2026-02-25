@@ -178,13 +178,13 @@ void StarField::Step(Point vel, double zoom)
 
 void StarField::Draw(const Point &blur, const System *system) const
 {
-  double density = system ? system->StarfieldDensity() : 1.;
+  const double density = system ? system->StarfieldDensity() : 1.;
 
   // Check preferences for the parallax quality.
   const auto parallaxSetting = Preferences::GetBackgroundParallax();
-  const int        layers          = (parallaxSetting == Preferences::BackgroundParallax::FANCY) ? 3 : 1;
-  const bool       isParallax      = (parallaxSetting == Preferences::BackgroundParallax::FANCY ||
-                     parallaxSetting == Preferences::BackgroundParallax::FAST);
+  const int  layers          = (parallaxSetting == Preferences::BackgroundParallax::FANCY) ? 3 : 1;
+  const bool isParallax      = (parallaxSetting == Preferences::BackgroundParallax::FANCY ||
+                           parallaxSetting == Preferences::BackgroundParallax::FAST);
 
   // Draw the starfield unless it is disabled in the preferences.
   double zoom = baseZoom;
@@ -198,23 +198,25 @@ void StarField::Draw(const Point &blur, const System *system) const
       if(isParallax) zoom = baseZoom * STAR_ZOOM * pow(pass, 0.2);
 
       const auto length = static_cast<float>(blur.Length());
-      Point unit   = length > 0. ? blur.Unit() : Point(1., 0.);
+      Point      unit   = length > 0. ? blur.Unit() : Point(1., 0.);
       // Don't zoom the stars at the same rate as the field; otherwise, at the
       // farthest out zoom they are too small to draw well.
       unit /= pow(zoom, .75);
 
-      const auto baseZoom   = static_cast<float>(zoom);
       glsl::mat2 rotate;
-      rotate.col0[0] = static_cast<float>(unit.Y());
-      rotate.col0[1] = static_cast<float>(-unit.X());
-      rotate.col1[0] = static_cast<float>(unit.X());
-      rotate.col1[1] = static_cast<float>(unit.Y());
+      rotate.col0[0]         = static_cast<float>(unit.Y());
+      rotate.col0[1]         = static_cast<float>(-unit.X());
+      rotate.col1[0]         = static_cast<float>(unit.X());
+      rotate.col1[1]         = static_cast<float>(unit.Y());
       const float elongation = length * static_cast<float>(zoom);
       const float brightness = std::min<float>(1.f, std::pow(static_cast<float>(zoom), .5f));
 
       const auto                &info = shader.GetInfo();
       std::vector<unsigned char> data_cp(info.GetUniformSize());
-      info.CopyUniformEntryToBuffer(data_cp.data(), &baseZoom, 0);
+      {
+        const auto zoom_f = static_cast<float>(zoom);
+        info.CopyUniformEntryToBuffer(data_cp.data(), &zoom_f, 0);
+      }
       info.CopyUniformEntryToBuffer(data_cp.data(), &rotate, 1);
       info.CopyUniformEntryToBuffer(data_cp.data(), &elongation, 3);
       info.CopyUniformEntryToBuffer(data_cp.data(), &brightness, 4);
@@ -361,9 +363,9 @@ void StarField::MakeStars(int stars, int width)
 
     // Randomize its sub-pixel position and its size / brightness.
     const asl::uint32 random = Random::Int(4096);
-    const float fx     = static_cast<float>(x & (TILE_SIZE - 1)) + static_cast<float>(random & 15) * 0.0625f;
-    const float fy     = static_cast<float>(y & (TILE_SIZE - 1)) + static_cast<float>(random >> 8) * 0.0625f;
-    const float size   = static_cast<float>(((random >> 4) & 15) + 20) * 0.0625f;
+    const float       fx     = static_cast<float>(x & (TILE_SIZE - 1)) + static_cast<float>(random & 15) * 0.0625f;
+    const float       fy     = static_cast<float>(y & (TILE_SIZE - 1)) + static_cast<float>(random >> 8) * 0.0625f;
+    const float       size   = static_cast<float>(((random >> 4) & 15) + 20) * 0.0625f;
 
     // Fill in the data array.
     auto        dataIt    = data.begin() + 6 * 4 * tileIndex[index]++;

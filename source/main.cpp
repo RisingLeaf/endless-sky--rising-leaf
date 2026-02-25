@@ -425,6 +425,7 @@ void GameLoop(PlayerInfo         &player,
         state.Blending.DSTAlpha = GraphicsTypes::BlendFactor::FACTOR_ONE_MINUS_SRC_ALPHA;
         state.Blending.SRCColor = GraphicsTypes::BlendFactor::FACTOR_ONE;
         state.Blending.DSTColor = GraphicsTypes::BlendFactor::FACTOR_ONE_MINUS_SRC_ALPHA;
+        state.ClearColor = GraphicsTypes::Color{0.f, 0.f, 0.f, 0.f};
         GameWindow::GetInstance()->SetState(state);
 
         (menuPanels.IsEmpty() ? gamePanels : menuPanels).PreDrawAll();

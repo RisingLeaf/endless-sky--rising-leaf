@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANSHADERINSTANCE_H
 #define VULKANSHADERINSTANCE_H
@@ -26,53 +27,60 @@ namespace File
 {
   struct ShaderString;
 }
-namespace VulkanObjects {
+namespace VulkanObjects
+{
   class VulkanDeviceInstance;
   struct VulkanPipelineState;
 
   class VulkanShaderInstance final : public GraphicsTypes::ShaderInstance
   {
-    const ShaderInfo     &Info;
+    const ShaderInfo &Info;
 
     VkDescriptorSetLayout DescriptorSetLayoutUBOCommon       = nullptr;
     VkDescriptorSetLayout DescriptorSetLayoutUBOSpecial      = nullptr;
     VkDescriptorSetLayout DescriptorSetLayoutTexturesSpecial = nullptr;
     VkPipelineLayout      PipelineLayout                     = nullptr;
 
-    VkShaderModule        VertexShader   = nullptr;
-    VkShaderModule        FragmentShader = nullptr;
-    VkShaderModule        ComputeShader  = nullptr;
+    VkShaderModule VertexShader   = nullptr;
+    VkShaderModule FragmentShader = nullptr;
+    VkShaderModule ComputeShader  = nullptr;
 
     VkPipelineShaderStageCreateInfo VertexShaderStage{};
     VkPipelineShaderStageCreateInfo FragmentShaderStage{};
     VkPipelineShaderStageCreateInfo ComputeShaderStage{};
 
     mutable std::vector<std::pair<VulkanPipelineState, VkPipeline>> PipelinesWithState;
-    mutable std::mutex PipelinesListMutex;
+    mutable std::mutex                                              PipelinesListMutex;
 
     const VulkanDeviceInstance *Device;
 
   public:
-    VulkanShaderInstance(
-      const VulkanDeviceInstance            *device,
-      const ShaderInfo                      &info,
-      const std::vector<File::ShaderString> &shader_code);
+    VulkanShaderInstance(const VulkanDeviceInstance            *device,
+                         const ShaderInfo                      &info,
+                         const std::vector<File::ShaderString> &shader_code,
+                         std::string_view                       name);
 
     ~VulkanShaderInstance() override;
 
-    VulkanShaderInstance(const VulkanShaderInstance &other) = delete;
-    VulkanShaderInstance(VulkanShaderInstance &&other) noexcept = delete;
-    VulkanShaderInstance &operator=(const VulkanShaderInstance &other) = delete;
+    VulkanShaderInstance(const VulkanShaderInstance &other)                = delete;
+    VulkanShaderInstance(VulkanShaderInstance &&other) noexcept            = delete;
+    VulkanShaderInstance &operator=(const VulkanShaderInstance &other)     = delete;
     VulkanShaderInstance &operator=(VulkanShaderInstance &&other) noexcept = delete;
 
-    VkPipeline GetPipelineForState(const VulkanPipelineState &state) const;
+    VkPipeline                                           GetPipelineForState(const VulkanPipelineState &state) const;
     [[nodiscard]] const VkPipelineShaderStageCreateInfo &GetComputeShaderStage() const { return ComputeShaderStage; }
-    [[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayoutUBOCommon()        const { return DescriptorSetLayoutUBOCommon; }
-    [[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayoutUBOSpecial()       const { return DescriptorSetLayoutUBOSpecial; }
-    [[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayoutTexturesSpecial()  const { return DescriptorSetLayoutTexturesSpecial; }
-    [[nodiscard]] VkPipelineLayout      GetPipelineLayout()                      const { return PipelineLayout; }
+    [[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayoutUBOCommon() const { return DescriptorSetLayoutUBOCommon; }
+    [[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayoutUBOSpecial() const
+    {
+      return DescriptorSetLayoutUBOSpecial;
+    }
+    [[nodiscard]] VkDescriptorSetLayout GetDescriptorSetLayoutTexturesSpecial() const
+    {
+      return DescriptorSetLayoutTexturesSpecial;
+    }
+    [[nodiscard]] VkPipelineLayout GetPipelineLayout() const { return PipelineLayout; }
   };
-}
+} // namespace VulkanObjects
 
 
-#endif //VULKANSHADERINSTANCE_H
+#endif // VULKANSHADERINSTANCE_H

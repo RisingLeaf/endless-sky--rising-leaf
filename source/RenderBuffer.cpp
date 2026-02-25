@@ -88,7 +88,11 @@ void RenderBuffer::SetTarget()
 
   SpriteShader::Bind();
   ShaderInfo::CommonUniformBufferData cm_data;
+#ifdef __APPLE__
   cm_data.scale = {2.f / static_cast<float>(size.X()), -2.f / static_cast<float>(size.Y())};
+#else
+  cm_data.scale = {-2.f / static_cast<float>(size.X()), -2.f / static_cast<float>(size.Y())};
+#endif
   GameWindow::GetInstance()->SetCommonUniforms(cm_data);
 }
 

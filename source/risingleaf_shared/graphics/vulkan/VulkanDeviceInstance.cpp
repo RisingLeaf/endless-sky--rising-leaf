@@ -42,7 +42,6 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   // TODO: maybe not have glfw included here
   std::vector<const char *> required_extensions = VulkanHelpers::GetRequiredExtensions();
   if(ENABLE_VALIDATION_LAYERS) required_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-
   create_info.enabledExtensionCount   = static_cast<uint32_t>(required_extensions.size());
   create_info.ppEnabledExtensionNames = required_extensions.data();
 
@@ -154,6 +153,12 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   allocator_create_info.physicalDevice = PhysicalDevice;
   allocator_create_info.device         = Device;
   VulkanHelpers::VK_CHECK_RESULT(vmaCreateAllocator(&allocator_create_info, &Allocator), __LINE__, __FILE__);
+
+#ifndef NDEBUG
+  vkSetDebugUtilsObjectNameEXT = reinterpret_cast<PFN_vkSetDebugUtilsObjectNameEXT>(vkGetDeviceProcAddr(Device, "vkSetDebugUtilsObjectNameEXT"));
+  if(!vkSetDebugUtilsObjectNameEXT) Log::Warn<<"Could not find vkSetDebugUtilsObjectNameEXT"<<Log::End;
+#endif
+
 }
 
 void VulkanObjects::VulkanDeviceInstance::QueueBufferForDeletion(VkBuffer buffer, VmaAllocation allocation) const { BufferDeleteQueue[CurrentFrame].emplace_back(buffer, allocation); }

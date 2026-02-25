@@ -70,17 +70,9 @@ namespace VulkanHelpers
 
   constexpr
 
-#ifdef __APPLE__
-  std::array<const char*, 3>
-#else
-  std::array<const char*, 2>
-#endif
-  DEVICE_EXTENSIONS = {
+  std::array<const char*, 2> DEVICE_EXTENSIONS = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME
-#ifdef __APPLE__
-    VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME
-#endif
   };
   bool IsDeviceSuitable(VkPhysicalDevice vk_physical_device, VkSurfaceKHR surface);
 

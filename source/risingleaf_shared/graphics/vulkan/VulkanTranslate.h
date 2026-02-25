@@ -95,10 +95,10 @@ namespace VulkanTranslate
   {
     switch(format)
     {
-    case GraphicsTypes::ImageFormat::R:       return VK_FORMAT_R8_UNORM;
-    case GraphicsTypes::ImageFormat::RG:      return VK_FORMAT_R8G8_UNORM;
-    case GraphicsTypes::ImageFormat::RGB:     return VK_FORMAT_R8G8B8_UNORM;
-    case GraphicsTypes::ImageFormat::RGBA:    return VK_FORMAT_R8G8B8A8_UNORM;
+    case GraphicsTypes::ImageFormat::R:       return VK_FORMAT_R8_SRGB;
+    case GraphicsTypes::ImageFormat::RG:      return VK_FORMAT_R8G8_SRGB;
+    case GraphicsTypes::ImageFormat::RGB:     return VK_FORMAT_R8G8B8_SRGB;
+    case GraphicsTypes::ImageFormat::RGBA:    return VK_FORMAT_R8G8B8A8_SRGB;
     case GraphicsTypes::ImageFormat::RGBA16F: return VK_FORMAT_R16G16B16A16_SFLOAT;
     case GraphicsTypes::ImageFormat::RGBA32F: return VK_FORMAT_R32G32B32A32_SFLOAT;
     case GraphicsTypes::ImageFormat::BGRA:    return VK_FORMAT_B8G8R8A8_SRGB;
