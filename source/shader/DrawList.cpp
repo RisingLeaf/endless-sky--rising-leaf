@@ -152,10 +152,10 @@ void DrawList::Push(const Body &body, Point pos, Point blur, double cloak, const
 	// (0, -1) means a zero-degree rotation (since negative Y is up).
 	uw *= zoom;
 	uh *= zoom;
-	item.transform[0] = -uw.Y();
-	item.transform[1] = uw.X();
-	item.transform[2] = -uh.X();
-	item.transform[3] = -uh.Y();
+	item.transform.col0[0] = static_cast<float>(-uw.Y());
+	item.transform.col0[1] = static_cast<float>(uw.X());
+	item.transform.col1[0] = static_cast<float>(-uh.X());
+	item.transform.col1[1] = static_cast<float>(-uh.Y());
 
 	// Calculate the blur std::vector, in texture coordinates.
 	blur *= zoom;

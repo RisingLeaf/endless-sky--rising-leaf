@@ -233,7 +233,7 @@ VulkanObjects::VulkanTextureInstance::VulkanTextureInstance(const VulkanDeviceIn
                                                 Info.Layers,
                                                 Info.MipLevels);
 
-  if(data) Image->Upload(cmd, data, 0, Info.Layers, 0);
+  if(data) Image->Upload(cmd, data, 0, Info.Layers - 1, 0);
 
   Image->SetLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 

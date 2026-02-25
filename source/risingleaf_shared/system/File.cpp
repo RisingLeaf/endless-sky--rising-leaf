@@ -19,13 +19,6 @@
 
 #include <iostream>
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STBI_FAILURE_USERMSG
-#ifdef __APPLE__
-#define STBI_NEON
-#endif
-#include "external/stb_image.h"
-
 #include "Log.h"
 
 
@@ -39,7 +32,7 @@ std::vector<char> File::Read(const std::string_view path)
     return {};
   }
 
-  size_t file_size = file.tellg();
+  const auto file_size = file.tellg();
   std::vector<char> buffer(file_size);
   file.seekg(0);
   file.read(buffer.data(), file_size);
@@ -52,66 +45,6 @@ std::string File::ReadString(const std::string_view path)
 {
   std::ifstream ifs(path.data());
   return {std::istreambuf_iterator(ifs), std::istreambuf_iterator<char>()};
-}
-
-File::PixelHandle File::ReadImage(const std::string_view path, int &width, int &height, int &channels, const bool red_only)
-{
-  stbi_uc *pixels = stbi_load(path.data(), &width, &height, &channels, red_only ? STBI_grey : STBI_rgb_alpha);
-
-  if (!pixels)
-  {
-    Log::Error<<"Image: "<<path.data()<<" could not be loaded. stbi says:\n\t"<<stbi_failure_reason()<<Log::End;
-  }
-
-  if(red_only)
-    channels = 1;
-  else
-    channels = 3;
-
-  return PixelHandle(pixels);
-}
-
-File::PixelHandle::~PixelHandle()
-{
-  if(pixels) stbi_image_free(pixels);
-}
-
-void File::ReadBPD(const std::string_view path, asl::list<unsigned char> &data, asl::uint32 &width, asl::uint8 &components, asl::uint8 &bytes)
-{
-  std::ifstream ifs(path.data(), std::ios_base::binary);
-
-  const auto EOF_CHECK = [&ifs, path]() -> bool
-  {
-    if(!ifs)
-    {
-      Log::Error<<"Failed to read file: "<<path.data()<<Log::End;
-      return false;
-    }
-    return true;
-  };
-
-  if(!ifs)
-  {
-    Log::Error<<"Failed to read file: "<<path.data()<<Log::End;
-    return;
-  }
-
-  ifs.read(reinterpret_cast<char *>(&bytes), 1);
-  if(!EOF_CHECK()) return;
-
-  ifs.read(reinterpret_cast<char *>(&components), 1);
-  if(!EOF_CHECK()) return;
-
-  ifs.read(reinterpret_cast<char *>(&width), 4);
-  if(!EOF_CHECK()) return;
-
-  char val;
-  while(true)
-  {
-    ifs.read(&val, 1);
-    if(ifs.eof()) return;
-    data.emplace_back(val);
-  }
 }
 
 std::vector<File::ShaderString> File::ReadShader(const std::string_view path)

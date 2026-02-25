@@ -66,7 +66,7 @@ size_t graphics_layer::GetAlignmentOfType(const GraphicsTypes::ShaderType type)
 #if defined(__APPLE__)
   case GraphicsTypes::ShaderType::MAT2: return 8;
 #else
-  case GraphicsTypes::ShaderType::MAT2: return 8;
+  case GraphicsTypes::ShaderType::MAT2:
 #endif
   case GraphicsTypes::ShaderType::MAT3:
   case GraphicsTypes::ShaderType::MAT4: return 16;
@@ -84,15 +84,19 @@ size_t graphics_layer::GetSizeOfType(const GraphicsTypes::ShaderType type)
   case GraphicsTypes::ShaderType::INT4: return 16;
   case GraphicsTypes::ShaderType::FLOAT2: return 8;
   case GraphicsTypes::ShaderType::FLOAT4:
+#if defined(__APPLE__) || defined(ASL_BUILD_WASM)
   case GraphicsTypes::ShaderType::MAT2: return 16;
+#else
+  case GraphicsTypes::ShaderType::MAT2: return 32;
+#endif
   case GraphicsTypes::ShaderType::MAT3: return 48;
   case GraphicsTypes::ShaderType::MAT4: return 64;
 #if defined(__APPLE__) || defined(ASL_BUILD_WASM)
   case GraphicsTypes::ShaderType::INT3:
   case GraphicsTypes::ShaderType::FLOAT3: return 16;
 #else
-  case GraphicsTypes::ShaderType::INT3: return 12;
-  case GraphicsTypes::ShaderType::FLOAT3: return 12;
+  case GraphicsTypes::ShaderType::INT3: return 16;
+  case GraphicsTypes::ShaderType::FLOAT3: return 16;
 #endif
   }
   throw std::runtime_error("ShaderType size not implemented");

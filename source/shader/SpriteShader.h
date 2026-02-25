@@ -17,6 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "../Point.h"
 #include "../Swizzle.h"
+#include "mat2.h"
 
 #include "risingleaf_shared/math/graphics_math/gm.h"
 #include "../risingleaf_shared/graphics/graphics_layer.h"
@@ -40,7 +41,7 @@ public:
 		float frame = 0.f;
 		float frameCount = 1.f;
 		float position[2] = {0.f, 0.f};
-		float transform[4] = {0.f, 0.f, 0.f, 0.f};
+		glsl::mat2 transform;
 		float blur[2] = {0.f, 0.f};
 		float clip = 1.f;
 		float alpha = 1.f;

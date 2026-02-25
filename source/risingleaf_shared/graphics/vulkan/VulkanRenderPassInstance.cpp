@@ -92,5 +92,5 @@ VulkanObjects::VulkanRenderPassInstance::VulkanRenderPassInstance(
 
 VulkanObjects::VulkanRenderPassInstance::~VulkanRenderPassInstance()
 {
-  if(RenderPass) vkDestroyRenderPass(Device->GetDevice(), RenderPass, nullptr);
+  if(RenderPass) Device->QueueRenderPassForDeletion(RenderPass);
 }

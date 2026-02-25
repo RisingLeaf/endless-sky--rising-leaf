@@ -179,7 +179,7 @@ bool MapPlanetCard::DrawIfFits(const Point &uiPoint)
 
 		spriteItem.clip = clip;
 		spriteItem.position[1] -= (sprite->Height() * ((1.f - clip) * .5f)) * spriteScale;
-		spriteItem.transform[3] *= clip;
+		spriteItem.transform.col1[1] *= clip;
 
 		SpriteShader::Bind();
 		SpriteShader::Add(spriteItem);
