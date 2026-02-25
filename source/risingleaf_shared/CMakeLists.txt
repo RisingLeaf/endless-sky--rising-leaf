@@ -18,19 +18,10 @@ list(APPEND SHARED_SOURCES
         graphics/graphics_layer.h
         graphics/graphics_layer.cpp
 
-        system/DebugMessenger.cpp
-        system/DebugMessenger.h
-        system/EventBridge.cpp
-        system/EventBridge.h
-        system/Events.cpp
-        system/Events.h
         system/File.cpp
         system/File.h
         system/Log.cpp
         system/Log.h
-        system/Timer.cpp
-        system/Timer.h
-
 )
 
 if (APPLE)

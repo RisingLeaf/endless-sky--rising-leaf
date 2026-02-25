@@ -36,7 +36,7 @@ void ShaderInfo::AddUniformVariable(GraphicsTypes::ShaderType type)
   SpecificUniformBufferSize = (SpecificUniformBufferSize + entry.Alignment - 1) & ~(entry.Alignment - 1);
   entry.Offset              = SpecificUniformBufferSize;
   entry.Size                = graphics_layer::GetSizeOfType(entry.Type);
-  SpecificUniformBufferSize += asl::max(entry.Size, entry.Alignment);
+  SpecificUniformBufferSize += entry.Size;
 }
 
 void ShaderInfo::AddTexture(std::string_view name) { Textures.emplace_back(name); }

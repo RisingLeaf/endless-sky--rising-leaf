@@ -160,6 +160,8 @@ void VulkanObjects::VulkanDeviceInstance::QueueBufferForDeletion(VkBuffer buffer
 void VulkanObjects::VulkanDeviceInstance::QueueImageForDeletion(VkImage image, VmaAllocation allocation) const { ImageDeleteQueue[CurrentFrame].emplace_back(image, allocation); }
 void VulkanObjects::VulkanDeviceInstance::QueueImageViewForDeletion(VkImageView view) const { ImageViewDeleteQueue[CurrentFrame].emplace_back(view); }
 void VulkanObjects::VulkanDeviceInstance::QueueSamplerForDeletion(VkSampler sampler) const { SamplerDeleteQueue[CurrentFrame].emplace_back(sampler); }
+void VulkanObjects::VulkanDeviceInstance::QueueFrameBufferForDeletion(VkFramebuffer framebuffer) const { FrameBufferDeleteQueue[CurrentFrame].emplace_back(framebuffer); }
+void VulkanObjects::VulkanDeviceInstance::QueueRenderPassForDeletion(VkRenderPass render_pass) const { RenderPassDeleteQueue[CurrentFrame].emplace_back(render_pass); }
 
 void VulkanObjects::VulkanDeviceInstance::BeginFrame() const
 {
@@ -170,16 +172,26 @@ void VulkanObjects::VulkanDeviceInstance::BeginFrame() const
 
   for(const auto &[buffer, allocation] : BufferDeleteQueue[CurrentFrame])
     if(buffer && allocation) vmaDestroyBuffer(Allocator, buffer, allocation);
+  BufferDeleteQueue[CurrentFrame].clear();
+
+  for(const auto &render_pass : RenderPassDeleteQueue[CurrentFrame])
+    if(render_pass) vkDestroyRenderPass(Device, render_pass, nullptr);
+  RenderPassDeleteQueue[CurrentFrame].clear();
+
+  for(const auto &framebuffer : FrameBufferDeleteQueue[CurrentFrame])
+    if(framebuffer) vkDestroyFramebuffer(Device, framebuffer, nullptr);
+  FrameBufferDeleteQueue[CurrentFrame].clear();
 
   for(const auto &sampler : SamplerDeleteQueue[CurrentFrame])
     if(sampler) vkDestroySampler(Device, sampler, nullptr);
+  SamplerDeleteQueue[CurrentFrame].clear();
+
   for(const auto &view : ImageViewDeleteQueue[CurrentFrame])
     if(view) vkDestroyImageView(Device, view, nullptr);
+  ImageViewDeleteQueue[CurrentFrame].clear();
+
   for(const auto &[image, allocation] : ImageDeleteQueue[CurrentFrame])
     if(image && allocation) vmaDestroyImage(Allocator, image, allocation);
-  BufferDeleteQueue[CurrentFrame].clear();
-  SamplerDeleteQueue[CurrentFrame].clear();
-  ImageViewDeleteQueue[CurrentFrame].clear();
   ImageDeleteQueue[CurrentFrame].clear();
 }
 
@@ -190,13 +202,22 @@ VulkanObjects::VulkanDeviceInstance::~VulkanDeviceInstance()
   {
     if(InFlightFences[frame]) vkDestroyFence(Device, InFlightFences[frame], nullptr);
     if(ImageAvailableSemaphores[frame]) vkDestroySemaphore(Device, ImageAvailableSemaphores[frame], nullptr);
+
     for(const auto &[buffer, allocation] : BufferDeleteQueue[frame])
       if(buffer && allocation) vmaDestroyBuffer(Allocator, buffer, allocation);
 
+    for(const auto &render_pass : RenderPassDeleteQueue[frame])
+      if(render_pass) vkDestroyRenderPass(Device, render_pass, nullptr);
+
+    for(const auto &framebuffer : FrameBufferDeleteQueue[frame])
+      if(framebuffer) vkDestroyFramebuffer(Device, framebuffer, nullptr);
+
     for(const auto &sampler : SamplerDeleteQueue[frame])
       if(sampler) vkDestroySampler(Device, sampler, nullptr);
+
     for(const auto &view : ImageViewDeleteQueue[frame])
       if(view) vkDestroyImageView(Device, view, nullptr);
+
     for(const auto &[image, allocation] : ImageDeleteQueue[frame])
       if(image && allocation) vmaDestroyImage(Allocator, image, allocation);
   }

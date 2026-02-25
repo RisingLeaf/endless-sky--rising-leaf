@@ -60,11 +60,11 @@ void SpriteShader::Init()
   asl::uint8 dummy_tex_raw[] = {125, 0, 255, 255};
 
   dummy_tex = graphics_layer::TextureHandle(GameWindow::GetInstance(),
-                                            {dummy_tex_raw},
+                                            dummy_tex_raw,
                                             1,
                                             1,
                                             1,
-                                            GraphicsTypes::TextureType::TYPE_2D,
+                                            GraphicsTypes::TextureType::TYPE_2D_ARRAY,
                                             GraphicsTypes::ImageFormat::RGBA,
                                             GraphicsTypes::TextureTarget::READ);
 }
@@ -106,10 +106,10 @@ SpriteShader::Item SpriteShader::Prepare(const Sprite  *sprite,
   Point scaledUnit  = unit * zoom;
   Point uw          = scaledUnit * sprite->Width();
   Point uh          = scaledUnit * sprite->Height();
-  item.transform[0] = static_cast<float>(-uw.Y());
-  item.transform[1] = static_cast<float>(uw.X());
-  item.transform[2] = static_cast<float>(-uh.X());
-  item.transform[3] = static_cast<float>(-uh.Y());
+  item.transform.col0[0] = static_cast<float>(-uw.Y());
+  item.transform.col0[1] = static_cast<float>(uw.X());
+  item.transform.col1[0] = static_cast<float>(-uh.X());
+  item.transform.col1[1] = static_cast<float>(-uh.Y());
   // Swizzle.
   item.swizzle = swizzle;
 
@@ -122,6 +122,8 @@ void SpriteShader::Bind() { shader.Bind(); }
 
 void SpriteShader::Add(const Item &item, bool withBlur)
 {
+  if(!item.texture) return;
+
   int use_swizzle_mask = 0;
   int use_swizzle      = 0;
   if(item.swizzle)
@@ -141,7 +143,7 @@ void SpriteShader::Add(const Item &item, bool withBlur)
   int                        i = -1;
 
   info.CopyUniformEntryToBuffer(data_cp.data(), item.position, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), item.transform, ++i);
+  info.CopyUniformEntryToBuffer(data_cp.data(), &item.transform, ++i);
   static constexpr float UNBLURRED[2] = {0.f, 0.f};
   info.CopyUniformEntryToBuffer(data_cp.data(), withBlur ? item.blur : UNBLURRED, ++i);
   info.CopyUniformEntryToBuffer(data_cp.data(), &item.clip, ++i);

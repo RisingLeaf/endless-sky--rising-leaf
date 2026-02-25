@@ -433,7 +433,11 @@ void GameLoop(PlayerInfo         &player,
 
         SpriteShader::Bind();
         ShaderInfo::CommonUniformBufferData cm_data;
+#ifdef __APPLE__
         cm_data.scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
+#else
+        cm_data.scale = {-2.f / Screen::Width(), -2.f / Screen::Height()};
+#endif
         GameWindow::GetInstance()->SetCommonUniforms(cm_data);
 
         // Events in this frame may have cleared out the menu, in which case

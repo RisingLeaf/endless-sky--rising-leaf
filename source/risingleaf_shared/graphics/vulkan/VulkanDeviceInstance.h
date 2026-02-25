@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANDEVICEINSTANCE_H
 #define VULKANDEVICEINSTANCE_H
@@ -56,11 +57,14 @@ namespace VulkanObjects
     static constexpr bool ENABLE_VALIDATION_LAYERS = true;
 #endif
 
-    mutable uint8_t                                                                           CurrentFrame = 0;
+    mutable uint8_t CurrentFrame = 0;
+
     mutable std::array<std::vector<std::pair<VkBuffer, VmaAllocation>>, MAX_FRAMES_IN_FLIGHT> BufferDeleteQueue;
     mutable std::array<std::vector<std::pair<VkImage, VmaAllocation>>, MAX_FRAMES_IN_FLIGHT>  ImageDeleteQueue;
     mutable std::array<std::vector<VkImageView>, MAX_FRAMES_IN_FLIGHT>                        ImageViewDeleteQueue;
     mutable std::array<std::vector<VkSampler>, MAX_FRAMES_IN_FLIGHT>                          SamplerDeleteQueue;
+    mutable std::array<std::vector<VkFramebuffer>, MAX_FRAMES_IN_FLIGHT>                      FrameBufferDeleteQueue;
+    mutable std::array<std::vector<VkRenderPass>, MAX_FRAMES_IN_FLIGHT>                       RenderPassDeleteQueue;
 
   public:
     explicit VulkanDeviceInstance();
@@ -74,6 +78,8 @@ namespace VulkanObjects
     void QueueImageForDeletion(VkImage image, VmaAllocation allocation) const;
     void QueueImageViewForDeletion(VkImageView view) const;
     void QueueSamplerForDeletion(VkSampler sampler) const;
+    void QueueFrameBufferForDeletion(VkFramebuffer framebuffer) const;
+    void QueueRenderPassForDeletion(VkRenderPass render_pass) const;
 
     void BeginFrame() const;
 
@@ -88,8 +94,8 @@ namespace VulkanObjects
     [[nodiscard]] VkQueue                    GetComputeQueue() const { return ComputeQueue; }
     [[nodiscard]] VkQueue                    GetPresentQueue() const { return PresentQueue; }
     [[nodiscard]] uint8_t                    GetCurrentFrame() const { return CurrentFrame; }
-    [[nodiscard]] VkSemaphore                GetImageAvailable() const { return ImageAvailableSemaphores[CurrentFrame]; }
-    [[nodiscard]] VkFence                    GetFence() const { return InFlightFences[CurrentFrame]; }
+    [[nodiscard]] VkSemaphore GetImageAvailable() const { return ImageAvailableSemaphores[CurrentFrame]; }
+    [[nodiscard]] VkFence     GetFence() const { return InFlightFences[CurrentFrame]; }
   };
 } // namespace VulkanObjects
 

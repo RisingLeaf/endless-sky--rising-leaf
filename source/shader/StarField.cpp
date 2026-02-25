@@ -204,17 +204,18 @@ void StarField::Draw(const Point &blur, const System *system) const
       unit /= pow(zoom, .75);
 
       const auto baseZoom   = static_cast<float>(zoom);
-      const float rotate[4]  = {static_cast<float>(unit.Y()),
-                                static_cast<float>(-unit.X()),
-                                static_cast<float>(unit.X()),
-                                static_cast<float>(unit.Y())};
+      glsl::mat2 rotate;
+      rotate.col0[0] = static_cast<float>(unit.Y());
+      rotate.col0[1] = static_cast<float>(-unit.X());
+      rotate.col1[0] = static_cast<float>(unit.X());
+      rotate.col1[1] = static_cast<float>(unit.Y());
       const float elongation = length * static_cast<float>(zoom);
       const float brightness = std::min<float>(1.f, std::pow(static_cast<float>(zoom), .5f));
 
       const auto                &info = shader.GetInfo();
       std::vector<unsigned char> data_cp(info.GetUniformSize());
       info.CopyUniformEntryToBuffer(data_cp.data(), &baseZoom, 0);
-      info.CopyUniformEntryToBuffer(data_cp.data(), rotate, 1);
+      info.CopyUniformEntryToBuffer(data_cp.data(), &rotate, 1);
       info.CopyUniformEntryToBuffer(data_cp.data(), &elongation, 3);
       info.CopyUniformEntryToBuffer(data_cp.data(), &brightness, 4);
 

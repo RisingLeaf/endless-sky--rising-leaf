@@ -208,5 +208,5 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(
 
 VulkanObjects::VulkanFrameBufferInstance::~VulkanFrameBufferInstance()
 {
-  for(const auto buffer : FrameBuffer) if(buffer) vkDestroyFramebuffer(Device->GetDevice(), buffer, nullptr);
+  for(const auto buffer : FrameBuffer) if(buffer) Device->QueueFrameBufferForDeletion(buffer);
 }
