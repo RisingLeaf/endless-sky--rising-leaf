@@ -158,6 +158,15 @@ PreferencesPanel::~PreferencesPanel()
 }
 
 
+void PreferencesPanel::PreDraw()
+{
+  if(page == 'p')
+  {
+    RenderPluginDescription(selectedPlugin);
+    PreDrawPlugins();
+  }
+}
+
 
 // Draw this panel.
 void PreferencesPanel::Draw()
@@ -346,7 +355,6 @@ bool PreferencesPanel::Click(int x, int y, MouseButton button, int clicks)
 				{
 					selectedPlugin = zone.Value();
 					selected = index;
-					RenderPluginDescription(selectedPlugin);
 					break;
 				}
 				index++;
@@ -524,7 +532,6 @@ void PreferencesPanel::Resize()
 		const Interface *pluginUi = GameData::Interfaces().Get("plugins");
 		Rectangle pluginListBox = pluginUi->GetBox("plugin list");
 		pluginListClip = std::make_unique<RenderBuffer>(pluginListBox.Dimensions());
-		RenderPluginDescription(selectedPlugin);
 	}
 }
 
@@ -1093,7 +1100,7 @@ void PreferencesPanel::DrawSettings()
 
 
 
-void PreferencesPanel::DrawPlugins()
+void PreferencesPanel::PreDrawPlugins()
 {
 	const Color &back = *GameData::Colors().Get("faint");
 	const Color &dim = *GameData::Colors().Get("dim");
@@ -1152,6 +1159,19 @@ void PreferencesPanel::DrawPlugins()
 	}
 
 	pluginListClip->Deactivate();
+}
+
+void PreferencesPanel::DrawPlugins()
+{
+	const Color &back = *GameData::Colors().Get("faint");
+	const Color &dim = *GameData::Colors().Get("dim");
+	const Color &medium = *GameData::Colors().Get("medium");
+	const Color &bright = *GameData::Colors().Get("bright");
+	const Interface *pluginUI = GameData::Interfaces().Get("plugins");
+
+	const Sprite *box[2] = { SpriteSet::Get("ui/unchecked"), SpriteSet::Get("ui/checked") };
+
+	Rectangle pluginListBox = pluginUI->GetBox("plugin list");
 
 	pluginListClip->SetFadePadding(
 		pluginListScroll.IsScrollAtMin() ? 0 : 20,
@@ -1261,7 +1281,7 @@ void PreferencesPanel::RenderPluginDescription(const Plugin &plugin)
 	pluginDescriptionBuffer->SetTarget();
 
 	Point top(pluginDescriptionBuffer->Left(), pluginDescriptionBuffer->Top());
-	if(sprite)
+	if(sprite && sprite->Texture(false).GetTexture())
 	{
 		Point center(0., top.Y() + .5 * sprite->Height());
 		SpriteShader::Draw(sprite, center);
@@ -1443,7 +1463,6 @@ void PreferencesPanel::HandleUp()
 		break;
 	case 'p':
 		selectedPlugin = pluginZones.at(selected).Value();
-		RenderPluginDescription(selectedPlugin);
 		ScrollSelectedPlugin();
 		break;
 	default:
@@ -1468,7 +1487,6 @@ void PreferencesPanel::HandleDown()
 	case 'p':
 		selected = std::min(selected + 1, static_cast<int>(pluginZones.size() - 1));
 		selectedPlugin = pluginZones.at(selected).Value();
-		RenderPluginDescription(selectedPlugin);
 		ScrollSelectedPlugin();
 		break;
 	default:

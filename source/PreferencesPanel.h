@@ -40,6 +40,7 @@ public:
 	virtual ~PreferencesPanel();
 
 	// Draw this panel.
+  virtual void PreDraw() override;
 	virtual void Draw() override;
 
 	virtual void UpdateTooltipActivation() override;
@@ -61,6 +62,7 @@ protected:
 private:
 	void DrawControls();
 	void DrawSettings();
+	void PreDrawPlugins();
 	void DrawPlugins();
 	void RenderPluginDescription(const std::string &pluginName);
 	void RenderPluginDescription(const Plugin &plugin);
