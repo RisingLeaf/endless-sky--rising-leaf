@@ -61,7 +61,7 @@ private:
 
 private:
 	/// The zip handle
-	mz_zip_archive zipFile;
+	mz_zip_archive zipFile{};
 	/// The path of the zip file in the std::filesystem
 	std::filesystem::path basePath;
 	/// The name of the top-level directory inside the zip, or an empty string if it doesn't have such a directory

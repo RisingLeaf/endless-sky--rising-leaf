@@ -171,7 +171,7 @@ namespace graphics_layer
                   GraphicsTypes::TextureType             type,
                   GraphicsTypes::ImageFormat             format,
                   GraphicsTypes::TextureTarget           target,
-                  GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::REPEAT,
+                  GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
                   GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
     TextureHandle(const GraphicsTypes::GraphicsInstance *instance,
                   int                                    width,
@@ -180,7 +180,7 @@ namespace graphics_layer
                   GraphicsTypes::TextureType             type,
                   GraphicsTypes::ImageFormat             format,
                   GraphicsTypes::TextureTarget           target,
-                  GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::REPEAT,
+                  GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
                   GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
     ~TextureHandle();
 

@@ -83,7 +83,7 @@ size_t graphics_layer::GetSizeOfType(const GraphicsTypes::ShaderType type)
   case GraphicsTypes::ShaderType::INT2: return 8;
   case GraphicsTypes::ShaderType::INT4: return 16;
   case GraphicsTypes::ShaderType::FLOAT2: return 8;
-  case GraphicsTypes::ShaderType::FLOAT4:
+  case GraphicsTypes::ShaderType::FLOAT4: return 16;
 #if defined(__APPLE__) || defined(ASL_BUILD_WASM)
   case GraphicsTypes::ShaderType::MAT2: return 16;
 #else
