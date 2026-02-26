@@ -37,7 +37,8 @@ namespace VulkanObjects
     explicit VulkanBufferInstance(
       const VulkanDeviceInstance     *device,
       GraphicsTypes::BufferType       type,
-      size_t                          size);
+      size_t                          size,
+      std::string_view                name);
 
     ~VulkanBufferInstance() override;
 

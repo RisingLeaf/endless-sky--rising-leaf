@@ -251,6 +251,7 @@ int main(int argc, char *argv[])
   Plugins::Save();
 
   Audio::Quit();
+  GameData::ClearShaders();
   GameWindow::Quit();
 
   return 0;

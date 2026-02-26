@@ -92,6 +92,7 @@ public:
 	static void CheckReferences();
 	static void LoadSettings();
 	static void LoadShaders();
+	static void ClearShaders();
 	static double GetProgress();
 	// Whether initial game loading is complete (data, sprites and audio are loaded).
 	static bool IsLoaded();

@@ -372,15 +372,15 @@ namespace GraphicsTypes
                               const std::vector<File::ShaderString> &shader_code,
                               std::string_view                       name) const = 0;
 
-    virtual void CreateBuffer(std::unique_ptr<BufferInstance> &buffer_instance, BufferType type, size_t buffer_size) const  = 0;
-    virtual void CreateBuffer(std::unique_ptr<BufferInstance> &buffer_instance, BufferType type, size_t buffer_size, const void *data) const = 0;
+    virtual void CreateBuffer(std::unique_ptr<BufferInstance> &buffer_instance, BufferType type, size_t buffer_size, std::string_view name) const  = 0;
+    virtual void CreateBuffer(std::unique_ptr<BufferInstance> &buffer_instance, BufferType type, size_t buffer_size, const void *data, std::string_view name) const = 0;
     virtual void MapBuffer(BufferInstance *buffer_instance, const void *map_memory) const = 0;
     // Copies lhs into rhs.
     virtual void CopyBuffer(BufferInstance *buffer_instance_rhs, BufferInstance *buffer_instance_lhs) const = 0;
 
-    virtual void CreateTexture(std::unique_ptr<TextureInstance> &texture_instance, const TextureInfo &texture_info, const void *in_data) const = 0;
+    virtual void CreateTexture(std::unique_ptr<TextureInstance> &texture_instance, const TextureInfo &texture_info, const void *in_data, std::string_view name) const = 0;
 
-    virtual void CreateRenderBuffer(std::unique_ptr<RenderBufferInstance> &render_buffer_instance, const FrameBufferInfo &create_info) const = 0;
+    virtual void CreateRenderBuffer(std::unique_ptr<RenderBufferInstance> &render_buffer_instance, const FrameBufferInfo &create_info, std::string_view name) const = 0;
     virtual const TextureInstance *GetRenderBufferTexture(RenderBufferInstance *render_buffer_instance) const                                                                                   = 0;
 
     virtual void DispatchCompute(const ShaderInstance *shader, const TextureInstance *const *texture_instance, int count, int num_x, int num_y, int num_z) const = 0;

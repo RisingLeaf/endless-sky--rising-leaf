@@ -27,4 +27,5 @@ class FontSet {
 public:
 	static void Add(const std::filesystem::path &path, int size);
 	static const Font &Get(int size);
+  static void Clear();
 };

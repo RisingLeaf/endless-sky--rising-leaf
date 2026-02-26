@@ -15,6 +15,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Sprite.h"
 
+#include <utility>
+
 #include "../GameWindow.h"
 #include "../Preferences.h"
 #include "../Screen.h"
@@ -24,15 +26,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 namespace
 {
-  void AddBuffer(ImageBuffer &buffer, graphics_layer::TextureHandle &target, bool noReduction)
+  void AddBuffer(ImageBuffer &buffer, graphics_layer::TextureHandle &target, const bool noReduction, const std::string_view name)
   {
     // Check whether this sprite is large enough to require size reduction.
-    Preferences::LargeGraphicsReduction setting = Preferences::GetLargeGraphicsReduction();
+    const Preferences::LargeGraphicsReduction setting = Preferences::GetLargeGraphicsReduction();
     if(!noReduction && (setting == Preferences::LargeGraphicsReduction::ALL || (setting == Preferences::LargeGraphicsReduction::LARGEST_ONLY && buffer.Width() * buffer.Height() >= 1000000)))
       buffer.ShrinkToHalfSize();
 
     target = graphics_layer::TextureHandle(
       GameWindow::GetInstance(),
+      name,
       buffer.Pixels(),
       buffer.Width(),
       buffer.Height(),
@@ -48,35 +51,35 @@ namespace
 } // namespace
 
 
-Sprite::Sprite(const std::string &name) : name(name) {}
+Sprite::Sprite(std::string name) : name(std::move(name)) {}
 
 
 const std::string &Sprite::Name() const { return name; }
 
 
-// Add the given frames, optionally uploading them. The given buffer will be cleared afterwards.
-void Sprite::AddFrames(ImageBuffer &buffer, bool is2x, bool noReduction)
+// Add the given frames, optionally uploading them. The given buffer will be cleared afterward.
+void Sprite::AddFrames(ImageBuffer &buffer, const bool is2x, const bool noReduction)
 {
   // If this is the 1x image, its dimensions determine the sprite's size.
   if(!is2x)
   {
-    width  = buffer.Width();
-    height = buffer.Height();
+    width  = static_cast<float>(buffer.Width());
+    height = static_cast<float>(buffer.Height());
     frames = buffer.Frames();
   }
 
   // Only non-empty buffers need to be added to the sprite.
-  if(buffer.Pixels()) AddBuffer(buffer, texture[is2x], noReduction);
+  if(buffer.Pixels()) AddBuffer(buffer, texture[is2x], noReduction, name);
 }
 
 
-// Upload the given frames. The given buffer will be cleared afterwards.
-void Sprite::AddSwizzleMaskFrames(ImageBuffer &buffer, bool is2x, bool noReduction)
+// Upload the given frames. The given buffer will be cleared afterward.
+void Sprite::AddSwizzleMaskFrames(ImageBuffer &buffer, const bool is2x, const bool noReduction)
 {
   // Do nothing if the buffer is empty.
   if(!buffer.Pixels()) return;
 
-  AddBuffer(buffer, swizzleMask[is2x], noReduction);
+  AddBuffer(buffer, swizzleMask[is2x], noReduction, name);
 }
 
 
@@ -115,7 +118,7 @@ int Sprite::Frames() const { return frames; }
 
 // Get the offset of the center from the top left corner; this is for easy
 // shifting of corner to center coordinates.
-Point Sprite::Center() const { return Point(.5 * width, .5 * height); }
+Point Sprite::Center() const { return {.5 * width, .5 * height}; }
 
 
 // Get the texture index, based on whether the screen is high DPI or not.

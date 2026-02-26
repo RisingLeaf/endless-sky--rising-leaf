@@ -193,6 +193,8 @@ bool GameWindow::Init(bool headless)
 // Clean up the SDL context, window, and shut down SDL.
 void GameWindow::Quit()
 {
+  Instance.reset();
+
   // Make sure the cursor is visible.
   SDL_ShowCursor();
 

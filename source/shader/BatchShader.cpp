@@ -46,6 +46,11 @@ void BatchShader::Init()
 }
 
 
+void BatchShader::Clear()
+{
+  shader.Clear();
+}
+
 
 void BatchShader::Bind()
 {

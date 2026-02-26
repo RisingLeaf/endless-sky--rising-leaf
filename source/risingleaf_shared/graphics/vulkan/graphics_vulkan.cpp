@@ -43,14 +43,15 @@
 
 namespace graphics_vulkan
 {
-  void BindBuffers(const VulkanGraphicsInstance               *graphics_instance,
-                   const VulkanObjects::VulkanShaderInstance  *current_shader_instance,
-                   const GraphicsTypes::BufferInstance *const *buffer_instance,
-                   const int                                   count,
-                   const GraphicsTypes::UBOBindPoint           bind_point,
-                   const int                                   set,
-                   const size_t                                offset,
-                   const size_t                                size)
+  void BindBuffers(
+      const VulkanGraphicsInstance               *graphics_instance,
+      const VulkanObjects::VulkanShaderInstance  *current_shader_instance,
+      const GraphicsTypes::BufferInstance *const *buffer_instance,
+      const int                                   count,
+      const GraphicsTypes::UBOBindPoint           bind_point,
+      const int                                   set,
+      const size_t                                offset,
+      const size_t                                size)
   {
     if(!buffer_instance)
     {
@@ -94,14 +95,15 @@ namespace graphics_vulkan
       vkUpdateDescriptorSets(graphics_instance->Device->GetDevice(), 1, &descriptor_write, 0, nullptr);
     }
 
-    vkCmdBindDescriptorSets(graphics_instance->CommandBuffers[graphics_instance->Device->GetCurrentFrame()],
-                            VK_PIPELINE_BIND_POINT_GRAPHICS,
-                            current_shader_instance->GetPipelineLayout(),
-                            set,
-                            1,
-                            &descriptor_set,
-                            0,
-                            nullptr);
+    vkCmdBindDescriptorSets(
+        graphics_instance->CommandBuffers[graphics_instance->Device->GetCurrentFrame()],
+        VK_PIPELINE_BIND_POINT_GRAPHICS,
+        current_shader_instance->GetPipelineLayout(),
+        set,
+        1,
+        &descriptor_set,
+        0,
+        nullptr);
   }
 
   void SubmitDrawCommands(const VulkanGraphicsInstance *graphics_instance)
@@ -115,9 +117,10 @@ namespace graphics_vulkan
       graphics_instance->DynamicUniformBuffersCommon[graphics_instance->Device->GetCurrentFrame()]->Map(&to_data);
       for(const auto &buffer : graphics_instance->CommonUniformBufferBindings)
       {
-        memcpy(static_cast<unsigned char *>(to_data) + graphics_instance->DynamicUniformBuffersCommonOffset,
-               buffer.data(),
-               buffer.size());
+        memcpy(
+            static_cast<unsigned char *>(to_data) + graphics_instance->DynamicUniformBuffersCommonOffset,
+            buffer.data(),
+            buffer.size());
 
         common_offsets.emplace_back(graphics_instance->DynamicUniformBuffersCommonOffset);
 
@@ -132,9 +135,10 @@ namespace graphics_vulkan
       graphics_instance->DynamicUniformBuffersSpecific[graphics_instance->Device->GetCurrentFrame()]->Map(&to_data);
       for(const auto &buffer : graphics_instance->CustomUniformBufferBindings)
       {
-        memcpy(static_cast<unsigned char *>(to_data) + graphics_instance->DynamicUniformBuffersSpecificOffset,
-               buffer.data(),
-               buffer.size());
+        memcpy(
+            static_cast<unsigned char *>(to_data) + graphics_instance->DynamicUniformBuffersSpecificOffset,
+            buffer.data(),
+            buffer.size());
 
         custom_offsets.emplace_back(graphics_instance->DynamicUniformBuffersSpecificOffset);
 
@@ -149,9 +153,10 @@ namespace graphics_vulkan
       graphics_instance->DynamicVertexBuffers[graphics_instance->Device->GetCurrentFrame()]->Map(&to_data);
       for(const auto &buffer : graphics_instance->DynamicDrawCalls)
       {
-        memcpy(static_cast<unsigned char *>(to_data) + graphics_instance->DynamicVertexBuffersOffset,
-               buffer.Data.data(),
-               buffer.Data.size());
+        memcpy(
+            static_cast<unsigned char *>(to_data) + graphics_instance->DynamicVertexBuffersOffset,
+            buffer.Data.data(),
+            buffer.Data.size());
 
         vertex_offsets.emplace_back(graphics_instance->DynamicVertexBuffersOffset);
 
@@ -177,10 +182,11 @@ namespace graphics_vulkan
         }
       case CommandType::INDEX_BIND:
         {
-          vkCmdBindIndexBuffer(current_command_buffer,
-                               graphics_instance->BoundBuffers[index]->Get(),
-                               0,
-                               VK_INDEX_TYPE_UINT32);
+          vkCmdBindIndexBuffer(
+              current_command_buffer,
+              graphics_instance->BoundBuffers[index]->Get(),
+              0,
+              VK_INDEX_TYPE_UINT32);
           break;
         }
       case CommandType::VERTEX_BIND:
@@ -195,14 +201,15 @@ namespace graphics_vulkan
         {
           if(current_shader_instance)
           {
-            vkCmdBindDescriptorSets(current_command_buffer,
-                                    VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                    current_shader_instance->GetPipelineLayout(),
-                                    graphics_instance->BoundTextures[index].Set,
-                                    1,
-                                    &graphics_instance->BoundTextures[index].DescriptorSet,
-                                    0,
-                                    nullptr);
+            vkCmdBindDescriptorSets(
+                current_command_buffer,
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                current_shader_instance->GetPipelineLayout(),
+                graphics_instance->BoundTextures[index].Set,
+                1,
+                &graphics_instance->BoundTextures[index].DescriptorSet,
+                0,
+                nullptr);
           }
           break;
         }
@@ -212,14 +219,15 @@ namespace graphics_vulkan
           {
             auto *buffer =
                 graphics_instance->DynamicUniformBuffersCommon[graphics_instance->Device->GetCurrentFrame()].get();
-            BindBuffers(graphics_instance,
-                        current_shader_instance,
-                        reinterpret_cast<GraphicsTypes::BufferInstance **>(&buffer),
-                        1,
-                        GraphicsTypes::UBOBindPoint::Common,
-                        0,
-                        common_offsets[index],
-                        graphics_instance->CommonUniformBufferBindings[index].size());
+            BindBuffers(
+                graphics_instance,
+                current_shader_instance,
+                reinterpret_cast<GraphicsTypes::BufferInstance **>(&buffer),
+                1,
+                GraphicsTypes::UBOBindPoint::Common,
+                0,
+                common_offsets[index],
+                graphics_instance->CommonUniformBufferBindings[index].size());
           }
           break;
         }
@@ -229,14 +237,15 @@ namespace graphics_vulkan
           {
             auto *buffer =
                 graphics_instance->DynamicUniformBuffersSpecific[graphics_instance->Device->GetCurrentFrame()].get();
-            BindBuffers(graphics_instance,
-                        current_shader_instance,
-                        reinterpret_cast<GraphicsTypes::BufferInstance **>(&buffer),
-                        1,
-                        GraphicsTypes::UBOBindPoint::Specific,
-                        1,
-                        custom_offsets[index],
-                        graphics_instance->CustomUniformBufferBindings[index].size());
+            BindBuffers(
+                graphics_instance,
+                current_shader_instance,
+                reinterpret_cast<GraphicsTypes::BufferInstance **>(&buffer),
+                1,
+                GraphicsTypes::UBOBindPoint::Specific,
+                1,
+                custom_offsets[index],
+                graphics_instance->CustomUniformBufferBindings[index].size());
           }
           break;
         }
@@ -244,24 +253,37 @@ namespace graphics_vulkan
         {
           if(current_pipeline != graphics_instance->DrawCalls[index].Pipeline)
           {
-            vkCmdBindPipeline(current_command_buffer,
-                              VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              graphics_instance->DrawCalls[index].Pipeline);
+            vkCmdBindPipeline(
+                current_command_buffer,
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                graphics_instance->DrawCalls[index].Pipeline);
             current_pipeline = graphics_instance->DrawCalls[index].Pipeline;
           }
-          vkCmdDraw(current_command_buffer, graphics_instance->DrawCalls[index].Count, 1, graphics_instance->DrawCalls[index].Start, 0);
+          vkCmdDraw(
+              current_command_buffer,
+              graphics_instance->DrawCalls[index].Count,
+              1,
+              graphics_instance->DrawCalls[index].Start,
+              0);
           break;
         }
       case CommandType::DRAW_INDEXED:
         {
           if(current_pipeline != graphics_instance->DrawCalls[index].Pipeline)
           {
-            vkCmdBindPipeline(current_command_buffer,
-                              VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              graphics_instance->DrawCalls[index].Pipeline);
+            vkCmdBindPipeline(
+                current_command_buffer,
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                graphics_instance->DrawCalls[index].Pipeline);
             current_pipeline = graphics_instance->DrawCalls[index].Pipeline;
           }
-          vkCmdDrawIndexed(current_command_buffer, graphics_instance->DrawCalls[index].Count, 1, graphics_instance->DrawCalls[index].Start, 0, 0);
+          vkCmdDrawIndexed(
+              current_command_buffer,
+              graphics_instance->DrawCalls[index].Count,
+              1,
+              graphics_instance->DrawCalls[index].Start,
+              0,
+              0);
           break;
         }
       case CommandType::DRAW_DYNAMIC:
@@ -274,9 +296,10 @@ namespace graphics_vulkan
 
           if(current_pipeline != graphics_instance->DynamicDrawCalls[index].Pipeline)
           {
-            vkCmdBindPipeline(current_command_buffer,
-                              VK_PIPELINE_BIND_POINT_GRAPHICS,
-                              graphics_instance->DynamicDrawCalls[index].Pipeline);
+            vkCmdBindPipeline(
+                current_command_buffer,
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                graphics_instance->DynamicDrawCalls[index].Pipeline);
             current_pipeline = graphics_instance->DynamicDrawCalls[index].Pipeline;
           }
           vkCmdDraw(current_command_buffer, graphics_instance->DynamicDrawCalls[index].Count, 1, 0, 0);
@@ -305,9 +328,9 @@ graphics_vulkan::VulkanGraphicsInstance::VulkanGraphicsInstance(const int width,
   DescriptorPool = std::make_unique<VulkanObjects::VulkanDescriptorPool>(Device.get());
   SwapChain = std::make_unique<VulkanObjects::VulkanSwapChainInstance>(Device.get(), CommandPool.get(), width, height);
 
-  const auto buffer_allocate_info =
-      VulkanBootstrap::GetCommandBufferAllocate(CommandPool->Get(),
-                                                VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT);
+  const auto buffer_allocate_info = VulkanBootstrap::GetCommandBufferAllocate(
+      CommandPool->Get(),
+      VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT);
   VulkanHelpers::VK_CHECK_RESULT(
       vkAllocateCommandBuffers(Device->GetDevice(), &buffer_allocate_info, CommandBuffers.data()),
       __LINE__,
@@ -315,18 +338,21 @@ graphics_vulkan::VulkanGraphicsInstance::VulkanGraphicsInstance(const int width,
 
   for(size_t i = 0; i < VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT; i++)
   {
-    DynamicUniformBuffersCommon[i] =
-        std::make_unique<VulkanObjects::VulkanBufferInstance>(Device.get(),
-                                                              GraphicsTypes::BufferType::UNIFORM_DYNAMIC,
-                                                              1024 * 1024 * 8);
-    DynamicUniformBuffersSpecific[i] =
-        std::make_unique<VulkanObjects::VulkanBufferInstance>(Device.get(),
-                                                              GraphicsTypes::BufferType::UNIFORM_DYNAMIC,
-                                                              1024 * 1024 * 8);
-    DynamicVertexBuffers[i] =
-        std::make_unique<VulkanObjects::VulkanBufferInstance>(Device.get(),
-                                                              GraphicsTypes::BufferType::VERTEX_DYNAMIC,
-                                                              1024 * 1024 * 8);
+    DynamicUniformBuffersCommon[i] = std::make_unique<VulkanObjects::VulkanBufferInstance>(
+        Device.get(),
+        GraphicsTypes::BufferType::UNIFORM_DYNAMIC,
+        1024 * 1024 * 8,
+        "dynamic_ubo_cm");
+    DynamicUniformBuffersSpecific[i] = std::make_unique<VulkanObjects::VulkanBufferInstance>(
+        Device.get(),
+        GraphicsTypes::BufferType::UNIFORM_DYNAMIC,
+        1024 * 1024 * 8,
+        "dynamic_ubo_spec");
+    DynamicVertexBuffers[i] = std::make_unique<VulkanObjects::VulkanBufferInstance>(
+        Device.get(),
+        GraphicsTypes::BufferType::VERTEX_DYNAMIC,
+        1024 * 1024 * 8,
+        "dynamic_vert");
   }
 }
 
@@ -342,18 +368,20 @@ void graphics_vulkan::VulkanGraphicsInstance::CreateShader(
 void graphics_vulkan::VulkanGraphicsInstance::CreateBuffer(
     std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance,
     const GraphicsTypes::BufferType                 type,
-    const size_t                                    buffer_size) const
+    const size_t                                    buffer_size,
+    const std::string_view                          name) const
 {
-  buffer_instance = std::make_unique<VulkanObjects::VulkanBufferInstance>(Device.get(), type, buffer_size);
+  buffer_instance = std::make_unique<VulkanObjects::VulkanBufferInstance>(Device.get(), type, buffer_size, name);
 }
 
 void graphics_vulkan::VulkanGraphicsInstance::CreateBuffer(
     std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance,
     const GraphicsTypes::BufferType                 type,
     const size_t                                    buffer_size,
-    const void                                     *data) const
+    const void                                     *data,
+    const std::string_view                          name) const
 {
-  buffer_instance = std::make_unique<VulkanObjects::VulkanBufferInstance>(Device.get(), type, buffer_size);
+  buffer_instance = std::make_unique<VulkanObjects::VulkanBufferInstance>(Device.get(), type, buffer_size, name);
 
   void      *to_data;
   const auto vulkan_buffer = reinterpret_cast<VulkanObjects::VulkanBufferInstance *>(buffer_instance.get());
@@ -362,8 +390,9 @@ void graphics_vulkan::VulkanGraphicsInstance::CreateBuffer(
   vulkan_buffer->UnMap();
 }
 
-void graphics_vulkan::VulkanGraphicsInstance::MapBuffer(GraphicsTypes::BufferInstance *buffer_instance,
-                                                        const void                    *map_memory) const
+void graphics_vulkan::VulkanGraphicsInstance::MapBuffer(
+    GraphicsTypes::BufferInstance *buffer_instance,
+    const void                    *map_memory) const
 {
   if(!buffer_instance) throw std::runtime_error("trying to map uninitialized buffer");
   const auto vulkan_buffer = reinterpret_cast<VulkanObjects::VulkanBufferInstance *>(buffer_instance);
@@ -374,8 +403,9 @@ void graphics_vulkan::VulkanGraphicsInstance::MapBuffer(GraphicsTypes::BufferIns
 }
 
 // Copies lhs into rhs.
-void graphics_vulkan::VulkanGraphicsInstance::CopyBuffer(GraphicsTypes::BufferInstance *buffer_instance_rhs,
-                                                         GraphicsTypes::BufferInstance *buffer_instance_lhs) const
+void graphics_vulkan::VulkanGraphicsInstance::CopyBuffer(
+    GraphicsTypes::BufferInstance *buffer_instance_rhs,
+    GraphicsTypes::BufferInstance *buffer_instance_lhs) const
 {
   VulkanObjects::VulkanSingleCommandBuffer cmd(Device.get(), CommandPool.get());
 
@@ -404,14 +434,15 @@ void graphics_vulkan::VulkanGraphicsInstance::CopyBuffer(GraphicsTypes::BufferIn
 void graphics_vulkan::VulkanGraphicsInstance::CreateTexture(
     std::unique_ptr<GraphicsTypes::TextureInstance> &texture_instance,
     const GraphicsTypes::TextureInfo                &texture_info,
-    const void                                      *in_data) const
+    const void                                      *in_data,
+    const std::string_view                           name) const
 {
   VulkanObjects::VulkanSingleCommandBuffer cmd(Device.get(), CommandPool.get());
 
   cmd.Begin();
 
   texture_instance =
-      std::make_unique<VulkanObjects::VulkanTextureInstance>(Device.get(), cmd.Get(), in_data, texture_info);
+      std::make_unique<VulkanObjects::VulkanTextureInstance>(Device.get(), name, cmd.Get(), in_data, texture_info);
 
   reinterpret_cast<VulkanObjects::VulkanTextureInstance *>(texture_instance.get())
       ->GetImage()
@@ -422,18 +453,20 @@ void graphics_vulkan::VulkanGraphicsInstance::CreateTexture(
 
 void graphics_vulkan::VulkanGraphicsInstance::CreateRenderBuffer(
     std::unique_ptr<GraphicsTypes::RenderBufferInstance> &render_buffer_instance,
-    const GraphicsTypes::FrameBufferInfo                 &create_info) const
+    const GraphicsTypes::FrameBufferInfo                 &create_info,
+    const std::string_view                                name) const
 {
   GraphicsTypes::StateInfo state;
   state.Color   = create_info.HasColor;
   state.Depth   = create_info.HasDepth;
-  state.Samples = create_info.Samples;
+  state.Samples = static_cast<int>(create_info.Samples);
 
   render_buffer_instance = std::make_unique<VulkanObjects::VulkanFrameBufferInstance>(
       Device.get(),
       create_info,
       state,
-      VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT);
+      VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT,
+      name);
 }
 
 const GraphicsTypes::TextureInstance *graphics_vulkan::VulkanGraphicsInstance::GetRenderBufferTexture(
@@ -462,17 +495,22 @@ void graphics_vulkan::VulkanGraphicsInstance::DispatchCompute(
 
   std::vector<VkDescriptorSetLayoutBinding> layout_bindings;
   for(int x = 0; x < count; x++)
+  {
     layout_bindings.emplace_back(
-        VulkanBootstrap::GetDescriptorSetLayoutBinding(x,
-                                                       VulkanTranslate::ShaderStage::COMPUTE,
-                                                       VulkanTranslate::DescriptorType::STORAGE_TEXTURE));
+        VulkanBootstrap::GetDescriptorSetLayoutBinding(
+            x,
+            VulkanTranslate::ShaderStage::COMPUTE,
+            VulkanTranslate::DescriptorType::STORAGE_TEXTURE));
+  }
 
   VkDescriptorSetLayout compute_descriptor_set_layout;
   const auto            layout_info = VulkanBootstrap::GetDescriptorSetLayoutCreate(layout_bindings);
 
   if(vkCreateDescriptorSetLayout(Device->GetDevice(), &layout_info, nullptr, &compute_descriptor_set_layout) !=
      VK_SUCCESS)
+  {
     throw std::runtime_error("failed to create compute descriptor set layout!");
+  }
 
   const std::vector descriptor_set_layouts = {compute_descriptor_set_layout};
 
@@ -569,9 +607,10 @@ bool graphics_vulkan::VulkanGraphicsInstance::StartDraw(const int width, const i
   vkResetCommandBuffer(CommandBuffers[Device->GetCurrentFrame()], 0);
 
   const auto buffer_begin_info = VulkanBootstrap::GetCommandBufferBegin(VulkanTranslate::CommandBufferType::REUSE);
-  VulkanHelpers::VK_CHECK_RESULT(vkBeginCommandBuffer(CommandBuffers[Device->GetCurrentFrame()], &buffer_begin_info),
-                                 __LINE__,
-                                 __FILE__);
+  VulkanHelpers::VK_CHECK_RESULT(
+      vkBeginCommandBuffer(CommandBuffers[Device->GetCurrentFrame()], &buffer_begin_info),
+      __LINE__,
+      __FILE__);
 
   return true;
 }
@@ -603,8 +642,9 @@ void graphics_vulkan::VulkanGraphicsInstance::BindShader(const GraphicsTypes::Sh
   State.Shader = reinterpret_cast<const VulkanObjects::VulkanShaderInstance *>(shader_instance);
 }
 
-void graphics_vulkan::VulkanGraphicsInstance::BindBufferDynamic(const std::vector<unsigned char> &data,
-                                                                const GraphicsTypes::UBOBindPoint bind_point) const
+void graphics_vulkan::VulkanGraphicsInstance::BindBufferDynamic(
+    const std::vector<unsigned char> &data,
+    const GraphicsTypes::UBOBindPoint bind_point) const
 {
   switch(bind_point)
   {
@@ -682,10 +722,11 @@ void graphics_vulkan::VulkanGraphicsInstance::BindVertexBuffer(GraphicsTypes::Bu
   CommandsRecorded.emplace_back(CommandType::VERTEX_BIND, BoundBuffers.size() - 1);
 }
 
-void graphics_vulkan::VulkanGraphicsInstance::DrawIndexed(const size_t                         start,
-                                                          const size_t                         count,
-                                                          const GraphicsTypes::BufferInstance *buffer_instance,
-                                                          const GraphicsTypes::PrimitiveType   prim_type) const
+void graphics_vulkan::VulkanGraphicsInstance::DrawIndexed(
+    const size_t                         start,
+    const size_t                         count,
+    const GraphicsTypes::BufferInstance *buffer_instance,
+    const GraphicsTypes::PrimitiveType   prim_type) const
 {
   State.RenderState.DrawPrimitiveType = prim_type;
 
@@ -699,17 +740,17 @@ void graphics_vulkan::VulkanGraphicsInstance::DrawIndexed(const size_t          
     DrawCalls.emplace_back(State.Shader->GetPipelineForState(State), count, start);
     CommandsRecorded.emplace_back(CommandType::DRAW_INDEXED, DrawCalls.size() - 1);
   }
-  else
-  {
+  else {
     DrawCalls.emplace_back(State.Shader->GetPipelineForState(State), count, start);
     CommandsRecorded.emplace_back(CommandType::DRAW, DrawCalls.size() - 1);
   }
 }
 
-void graphics_vulkan::VulkanGraphicsInstance::DrawDynamic(const size_t                       count,
-                                                          const size_t                       type_size,
-                                                          const void                        *data,
-                                                          const GraphicsTypes::PrimitiveType prim_type) const
+void graphics_vulkan::VulkanGraphicsInstance::DrawDynamic(
+    const size_t                       count,
+    const size_t                       type_size,
+    const void                        *data,
+    const GraphicsTypes::PrimitiveType prim_type) const
 {
   State.RenderState.DrawPrimitiveType = prim_type;
 
@@ -732,13 +773,10 @@ void graphics_vulkan::VulkanGraphicsInstance::BindRenderBuffer(
   auto vulkan_render_buffer_instance =
       reinterpret_cast<VulkanObjects::VulkanFrameBufferInstance *>(render_buffer_instance);
 
-  if(!vulkan_render_buffer_instance->IsInUse())
-  {
-    vulkan_render_buffer_instance->SetInUse(true);
-  }
+  if(!vulkan_render_buffer_instance->IsInUse()) vulkan_render_buffer_instance->SetInUse(true);
 
   State.RenderPass = vulkan_render_buffer_instance->GetRenderPass();
-  State.Samples    = vulkan_render_buffer_instance->GetInfo().Samples;
+  State.Samples    = static_cast<int>(vulkan_render_buffer_instance->GetInfo().Samples);
 }
 
 void graphics_vulkan::VulkanGraphicsInstance::EndRenderBuffer(
@@ -755,15 +793,23 @@ void graphics_vulkan::VulkanGraphicsInstance::EndRenderBuffer(
   std::vector<VkClearValue> clear_values;
   if(State.Color)
   {
-    clear_values.emplace_back(VkClearValue{.color = {{State.RenderState.ClearColor.r,
-                                                      State.RenderState.ClearColor.g,
-                                                      State.RenderState.ClearColor.b,
-                                                      State.RenderState.ClearColor.a}}});
+    clear_values.emplace_back(
+        VkClearValue{
+            .color = {
+                {State.RenderState.ClearColor.r,
+                 State.RenderState.ClearColor.g,
+                 State.RenderState.ClearColor.b,
+                 State.RenderState.ClearColor.a}}});
     if(State.Samples > 1)
-      clear_values.emplace_back(VkClearValue{.color = {{State.RenderState.ClearColor.r,
-                                                        State.RenderState.ClearColor.g,
-                                                        State.RenderState.ClearColor.b,
-                                                        State.RenderState.ClearColor.a}}});
+    {
+      clear_values.emplace_back(
+          VkClearValue{
+              .color = {
+                  {State.RenderState.ClearColor.r,
+                   State.RenderState.ClearColor.g,
+                   State.RenderState.ClearColor.b,
+                   State.RenderState.ClearColor.a}}});
+    }
   }
   clear_values.emplace_back(VkClearValue{.depthStencil = {State.RenderState.ClearDepth, 0}});
 
@@ -771,8 +817,9 @@ void graphics_vulkan::VulkanGraphicsInstance::EndRenderBuffer(
       CommandBuffers[Device->GetCurrentFrame()],
       State.Color ? VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
 
-  const VkExtent2D extent_2d = {vulkan_render_buffer_instance->GetTexture()->GetInfo().Width,
-                                vulkan_render_buffer_instance->GetTexture()->GetInfo().Height};
+  const VkExtent2D extent_2d = {
+      vulkan_render_buffer_instance->GetTexture()->GetInfo().Width,
+      vulkan_render_buffer_instance->GetTexture()->GetInfo().Height};
 
   VkRenderPassBeginInfo render_pass_info{};
   render_pass_info.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -846,14 +893,16 @@ void graphics_vulkan::VulkanGraphicsInstance::EndRenderBuffer(
 void graphics_vulkan::VulkanGraphicsInstance::StartMainRenderPass()
 {
   std::vector<VkClearValue> clear_values(3);
-  clear_values[0].color        = {{State.RenderState.ClearColor.r,
-                                   State.RenderState.ClearColor.g,
-                                   State.RenderState.ClearColor.b,
-                                   State.RenderState.ClearColor.a}};
-  clear_values[1].color        = {{State.RenderState.ClearColor.r,
-                                   State.RenderState.ClearColor.g,
-                                   State.RenderState.ClearColor.b,
-                                   State.RenderState.ClearColor.a}};
+  clear_values[0].color = {
+      {State.RenderState.ClearColor.r,
+       State.RenderState.ClearColor.g,
+       State.RenderState.ClearColor.b,
+       State.RenderState.ClearColor.a}};
+  clear_values[1].color = {
+      {State.RenderState.ClearColor.r,
+       State.RenderState.ClearColor.g,
+       State.RenderState.ClearColor.b,
+       State.RenderState.ClearColor.a}};
   clear_values[2].depthStencil = {State.RenderState.ClearDepth, 0};
 
   const auto *current_frame_buffer = SwapChain->GetCurrentFrameBuffer();
@@ -910,9 +959,10 @@ void graphics_vulkan::VulkanGraphicsInstance::EndDraw(const int width, const int
   submit_info.pCommandBuffers      = &CommandBuffers[Device->GetCurrentFrame()];
   submit_info.signalSemaphoreCount = 1;
   submit_info.pSignalSemaphores    = signal_semaphores;
-  VulkanHelpers::VK_CHECK_RESULT(vkQueueSubmit(Device->GetGraphicsQueue(), 1, &submit_info, Device->GetFence()),
-                                 __LINE__,
-                                 __FILE__);
+  VulkanHelpers::VK_CHECK_RESULT(
+      vkQueueSubmit(Device->GetGraphicsQueue(), 1, &submit_info, Device->GetFence()),
+      __LINE__,
+      __FILE__);
 
   SwapChain->EndFrame(CommandPool.get(), width, height);
 }
@@ -929,10 +979,11 @@ graphics_vulkan::VulkanGraphicsInstance::~VulkanGraphicsInstance()
     buffer.reset();
   Wait();
 
-  vkFreeCommandBuffers(Device->GetDevice(),
-                       CommandPool->Get(),
-                       VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT,
-                       CommandBuffers.data());
+  vkFreeCommandBuffers(
+      Device->GetDevice(),
+      CommandPool->Get(),
+      VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT,
+      CommandBuffers.data());
 
   DescriptorPool.reset();
   SwapChain.reset();

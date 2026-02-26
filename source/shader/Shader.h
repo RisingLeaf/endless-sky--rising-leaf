@@ -40,6 +40,8 @@ public:
 
 	bool operator()() const { return ShaderInstance.get(); }
 
+  void Clear();
+
 private:
 	const std::string_view Name;
 

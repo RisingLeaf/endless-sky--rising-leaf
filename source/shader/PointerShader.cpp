@@ -24,72 +24,96 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "graphics/graphics_layer.h"
 
 
+namespace
+{
+  Shader shader("pointer shader");
 
-namespace {
-	Shader shader("pointer shader");
-
-	graphics_layer::ObjectHandle square;
+  graphics_layer::ObjectHandle square;
 } // namespace
 
 
-void PointerShader::Init() {
-	auto &info = shader.GetInfo();
+void PointerShader::Init()
+{
+  auto &info = shader.GetInfo();
 
   info.SetInputSize(2 * sizeof(float));
-	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
+  info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
 
-	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
-	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
-	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
-	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);
-	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4);
+  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
+  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
+  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
+  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);
+  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4);
 
-	shader.Create(*GameData::Shaders().Find("pointer"));
+  shader.Create(*GameData::Shaders().Find("pointer"));
 
-	constexpr float vertexData[] = {
-	        0.f, 0.f, 0.f, 1.f, 1.f, 0.f,
-	};
+  constexpr float vertexData[] = {
+      0.f,
+      0.f,
+      0.f,
+      1.f,
+      1.f,
+      0.f,
+  };
 
-	square = graphics_layer::ObjectHandle(GameWindow::GetInstance(), 3, 2 * sizeof(float), vertexData, {});
+  square =
+      graphics_layer::ObjectHandle(GameWindow::GetInstance(), 3, 2 * sizeof(float), vertexData, {}, "pointer_quad");
+}
+
+void PointerShader::Clear()
+{
+  shader.Clear();
+  square = {};
 }
 
 
-void PointerShader::Draw(const Point &center, const Point &angle, float width, float height, float offset,
-                         const Color &color) {
-	Bind();
+void PointerShader::Draw(
+    const Point &center,
+    const Point &angle,
+    float        width,
+    float        height,
+    float        offset,
+    const Color &color)
+{
+  Bind();
 
-	Add(center, angle, width, height, offset, color);
+  Add(center, angle, width, height, offset, color);
 
-	Unbind();
+  Unbind();
 }
 
 
 void PointerShader::Bind() { shader.Bind(); }
 
 
-void PointerShader::Add(const Point &center, const Point &angle, float width, float height, float offset,
-                        const Color &color) {
+void PointerShader::Add(
+    const Point &center,
+    const Point &angle,
+    const float  width,
+    const float  height,
+    const float  offset,
+    const Color &color)
+{
 
-	const float c[2] = {static_cast<float>(center.X()), static_cast<float>(center.Y())};
-	const float a[2] = {static_cast<float>(angle.X()), static_cast<float>(angle.Y())};
-	const float size[2] = {width, height};
+  const float c[2]    = {static_cast<float>(center.X()), static_cast<float>(center.Y())};
+  const float a[2]    = {static_cast<float>(angle.X()), static_cast<float>(angle.Y())};
+  const float size[2] = {width, height};
 
-	const auto &info = shader.GetInfo();
-	std::vector<unsigned char> data_cp(info.GetUniformSize());
+  const auto                &info = shader.GetInfo();
+  std::vector<unsigned char> data_cp(info.GetUniformSize());
 
-	int i = -1;
-	info.CopyUniformEntryToBuffer(data_cp.data(), c, ++i);
-	info.CopyUniformEntryToBuffer(data_cp.data(), a, ++i);
-	info.CopyUniformEntryToBuffer(data_cp.data(), size, ++i);
-	info.CopyUniformEntryToBuffer(data_cp.data(), &offset, ++i);
-	info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
+  int i = -1;
+  info.CopyUniformEntryToBuffer(data_cp.data(), c, ++i);
+  info.CopyUniformEntryToBuffer(data_cp.data(), a, ++i);
+  info.CopyUniformEntryToBuffer(data_cp.data(), size, ++i);
+  info.CopyUniformEntryToBuffer(data_cp.data(), &offset, ++i);
+  info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
 
-	GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
+  GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
 
 
-	square.Draw(GraphicsTypes::PrimitiveType::TRIANGLES);
+  square.Draw(GraphicsTypes::PrimitiveType::TRIANGLES);
 }
 
 
-void PointerShader::Unbind() {
-}
+void PointerShader::Unbind() {}

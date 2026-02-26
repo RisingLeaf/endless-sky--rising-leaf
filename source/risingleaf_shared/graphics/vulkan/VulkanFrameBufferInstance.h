@@ -48,14 +48,16 @@ namespace VulkanObjects
       const VulkanDeviceInstance           *device,
       const GraphicsTypes::FrameBufferInfo &info,
       const GraphicsTypes::StateInfo       &state,
-      size_t                                count);
+      size_t                                count,
+      std::string_view                      name);
 
     VulkanFrameBufferInstance(
       const VulkanDeviceInstance           *device,
       VkCommandBuffer                       cmd,
       const GraphicsTypes::FrameBufferInfo &info,
       const GraphicsTypes::StateInfo       &state,
-      VkImage                               image);
+      VkImage                               image,
+      std::string_view                      name);
 
     void SetInUse(const bool state) { InUse = state; }
     [[nodiscard]] bool IsInUse() const { return InUse; }

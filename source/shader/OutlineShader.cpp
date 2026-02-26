@@ -53,16 +53,24 @@ void OutlineShader::Init()
 
   constexpr float vertexData[] = {-.5f, -.5f, 0.f, 0.f, .5f, -.5f, 1.f, 0.f, -.5f, .5f, 0.f, 1.f, .5f, .5f, 1.f, 1.f};
 
-  square = graphics_layer::ObjectHandle(GameWindow::GetInstance(), 4, 4 * sizeof(float), vertexData, {});
+  square =
+      graphics_layer::ObjectHandle(GameWindow::GetInstance(), 4, 4 * sizeof(float), vertexData, {}, "outline_quad");
+}
+
+void OutlineShader::Clear()
+{
+  shader.Clear();
+  square = {};
 }
 
 
-void OutlineShader::Draw(const Sprite *sprite,
-                         const Point  &pos,
-                         const Point  &size,
-                         const Color  &color,
-                         const Point  &unit,
-                         const float   frame)
+void OutlineShader::Draw(
+    const Sprite *sprite,
+    const Point  &pos,
+    const Point  &size,
+    const Color  &color,
+    const Point  &unit,
+    const float   frame)
 {
   Point uw = unit * size.X();
   Point uh = unit * size.Y();

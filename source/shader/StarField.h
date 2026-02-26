@@ -38,6 +38,7 @@ class System;
 class StarField {
 public:
 	void Init(int stars, int width);
+  void Clear();
 	void FinishLoading();
 	const Point &Position() const;
 	void SetPosition(const Point &position);

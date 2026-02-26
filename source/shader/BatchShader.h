@@ -27,6 +27,7 @@ class BatchShader {
 public:
 	// Initialize the shaders.
 	static void Init();
+	static void Clear();
 
 	static void Bind();
 	static void Add(const Sprite *sprite, bool isHighDPI, const std::vector<float> &data);

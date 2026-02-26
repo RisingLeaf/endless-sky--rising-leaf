@@ -27,6 +27,7 @@ class Rectangle;
 class FillShader {
 public:
 	static void Init();
+	static void Clear();
 	static void Fill(const Rectangle &area, const Color &color);
 	static void Fill(const Point &center, const Point &size, const Color &color);
 };

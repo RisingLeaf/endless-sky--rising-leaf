@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #include "VulkanSwapChainInstance.h"
 
@@ -22,7 +23,10 @@
 #include "risingleaf_shared/base/ASLTypes.h"
 
 
-void VulkanObjects::VulkanSwapChainInstance::Create(const VulkanCommandPool *command_pool, const uint32_t width, const uint32_t height)
+void VulkanObjects::VulkanSwapChainInstance::Create(
+    const VulkanCommandPool *command_pool,
+    const uint32_t           width,
+    const uint32_t           height)
 {
   VulkanSingleCommandBuffer cmd(Device, command_pool);
 
@@ -33,25 +37,29 @@ void VulkanObjects::VulkanSwapChainInstance::Create(const VulkanCommandPool *com
 
   const VkSurfaceFormatKHR surface_format = VulkanHelpers::ChooseSwapSurfaceFormat(swap_chain_support.Formats);
   const VkPresentModeKHR   present_mode   = VulkanHelpers::ChooseSwapPresentMode(swap_chain_support.PresentModes);
-  const VkExtent2D         extent_2d      = VulkanHelpers::ChooseSwapExtent(swap_chain_support.Capabilities, width, height);
+  const VkExtent2D         extent_2d = VulkanHelpers::ChooseSwapExtent(swap_chain_support.Capabilities, width, height);
 
   uint32_t image_count = swap_chain_support.Capabilities.minImageCount + 1;
-  if (swap_chain_support.Capabilities.maxImageCount > 0 && image_count > swap_chain_support.Capabilities.maxImageCount)
+  if(swap_chain_support.Capabilities.maxImageCount > 0 && image_count > swap_chain_support.Capabilities.maxImageCount)
     image_count = swap_chain_support.Capabilities.maxImageCount;
 
-  VulkanHelpers::QueueFamilyIndices indices = VulkanHelpers::FindQueueFamilies(Device->GetPhysicalDevice(), Device->GetSurface());
+  VulkanHelpers::QueueFamilyIndices indices =
+      VulkanHelpers::FindQueueFamilies(Device->GetPhysicalDevice(), Device->GetSurface());
   uint32_t queueFamilyIndices[] = {indices.GraphicsFamily.value(), indices.PresentFamily.value()};
 
   const auto create_info = VulkanBootstrap::GetSwapChainCreate(
-    Device->GetSurface(),
-    image_count,
-    surface_format,
-    extent_2d,
-    indices.GraphicsFamily != indices.PresentFamily ? queueFamilyIndices : nullptr,
-    swap_chain_support.Capabilities.currentTransform,
-    present_mode );
+      Device->GetSurface(),
+      image_count,
+      surface_format,
+      extent_2d,
+      indices.GraphicsFamily != indices.PresentFamily ? queueFamilyIndices : nullptr,
+      swap_chain_support.Capabilities.currentTransform,
+      present_mode);
 
-  VulkanHelpers::VK_CHECK_RESULT(vkCreateSwapchainKHR(Device->GetDevice(), &create_info, nullptr, &SwapChain), __LINE__, __FILE__);
+  VulkanHelpers::VK_CHECK_RESULT(
+      vkCreateSwapchainKHR(Device->GetDevice(), &create_info, nullptr, &SwapChain),
+      __LINE__,
+      __FILE__);
 
   std::vector<VkImage> images;
   vkGetSwapchainImagesKHR(Device->GetDevice(), SwapChain, &image_count, nullptr);
@@ -74,13 +82,8 @@ void VulkanObjects::VulkanSwapChainInstance::Create(const VulkanCommandPool *com
   state.DepthWrite = true;
   for(uint32_t i = 0; i < image_count; i++)
   {
-    FrameBuffers.emplace_back(std::make_unique<VulkanFrameBufferInstance>(
-      Device,
-      cmd.Get(),
-      info,
-      state,
-      images[i]
-    ));
+    FrameBuffers.emplace_back(
+        std::make_unique<VulkanFrameBufferInstance>(Device, cmd.Get(), info, state, images[i], "swap_chain"));
   }
 
   cmd.End();
@@ -90,16 +93,23 @@ void VulkanObjects::VulkanSwapChainInstance::Create(const VulkanCommandPool *com
   semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
   for(asl::uint32 i = 0; i < image_count; i++)
   {
-    vkCreateSemaphore(Device->GetDevice(), &semaphore_create_info, nullptr, &RenderFinishedSemaphores[i]);
+    VulkanHelpers::VK_CHECK_RESULT(
+        vkCreateSemaphore(Device->GetDevice(), &semaphore_create_info, nullptr, &RenderFinishedSemaphores[i]),
+        __LINE__,
+        __FILE__);
+    Device->NameObject(
+        VK_OBJECT_TYPE_SEMAPHORE,
+        reinterpret_cast<uint64_t>(RenderFinishedSemaphores[i]),
+        "swap_chain_semaphore");
   }
 }
 
 VulkanObjects::VulkanSwapChainInstance::VulkanSwapChainInstance(
-  const VulkanDeviceInstance *device,
-  const VulkanCommandPool *command_pool,
-  const uint32_t width,
-  const uint32_t height)
-: Device(device)
+    const VulkanDeviceInstance *device,
+    const VulkanCommandPool    *command_pool,
+    const uint32_t              width,
+    const uint32_t              height) :
+  Device(device)
 {
   Create(command_pool, width, height);
 }
@@ -107,16 +117,21 @@ VulkanObjects::VulkanSwapChainInstance::VulkanSwapChainInstance(
 VulkanObjects::VulkanSwapChainInstance::~VulkanSwapChainInstance()
 {
   if(SwapChain) vkDestroySwapchainKHR(Device->GetDevice(), SwapChain, nullptr);
-  for(const auto &semaphore : RenderFinishedSemaphores) vkDestroySemaphore(Device->GetDevice(), semaphore, nullptr);
+  for(const auto &semaphore : RenderFinishedSemaphores)
+    vkDestroySemaphore(Device->GetDevice(), semaphore, nullptr);
   RenderFinishedSemaphores.clear();
 }
 
-void VulkanObjects::VulkanSwapChainInstance::Recreate(const VulkanCommandPool *command_pool, const uint32_t width, const uint32_t height)
+void VulkanObjects::VulkanSwapChainInstance::Recreate(
+    const VulkanCommandPool *command_pool,
+    const uint32_t           width,
+    const uint32_t           height)
 {
   vkDeviceWaitIdle(Device->GetDevice());
 
   FrameBuffers.clear();
-  for(const auto &semaphore : RenderFinishedSemaphores) vkDestroySemaphore(Device->GetDevice(), semaphore, nullptr);
+  for(const auto &semaphore : RenderFinishedSemaphores)
+    vkDestroySemaphore(Device->GetDevice(), semaphore, nullptr);
   RenderFinishedSemaphores.clear();
 
   if(SwapChain) vkDestroySwapchainKHR(Device->GetDevice(), SwapChain, nullptr);
@@ -124,32 +139,47 @@ void VulkanObjects::VulkanSwapChainInstance::Recreate(const VulkanCommandPool *c
   Create(command_pool, width, height);
 }
 
-bool VulkanObjects::VulkanSwapChainInstance::BeginFrame(const VulkanCommandPool *command_pool, const uint32_t width, const uint32_t height)
+bool VulkanObjects::VulkanSwapChainInstance::BeginFrame(
+    const VulkanCommandPool *command_pool,
+    const uint32_t           width,
+    const uint32_t           height)
 {
-  const auto result = vkAcquireNextImageKHR(Device->GetDevice(), SwapChain, UINT64_MAX, Device->GetImageAvailable(), VK_NULL_HANDLE, &ImageIndex);
+  const auto result = vkAcquireNextImageKHR(
+      Device->GetDevice(),
+      SwapChain,
+      UINT64_MAX,
+      Device->GetImageAvailable(),
+      VK_NULL_HANDLE,
+      &ImageIndex);
 
-  if (result == VK_ERROR_OUT_OF_DATE_KHR)
-    Recreate(command_pool, width, height);
-  if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
-    return false;
+  if(result == VK_ERROR_OUT_OF_DATE_KHR) Recreate(command_pool, width, height);
+  if(result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) return false;
   return true;
 }
 
-void VulkanObjects::VulkanSwapChainInstance::EndFrame(const VulkanCommandPool *command_pool, const uint32_t width, const uint32_t height)
+void VulkanObjects::VulkanSwapChainInstance::EndFrame(
+    const VulkanCommandPool *command_pool,
+    const uint32_t           width,
+    const uint32_t           height)
 {
   const VkSemaphore wait_semaphores[] = {RenderFinishedSemaphores[ImageIndex]};
-  VkPresentInfoKHR present_info{};
+  VkPresentInfoKHR  present_info{};
   present_info.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
   present_info.waitSemaphoreCount = 1;
   present_info.pWaitSemaphores    = wait_semaphores;
 
   const VkSwapchainKHR swap_chain_khrs[] = {SwapChain};
-  present_info.swapchainCount  = 1;
-  present_info.pSwapchains     = swap_chain_khrs;
-  present_info.pImageIndices   = &ImageIndex;
+  present_info.swapchainCount            = 1;
+  present_info.pSwapchains               = swap_chain_khrs;
+  present_info.pImageIndices             = &ImageIndex;
 
-  if (const auto result = vkQueuePresentKHR(Device->GetPresentQueue(), &present_info); result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+  if(const auto result = vkQueuePresentKHR(Device->GetPresentQueue(), &present_info);
+     result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR)
+  {
     Recreate(command_pool, width, height);
-  else if (result != VK_SUCCESS)
+  }
+  else if(result != VK_SUCCESS)
+  {
     throw std::runtime_error("failed to present swap chain image!");
+  }
 }

@@ -25,6 +25,7 @@ class Point;
 class RingShader {
 public:
 	static void Init();
+	static void Clear();
 
 	static void Draw(const Point &pos, float out, float in, const Color &color);
 	static void Draw(const Point &pos, float radius, float width, float fraction,

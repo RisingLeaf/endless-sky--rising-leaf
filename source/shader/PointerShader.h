@@ -24,6 +24,7 @@ class Point;
 class PointerShader {
 public:
 	static void Init();
+  static void Clear();
 
 	static void Draw(const Point &center, const Point &angle, float width, float height, float offset, const Color &color);
 

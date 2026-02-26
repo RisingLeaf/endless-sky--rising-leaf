@@ -20,6 +20,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include <array>
+#include <string_view>
 #include <vector>
 
 #include "external/vk_mem_alloc.h"
@@ -55,6 +56,7 @@ namespace VulkanObjects
     static constexpr bool ENABLE_VALIDATION_LAYERS = false;
 #else
     static constexpr bool ENABLE_VALIDATION_LAYERS = true;
+    PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT = nullptr;
 #endif
 
     mutable uint8_t CurrentFrame = 0;
@@ -65,6 +67,7 @@ namespace VulkanObjects
     mutable std::array<std::vector<VkSampler>, MAX_FRAMES_IN_FLIGHT>                          SamplerDeleteQueue;
     mutable std::array<std::vector<VkFramebuffer>, MAX_FRAMES_IN_FLIGHT>                      FrameBufferDeleteQueue;
     mutable std::array<std::vector<VkRenderPass>, MAX_FRAMES_IN_FLIGHT>                       RenderPassDeleteQueue;
+    mutable std::array<std::vector<VkPipeline>, MAX_FRAMES_IN_FLIGHT>                         PipelineDeleteQueue;
 
   public:
     explicit VulkanDeviceInstance();
@@ -80,6 +83,9 @@ namespace VulkanObjects
     void QueueSamplerForDeletion(VkSampler sampler) const;
     void QueueFrameBufferForDeletion(VkFramebuffer framebuffer) const;
     void QueueRenderPassForDeletion(VkRenderPass render_pass) const;
+    void QueuePipelineForDeletion(VkPipeline pipeline) const;
+
+    void NameObject(VkObjectType object_type, uint64_t object_handle, std::string_view name) const;
 
     void BeginFrame() const;
 
@@ -96,9 +102,6 @@ namespace VulkanObjects
     [[nodiscard]] uint8_t                    GetCurrentFrame() const { return CurrentFrame; }
     [[nodiscard]] VkSemaphore GetImageAvailable() const { return ImageAvailableSemaphores[CurrentFrame]; }
     [[nodiscard]] VkFence     GetFence() const { return InFlightFences[CurrentFrame]; }
-#ifndef NDEBUG
-    PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT = nullptr;
-#endif
 
   };
 } // namespace VulkanObjects

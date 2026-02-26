@@ -1,14 +1,22 @@
 ---
 Language: Cpp
-BasedOnStyle: LLVM
+BasedOnStyle: clang-format
+
+ColumnLimit: 120
+IndentWidth: 2
+TabWidth: 2
+
 IndentAccessModifiers: false
 AccessModifierOffset: -2
+
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 AlignOperands: true
 AlignTrailingComments: true
+
 AlwaysBreakTemplateDeclarations: Yes
-BraceWrapping: 
+
+BraceWrapping:
   AfterCaseLabel: true
   AfterClass: true
   AfterControlStatement: true
@@ -25,10 +33,10 @@ BraceWrapping:
   SplitEmptyFunction: true
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
-BreakBeforeBraces: Custom
+BreakBeforeBraces: Allman
+
 BreakConstructorInitializers: AfterColon
 BreakConstructorInitializersBeforeComma: true
-ColumnLimit: 120
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 ConstructorInitializerIndentWidth: 2
 IncludeCategories: 
@@ -39,30 +47,37 @@ IncludeCategories:
   - Regex: '.*'
     Priority: 3
 IncludeIsMainRegex: '([-_](test|unittest))?$'
+
 IndentCaseBlocks: true
-IndentWidth: 2
+
 InsertNewlineAtEOF: true
-MacroBlockBegin: ''
-MacroBlockEnd: ''
+
 MaxEmptyLinesToKeep: 2
+
 NamespaceIndentation: All
+
 PointerAlignment: Right
+
 SpaceInEmptyParentheses: false
 SpacesInAngles: false
 SpacesInConditionalStatement: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
 SpaceBeforeParens: Never
+
 AllowShortFunctionsOnASingleLine: All
-BinPackParameters: false
-TabWidth: 2
+
 AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AllowShortCaseExpressionOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
-AlignAfterOpenBracket: Align
+AllowShortBlocksOnASingleLine: Empty
+
+AlignAfterOpenBracket: AlwaysBreak
 AlignConsecutiveShortCaseStatements:
   Enabled: true
+BinPackParameters: false
+BinPackArguments: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AllowAllArgumentsOnNextLine: false
-BinPackArguments: false
+PenaltyBreakBeforeFirstCallParameter: 0
 ...

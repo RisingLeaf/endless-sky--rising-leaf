@@ -61,3 +61,8 @@ Sprite *SpriteSet::Modify(const std::string &name)
 		it = sprites.emplace(name, Sprite(name)).first;
 	return &it->second;
 }
+
+void SpriteSet::Clear()
+{
+  sprites.clear();
+}

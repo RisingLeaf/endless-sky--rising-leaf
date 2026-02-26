@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANRENDERPASSINSTANCE_H
 #define VULKANRENDERPASSINSTANCE_H
@@ -29,24 +30,25 @@ namespace VulkanObjects
     VkRenderPass RenderPass = nullptr;
 
     const VulkanDeviceInstance *Device;
+
   public:
     VulkanRenderPassInstance(
-      const VulkanDeviceInstance       *device,
-      GraphicsTypes::ImageFormat        image_format,
-      const GraphicsTypes::StateInfo   &state,
-      bool                              is_swap_chain = false);
+        const VulkanDeviceInstance     *device,
+        GraphicsTypes::ImageFormat      image_format,
+        const GraphicsTypes::StateInfo &state,
+        std::string_view                name,
+        bool                            is_swap_chain = false);
 
     ~VulkanRenderPassInstance() override;
 
-    VulkanRenderPassInstance(const VulkanRenderPassInstance &other) = delete;
-    VulkanRenderPassInstance(VulkanRenderPassInstance &&other) noexcept = delete;
-    VulkanRenderPassInstance &operator=(const VulkanRenderPassInstance &other) = delete;
+    VulkanRenderPassInstance(const VulkanRenderPassInstance &other)                = delete;
+    VulkanRenderPassInstance(VulkanRenderPassInstance &&other) noexcept            = delete;
+    VulkanRenderPassInstance &operator=(const VulkanRenderPassInstance &other)     = delete;
     VulkanRenderPassInstance &operator=(VulkanRenderPassInstance &&other) noexcept = delete;
 
     [[nodiscard]] VkRenderPass Get() const { return RenderPass; }
   };
-}
+} // namespace VulkanObjects
 
 
-
-#endif //VULKANRENDERPASSINSTANCE_H
+#endif // VULKANRENDERPASSINSTANCE_H

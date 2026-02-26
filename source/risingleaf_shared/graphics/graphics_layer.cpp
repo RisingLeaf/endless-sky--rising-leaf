@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //_
 #ifndef GRAPHICS_LAYER_IMPLEMENTATION
 #define GRAPHICS_LAYER_IMPLEMENTATION
@@ -27,7 +28,6 @@
 
 #include "graphics/graphics_toplevel_defines.h"
 #include "system/File.h"
-#include "system/Log.h"
 
 #include <cstring>
 
@@ -37,14 +37,14 @@ namespace
   {
     switch(format)
     {
-    case GraphicsTypes::ImageFormat::R: return 1;
-    case GraphicsTypes::ImageFormat::RG: return 2;
+    case GraphicsTypes::ImageFormat::R:       return 1;
+    case GraphicsTypes::ImageFormat::RG:      return 2;
     case GraphicsTypes::ImageFormat::RGB:
     case GraphicsTypes::ImageFormat::RGBA:
     case GraphicsTypes::ImageFormat::RGBA16F:
     case GraphicsTypes::ImageFormat::RGBA32F:
-    case GraphicsTypes::ImageFormat::BGRA: return 4;
-    case GraphicsTypes::ImageFormat::DEPTH: return 1;
+    case GraphicsTypes::ImageFormat::BGRA:    return 4;
+    case GraphicsTypes::ImageFormat::DEPTH:   return 1;
     case GraphicsTypes::ImageFormat::INVALID: return 0;
     }
     throw std::runtime_error("Missing Format case in GetComponentsOfFormat");
@@ -56,10 +56,10 @@ size_t graphics_layer::GetAlignmentOfType(const GraphicsTypes::ShaderType type)
   switch(type)
   {
   case GraphicsTypes::ShaderType::INT:
-  case GraphicsTypes::ShaderType::FLOAT: return 4;
-  case GraphicsTypes::ShaderType::INT2: return 8;
+  case GraphicsTypes::ShaderType::FLOAT:  return 4;
+  case GraphicsTypes::ShaderType::INT2:   return 8;
   case GraphicsTypes::ShaderType::INT3:
-  case GraphicsTypes::ShaderType::INT4: return 16;
+  case GraphicsTypes::ShaderType::INT4:   return 16;
   case GraphicsTypes::ShaderType::FLOAT2: return 8;
   case GraphicsTypes::ShaderType::FLOAT3:
   case GraphicsTypes::ShaderType::FLOAT4: return 16;
@@ -79,9 +79,9 @@ size_t graphics_layer::GetSizeOfType(const GraphicsTypes::ShaderType type)
   switch(type)
   {
   case GraphicsTypes::ShaderType::INT:
-  case GraphicsTypes::ShaderType::FLOAT: return 4;
-  case GraphicsTypes::ShaderType::INT2: return 8;
-  case GraphicsTypes::ShaderType::INT4: return 16;
+  case GraphicsTypes::ShaderType::FLOAT:  return 4;
+  case GraphicsTypes::ShaderType::INT2:   return 8;
+  case GraphicsTypes::ShaderType::INT4:   return 16;
   case GraphicsTypes::ShaderType::FLOAT2: return 8;
   case GraphicsTypes::ShaderType::FLOAT4: return 16;
 #if defined(__APPLE__) || defined(ASL_BUILD_WASM)
@@ -95,7 +95,7 @@ size_t graphics_layer::GetSizeOfType(const GraphicsTypes::ShaderType type)
   case GraphicsTypes::ShaderType::INT3:
   case GraphicsTypes::ShaderType::FLOAT3: return 16;
 #else
-  case GraphicsTypes::ShaderType::INT3: return 16;
+  case GraphicsTypes::ShaderType::INT3:
   case GraphicsTypes::ShaderType::FLOAT3: return 16;
 #endif
   }
@@ -115,8 +115,14 @@ std::unique_ptr<GraphicsTypes::GraphicsInstance> graphics_layer::Init(const int 
 
 namespace graphics_layer
 {
-  frame_buffer_handle::frame_buffer_handle(GraphicsTypes::GraphicsInstance *instance, const uint32_t width, const uint32_t height, const GraphicsTypes::RenderBufferType type, const uint32_t samples) :
-    Instance(instance), Width(width), Height(height), Type(type), Samples(samples)
+  FrameBufferHandle::FrameBufferHandle(
+      GraphicsTypes::GraphicsInstance      *instance,
+      const uint32_t                        width,
+      const uint32_t                        height,
+      const GraphicsTypes::RenderBufferType type,
+      const uint32_t                        samples,
+      const std::string_view                name) :
+    Instance(instance), Width(width), Height(height), Type(type), Samples(samples), Name(name)
   {
     GraphicsTypes::FrameBufferInfo create_info;
     create_info.Width      = width;
@@ -126,23 +132,24 @@ namespace graphics_layer
     create_info.HasDepth   = Type != GraphicsTypes::RenderBufferType::COLOR;
     create_info.Presenter  = false;
     create_info.TargetType = Type;
-    create_info.Format     = Type == GraphicsTypes::RenderBufferType::DEPTH ? GraphicsTypes::ImageFormat::DEPTH : GraphicsTypes::ImageFormat::RGBA;
-    Instance->CreateRenderBuffer(frame_buffer, create_info);
+    create_info.Format     = Type == GraphicsTypes::RenderBufferType::DEPTH ? GraphicsTypes::ImageFormat::DEPTH
+                                                                            : GraphicsTypes::ImageFormat::RGBA;
+    Instance->CreateRenderBuffer(FrameBuffer, create_info, Name);
   }
 
-  frame_buffer_handle::~frame_buffer_handle() = default;
+  FrameBufferHandle::~FrameBufferHandle() = default;
 
-  void frame_buffer_handle::Bind() const
+  void FrameBufferHandle::Bind() const
   {
-    Instance->BindRenderBuffer(frame_buffer.get());
+    Instance->BindRenderBuffer(FrameBuffer.get());
     Instance->SetColorState(Type != GraphicsTypes::RenderBufferType::DEPTH);
   }
 
-  void frame_buffer_handle::Finish() const { Instance->EndRenderBuffer(frame_buffer.get()); }
+  void FrameBufferHandle::Finish() const { Instance->EndRenderBuffer(FrameBuffer.get()); }
 
-  void frame_buffer_handle::Resize(const uint32_t width, const uint32_t height)
+  void FrameBufferHandle::Resize(const uint32_t width, const uint32_t height)
   {
-    frame_buffer.reset();
+    FrameBuffer.reset();
     Width  = width;
     Height = height;
 
@@ -154,23 +161,41 @@ namespace graphics_layer
     create_info.HasDepth   = Type != GraphicsTypes::RenderBufferType::COLOR;
     create_info.Presenter  = false;
     create_info.TargetType = Type;
-    create_info.Format     = Type == GraphicsTypes::RenderBufferType::DEPTH ? GraphicsTypes::ImageFormat::DEPTH : GraphicsTypes::ImageFormat::RGBA;
-    Instance->CreateRenderBuffer(frame_buffer, create_info);
+    create_info.Format     = Type == GraphicsTypes::RenderBufferType::DEPTH ? GraphicsTypes::ImageFormat::DEPTH
+                                                                            : GraphicsTypes::ImageFormat::RGBA;
+    Instance->CreateRenderBuffer(FrameBuffer, create_info, Name);
   }
 
-  const GraphicsTypes::TextureInstance *frame_buffer_handle::GetTexture() const { return Instance->GetRenderBufferTexture(frame_buffer.get()); }
+  const GraphicsTypes::TextureInstance *FrameBufferHandle::GetTexture() const
+  {
+    return Instance->GetRenderBufferTexture(FrameBuffer.get());
+  }
 
-  ObjectHandle::ObjectHandle(const GraphicsTypes::GraphicsInstance *instance, const size_t size, const size_t type_size, const void *in_data, const std::vector<uint32_t> &indices) :
+  ObjectHandle::ObjectHandle(
+      const GraphicsTypes::GraphicsInstance *instance,
+      const size_t                           size,
+      const size_t                           type_size,
+      const void                            *in_data,
+      const std::vector<uint32_t>           &indices,
+      const std::string_view                 name) :
     Instance(instance), VertexBufferSize(size * type_size), Size(!indices.empty() ? indices.size() : size)
   {
     {
 #if !defined(__APPLE__) && !defined(ASL_BUILD_WASM)
       std::unique_ptr<GraphicsTypes::BufferInstance> staging_buffer;
-      Instance->CreateBuffer(staging_buffer, GraphicsTypes::BufferType::STAGING, VertexBufferSize);
+      Instance->CreateBuffer(
+          staging_buffer,
+          GraphicsTypes::BufferType::STAGING,
+          VertexBufferSize,
+          std::string(name) + "_vert_staging");
 
       Instance->MapBuffer(staging_buffer.get(), in_data);
 
-      Instance->CreateBuffer(VertexBuffer, GraphicsTypes::BufferType::VERTEX, VertexBufferSize);
+      Instance->CreateBuffer(
+          VertexBuffer,
+          GraphicsTypes::BufferType::VERTEX,
+          VertexBufferSize,
+          std::string(name) + "_vert");
       Instance->CopyBuffer(VertexBuffer.get(), staging_buffer.get());
 #else
       Instance->CreateBuffer(VertexBuffer, GraphicsTypes::BufferType::VERTEX, VertexBufferSize, in_data);
@@ -183,11 +208,19 @@ namespace graphics_layer
       const size_t index_buffer_size = indices.size() * sizeof(indices[0]);
 #if !defined(__APPLE__) && !defined(ASL_BUILD_WASM)
       std::unique_ptr<GraphicsTypes::BufferInstance> staging_buffer;
-      Instance->CreateBuffer(staging_buffer, GraphicsTypes::BufferType::STAGING, index_buffer_size);
+      Instance->CreateBuffer(
+          staging_buffer,
+          GraphicsTypes::BufferType::STAGING,
+          index_buffer_size,
+          std::string(name) + "_index_staging");
 
       Instance->MapBuffer(staging_buffer.get(), indices.data());
 
-      Instance->CreateBuffer(IndexBuffer, GraphicsTypes::BufferType::INDEX, index_buffer_size);
+      Instance->CreateBuffer(
+          IndexBuffer,
+          GraphicsTypes::BufferType::INDEX,
+          index_buffer_size,
+          std::string(name) + "_index");
       Instance->CopyBuffer(IndexBuffer.get(), staging_buffer.get());
 #else
       Instance->CreateBuffer(IndexBuffer, GraphicsTypes::BufferType::INDEX, index_buffer_size, indices.data());
@@ -203,19 +236,23 @@ namespace graphics_layer
     Instance->DrawIndexed(start, end > 0 ? end : Size, IndexBuffer.get(), prim_type);
   }
 
-  TextureHandle::TextureHandle(const GraphicsTypes::GraphicsInstance *instance,
-                               const void                            *data,
-                               const int                              width,
-                               const int                              height,
-                               const int                              depth,
-                               const GraphicsTypes::TextureType       type,
-                               const GraphicsTypes::ImageFormat       format,
-                               const GraphicsTypes::TextureTarget     target,
-                               const GraphicsTypes::TextureAddressMode address_mode,
-                               const GraphicsTypes::TextureFilter      filter) :
+  TextureHandle::TextureHandle(
+      const GraphicsTypes::GraphicsInstance  *instance,
+      const std::string_view                  name,
+      const void                             *data,
+      const int                               width,
+      const int                               height,
+      const int                               depth,
+      const GraphicsTypes::TextureType        type,
+      const GraphicsTypes::ImageFormat        format,
+      const GraphicsTypes::TextureTarget      target,
+      const GraphicsTypes::TextureAddressMode address_mode,
+      const GraphicsTypes::TextureFilter      filter) :
     Instance(instance)
   {
-    assert((depth == 1 || type != GraphicsTypes::TextureType::TYPE_2D) && "Select a texture type with 3d support (array or 3d)!");
+    assert(
+        (depth == 1 || type != GraphicsTypes::TextureType::TYPE_2D) &&
+        "Select a texture type with 3d support (array or 3d)!");
     GraphicsTypes::TextureInfo info;
     info.Width = width;
 
@@ -241,32 +278,35 @@ namespace graphics_layer
       info.Layers = depth;
       info.Depth  = 1;
     }
-    else
-    {
+    else {
       info.Layers = 1;
       info.Depth  = 1;
     }
-    info.Type   = type;
-    info.Format = format;
-    info.Target = target;
+    info.Type        = type;
+    info.Format      = format;
+    info.Target      = target;
     info.AddressMode = address_mode;
-    info.Filter = filter;
-    Instance->CreateTexture(Texture, info, data);
+    info.Filter      = filter;
+    Instance->CreateTexture(Texture, info, data, name);
   }
 
 
-  TextureHandle::TextureHandle(const GraphicsTypes::GraphicsInstance  *instance,
-                               const int                               width,
-                               const int                               height,
-                               const int                               depth,
-                               const GraphicsTypes::TextureType        type,
-                               const GraphicsTypes::ImageFormat        format,
-                               const GraphicsTypes::TextureTarget      target,
-                               const GraphicsTypes::TextureAddressMode address_mode,
-                               const GraphicsTypes::TextureFilter      filter) :
+  TextureHandle::TextureHandle(
+      const GraphicsTypes::GraphicsInstance  *instance,
+      const std::string_view                  name,
+      const int                               width,
+      const int                               height,
+      const int                               depth,
+      const GraphicsTypes::TextureType        type,
+      const GraphicsTypes::ImageFormat        format,
+      const GraphicsTypes::TextureTarget      target,
+      const GraphicsTypes::TextureAddressMode address_mode,
+      const GraphicsTypes::TextureFilter      filter) :
     Instance(instance)
   {
-    assert((depth == 1 || type != GraphicsTypes::TextureType::TYPE_2D) && "Select a texture type with 3d support (array or 3d)!");
+    assert(
+        (depth == 1 || type != GraphicsTypes::TextureType::TYPE_2D) &&
+        "Select a texture type with 3d support (array or 3d)!");
     GraphicsTypes::TextureInfo info;
     info.Width = width;
 
@@ -292,17 +332,16 @@ namespace graphics_layer
       info.Layers = depth;
       info.Depth  = 1;
     }
-    else
-    {
+    else {
       info.Layers = 1;
       info.Depth  = 1;
     }
-    info.Type   = type;
-    info.Format = format;
-    info.Target = target;
+    info.Type        = type;
+    info.Format      = format;
+    info.Target      = target;
     info.AddressMode = address_mode;
-    info.Filter = filter;
-    Instance->CreateTexture(Texture, info, {});
+    info.Filter      = filter;
+    Instance->CreateTexture(Texture, info, nullptr, name);
   }
 
   TextureHandle::~TextureHandle() = default;
@@ -316,11 +355,13 @@ namespace graphics_layer
     entry.id     = static_cast<int>(id);
     entry.vertex = vertex;
     for(auto &e : Textures)
+    {
       if(e.id == entry.id)
       {
         e = entry;
         return;
       }
+    }
     Textures.emplace_back(entry);
   }
 

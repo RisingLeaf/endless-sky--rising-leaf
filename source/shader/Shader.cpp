@@ -42,4 +42,9 @@ void Shader::Bind() const
 	GameWindow::GetInstance()->BindShader(ShaderInstance.get());
 }
 
+void Shader::Clear()
+{
+  ShaderInstance.reset();
+}
+
 

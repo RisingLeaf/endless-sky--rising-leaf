@@ -34,4 +34,6 @@ public:
 	static void CheckReferences();
 
 	static Sprite *Modify(const std::string &name);
+
+  static void Clear();
 };

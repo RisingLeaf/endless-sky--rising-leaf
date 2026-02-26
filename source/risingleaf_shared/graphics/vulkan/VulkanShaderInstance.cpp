@@ -30,50 +30,44 @@ VulkanObjects::VulkanShaderInstance::VulkanShaderInstance(const VulkanDeviceInst
                                                           const ShaderInfo                      &info,
                                                           const std::vector<File::ShaderString> &shader_code,
                                                           const std::string_view                 name) :
-  GraphicsTypes::ShaderInstance(), Info(info), Device(device)
+  GraphicsTypes::ShaderInstance(), Info(info), Device(device), Name(name)
 {
   for(const auto &code : shader_code)
   {
     VkShaderModule                  *shader_module     = nullptr;
     VkPipelineShaderStageCreateInfo *stage_create_info = nullptr;
     VulkanTranslate::ShaderStage     stage;
+    std::string                      module_name = Name;
     switch(code.stage)
     {
     case GraphicsTypes::ShaderStage::VULKAN_VERTEX:
       shader_module     = &VertexShader;
       stage_create_info = &VertexShaderStage;
       stage             = VulkanTranslate::ShaderStage::VERTEX;
+      module_name += "_vert";
       break;
     case GraphicsTypes::ShaderStage::VULKAN_FRAGMENT:
       shader_module     = &FragmentShader;
       stage_create_info = &FragmentShaderStage;
       stage             = VulkanTranslate::ShaderStage::FRAGMENT;
+      module_name += "_frag";
       break;
     case GraphicsTypes::ShaderStage::VULKAN_COMPUTE:
       shader_module     = &ComputeShader;
       stage_create_info = &ComputeShaderStage;
       stage             = VulkanTranslate::ShaderStage::COMPUTE;
+      module_name += "_comp";
       break;
     case GraphicsTypes::ShaderStage::METAL_COMBINED:
     default:                                         continue;
     }
 
     auto module_create_info = VulkanBootstrap::GetShaderModuleCreate(code.code);
-    VulkanHelpers::VK_CHECK_RESULT(vkCreateShaderModule(Device->GetDevice(), &module_create_info, nullptr, shader_module), __LINE__, __FILE__);
-
-#ifndef NDEBUG
-    if(Device->vkSetDebugUtilsObjectNameEXT)
-    {
-      VkDebugUtilsObjectNameInfoEXT nameInfo = {.sType        = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
-                                                .pNext        = nullptr,
-                                                .objectType   = VK_OBJECT_TYPE_SHADER_MODULE,
-                                                .objectHandle = reinterpret_cast<uint64_t>(*shader_module),
-                                                .pObjectName  = name.data()};
-
-      Device->vkSetDebugUtilsObjectNameEXT(Device->GetDevice(), &nameInfo);
-    }
-#endif
-
+    VulkanHelpers::VK_CHECK_RESULT(
+        vkCreateShaderModule(Device->GetDevice(), &module_create_info, nullptr, shader_module),
+        __LINE__,
+        __FILE__);
+    Device->NameObject(VK_OBJECT_TYPE_SHADER_MODULE, reinterpret_cast<uint64_t>(*shader_module), module_name);
 
     *stage_create_info = VulkanBootstrap::GetShaderStageCreate(*shader_module, stage);
   }
@@ -82,15 +76,29 @@ VulkanObjects::VulkanShaderInstance::VulkanShaderInstance(const VulkanDeviceInst
       VulkanBootstrap::GetDescriptorSetLayoutBinding(0,
                                                      VulkanTranslate::ShaderStage::ALL,
                                                      VulkanTranslate::DescriptorType::UNIFORM_BUFFER);
-  std::vector<VkDescriptorSetLayoutBinding> buffer_bindings = {buffer};
-  auto common_buffer_create_info = VulkanBootstrap::GetDescriptorSetLayoutCreate(buffer_bindings);
-  vkCreateDescriptorSetLayout(Device->GetDevice(), &common_buffer_create_info, nullptr, &DescriptorSetLayoutUBOCommon);
+  std::vector buffer_bindings           = {buffer};
+  auto        common_buffer_create_info = VulkanBootstrap::GetDescriptorSetLayoutCreate(buffer_bindings);
+  VulkanHelpers::VK_CHECK_RESULT(vkCreateDescriptorSetLayout(Device->GetDevice(),
+                                                             &common_buffer_create_info,
+                                                             nullptr,
+                                                             &DescriptorSetLayoutUBOCommon),
+                                 __LINE__,
+                                 __FILE__);
+  Device->NameObject(VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT,
+                     reinterpret_cast<uint64_t>(DescriptorSetLayoutUBOCommon),
+                     Name + "_cm_ubo_layout");
+
 
   auto specific_buffer_create_info = VulkanBootstrap::GetDescriptorSetLayoutCreate(buffer_bindings);
-  vkCreateDescriptorSetLayout(Device->GetDevice(),
-                              &specific_buffer_create_info,
-                              nullptr,
-                              &DescriptorSetLayoutUBOSpecial);
+  VulkanHelpers::VK_CHECK_RESULT(vkCreateDescriptorSetLayout(Device->GetDevice(),
+                                                             &specific_buffer_create_info,
+                                                             nullptr,
+                                                             &DescriptorSetLayoutUBOSpecial),
+                                 __LINE__,
+                                 __FILE__);
+  Device->NameObject(VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT,
+                     reinterpret_cast<uint64_t>(DescriptorSetLayoutUBOSpecial),
+                     Name + "_spec_ubo_layout");
 
   std::vector<VkDescriptorSetLayoutBinding> specific_texture_list_info;
   for(size_t x = 0; x < info.GetSpecificTextureCount(); x++)
@@ -103,10 +111,15 @@ VulkanObjects::VulkanShaderInstance::VulkanShaderInstance(const VulkanDeviceInst
   }
 
   auto specific_texture_create_info = VulkanBootstrap::GetDescriptorSetLayoutCreate(specific_texture_list_info);
-  vkCreateDescriptorSetLayout(Device->GetDevice(),
-                              &specific_texture_create_info,
-                              nullptr,
-                              &DescriptorSetLayoutTexturesSpecial);
+  VulkanHelpers::VK_CHECK_RESULT(vkCreateDescriptorSetLayout(Device->GetDevice(),
+                                                             &specific_texture_create_info,
+                                                             nullptr,
+                                                             &DescriptorSetLayoutTexturesSpecial),
+                                 __LINE__,
+                                 __FILE__);
+  Device->NameObject(VK_OBJECT_TYPE_DESCRIPTOR_SET_LAYOUT,
+                     reinterpret_cast<uint64_t>(DescriptorSetLayoutTexturesSpecial),
+                     Name + "_tex_layout");
 
   std::vector descriptor_set_layouts = {
       DescriptorSetLayoutUBOCommon,
@@ -120,6 +133,9 @@ VulkanObjects::VulkanShaderInstance::VulkanShaderInstance(const VulkanDeviceInst
       vkCreatePipelineLayout(Device->GetDevice(), &pipeline_layout_info, nullptr, &PipelineLayout),
       __LINE__,
       __FILE__);
+  Device->NameObject(VK_OBJECT_TYPE_PIPELINE_LAYOUT,
+                     reinterpret_cast<uint64_t>(PipelineLayout),
+                     Name + "_pipeline_layout");
 }
 
 VulkanObjects::VulkanShaderInstance::~VulkanShaderInstance()
@@ -138,17 +154,15 @@ VulkanObjects::VulkanShaderInstance::~VulkanShaderInstance()
   if(ComputeShader) vkDestroyShaderModule(Device->GetDevice(), ComputeShader, nullptr);
 
   for(const auto &pipeline : PipelinesWithState)
-    if(pipeline.second) vkDestroyPipeline(Device->GetDevice(), pipeline.second, nullptr);
+    if(pipeline.second) Device->QueuePipelineForDeletion(pipeline.second);
 }
 
 VkPipeline VulkanObjects::VulkanShaderInstance::GetPipelineForState(const VulkanPipelineState &state) const
 {
   std::lock_guard guard(PipelinesListMutex);
 
-  for(const auto &pipeline : PipelinesWithState)
-  {
-    if(state == pipeline.first) return pipeline.second;
-  }
+  for(const auto &[it_state, it_pipeline] : PipelinesWithState)
+    if(state == it_state) return it_pipeline;
 
   // We are using a dynamic viewport and scissor.
   constexpr std::array DYNAMIC_STATES = {
@@ -288,6 +302,9 @@ VkPipeline VulkanObjects::VulkanShaderInstance::GetPipelineForState(const Vulkan
       vkCreateGraphicsPipelines(Device->GetDevice(), VK_NULL_HANDLE, 1, &pipeline_info, nullptr, &it.second),
       __LINE__,
       __FILE__);
+  Device->NameObject(VK_OBJECT_TYPE_PIPELINE,
+                     reinterpret_cast<uint64_t>(it.second),
+                     Name + "_pipeline");
 
   return it.second;
 }

@@ -23,7 +23,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Shader.h"
 
 
-
 namespace
 {
   Shader                        shader("sprite shader");
@@ -55,27 +54,37 @@ void SpriteShader::Init()
 
   constexpr float vertexData[] = {-.5f, -.5f, -.5f, .5f, .5f, -.5f, .5f, .5f};
 
-  square = graphics_layer::ObjectHandle(GameWindow::GetInstance(), 4, 2 * sizeof(float), vertexData, {});
+  square = graphics_layer::ObjectHandle(GameWindow::GetInstance(), 4, 2 * sizeof(float), vertexData, {}, "sprite_quad");
 
-  asl::uint8 dummy_tex_raw[] = {125, 0, 255, 255};
+  constexpr asl::uint8 dummy_tex_raw[] = {125, 0, 255, 255};
 
-  dummy_tex = graphics_layer::TextureHandle(GameWindow::GetInstance(),
-                                            dummy_tex_raw,
-                                            1,
-                                            1,
-                                            1,
-                                            GraphicsTypes::TextureType::TYPE_2D_ARRAY,
-                                            GraphicsTypes::ImageFormat::RGBA,
-                                            GraphicsTypes::TextureTarget::READ);
+  dummy_tex = graphics_layer::TextureHandle(
+      GameWindow::GetInstance(),
+      "dummy_tex",
+      dummy_tex_raw,
+      1,
+      1,
+      1,
+      GraphicsTypes::TextureType::TYPE_2D_ARRAY,
+      GraphicsTypes::ImageFormat::RGBA,
+      GraphicsTypes::TextureTarget::READ);
+}
+
+void SpriteShader::Clear()
+{
+  shader.Clear();
+  square = {};
+  dummy_tex= {};
 }
 
 
-void SpriteShader::Draw(const Sprite  *sprite,
-                        const Point   &position,
-                        const float    zoom,
-                        const Swizzle *swizzle,
-                        const float    frame,
-                        const Point   &unit)
+void SpriteShader::Draw(
+    const Sprite  *sprite,
+    const Point   &position,
+    const float    zoom,
+    const Swizzle *swizzle,
+    const float    frame,
+    const Point   &unit)
 {
   if(!sprite) return;
 
@@ -85,12 +94,13 @@ void SpriteShader::Draw(const Sprite  *sprite,
 }
 
 
-SpriteShader::Item SpriteShader::Prepare(const Sprite  *sprite,
-                                         const Point   &position,
-                                         float          zoom,
-                                         const Swizzle *swizzle,
-                                         float          frame,
-                                         const Point   &unit)
+SpriteShader::Item SpriteShader::Prepare(
+    const Sprite  *sprite,
+    const Point   &position,
+    float          zoom,
+    const Swizzle *swizzle,
+    float          frame,
+    const Point   &unit)
 {
   if(!sprite) return {};
 
@@ -98,14 +108,14 @@ SpriteShader::Item SpriteShader::Prepare(const Sprite  *sprite,
   item.texture     = sprite->Texture().GetTexture();
   item.swizzleMask = sprite->SwizzleMask().GetTexture();
   item.frame       = frame;
-  item.frameCount  = sprite->Frames();
+  item.frameCount  = static_cast<float>(sprite->Frames());
   // Position.
   item.position[0] = static_cast<float>(position.X());
   item.position[1] = static_cast<float>(position.Y());
   // Rotation and scale.
-  Point scaledUnit  = unit * zoom;
-  Point uw          = scaledUnit * sprite->Width();
-  Point uh          = scaledUnit * sprite->Height();
+  Point scaledUnit       = unit * zoom;
+  Point uw               = scaledUnit * sprite->Width();
+  Point uh               = scaledUnit * sprite->Height();
   item.transform.col0[0] = static_cast<float>(-uw.Y());
   item.transform.col0[1] = static_cast<float>(uw.X());
   item.transform.col1[0] = static_cast<float>(-uh.X());
@@ -138,7 +148,7 @@ void SpriteShader::Add(const Item &item, bool withBlur)
   else texture_list.AddTexture(dummy_tex.GetTexture(), 1, false);
   texture_list.Bind(GameWindow::GetInstance());
 
-  const auto                 info = shader.GetInfo();
+  const auto                &info = shader.GetInfo();
   std::vector<unsigned char> data_cp(info.GetUniformSize());
   int                        i = -1;
 
@@ -150,10 +160,22 @@ void SpriteShader::Add(const Item &item, bool withBlur)
   info.CopyUniformEntryToBuffer(data_cp.data(), &item.frame, ++i);
   info.CopyUniformEntryToBuffer(data_cp.data(), &item.frameCount, ++i);
   static constexpr float UNSWIZZLED[16] = {
-      1.f, 0.f, 0.f, 0.f,
-      0.f, 1.f, 0.f, 0.f,
-      0.f, 0.f, 1.f, 0.f,
-      0.f, 0.f, 0.f, 1.f,
+      1.f,
+      0.f,
+      0.f,
+      0.f,
+      0.f,
+      1.f,
+      0.f,
+      0.f,
+      0.f,
+      0.f,
+      1.f,
+      0.f,
+      0.f,
+      0.f,
+      0.f,
+      1.f,
   };
   info.CopyUniformEntryToBuffer(data_cp.data(), item.swizzle ? item.swizzle->MatrixPtr() : UNSWIZZLED, ++i);
   info.CopyUniformEntryToBuffer(data_cp.data(), &use_swizzle, ++i);

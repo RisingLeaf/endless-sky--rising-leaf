@@ -74,7 +74,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <vector>
 
 #include "risingleaf_shared/system/File.h"
-
+#include "text/Font.h"
 
 
 namespace {
@@ -312,6 +312,27 @@ void GameData::LoadShaders()
 	FontSet::Add(Files::Images() / "font/ubuntu18r.png", 18);
 
 	background.Init(16384, 4096);
+}
+
+
+void GameData::ClearShaders()
+{
+  FillShader::Clear();
+  FogShader::Clear();
+  LineShader::Clear();
+  OutlineShader::Clear();
+  PointerShader::Clear();
+  RingShader::Clear();
+  SpriteShader::Clear();
+  BatchShader::Clear();
+  RenderBuffer::Clear();
+
+  FontSet::Clear();
+  Font::Clear();
+
+  SpriteSet::Clear();
+
+  background.Clear();
 }
 
 

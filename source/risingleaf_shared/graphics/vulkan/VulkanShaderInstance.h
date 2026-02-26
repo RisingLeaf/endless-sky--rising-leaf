@@ -54,6 +54,8 @@ namespace VulkanObjects
 
     const VulkanDeviceInstance *Device;
 
+    std::string Name;
+
   public:
     VulkanShaderInstance(const VulkanDeviceInstance            *device,
                          const ShaderInfo                      &info,

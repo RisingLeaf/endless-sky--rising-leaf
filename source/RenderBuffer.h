@@ -26,35 +26,36 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class RenderBuffer {
 public:
 	// Create a texture of the given size that can be used as a render target.
-	RenderBuffer(const Point &dimensions);
+	RenderBuffer(const Point &dimensions, std::string_view name);
 	virtual ~RenderBuffer();
 
 	// Initialize the shaders used internally.
 	static void Init();
+	static void Clear();
 
 	// Turn this buffer on as a render target.
 	void SetTarget();
-	void Deactivate();
+	void Deactivate() const;
 
 	// Draw the contents of this buffer at the specified position.
 	void Draw(const Point &position);
 	// Draw the contents of this buffer at the specified position, clipping the contents.
-	void Draw(const Point &position, const Point &clipsize, const Point &srcposition = Point());
+	void Draw(const Point &position, const Point &clip_size, const Point &src_position = Point());
 
-	double Top() const;
-	double Bottom() const;
-	double Left() const;
-	double Right() const;
-	const Point &Dimensions() const;
-	double Height() const;
-	double Width() const;
+	[[nodiscard]] double Top() const;
+	[[nodiscard]] double Bottom() const;
+	[[nodiscard]] double Left() const;
+	[[nodiscard]] double Right() const;
+	[[nodiscard]] const Point &Dimensions() const;
+	[[nodiscard]] double Height() const;
+	[[nodiscard]] double Width() const;
 
 	void SetFadePadding(float top, float bottom, float right = 0, float left = 0);
 
 private:
 	Point size;
 	unsigned int texid = -1;
-	graphics_layer::frame_buffer_handle FrameBuffer;
+	graphics_layer::FrameBufferHandle FrameBuffer;
 
 	float fadePadding[4] = {};
 

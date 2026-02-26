@@ -35,7 +35,7 @@ namespace graphics_layer
 
   std::unique_ptr<GraphicsTypes::GraphicsInstance> Init(int width, int height);
 
-  class frame_buffer_handle
+  class FrameBufferHandle
   {
     GraphicsTypes::GraphicsInstance *Instance;
 
@@ -44,20 +44,24 @@ namespace graphics_layer
     GraphicsTypes::RenderBufferType Type;
     uint32_t                        Samples;
 
-    std::unique_ptr<GraphicsTypes::RenderBufferInstance> frame_buffer;
+    std::unique_ptr<GraphicsTypes::RenderBufferInstance> FrameBuffer;
+
+    std::string Name;
 
   public:
-    frame_buffer_handle(GraphicsTypes::GraphicsInstance *instance,
-                        uint32_t                         width,
-                        uint32_t                         height,
-                        GraphicsTypes::RenderBufferType  type,
-                        uint32_t                         samples);
-    ~frame_buffer_handle();
+    FrameBufferHandle(
+        GraphicsTypes::GraphicsInstance *instance,
+        uint32_t                         width,
+        uint32_t                         height,
+        GraphicsTypes::RenderBufferType  type,
+        uint32_t                         samples,
+        std::string_view                 name);
+    ~FrameBufferHandle();
 
-    frame_buffer_handle(const frame_buffer_handle &other)                = delete;
-    frame_buffer_handle(frame_buffer_handle &&other) noexcept            = delete;
-    frame_buffer_handle &operator=(const frame_buffer_handle &other)     = delete;
-    frame_buffer_handle &operator=(frame_buffer_handle &&other) noexcept = delete;
+    FrameBufferHandle(const FrameBufferHandle &other)                = delete;
+    FrameBufferHandle(FrameBufferHandle &&other) noexcept            = delete;
+    FrameBufferHandle &operator=(const FrameBufferHandle &other)     = delete;
+    FrameBufferHandle &operator=(FrameBufferHandle &&other) noexcept = delete;
 
     void Bind() const;
     void Finish() const;
@@ -70,7 +74,7 @@ namespace graphics_layer
 
   class ObjectHandle
   {
-    const GraphicsTypes::GraphicsInstance *Instance;
+    const GraphicsTypes::GraphicsInstance *Instance = nullptr;
 
     std::unique_ptr<GraphicsTypes::BufferInstance> VertexBuffer = nullptr;
     std::unique_ptr<GraphicsTypes::BufferInstance> IndexBuffer  = nullptr;
@@ -80,11 +84,13 @@ namespace graphics_layer
 
   public:
     ObjectHandle() = default;
-    ObjectHandle(const GraphicsTypes::GraphicsInstance *instance,
-                 size_t                                 size,
-                 size_t                                 type_size,
-                 const void                            *in_data,
-                 const std::vector<uint32_t>           &indices);
+    ObjectHandle(
+        const GraphicsTypes::GraphicsInstance *instance,
+        size_t                                 size,
+        size_t                                 type_size,
+        const void                            *in_data,
+        const std::vector<uint32_t>           &indices,
+        std::string_view                       name);
     ~ObjectHandle();
 
     ObjectHandle(const ObjectHandle &other) = delete;
@@ -109,79 +115,38 @@ namespace graphics_layer
     void Draw(GraphicsTypes::PrimitiveType prim_type, int start = 0, int end = -1) const;
   };
 
-  class RotatingObjectBuffer
-  {
-    const GraphicsTypes::GraphicsInstance *Instance;
-
-    std::vector<std::unique_ptr<GraphicsTypes::BufferInstance>> VertexBuffers{};
-    std::vector<std::unique_ptr<GraphicsTypes::BufferInstance>> IndexBuffers{};
-
-    size_t CurrentIndex = 0;
-
-    size_t VertexBufferSize = 0;
-    size_t Size             = 0;
-
-  public:
-    RotatingObjectBuffer() = default;
-    RotatingObjectBuffer(const GraphicsTypes::GraphicsInstance *instance,
-                         size_t                                 size,
-                         size_t                                 type_size,
-                         const void                            *in_data,
-                         const std::vector<uint32_t>           &indices);
-    ~RotatingObjectBuffer();
-
-    RotatingObjectBuffer(const RotatingObjectBuffer &other) = delete;
-    RotatingObjectBuffer(RotatingObjectBuffer &&other) noexcept :
-      Instance(other.Instance), VertexBufferSize(other.VertexBufferSize), Size(other.Size)
-    {
-      VertexBuffers.swap(other.VertexBuffers);
-      IndexBuffers.swap(other.IndexBuffers);
-    }
-    RotatingObjectBuffer &operator=(const RotatingObjectBuffer &other) = delete;
-    RotatingObjectBuffer &operator=(RotatingObjectBuffer &&other) noexcept
-    {
-      this->Instance = other.Instance;
-      this->VertexBuffers.swap(other.VertexBuffers);
-      this->IndexBuffers.swap(other.IndexBuffers);
-      this->Size             = other.Size;
-      this->VertexBufferSize = other.VertexBufferSize;
-
-      return *this;
-    }
-
-    void Draw() const;
-
-    void ReplaceVerticesAndIndices(const void *data, size_t size, const std::vector<uint32_t> &indices) const;
-  };
-
   class TextureHandle
   {
-    const GraphicsTypes::GraphicsInstance *Instance;
+    const GraphicsTypes::GraphicsInstance *Instance = nullptr;
 
     std::unique_ptr<GraphicsTypes::TextureInstance> Texture;
     int                                             Width = 0, Height = 0;
 
   public:
     TextureHandle() = default;
-    TextureHandle(const GraphicsTypes::GraphicsInstance *instance,
-                  const void *                           data,
-                  int                                    width,
-                  int                                    height,
-                  int                                    depth,
-                  GraphicsTypes::TextureType             type,
-                  GraphicsTypes::ImageFormat             format,
-                  GraphicsTypes::TextureTarget           target,
-                  GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
-                  GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
-    TextureHandle(const GraphicsTypes::GraphicsInstance *instance,
-                  int                                    width,
-                  int                                    height,
-                  int                                    depth,
-                  GraphicsTypes::TextureType             type,
-                  GraphicsTypes::ImageFormat             format,
-                  GraphicsTypes::TextureTarget           target,
-                  GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
-                  GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
+    TextureHandle(
+        const GraphicsTypes::GraphicsInstance *instance,
+        std::string_view                       name,
+        const void                            *data,
+        int                                    width,
+        int                                    height,
+        int                                    depth,
+        GraphicsTypes::TextureType             type,
+        GraphicsTypes::ImageFormat             format,
+        GraphicsTypes::TextureTarget           target,
+        GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
+        GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
+    TextureHandle(
+        const GraphicsTypes::GraphicsInstance *instance,
+        std::string_view                       name,
+        int                                    width,
+        int                                    height,
+        int                                    depth,
+        GraphicsTypes::TextureType             type,
+        GraphicsTypes::ImageFormat             format,
+        GraphicsTypes::TextureTarget           target,
+        GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
+        GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
     ~TextureHandle();
 
     TextureHandle(const TextureHandle &other) = delete;
@@ -190,7 +155,7 @@ namespace graphics_layer
       this->Texture.swap(other.Texture);
       Width  = other.Width;
       Height = other.Height;
-    };
+    }
     TextureHandle &operator=(const TextureHandle &other) = delete;
     TextureHandle &operator=(TextureHandle &&other) noexcept
     {

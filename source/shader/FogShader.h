@@ -24,6 +24,7 @@ class Point;
 class FogShader {
 public:
 	static void Init();
+	static void Clear();
 	static void Redraw();
 	static void Draw(const Point &center, double zoom, const PlayerInfo &player);
 };

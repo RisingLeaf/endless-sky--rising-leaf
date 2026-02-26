@@ -118,15 +118,15 @@ namespace graphics_vulkan
 
     void CreateShader(std::unique_ptr<GraphicsTypes::ShaderInstance> &shader_instance, const ShaderInfo &shader_info, const std::vector<File::ShaderString> &shader_code, std::string_view name) const override;
 
-    void CreateBuffer(std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance, GraphicsTypes::BufferType type, size_t buffer_size) const override;
-    void CreateBuffer(std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance, GraphicsTypes::BufferType type, size_t buffer_size, const void *data) const override;
+    void CreateBuffer(std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance, GraphicsTypes::BufferType type, size_t buffer_size, std::string_view name) const override;
+    void CreateBuffer(std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance, GraphicsTypes::BufferType type, size_t buffer_size, const void *data, std::string_view name) const override;
     void MapBuffer(GraphicsTypes::BufferInstance *buffer_instance, const void *map_memory) const override;
     // Copies lhs into rhs.
     void CopyBuffer(GraphicsTypes::BufferInstance *buffer_instance_rhs, GraphicsTypes::BufferInstance *buffer_instance_lhs) const override;
 
-    void CreateTexture(std::unique_ptr<GraphicsTypes::TextureInstance> &texture_instance, const GraphicsTypes::TextureInfo &texture_info, const void *in_data) const override;
+    void CreateTexture(std::unique_ptr<GraphicsTypes::TextureInstance> &texture_instance, const GraphicsTypes::TextureInfo &texture_info, const void *in_data, std::string_view name) const override;
 
-    void CreateRenderBuffer(std::unique_ptr<GraphicsTypes::RenderBufferInstance> &render_buffer_instance, const GraphicsTypes::FrameBufferInfo &create_info) const override;
+    void CreateRenderBuffer(std::unique_ptr<GraphicsTypes::RenderBufferInstance> &render_buffer_instance, const GraphicsTypes::FrameBufferInfo &create_info, std::string_view name) const override;
 
     const GraphicsTypes::TextureInstance *GetRenderBufferTexture(GraphicsTypes::RenderBufferInstance *render_buffer_instance) const override;
 

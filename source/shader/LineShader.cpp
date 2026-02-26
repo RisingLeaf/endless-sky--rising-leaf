@@ -26,7 +26,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "graphics/graphics_layer.h"
 
 
-
 namespace
 {
   Shader                       shader("line shader");
@@ -53,28 +52,35 @@ void LineShader::Init()
 
   constexpr float vertexData[] = {-1.f, -1.f, 1.f, -1.f, -1.f, 1.f, 1.f, 1.f};
 
-  line = graphics_layer::ObjectHandle(GameWindow::GetInstance(), 4, 2 * sizeof(float), vertexData, {});
+  line = graphics_layer::ObjectHandle(GameWindow::GetInstance(), 4, 2 * sizeof(float), vertexData, {}, "line_quad");
+}
+
+void LineShader::Clear()
+{
+  shader.Clear();
+  line = {};
 }
 
 
-void LineShader::Draw(const Point &from, const Point &to, float width, const Color &color, bool roundCap)
+void LineShader::Draw(const Point &from, const Point &to, const float width, const Color &color, const bool roundCap)
 {
   DrawGradient(from, to, width, color, color, roundCap);
 }
 
 
-void LineShader::DrawDashed(const Point &from,
-                            const Point &to,
-                            const Point &unit,
-                            const float  width,
-                            const Color &color,
-                            const double dashLength,
-                            double       spaceLength,
-                            bool         roundCap)
+void LineShader::DrawDashed(
+    const Point &from,
+    const Point &to,
+    const Point &unit,
+    const float  width,
+    const Color &color,
+    const double dashLength,
+    double       spaceLength,
+    const bool   roundCap)
 {
   const double length        = (to - from).Length();
   const double patternLength = dashLength + spaceLength;
-  int          segments      = length / patternLength;
+  int          segments      = static_cast<int>(length / patternLength);
   // If needed, scale pattern down so we can draw at least two of them over length.
   if(segments < 2)
   {
@@ -84,20 +90,24 @@ void LineShader::DrawDashed(const Point &from,
   spaceLength /= 2.;
   float capOffset = roundCap ? width : 0.;
   for(int i = 0; i < segments; ++i)
-    Draw(from + unit * (i * length / segments + spaceLength + capOffset),
-         from + unit * ((i + 1) * length / segments - spaceLength - capOffset),
-         width,
-         color,
-         roundCap);
+  {
+    Draw(
+        from + unit * (i * length / segments + spaceLength + capOffset),
+        from + unit * ((i + 1) * length / segments - spaceLength - capOffset),
+        width,
+        color,
+        roundCap);
+  }
 }
 
 
-void LineShader::DrawGradient(const Point &from,
-                              const Point &to,
-                              const float  width,
-                              const Color &fromColor,
-                              const Color &toColor,
-                              bool         roundCap)
+void LineShader::DrawGradient(
+    const Point &from,
+    const Point &to,
+    const float  width,
+    const Color &fromColor,
+    const Color &toColor,
+    bool         roundCap)
 {
   if(!shader()) throw std::runtime_error("LineShader: Draw() called before Init().");
 
@@ -109,7 +119,7 @@ void LineShader::DrawGradient(const Point &from,
 
   const auto                &info = shader.GetInfo();
   std::vector<unsigned char> data_cp(info.GetUniformSize());
-  int i = -1;
+  int                        i = -1;
   info.CopyUniformEntryToBuffer(data_cp.data(), start, ++i);
   info.CopyUniformEntryToBuffer(data_cp.data(), end, ++i);
   info.CopyUniformEntryToBuffer(data_cp.data(), &width, ++i);
@@ -123,19 +133,20 @@ void LineShader::DrawGradient(const Point &from,
 }
 
 
-void LineShader::DrawGradientDashed(const Point &from,
-                                    const Point &to,
-                                    const Point &unit,
-                                    const float  width,
-                                    const Color &fromColor,
-                                    const Color &toColor,
-                                    const double dashLength,
-                                    double       spaceLength,
-                                    bool         roundCap)
+void LineShader::DrawGradientDashed(
+    const Point &from,
+    const Point &to,
+    const Point &unit,
+    const float  width,
+    const Color &fromColor,
+    const Color &toColor,
+    const double dashLength,
+    double       spaceLength,
+    const bool   roundCap)
 {
   const double length        = (to - from).Length();
   const double patternLength = dashLength + spaceLength;
-  int          segments      = length / patternLength;
+  int          segments      = static_cast<int>(length / patternLength);
   // If needed, scale pattern down so we can draw at least two of them over length.
   if(segments < 2)
   {
@@ -143,18 +154,19 @@ void LineShader::DrawGradientDashed(const Point &from,
     spaceLength *= length / (segments * patternLength);
   }
   spaceLength /= 2.;
-  float capOffset = roundCap ? width : 0.;
+  const float capOffset = roundCap ? width : 0.;
   for(int i = 0; i < segments; ++i)
   {
-    float p      = static_cast<float>(i) / segments;
-    Color mixed  = Color::Combine(1. - p, fromColor, p, toColor);
-    float pv     = static_cast<float>(i + 1) / segments;
-    Color mixed2 = Color::Combine(1. - pv, fromColor, pv, toColor);
-    DrawGradient(from + unit * (i * length / segments + spaceLength + capOffset),
-                 from + unit * ((i + 1) * length / segments - spaceLength - capOffset),
-                 width,
-                 mixed,
-                 mixed2,
-                 roundCap);
+    const float p      = static_cast<float>(i) / static_cast<float>(segments);
+    Color mixed  = Color::Combine(1.f - p, fromColor, p, toColor);
+    const float pv     = static_cast<float>(i + 1) / static_cast<float>(segments);
+    Color mixed2 = Color::Combine(1.f - pv, fromColor, pv, toColor);
+    DrawGradient(
+        from + unit * (i * length / segments + spaceLength + capOffset),
+        from + unit * ((i + 1) * length / segments - spaceLength - capOffset),
+        width,
+        mixed,
+        mixed2,
+        roundCap);
   }
 }

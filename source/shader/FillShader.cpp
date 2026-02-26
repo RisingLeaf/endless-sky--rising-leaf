@@ -26,65 +26,59 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "graphics/graphics_layer.h"
 
 
+namespace
+{
+  Shader shader("fill shader");
 
-namespace {
-	Shader shader("fill shader");
-
-	graphics_layer::ObjectHandle square;
-}
-
+  graphics_layer::ObjectHandle square;
+} // namespace
 
 
 void FillShader::Init()
 {
-	auto &info = shader.GetInfo();
+  auto &info = shader.GetInfo();
 
   info.SetInputSize(2 * sizeof(float));
-	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
+  info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
 
-	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); //u_in vec2 center;
-	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); //u_in vec2 size;
-	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4); //u_in vec4 color;
+  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // u_in vec2 center;
+  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // u_in vec2 size;
+  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4); // u_in vec4 color;
 
-	shader.Create(*GameData::Shaders().Find("fill"));
+  shader.Create(*GameData::Shaders().Find("fill"));
 
-	constexpr float vertexData[] = {
-		-.5f, -.5f,
-		 .5f, -.5f,
-		-.5f,  .5f,
-		 .5f,  .5f
-	};
+  constexpr float vertexData[] = {-.5f, -.5f, .5f, -.5f, -.5f, .5f, .5f, .5f};
 
-	square = graphics_layer::ObjectHandle(GameWindow::GetInstance(), 4, 2 * sizeof(float), vertexData, {});
+  square = graphics_layer::ObjectHandle(GameWindow::GetInstance(), 4, 2 * sizeof(float), vertexData, {}, "fill_quad");
 }
 
-
-
-void FillShader::Fill(const Rectangle &area, const Color &color)
+void FillShader::Clear()
 {
-	Fill(area.Center(), area.Dimensions(), color);
+  shader.Clear();
+  square = {};
 }
 
+
+void FillShader::Fill(const Rectangle &area, const Color &color) { Fill(area.Center(), area.Dimensions(), color); }
 
 
 void FillShader::Fill(const Point &center, const Point &size, const Color &color)
 {
-	if (!shader())
-		throw std::runtime_error("Draw called before init!");
-	shader.Bind();
+  if(!shader()) throw std::runtime_error("Draw called before init!");
+  shader.Bind();
 
-	const float centerV[2] = {static_cast<float>(center.X()), static_cast<float>(center.Y())};
-	const float sizeV[2]   = {static_cast<float>(size.X()), static_cast<float>(size.Y())};
+  const float centerV[2] = {static_cast<float>(center.X()), static_cast<float>(center.Y())};
+  const float sizeV[2]   = {static_cast<float>(size.X()), static_cast<float>(size.Y())};
 
-	const auto info = shader.GetInfo();
-	std::vector<unsigned char> data_cp(info.GetUniformSize());
+  const auto                &info = shader.GetInfo();
+  std::vector<unsigned char> data_cp(info.GetUniformSize());
 
-	int i = -1;
-	info.CopyUniformEntryToBuffer(data_cp.data(), centerV,     ++i);
-	info.CopyUniformEntryToBuffer(data_cp.data(), sizeV,       ++i);
-	info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
+  int i = -1;
+  info.CopyUniformEntryToBuffer(data_cp.data(), centerV, ++i);
+  info.CopyUniformEntryToBuffer(data_cp.data(), sizeV, ++i);
+  info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
 
-	GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
+  GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
 
-	square.Draw(GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
+  square.Draw(GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
 }

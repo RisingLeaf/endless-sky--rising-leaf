@@ -39,3 +39,8 @@ const Font &FontSet::Get(int size)
 {
 	return fonts[size];
 }
+
+void FontSet::Clear()
+{
+  fonts.clear();
+}

@@ -53,11 +53,12 @@ namespace
   const double STAR_ZOOM = 0.70;
   const double HAZE_ZOOM = 0.90;
 
-  void AddHaze(DrawList                &drawList,
-               const std::vector<Body> &haze,
-               const Point             &topLeft,
-               const Point             &bottomRight,
-               double                   transparency)
+  void AddHaze(
+      DrawList                &drawList,
+      const std::vector<Body> &haze,
+      const Point             &topLeft,
+      const Point             &bottomRight,
+      double                   transparency)
   {
     for(auto &&it : haze)
     {
@@ -109,6 +110,12 @@ void StarField::Init(int stars, int width)
     haze[0].emplace_back(lastSprite, next, Point(), Angle::Random(), 8.);
   }
   haze[1].assign(haze[0].begin(), haze[0].end());
+}
+
+void StarField::Clear()
+{
+  shader.Clear();
+  vertices = {};
 }
 
 
@@ -170,7 +177,9 @@ void StarField::Step(Point vel, double zoom)
     // the player is.
     vel /= baseZoom / zoom;
   }
-  else baseZoom = zoom;
+  else {
+    baseZoom = zoom;
+  }
 
   pos += vel;
 }
@@ -183,8 +192,9 @@ void StarField::Draw(const Point &blur, const System *system) const
   // Check preferences for the parallax quality.
   const auto parallaxSetting = Preferences::GetBackgroundParallax();
   const int  layers          = (parallaxSetting == Preferences::BackgroundParallax::FANCY) ? 3 : 1;
-  const bool isParallax      = (parallaxSetting == Preferences::BackgroundParallax::FANCY ||
-                           parallaxSetting == Preferences::BackgroundParallax::FAST);
+  const bool isParallax =
+      (parallaxSetting == Preferences::BackgroundParallax::FANCY ||
+       parallaxSetting == Preferences::BackgroundParallax::FAST);
 
   // Draw the starfield unless it is disabled in the preferences.
   double zoom = baseZoom;
@@ -313,6 +323,7 @@ void StarField::MakeStars(int stars, int width)
   static const int MIN_D   = MAX_D / 4;
   off.reserve(MAX_OFF * MAX_OFF * 5);
   for(int x = -MAX_OFF; x <= MAX_OFF; ++x)
+  {
     for(int y = -MAX_OFF; y <= MAX_OFF; ++y)
     {
       int d = x * x + y * y;
@@ -321,6 +332,7 @@ void StarField::MakeStars(int stars, int width)
       off.push_back(x);
       off.push_back(y);
     }
+  }
 
   // Generate random points in a temporary std::vector.
   // Keep track of how many fall into each tile, for sorting out later.
@@ -369,12 +381,13 @@ void StarField::MakeStars(int stars, int width)
 
     // Fill in the data array.
     auto        dataIt    = data.begin() + 6 * 4 * tileIndex[index]++;
-    const float CORNER[6] = {static_cast<float>(0. * PI),
-                             static_cast<float>(.5 * PI),
-                             static_cast<float>(1.5 * PI),
-                             static_cast<float>(.5 * PI),
-                             static_cast<float>(1.5 * PI),
-                             static_cast<float>(1. * PI)};
+    const float CORNER[6] = {
+        static_cast<float>(0. * PI),
+        static_cast<float>(.5 * PI),
+        static_cast<float>(1.5 * PI),
+        static_cast<float>(.5 * PI),
+        static_cast<float>(1.5 * PI),
+        static_cast<float>(1. * PI)};
     for(float corner : CORNER)
     {
       *dataIt++ = fx;
@@ -386,5 +399,11 @@ void StarField::MakeStars(int stars, int width)
   // Adjust the tile indices so that tileIndex[i] is the start of tile i.
   tileIndex.insert(tileIndex.begin(), 0);
 
-  vertices = graphics_layer::ObjectHandle(GameWindow::GetInstance(), 6 * stars, 4 * sizeof(float), data.data(), {});
+  vertices = graphics_layer::ObjectHandle(
+      GameWindow::GetInstance(),
+      6 * stars,
+      4 * sizeof(float),
+      data.data(),
+      {},
+      "starfield");
 }

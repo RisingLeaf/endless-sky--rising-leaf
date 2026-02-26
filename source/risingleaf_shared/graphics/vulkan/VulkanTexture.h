@@ -47,17 +47,19 @@ namespace VulkanObjects
     const bool                       Owning;
 
   public:
-    VulkanImageInstance(const VulkanDeviceInstance  *device,
-                        GraphicsTypes::TextureType   type,
-                        GraphicsTypes::ImageFormat   format,
-                        GraphicsTypes::TextureTarget target,
-                        uint32_t                     samples,
-                        uint32_t                     width,
-                        uint32_t                     height,
-                        uint32_t                     depth      = 1,
-                        uint32_t                     layers     = 1,
-                        uint32_t                     mip_levels = 1,
-                        VkImage                      image      = nullptr);
+    VulkanImageInstance(
+        const VulkanDeviceInstance  *device,
+        std::string_view             name,
+        GraphicsTypes::TextureType   type,
+        GraphicsTypes::ImageFormat   format,
+        GraphicsTypes::TextureTarget target,
+        uint32_t                     samples,
+        uint32_t                     width,
+        uint32_t                     height,
+        uint32_t                     depth      = 1,
+        uint32_t                     layers     = 1,
+        uint32_t                     mip_levels = 1,
+        VkImage                      image      = nullptr);
 
     ~VulkanImageInstance();
 
@@ -69,11 +71,12 @@ namespace VulkanObjects
     void SetLayout(VkCommandBuffer cmd, VkImageLayout dest) const;
     void ExternalSetLayout(const VkImageLayout dest) const { Layout = dest; }
 
-    void Upload(VkCommandBuffer                  cmd,
-                const void                      *data,
-                uint32_t                         start_layer = 0,
-                uint32_t                         end_layer   = 0,
-                uint32_t                         mip_level   = 0) const;
+    void Upload(
+        VkCommandBuffer cmd,
+        const void     *data,
+        uint32_t        start_layer = 0,
+        uint32_t        end_layer   = 0,
+        uint32_t        mip_level   = 0) const;
 
     void CreateMipMaps(VkCommandBuffer cmd) const;
 
@@ -89,12 +92,14 @@ namespace VulkanObjects
     const VulkanDeviceInstance *Device;
 
   public:
-    VulkanViewInstance(const VulkanDeviceInstance *device,
-                       VkImage                     image,
-                       GraphicsTypes::ImageFormat  format,
-                       GraphicsTypes::TextureType  type,
-                       uint32_t                    layers,
-                       uint32_t                    mip_levels);
+    VulkanViewInstance(
+        const VulkanDeviceInstance *device,
+        std::string_view            name,
+        VkImage                     image,
+        GraphicsTypes::ImageFormat  format,
+        GraphicsTypes::TextureType  type,
+        uint32_t                    layers,
+        uint32_t                    mip_levels);
 
     ~VulkanViewInstance();
 
@@ -113,10 +118,12 @@ namespace VulkanObjects
     const VulkanDeviceInstance *Device;
 
   public:
-    VulkanSamplerInstance(const VulkanDeviceInstance       *device,
-                          uint32_t                          mip_levels,
-                          GraphicsTypes::TextureAddressMode address_mode,
-                          GraphicsTypes::TextureFilter      filter);
+    VulkanSamplerInstance(
+        const VulkanDeviceInstance       *device,
+        std::string_view                  name,
+        uint32_t                          mip_levels,
+        GraphicsTypes::TextureAddressMode address_mode,
+        GraphicsTypes::TextureFilter      filter);
 
     ~VulkanSamplerInstance();
 
@@ -138,15 +145,19 @@ namespace VulkanObjects
     std::optional<const VulkanViewInstance *>  ViewLink;
 
   public:
-    VulkanTextureInstance(const VulkanDeviceInstance       *device,
-                          VkCommandBuffer                   cmd,
-                          const void                       *data,
-                          const GraphicsTypes::TextureInfo &info);
+    VulkanTextureInstance(
+        const VulkanDeviceInstance       *device,
+        std::string_view                  name,
+        VkCommandBuffer                   cmd,
+        const void                       *data,
+        const GraphicsTypes::TextureInfo &info);
 
-    VulkanTextureInstance(const VulkanDeviceInstance       *device,
-                          const VulkanImageInstance        *image,
-                          const VulkanViewInstance         *view,
-                          const GraphicsTypes::TextureInfo &info);
+    VulkanTextureInstance(
+        const VulkanDeviceInstance       *device,
+        std::string_view                  name,
+        const VulkanImageInstance        *image,
+        const VulkanViewInstance         *view,
+        const GraphicsTypes::TextureInfo &info);
 
     void SetLayout(VkCommandBuffer cmd, VkImageLayout layout) const;
 

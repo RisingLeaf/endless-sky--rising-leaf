@@ -51,6 +51,7 @@ public:
 public:
 	// Initialize the shaders.
 	static void Init();
+	static void Clear();
 
 	// Draw a sprite.
 	static void Draw(const Sprite *sprite, const Point &position, float zoom = 1.f,

@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #include "VulkanDeviceInstance.h"
 
@@ -63,16 +64,21 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   if constexpr(ENABLE_VALIDATION_LAYERS)
   {
     VkDebugUtilsMessengerCreateInfoEXT debug_create_info{};
-    debug_create_info.sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    debug_create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    debug_create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    debug_create_info.messageSeverity =
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
     //  | VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT;
     //| VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT;
-    debug_create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
+    debug_create_info.messageType =
+        VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT;
     //| VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     debug_create_info.pfnUserCallback = VulkanHelpers::DebugCallback;
     debug_create_info.pUserData       = nullptr; // Optional
 
-    VulkanHelpers::VK_CHECK_RESULT(VulkanHelpers::CreateDebugUtilsMessengerEXT(Instance, &debug_create_info, nullptr, &DebugMessenger), __LINE__, __FILE__);
+    VulkanHelpers::VK_CHECK_RESULT(
+        VulkanHelpers::CreateDebugUtilsMessengerEXT(Instance, &debug_create_info, nullptr, &DebugMessenger),
+        __LINE__,
+        __FILE__);
   }
 
   if(!SDL_Vulkan_CreateSurface(GameWindow::GetWindow(), Instance, nullptr, &Surface))
@@ -99,8 +105,8 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   ////
   VulkanHelpers::QueueFamilyIndices    indices = VulkanHelpers::FindQueueFamilies(PhysicalDevice, Surface);
   std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
-  std::set                             unique_queue_families = {indices.GraphicsFamily.value(), indices.PresentFamily.value()};
-  float                                queue_priority        = 1.0f;
+  std::set unique_queue_families = {indices.GraphicsFamily.value(), indices.PresentFamily.value()};
+  float    queue_priority        = 1.0f;
   for(uint32_t queue_family : unique_queue_families)
   {
     VkDeviceQueueCreateInfo queue_create_info{};
@@ -131,7 +137,9 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   device_create_info.ppEnabledExtensionNames = VulkanHelpers::DEVICE_EXTENSIONS.data();
   device_create_info.pNext                   = &deviceFeatures2;
 
-  VulkanHelpers::VK_CHECK_RESULT(vkCreateDevice(PhysicalDevice, &device_create_info, nullptr, &Device), __LINE__, __FILE__);
+  VulkanHelpers::VK_CHECK_RESULT(vkCreateDevice(PhysicalDevice, &device_create_info, nullptr, &Device),
+                                 __LINE__,
+                                 __FILE__);
 
   vkGetDeviceQueue(Device, indices.GraphicsFamily.value(), 0, &GraphicsQueue);
   vkGetDeviceQueue(Device, indices.GraphicsFamily.value(), 0, &ComputeQueue);
@@ -144,7 +152,9 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
   for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
   {
-    VulkanHelpers::VK_CHECK_RESULT(vkCreateSemaphore(Device, &semaphore_info, nullptr, &ImageAvailableSemaphores[i]), __LINE__, __FILE__);
+    VulkanHelpers::VK_CHECK_RESULT(vkCreateSemaphore(Device, &semaphore_info, nullptr, &ImageAvailableSemaphores[i]),
+                                   __LINE__,
+                                   __FILE__);
     VulkanHelpers::VK_CHECK_RESULT(vkCreateFence(Device, &fence_info, nullptr, &InFlightFences[i]), __LINE__, __FILE__);
   }
 
@@ -155,18 +165,60 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   VulkanHelpers::VK_CHECK_RESULT(vmaCreateAllocator(&allocator_create_info, &Allocator), __LINE__, __FILE__);
 
 #ifndef NDEBUG
-  vkSetDebugUtilsObjectNameEXT = reinterpret_cast<PFN_vkSetDebugUtilsObjectNameEXT>(vkGetDeviceProcAddr(Device, "vkSetDebugUtilsObjectNameEXT"));
-  if(!vkSetDebugUtilsObjectNameEXT) Log::Warn<<"Could not find vkSetDebugUtilsObjectNameEXT"<<Log::End;
+  vkSetDebugUtilsObjectNameEXT =
+      reinterpret_cast<PFN_vkSetDebugUtilsObjectNameEXT>(vkGetDeviceProcAddr(Device, "vkSetDebugUtilsObjectNameEXT"));
+  if(!vkSetDebugUtilsObjectNameEXT) Log::Warn << "Could not find vkSetDebugUtilsObjectNameEXT" << Log::End;
 #endif
-
 }
 
-void VulkanObjects::VulkanDeviceInstance::QueueBufferForDeletion(VkBuffer buffer, VmaAllocation allocation) const { BufferDeleteQueue[CurrentFrame].emplace_back(buffer, allocation); }
-void VulkanObjects::VulkanDeviceInstance::QueueImageForDeletion(VkImage image, VmaAllocation allocation) const { ImageDeleteQueue[CurrentFrame].emplace_back(image, allocation); }
-void VulkanObjects::VulkanDeviceInstance::QueueImageViewForDeletion(VkImageView view) const { ImageViewDeleteQueue[CurrentFrame].emplace_back(view); }
-void VulkanObjects::VulkanDeviceInstance::QueueSamplerForDeletion(VkSampler sampler) const { SamplerDeleteQueue[CurrentFrame].emplace_back(sampler); }
-void VulkanObjects::VulkanDeviceInstance::QueueFrameBufferForDeletion(VkFramebuffer framebuffer) const { FrameBufferDeleteQueue[CurrentFrame].emplace_back(framebuffer); }
-void VulkanObjects::VulkanDeviceInstance::QueueRenderPassForDeletion(VkRenderPass render_pass) const { RenderPassDeleteQueue[CurrentFrame].emplace_back(render_pass); }
+void VulkanObjects::VulkanDeviceInstance::QueueBufferForDeletion(VkBuffer buffer, VmaAllocation allocation) const
+{
+  BufferDeleteQueue[CurrentFrame].emplace_back(buffer, allocation);
+}
+void VulkanObjects::VulkanDeviceInstance::QueueImageForDeletion(VkImage image, VmaAllocation allocation) const
+{
+  ImageDeleteQueue[CurrentFrame].emplace_back(image, allocation);
+}
+void VulkanObjects::VulkanDeviceInstance::QueueImageViewForDeletion(VkImageView view) const
+{
+  ImageViewDeleteQueue[CurrentFrame].emplace_back(view);
+}
+void VulkanObjects::VulkanDeviceInstance::QueueSamplerForDeletion(VkSampler sampler) const
+{
+  SamplerDeleteQueue[CurrentFrame].emplace_back(sampler);
+}
+void VulkanObjects::VulkanDeviceInstance::QueueFrameBufferForDeletion(VkFramebuffer framebuffer) const
+{
+  FrameBufferDeleteQueue[CurrentFrame].emplace_back(framebuffer);
+}
+void VulkanObjects::VulkanDeviceInstance::QueueRenderPassForDeletion(VkRenderPass render_pass) const
+{
+  RenderPassDeleteQueue[CurrentFrame].emplace_back(render_pass);
+}
+
+void VulkanObjects::VulkanDeviceInstance::QueuePipelineForDeletion(VkPipeline pipeline) const
+{
+  PipelineDeleteQueue[CurrentFrame].emplace_back(pipeline);
+}
+
+void VulkanObjects::VulkanDeviceInstance::NameObject(const VkObjectType     object_type,
+                                                     const uint64_t         object_handle,
+                                                     const std::string_view name) const
+{
+#ifndef NDEBUG
+  if(vkSetDebugUtilsObjectNameEXT)
+  {
+    VkDebugUtilsObjectNameInfoEXT nameInfo{};
+    nameInfo.sType        = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+    nameInfo.pNext        = nullptr;
+    nameInfo.objectType   = object_type;
+    nameInfo.objectHandle = object_handle;
+    nameInfo.pObjectName  = name.data();
+
+    vkSetDebugUtilsObjectNameEXT(Device, &nameInfo);
+  }
+#endif
+}
 
 void VulkanObjects::VulkanDeviceInstance::BeginFrame() const
 {
@@ -174,6 +226,10 @@ void VulkanObjects::VulkanDeviceInstance::BeginFrame() const
 
   vkWaitForFences(Device, 1, &InFlightFences[CurrentFrame], VK_TRUE, UINT64_MAX);
   vkResetFences(Device, 1, &InFlightFences[CurrentFrame]);
+
+  for(const auto &pipeline : PipelineDeleteQueue[CurrentFrame])
+    if(pipeline) vkDestroyPipeline(Device, pipeline, nullptr);
+  PipelineDeleteQueue[CurrentFrame].clear();
 
   for(const auto &[buffer, allocation] : BufferDeleteQueue[CurrentFrame])
     if(buffer && allocation) vmaDestroyBuffer(Allocator, buffer, allocation);
@@ -210,6 +266,9 @@ VulkanObjects::VulkanDeviceInstance::~VulkanDeviceInstance()
 
     for(const auto &[buffer, allocation] : BufferDeleteQueue[frame])
       if(buffer && allocation) vmaDestroyBuffer(Allocator, buffer, allocation);
+
+    for(const auto &pipeline : PipelineDeleteQueue[frame])
+      if(pipeline) vkDestroyPipeline(Device, pipeline, nullptr);
 
     for(const auto &render_pass : RenderPassDeleteQueue[frame])
       if(render_pass) vkDestroyRenderPass(Device, render_pass, nullptr);

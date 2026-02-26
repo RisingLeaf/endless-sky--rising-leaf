@@ -25,17 +25,19 @@
 #include "VulkanHelpers.h"
 
 
-VulkanObjects::VulkanImageInstance::VulkanImageInstance(const VulkanDeviceInstance        *device,
-                                                        const GraphicsTypes::TextureType   type,
-                                                        const GraphicsTypes::ImageFormat   format,
-                                                        const GraphicsTypes::TextureTarget target,
-                                                        const uint32_t                     samples,
-                                                        const uint32_t                     width,
-                                                        const uint32_t                     height,
-                                                        const uint32_t                     depth,
-                                                        const uint32_t                     layers,
-                                                        const uint32_t                     mip_levels,
-                                                        VkImage                            image) :
+VulkanObjects::VulkanImageInstance::VulkanImageInstance(
+    const VulkanDeviceInstance        *device,
+    const std::string_view             name,
+    const GraphicsTypes::TextureType   type,
+    const GraphicsTypes::ImageFormat   format,
+    const GraphicsTypes::TextureTarget target,
+    const uint32_t                     samples,
+    const uint32_t                     width,
+    const uint32_t                     height,
+    const uint32_t                     depth,
+    const uint32_t                     layers,
+    const uint32_t                     mip_levels,
+    VkImage                            image) :
   Device(device),
   Format(format),
   Width(width),
@@ -62,6 +64,7 @@ VulkanObjects::VulkanImageInstance::VulkanImageInstance(const VulkanDeviceInstan
       vmaCreateImage(Device->GetAllocator(), &create_info, &allocation_create_info, &Image, &Memory, nullptr),
       __LINE__,
       __FILE__);
+  Device->NameObject(VK_OBJECT_TYPE_IMAGE, reinterpret_cast<uint64_t>(Image), name);
 }
 
 VulkanObjects::VulkanImageInstance::~VulkanImageInstance()
@@ -92,11 +95,12 @@ void VulkanObjects::VulkanImageInstance::SetLayout(VkCommandBuffer cmd, const Vk
   Layout = dest;
 }
 
-void VulkanObjects::VulkanImageInstance::Upload(VkCommandBuffer cmd,
-                                                const void     *data,
-                                                const uint32_t  start_layer,
-                                                const uint32_t  end_layer,
-                                                const uint32_t  mip_level) const
+void VulkanObjects::VulkanImageInstance::Upload(
+    VkCommandBuffer cmd,
+    const void     *data,
+    const uint32_t  start_layer,
+    const uint32_t  end_layer,
+    const uint32_t  mip_level) const
 {
   assert(end_layer >= start_layer && mip_level < MipLevels && "Invalid input");
 
@@ -108,13 +112,18 @@ void VulkanObjects::VulkanImageInstance::Upload(VkCommandBuffer cmd,
       Width * Height * VulkanTranslate::GetComponentsOfFormat(Format) * VulkanTranslate::GetByteCountOfFormat(Format);
   const size_t image_size = layer_size * (end_layer - start_layer + 1);
 
-  const VulkanBufferInstance buffer(Device, GraphicsTypes::BufferType::TEXTURE, image_size);
+  const VulkanBufferInstance buffer(Device, GraphicsTypes::BufferType::TEXTURE, image_size, "image upload buffer");
 
   void *to_data;
 
   buffer.Map(&to_data);
   for(size_t i = start_layer; i < end_layer + 1; i++)
-    memcpy(static_cast<unsigned char *>(to_data) + i * layer_size, static_cast<const unsigned char *>(data) + i * layer_size, layer_size);
+  {
+    memcpy(
+        static_cast<unsigned char *>(to_data) + i * layer_size,
+        static_cast<const unsigned char *>(data) + i * layer_size,
+        layer_size);
+  }
   buffer.UnMap();
 
   const VkBufferImageCopy region = VulkanBootstrap::GetSimpleBufferImageCopyRegion(
@@ -138,9 +147,10 @@ void VulkanObjects::VulkanImageInstance::CreateMipMaps(VkCommandBuffer cmd) cons
   SetLayout(cmd, VK_IMAGE_LAYOUT_GENERAL);
 
   VkFormatProperties format_properties;
-  vkGetPhysicalDeviceFormatProperties(Device->GetPhysicalDevice(),
-                                      VulkanTranslate::GetVkFormat(Format),
-                                      &format_properties);
+  vkGetPhysicalDeviceFormatProperties(
+      Device->GetPhysicalDevice(),
+      VulkanTranslate::GetVkFormat(Format),
+      &format_properties);
 
   // TODO: need proper handling here
   if(!(format_properties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
@@ -160,9 +170,10 @@ void VulkanObjects::VulkanImageInstance::CreateMipMaps(VkCommandBuffer cmd) cons
     blit.srcSubresource.baseArrayLayer = 0;
     blit.srcSubresource.layerCount     = Layers;
     blit.dstOffsets[0]                 = {0, 0, 0};
-    blit.dstOffsets[1]                 = VkOffset3D(mip_width > 1 ? mip_width / 2 : 1,
-                                    mip_height > 1 ? mip_height / 2 : 1,
-                                    mip_depth > 1 ? mip_depth / 2 : 1);
+    blit.dstOffsets[1]                 = VkOffset3D(
+        mip_width > 1 ? mip_width / 2 : 1,
+        mip_height > 1 ? mip_height / 2 : 1,
+        mip_depth > 1 ? mip_depth / 2 : 1);
     blit.dstSubresource.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
     blit.dstSubresource.mipLevel       = i;
     blit.dstSubresource.baseArrayLayer = 0;
@@ -177,12 +188,14 @@ void VulkanObjects::VulkanImageInstance::CreateMipMaps(VkCommandBuffer cmd) cons
 }
 
 
-VulkanObjects::VulkanViewInstance::VulkanViewInstance(const VulkanDeviceInstance      *device,
-                                                      VkImage                          image,
-                                                      const GraphicsTypes::ImageFormat format,
-                                                      const GraphicsTypes::TextureType type,
-                                                      const uint32_t                   layers,
-                                                      const uint32_t                   mip_levels) :
+VulkanObjects::VulkanViewInstance::VulkanViewInstance(
+    const VulkanDeviceInstance      *device,
+    const std::string_view           name,
+    VkImage                          image,
+    const GraphicsTypes::ImageFormat format,
+    const GraphicsTypes::TextureType type,
+    const uint32_t                   layers,
+    const uint32_t                   mip_levels) :
   Device(device)
 {
   const auto create_info = VulkanBootstrap::GetimageViewCreate(
@@ -193,64 +206,97 @@ VulkanObjects::VulkanViewInstance::VulkanViewInstance(const VulkanDeviceInstance
       layers,
       mip_levels);
 
-  vkCreateImageView(Device->GetDevice(), &create_info, nullptr, &View);
+  VulkanHelpers::VK_CHECK_RESULT(
+      vkCreateImageView(Device->GetDevice(), &create_info, nullptr, &View),
+      __LINE__,
+      __FILE__);
+  Device->NameObject(VK_OBJECT_TYPE_IMAGE_VIEW, reinterpret_cast<uint64_t>(View), name);
 }
 
 VulkanObjects::VulkanViewInstance::~VulkanViewInstance() { Device->QueueImageViewForDeletion(View); }
 
 
-VulkanObjects::VulkanSamplerInstance::VulkanSamplerInstance(const VulkanDeviceInstance             *device,
-                                                            const uint32_t                          mip_levels,
-                                                            const GraphicsTypes::TextureAddressMode address_mode,
-                                                            const GraphicsTypes::TextureFilter      filter) :
+VulkanObjects::VulkanSamplerInstance::VulkanSamplerInstance(
+    const VulkanDeviceInstance             *device,
+    const std::string_view                  name,
+    const uint32_t                          mip_levels,
+    const GraphicsTypes::TextureAddressMode address_mode,
+    const GraphicsTypes::TextureFilter      filter) :
   Device(device)
 {
-  const auto create_info = VulkanBootstrap::GetSamplerCreate(Device->GetProperties().limits.maxSamplerAnisotropy,
-                                                             static_cast<float>(mip_levels),
-                                                             address_mode,
-                                                             filter);
+  const auto create_info = VulkanBootstrap::GetSamplerCreate(
+      Device->GetProperties().limits.maxSamplerAnisotropy,
+      static_cast<float>(mip_levels),
+      address_mode,
+      filter);
 
-  vkCreateSampler(Device->GetDevice(), &create_info, nullptr, &Sampler);
+  VulkanHelpers::VK_CHECK_RESULT(
+      vkCreateSampler(Device->GetDevice(), &create_info, nullptr, &Sampler),
+      __LINE__,
+      __FILE__);
+  Device->NameObject(VK_OBJECT_TYPE_SAMPLER, reinterpret_cast<uint64_t>(Sampler), name);
 }
 
 VulkanObjects::VulkanSamplerInstance::~VulkanSamplerInstance() { Device->QueueSamplerForDeletion(Sampler); }
 
 
-VulkanObjects::VulkanTextureInstance::VulkanTextureInstance(const VulkanDeviceInstance       *device,
-                                                            VkCommandBuffer                   cmd,
-                                                            const void                       *data,
-                                                            const GraphicsTypes::TextureInfo &info)
+VulkanObjects::VulkanTextureInstance::VulkanTextureInstance(
+    const VulkanDeviceInstance       *device,
+    const std::string_view            name,
+    VkCommandBuffer                   cmd,
+    const void                       *data,
+    const GraphicsTypes::TextureInfo &info)
 {
   Info  = info;
-  Image = std::make_unique<VulkanImageInstance>(device,
-                                                Info.Type,
-                                                Info.Format,
-                                                Info.Target,
-                                                Info.Samples,
-                                                Info.Width,
-                                                Info.Height,
-                                                Info.Depth,
-                                                Info.Layers,
-                                                Info.MipLevels);
+  Image = std::make_unique<VulkanImageInstance>(
+      device,
+      std::string(name) + "_image",
+      Info.Type,
+      Info.Format,
+      Info.Target,
+      Info.Samples,
+      Info.Width,
+      Info.Height,
+      Info.Depth,
+      Info.Layers,
+      Info.MipLevels);
 
   if(data) Image->Upload(cmd, data, 0, Info.Layers - 1, 0);
 
   Image->SetLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-  View =
-      std::make_unique<VulkanViewInstance>(device, Image->Get(), Info.Format, Info.Type, Info.Layers, Info.MipLevels);
-  Sampler = std::make_unique<VulkanSamplerInstance>(device, Info.MipLevels, Info.AddressMode, Info.Filter);
+  View = std::make_unique<VulkanViewInstance>(
+      device,
+      std::string(name) + "_view",
+      Image->Get(),
+      Info.Format,
+      Info.Type,
+      Info.Layers,
+      Info.MipLevels);
+  Sampler = std::make_unique<VulkanSamplerInstance>(
+      device,
+      std::string(name) + "_sampler",
+      Info.MipLevels,
+      Info.AddressMode,
+      Info.Filter);
 }
 
-VulkanObjects::VulkanTextureInstance::VulkanTextureInstance(const VulkanDeviceInstance       *device,
-                                                            const VulkanImageInstance        *image,
-                                                            const VulkanViewInstance         *view,
-                                                            const GraphicsTypes::TextureInfo &info)
+VulkanObjects::VulkanTextureInstance::VulkanTextureInstance(
+    const VulkanDeviceInstance       *device,
+    const std::string_view            name,
+    const VulkanImageInstance        *image,
+    const VulkanViewInstance         *view,
+    const GraphicsTypes::TextureInfo &info)
 {
   Info      = info;
   ImageLink = image;
   ViewLink  = view;
-  Sampler   = std::make_unique<VulkanSamplerInstance>(device, Info.MipLevels, Info.AddressMode, Info.Filter);
+  Sampler   = std::make_unique<VulkanSamplerInstance>(
+      device,
+      std::string(name) + "_sampler",
+      Info.MipLevels,
+      Info.AddressMode,
+      Info.Filter);
 }
 
 void VulkanObjects::VulkanTextureInstance::SetLayout(VkCommandBuffer cmd, const VkImageLayout layout) const
