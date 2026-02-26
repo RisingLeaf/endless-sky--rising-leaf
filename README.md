@@ -2,12 +2,12 @@ Find the actual Readme at: https://github.com/endless-sky/endless-sky/
 
 ## Changes compared to base (in order of magnitude):
 
-- custom graphics backend(metal/vulkan, vulkan a tad slow still (too many stars?), see source/risingleaf_shared/ for my stuff)
+- custom graphics backend(metal/vulkan, see source/risingleaf_shared/ for my stuff)
 - overhauled build system(using fetch content instead of vcpkg and no system libs, you might experience longer build times)
 - removed `using namespace std;` it always annoyed me
 - removed SSE from a vec2 class (Point)
-- removed libmad in favour of miniaudio as libmad is very outdated
-- removed minizip in favour of single header miniz
+- removed libmad in favor of miniaudio as libmad is very outdated
+- removed minizip in favor of single header miniz (broken)
 - uses openal-soft by default
 - various style changes (.clang-format has not been applied everywhere yet)
 
