@@ -198,7 +198,7 @@ namespace graphics_layer
           std::string(name) + "_vert");
       Instance->CopyBuffer(VertexBuffer.get(), staging_buffer.get());
 #else
-      Instance->CreateBuffer(VertexBuffer, GraphicsTypes::BufferType::VERTEX, VertexBufferSize, in_data);
+      Instance->CreateBuffer(VertexBuffer, GraphicsTypes::BufferType::VERTEX, VertexBufferSize, in_data, name);
 #endif
     }
 
@@ -223,7 +223,7 @@ namespace graphics_layer
           std::string(name) + "_index");
       Instance->CopyBuffer(IndexBuffer.get(), staging_buffer.get());
 #else
-      Instance->CreateBuffer(IndexBuffer, GraphicsTypes::BufferType::INDEX, index_buffer_size, indices.data());
+      Instance->CreateBuffer(IndexBuffer, GraphicsTypes::BufferType::INDEX, index_buffer_size, indices.data(), name);
 #endif
     }
   }
