@@ -296,8 +296,10 @@ namespace graphics_metal
   {
     instance->RenderPassDescriptor->colorAttachments()->object(0)->setTexture(instance->MSAARenderTargetTexture);
     if(instance->CurrentDrawable)
+    {
       instance->RenderPassDescriptor->colorAttachments()->object(0)->setResolveTexture(
           instance->CurrentDrawable->texture());
+    }
     instance->RenderPassDescriptor->depthAttachment()->setTexture(instance->DepthTexture);
   }
 
@@ -319,18 +321,17 @@ namespace graphics_metal
   }
 
 
-  const MTL::DepthStencilState *GetDepthStencilForState(const MetalGraphicsInstance          *instance,
-                                                        const bool                            depth_test,
-                                                        const bool                            depth_write,
-                                                        const GraphicsTypes::DepthCompareMode depth_compare)
+  const MTL::DepthStencilState *GetDepthStencilForState(
+      const MetalGraphicsInstance          *instance,
+      const bool                            depth_test,
+      const bool                            depth_write,
+      const GraphicsTypes::DepthCompareMode depth_compare)
   {
     std::lock_guard guard(instance->DepthStatesListMutex);
 
     for(const auto &depth : instance->DepthStateList)
-    {
       if(depth.DepthTest == depth_test && depth.DepthCompare == depth_compare && depth.DepthWrite == depth_write)
         return depth.Depth;
-    }
 
     MTL::DepthStencilDescriptor *depthStencilDescriptor = MTL::DepthStencilDescriptor::alloc()->init();
 
@@ -375,15 +376,13 @@ namespace graphics_metal
   }
 
 
-  const MTL::RenderPipelineState *GetPipelineForState(const MetalGraphicsInstance *instance,
-                                                      const MetalPipelineState    &state)
+  const MTL::RenderPipelineState *
+  GetPipelineForState(const MetalGraphicsInstance *instance, const MetalPipelineState &state)
   {
     std::lock_guard guard(instance->PipelinesListMutex);
 
     for(const auto &pipeline : instance->Pipelines)
-    {
       if(pipeline.State == state) return pipeline.Pipeline;
-    }
 
     MTL::RenderPipelineDescriptor *render_pipeline_descriptor = MTL::RenderPipelineDescriptor::alloc()->init();
     render_pipeline_descriptor->setLabel(NS::String::string(state.shader->Name.c_str(), NS::ASCIIStringEncoding));
@@ -471,9 +470,10 @@ namespace graphics_metal
     return reinterpret_cast<MetalGraphicsInstance *>(metal_instance);
   }
 
-  const MetalGraphicsInstance *ConvertGraphicsInstance(const GraphicsTypes::GraphicsInstance *metal_instance,
-                                                       const int                              line,
-                                                       const char                            *file = __FILE__)
+  const MetalGraphicsInstance *ConvertGraphicsInstance(
+      const GraphicsTypes::GraphicsInstance *metal_instance,
+      const int                              line,
+      const char                            *file = __FILE__)
   {
     if(!metal_instance)
     {
@@ -522,11 +522,13 @@ void graphics_metal::MetalGraphicsInstance::CreateShader(
   const File::ShaderString *metal_shader_code = nullptr;
 
   for(const auto &code : shader_code)
+  {
     if(code.stage == GraphicsTypes::ShaderStage::METAL_COMBINED)
     {
       metal_shader_code = &code;
       break;
     }
+  }
 
   if(!metal_shader_code)
   {
@@ -539,11 +541,12 @@ void graphics_metal::MetalGraphicsInstance::CreateShader(
   options->setOptimizationLevel(MTL::LibraryOptimizationLevelDefault);
 
   NS::Error    *error = nullptr;
-  MTL::Library *lib =
-      Device->newLibrary(NS::String::string(reinterpret_cast<const char *>(metal_shader_code->code.data()),
-                                            NS::StringEncoding::ASCIIStringEncoding),
-                         options,
-                         &error);
+  MTL::Library *lib   = Device->newLibrary(
+      NS::String::string(
+          reinterpret_cast<const char *>(metal_shader_code->code.data()),
+          NS::StringEncoding::ASCIIStringEncoding),
+      options,
+      &error);
 
   options->release();
 
@@ -565,7 +568,8 @@ void graphics_metal::MetalGraphicsInstance::CreateShader(
 void graphics_metal::MetalGraphicsInstance::CreateBuffer(
     std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance,
     const GraphicsTypes::BufferType,
-    const size_t buffer_size) const
+    const size_t     buffer_size,
+    std::string_view name) const
 {
   if(buffer_instance)
   {
@@ -575,7 +579,8 @@ void graphics_metal::MetalGraphicsInstance::CreateBuffer(
 
   auto *metal_buffer_instance = new MetalBufferInstance;
 
-  metal_buffer_instance->Buffer     = Device->newBuffer(buffer_size, MTL::ResourceStorageModeManaged);
+  metal_buffer_instance->Buffer = Device->newBuffer(buffer_size, MTL::ResourceStorageModeManaged);
+  metal_buffer_instance->Buffer->setLabel(NS::String::string(name.data(), STRING_ENCODING));
   metal_buffer_instance->BufferSize = buffer_size;
 
   buffer_instance.reset(metal_buffer_instance);
@@ -584,8 +589,9 @@ void graphics_metal::MetalGraphicsInstance::CreateBuffer(
 void graphics_metal::MetalGraphicsInstance::CreateBuffer(
     std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance,
     const GraphicsTypes::BufferType,
-    const size_t buffer_size,
-    const void  *data) const
+    const size_t     buffer_size,
+    const void      *data,
+    std::string_view name) const
 {
   if(buffer_instance)
   {
@@ -597,14 +603,16 @@ void graphics_metal::MetalGraphicsInstance::CreateBuffer(
 
   auto *metal_buffer_instance = new MetalBufferInstance;
 
-  metal_buffer_instance->Buffer     = Device->newBuffer(data, buffer_size, MTL::ResourceStorageModeManaged);
+  metal_buffer_instance->Buffer = Device->newBuffer(data, buffer_size, MTL::ResourceStorageModeManaged);
+  metal_buffer_instance->Buffer->setLabel(NS::String::string(name.data(), STRING_ENCODING));
   metal_buffer_instance->BufferSize = buffer_size;
 
   buffer_instance.reset(metal_buffer_instance);
 }
 
-void graphics_metal::MetalGraphicsInstance::MapBuffer(GraphicsTypes::BufferInstance *buffer_instance,
-                                                      const void                    *map_memory) const
+void graphics_metal::MetalGraphicsInstance::MapBuffer(
+    GraphicsTypes::BufferInstance *buffer_instance,
+    const void                    *map_memory) const
 {
   if(!buffer_instance)
   {
@@ -617,8 +625,9 @@ void graphics_metal::MetalGraphicsInstance::MapBuffer(GraphicsTypes::BufferInsta
   metal_buffer_instance->Buffer->didModifyRange(NS::Range::Make(0, metal_buffer_instance->Buffer->length()));
 }
 
-void graphics_metal::MetalGraphicsInstance::CopyBuffer(GraphicsTypes::BufferInstance *buffer_instance_rhs,
-                                                       GraphicsTypes::BufferInstance *buffer_instance_lhs) const
+void graphics_metal::MetalGraphicsInstance::CopyBuffer(
+    GraphicsTypes::BufferInstance *buffer_instance_rhs,
+    GraphicsTypes::BufferInstance *buffer_instance_lhs) const
 {
   if(!buffer_instance_rhs)
   {
@@ -634,11 +643,12 @@ void graphics_metal::MetalGraphicsInstance::CopyBuffer(GraphicsTypes::BufferInst
   auto *metal_buffer_instance_lhs = reinterpret_cast<MetalBufferInstance *>(buffer_instance_lhs);
   auto  single_command_buffer     = MetalCommandQueue->commandBuffer();
   auto  encoder                   = single_command_buffer->blitCommandEncoder();
-  encoder->copyFromBuffer(metal_buffer_instance_lhs->Buffer,
-                          0,
-                          metal_buffer_instance_rhs->Buffer,
-                          0,
-                          metal_buffer_instance_lhs->BufferSize);
+  encoder->copyFromBuffer(
+      metal_buffer_instance_lhs->Buffer,
+      0,
+      metal_buffer_instance_rhs->Buffer,
+      0,
+      metal_buffer_instance_lhs->BufferSize);
   encoder->endEncoding();
   single_command_buffer->commit();
   single_command_buffer->waitUntilCompleted();
@@ -647,7 +657,8 @@ void graphics_metal::MetalGraphicsInstance::CopyBuffer(GraphicsTypes::BufferInst
 void graphics_metal::MetalGraphicsInstance::CreateTexture(
     std::unique_ptr<GraphicsTypes::TextureInstance> &texture_instance,
     const GraphicsTypes::TextureInfo                &texture_info,
-    const void *const                                in_data) const
+    const void *const                                in_data,
+    const std::string_view                           name) const
 {
   if(texture_instance)
   {
@@ -670,18 +681,13 @@ void graphics_metal::MetalGraphicsInstance::CreateTexture(
   textureDescriptor->setMipmapLevelCount(metal_texture_instance->GetInfo().MipLevels);
   textureDescriptor->setTextureType(GetMetalTextureType(metal_texture_instance->GetInfo().Type));
   MTL::TextureUsage usage = MTL::TextureUsageUnknown;
-  if(texture_info.Target != GraphicsTypes::TextureTarget::WRITE)
-  {
-    usage |= MTL::TextureUsageShaderRead;
-  }
-  if(texture_info.Target != GraphicsTypes::TextureTarget::READ)
-  {
-    usage |= MTL::TextureUsageShaderWrite;
-  }
+  if(texture_info.Target != GraphicsTypes::TextureTarget::WRITE) usage |= MTL::TextureUsageShaderRead;
+  if(texture_info.Target != GraphicsTypes::TextureTarget::READ) usage |= MTL::TextureUsageShaderWrite;
   textureDescriptor->setUsage(usage);
   textureDescriptor->setStorageMode(MTL::StorageModeShared);
 
   metal_texture_instance->texture = Device->newTexture(textureDescriptor);
+  metal_texture_instance->texture->setLabel(NS::String::string(name.data(), STRING_ENCODING));
 
   textureDescriptor->release();
 
@@ -692,13 +698,15 @@ void graphics_metal::MetalGraphicsInstance::CreateTexture(
   else if(metal_texture_instance->GetInfo().Format == GraphicsTypes::ImageFormat::RGBA32F) bytesPerRow *= 4;
 
   for(int i = 0; i < texture_info.Layers; i++)
-    metal_texture_instance->texture->replaceRegion(region,
-                                                   0,
-                                                   i,
-                                                   static_cast<const unsigned char *>(in_data) +
-                                                       i * bytesPerRow * metal_texture_instance->GetInfo().Height,
-                                                   bytesPerRow,
-                                                   bytesPerRow * metal_texture_instance->GetInfo().Height);
+  {
+    metal_texture_instance->texture->replaceRegion(
+        region,
+        0,
+        i,
+        static_cast<const unsigned char *>(in_data) + i * bytesPerRow * metal_texture_instance->GetInfo().Height,
+        bytesPerRow,
+        bytesPerRow * metal_texture_instance->GetInfo().Height);
+  }
 
   if(texture_info.MipLevels > 1)
   {
@@ -719,7 +727,8 @@ void graphics_metal::MetalGraphicsInstance::CreateTexture(
 
 void graphics_metal::MetalGraphicsInstance::CreateRenderBuffer(
     std::unique_ptr<GraphicsTypes::RenderBufferInstance> &render_buffer_instance,
-    const GraphicsTypes::FrameBufferInfo                 &info) const
+    const GraphicsTypes::FrameBufferInfo                 &info,
+    const std::string_view                                name) const
 {
   if(render_buffer_instance)
   {
@@ -733,8 +742,8 @@ void graphics_metal::MetalGraphicsInstance::CreateRenderBuffer(
   constexpr int main_attachment_samples = 1; // type != GraphicsTypes::RenderBufferType::DEPTH ? 1 : samples;
 
   MTL::TextureDescriptor *framebuffer_descriptor = MTL::TextureDescriptor::alloc()->init();
-  framebuffer_descriptor->setTextureType(main_attachment_samples == 1 ? MTL::TextureType2D
-                                                                      : MTL::TextureType2DMultisample);
+  framebuffer_descriptor->setTextureType(
+      main_attachment_samples == 1 ? MTL::TextureType2D : MTL::TextureType2DMultisample);
   framebuffer_descriptor->setPixelFormat(GetMetalPixelFormat(info.Format));
   framebuffer_descriptor->setWidth(info.Width);
   framebuffer_descriptor->setHeight(info.Height);
@@ -791,7 +800,10 @@ void graphics_metal::MetalGraphicsInstance::CreateRenderBuffer(
       colorAttachment->setTexture(metal_render_buffer_instance->OptionalColor.texture);
       colorAttachment->setResolveTexture(metal_render_buffer_instance->FrameBuffer.texture);
     }
-    else colorAttachment->setTexture(metal_render_buffer_instance->FrameBuffer.texture);
+    else
+    {
+      colorAttachment->setTexture(metal_render_buffer_instance->FrameBuffer.texture);
+    }
     colorAttachment->setLoadAction(MTL::LoadActionClear);
     colorAttachment->setClearColor(MTL::ClearColor(0., .0, .0, 0.0));
     colorAttachment->setStoreAction(info.Samples > 1 ? MTL::StoreActionMultisampleResolve : MTL::StoreActionStore);
@@ -802,9 +814,9 @@ void graphics_metal::MetalGraphicsInstance::CreateRenderBuffer(
     MTL::RenderPassDepthAttachmentDescriptor *depthAttachment =
         metal_render_buffer_instance->RenderPassDescriptorFrameBuffer->depthAttachment();
 
-    depthAttachment->setTexture(info.TargetType == GraphicsTypes::RenderBufferType::BOTH
-                                    ? metal_render_buffer_instance->OptionalDepth.texture
-                                    : metal_render_buffer_instance->FrameBuffer.texture);
+    depthAttachment->setTexture(
+        info.TargetType == GraphicsTypes::RenderBufferType::BOTH ? metal_render_buffer_instance->OptionalDepth.texture
+                                                                 : metal_render_buffer_instance->FrameBuffer.texture);
     depthAttachment->setLoadAction(MTL::LoadActionClear);
     depthAttachment->setClearDepth(0.);
     depthAttachment->setStoreAction(MTL::StoreActionStore);
@@ -846,9 +858,7 @@ void graphics_metal::MetalGraphicsInstance::DispatchCompute(
   auto *const *metal_texture_instances = reinterpret_cast<const MetalTextureInstance *const *>(texture_instance);
 
   for(int i = 0; i < count; i++)
-  {
     encoder->setTexture(metal_texture_instances[i]->texture, i);
-  }
 
   // NS::UInteger threadGroupSize = pipeline->maxTotalThreadsPerThreadgroup();
   const MTL::Size thread_groups(8, 8, 8); // TODO: make this smart
@@ -940,8 +950,9 @@ void graphics_metal::MetalGraphicsInstance::SetCommonUniforms(const ShaderInfo::
 
 void graphics_metal::MetalGraphicsInstance::SetColorState(const bool state) const { current_state.color = state; }
 
-void graphics_metal::MetalGraphicsInstance::BindBufferDynamic(const std::vector<unsigned char>       &data,
-                                                              const GraphicsTypes::UBOBindPoint bind_point) const
+void graphics_metal::MetalGraphicsInstance::BindBufferDynamic(
+    const std::vector<unsigned char> &data,
+    const GraphicsTypes::UBOBindPoint bind_point) const
 {
   switch(bind_point)
   {
@@ -956,9 +967,10 @@ void graphics_metal::MetalGraphicsInstance::BindBufferDynamic(const std::vector<
   }
 }
 
-void graphics_metal::MetalGraphicsInstance::BindTextures(const GraphicsTypes::TextureInstance *const *texture_instance,
-                                                         const int                                    count,
-                                                         int) const
+void graphics_metal::MetalGraphicsInstance::BindTextures(
+    const GraphicsTypes::TextureInstance *const *texture_instance,
+    const int                                    count,
+    int) const
 {
   if(!texture_instance)
   {
@@ -988,10 +1000,11 @@ void graphics_metal::MetalGraphicsInstance::BindVertexBuffer(GraphicsTypes::Buff
   current_encoder->setVertexBuffer(metal_buffer_instance->Buffer, 0, 0);
 }
 
-void graphics_metal::MetalGraphicsInstance::DrawIndexed(const size_t                         start,
-                                                        const size_t                         count,
-                                                        const GraphicsTypes::BufferInstance *buffer_instance,
-                                                        const GraphicsTypes::PrimitiveType   prim_type) const
+void graphics_metal::MetalGraphicsInstance::DrawIndexed(
+    const size_t                         start,
+    const size_t                         count,
+    const GraphicsTypes::BufferInstance *buffer_instance,
+    const GraphicsTypes::PrimitiveType   prim_type) const
 {
   const auto pipeline = GetPipelineForState(this, current_state);
 
@@ -1002,10 +1015,11 @@ void graphics_metal::MetalGraphicsInstance::DrawIndexed(const size_t            
   }
 
   current_encoder->setRenderPipelineState(pipeline);
-  current_encoder->setDepthStencilState(GetDepthStencilForState(this,
-                                                                current_state.State.DepthTest,
-                                                                current_state.State.DepthWrite,
-                                                                current_state.State.DepthCompare));
+  current_encoder->setDepthStencilState(GetDepthStencilForState(
+      this,
+      current_state.State.DepthTest,
+      current_state.State.DepthWrite,
+      current_state.State.DepthCompare));
 
   current_encoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
   switch(current_state.State.Culling)
@@ -1048,10 +1062,11 @@ void graphics_metal::MetalGraphicsInstance::DrawIndexed(const size_t            
   }
 }
 
-void graphics_metal::MetalGraphicsInstance::DrawDynamic(const size_t                       count,
-                                                        const size_t                       type_size,
-                                                        const void                        *data,
-                                                        const GraphicsTypes::PrimitiveType prim_type) const
+void graphics_metal::MetalGraphicsInstance::DrawDynamic(
+    const size_t                       count,
+    const size_t                       type_size,
+    const void                        *data,
+    const GraphicsTypes::PrimitiveType prim_type) const
 {
   const auto pipeline = GetPipelineForState(this, current_state);
 
@@ -1062,10 +1077,11 @@ void graphics_metal::MetalGraphicsInstance::DrawDynamic(const size_t            
   }
 
   current_encoder->setRenderPipelineState(pipeline);
-  current_encoder->setDepthStencilState(GetDepthStencilForState(this,
-                                                                current_state.State.DepthTest,
-                                                                current_state.State.DepthWrite,
-                                                                current_state.State.DepthCompare));
+  current_encoder->setDepthStencilState(GetDepthStencilForState(
+      this,
+      current_state.State.DepthTest,
+      current_state.State.DepthWrite,
+      current_state.State.DepthCompare));
 
   current_encoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
   switch(current_state.State.Culling)
@@ -1096,12 +1112,16 @@ void graphics_metal::MetalGraphicsInstance::DrawDynamic(const size_t            
   case GraphicsTypes::PrimitiveType::POINTS:         mtl_prim_type = MTL::PrimitiveTypePoint; break;
   }
 
-  if(count * type_size < MaxBindBytes) current_encoder->setVertexBytes(data, count * type_size, 0);
+  if(count * type_size < MaxBindBytes)
+  {
+    current_encoder->setVertexBytes(data, count * type_size, 0);
+  }
   else
   {
-    memcpy(static_cast<unsigned char *>(DynamicVertexBuffer->contents()) + DynamicVertexBufferOffset,
-           data,
-           count * type_size);
+    memcpy(
+        static_cast<unsigned char *>(DynamicVertexBuffer->contents()) + DynamicVertexBufferOffset,
+        data,
+        count * type_size);
     DynamicVertexBuffer->didModifyRange(NS::Range(DynamicVertexBufferOffset, count * type_size));
     current_encoder->setVertexBuffer(DynamicVertexBuffer, DynamicVertexBufferOffset, 0);
     DynamicVertexBufferOffset += count * type_size;
@@ -1140,10 +1160,11 @@ void graphics_metal::MetalGraphicsInstance::StartMainRenderPass()
   current_encoder->setFrontFacingWinding(MTL::WindingCounterClockwise);
   current_encoder->setCullMode(MTL::CullModeBack);
 
-  current_encoder->setDepthStencilState(GetDepthStencilForState(this,
-                                                                current_state.State.DepthTest,
-                                                                current_state.State.DepthWrite,
-                                                                current_state.State.DepthCompare));
+  current_encoder->setDepthStencilState(GetDepthStencilForState(
+      this,
+      current_state.State.DepthTest,
+      current_state.State.DepthWrite,
+      current_state.State.DepthCompare));
 
   current_state.Info.Samples  = 4;
   current_state.Info.Format   = GraphicsTypes::ImageFormat::BGRA;
