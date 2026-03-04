@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <stdexcept>
+#include <utility>
 
 #include <vulkan/vulkan_core.h>
 
@@ -97,7 +98,7 @@ namespace VulkanTranslate
     {
     case GraphicsTypes::ImageFormat::R:       return VK_FORMAT_R8_SRGB;
     case GraphicsTypes::ImageFormat::RG:      return VK_FORMAT_R8G8_SRGB;
-    case GraphicsTypes::ImageFormat::RGB:     return VK_FORMAT_R8G8B8_SRGB;
+    case GraphicsTypes::ImageFormat::RGB:
     case GraphicsTypes::ImageFormat::RGBA:    return VK_FORMAT_R8G8B8A8_SRGB;
     case GraphicsTypes::ImageFormat::RGBA16F: return VK_FORMAT_R16G16B16A16_SFLOAT;
     case GraphicsTypes::ImageFormat::RGBA32F: return VK_FORMAT_R32G32B32A32_SFLOAT;
@@ -105,7 +106,7 @@ namespace VulkanTranslate
     case GraphicsTypes::ImageFormat::DEPTH:   return VK_FORMAT_D32_SFLOAT;
     case GraphicsTypes::ImageFormat::INVALID: break;
     }
-    throw std::runtime_error("Internal format not implemented/translated in vulkan.");
+    std::unreachable();
   }
 
   constexpr uint32_t GetComponentsOfFormat(const GraphicsTypes::ImageFormat format)

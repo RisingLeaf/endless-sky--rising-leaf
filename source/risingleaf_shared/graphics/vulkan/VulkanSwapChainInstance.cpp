@@ -20,7 +20,7 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanFrameBufferInstance.h"
 #include "VulkanHelpers.h"
-#include "risingleaf_shared/base/ASLTypes.h"
+#include "base/ASLTypes.h"
 
 
 void VulkanObjects::VulkanSwapChainInstance::Create(

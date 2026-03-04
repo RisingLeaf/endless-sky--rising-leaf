@@ -28,6 +28,7 @@
 
 #include "graphics/graphics_toplevel_defines.h"
 #include "system/File.h"
+#include "system/Log.h"
 
 #include <cstring>
 

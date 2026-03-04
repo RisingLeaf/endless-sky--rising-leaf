@@ -3,16 +3,18 @@
 //
 // Copyright (c) 2025 by Torben Hans
 //
-// Astrolative is free software: you can redistribute it and/or modify it under the
-// terms of the GNU General Public License as published by the Free Software
-// Foundation, either version 3 of the License, or (at your option) any later version.
+// Astrolative is free software: you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation, either version 3 of the License, or (at your option) any later
+// version.
 //
-//  Astrolative is distributed in the hope that it will be useful, but WITHOUT ANY
-//  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-//  PARTICULAR PURPOSE. See the GNU General Public License for more details.
+//  Astrolative is distributed in the hope that it will be useful, but WITHOUT
+//  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+//  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+//  more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
-//  <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with
+//  Astrolative. If not, see <https://www.gnu.org/licenses/>.
 //
 #ifndef GRAPHICS_LAYER_H
 #define GRAPHICS_LAYER_H
@@ -134,7 +136,7 @@ namespace graphics_layer
         GraphicsTypes::TextureType             type,
         GraphicsTypes::ImageFormat             format,
         GraphicsTypes::TextureTarget           target,
-        GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
+        GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::REPEAT,
         GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
     TextureHandle(
         const GraphicsTypes::GraphicsInstance *instance,
@@ -145,7 +147,7 @@ namespace graphics_layer
         GraphicsTypes::TextureType             type,
         GraphicsTypes::ImageFormat             format,
         GraphicsTypes::TextureTarget           target,
-        GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
+        GraphicsTypes::TextureAddressMode      address_mode = GraphicsTypes::TextureAddressMode::REPEAT,
         GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
     ~TextureHandle();
 
@@ -173,7 +175,6 @@ namespace graphics_layer
     [[nodiscard]] const GraphicsTypes::TextureInstance *GetTexture() const { return Texture.get(); }
   };
 
-
   class TextureList
   {
     struct TexEntry
@@ -183,7 +184,6 @@ namespace graphics_layer
       bool                                  vertex;
     };
     std::vector<TexEntry> Textures;
-
 
   public:
     TextureList() = default;

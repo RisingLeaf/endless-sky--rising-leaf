@@ -18,7 +18,7 @@
 
 #include <vector>
 
-#include "risingleaf_shared/math/graphics_math/gm.h"
+#include "math/graphics_math/gm.h"
 
 namespace GraphicsTypes
 {

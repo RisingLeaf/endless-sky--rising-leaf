@@ -220,9 +220,9 @@ VkPipeline VulkanObjects::VulkanShaderInstance::GetPipelineForState(const Vulkan
   vertex_input_info.pVertexAttributeDescriptions    = vertex_attrib_info.data();
 
   VkPipelineInputAssemblyStateCreateInfo input_assembly_info{};
-  input_assembly_info.sType    = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-  input_assembly_info.topology = VulkanTranslate::GetVkPrimitiveTopology(state.RenderState.DrawPrimitiveType);
-  input_assembly_info.primitiveRestartEnable = VK_FALSE;
+  input_assembly_info.sType                         = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
+  input_assembly_info.topology                      = VulkanTranslate::GetVkPrimitiveTopology(state.RenderState.DrawPrimitiveType);
+  input_assembly_info.primitiveRestartEnable        = VK_FALSE;
 
   VkPipelineRasterizationStateCreateInfo rasterizer{};
   rasterizer.sType                   = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;

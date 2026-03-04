@@ -43,6 +43,7 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   // TODO: maybe not have glfw included here
   std::vector<const char *> required_extensions = VulkanHelpers::GetRequiredExtensions();
   if(ENABLE_VALIDATION_LAYERS) required_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
   create_info.enabledExtensionCount   = static_cast<uint32_t>(required_extensions.size());
   create_info.ppEnabledExtensionNames = required_extensions.data();
 
@@ -105,8 +106,8 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   ////
   VulkanHelpers::QueueFamilyIndices    indices = VulkanHelpers::FindQueueFamilies(PhysicalDevice, Surface);
   std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
-  std::set unique_queue_families = {indices.GraphicsFamily.value(), indices.PresentFamily.value()};
-  float    queue_priority        = 1.0f;
+  std::set                             unique_queue_families = {indices.GraphicsFamily.value(), indices.PresentFamily.value()};
+  float                                queue_priority        = 1.0f;
   for(uint32_t queue_family : unique_queue_families)
   {
     VkDeviceQueueCreateInfo queue_create_info{};

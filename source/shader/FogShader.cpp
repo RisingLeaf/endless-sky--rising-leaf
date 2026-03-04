@@ -209,10 +209,8 @@ void FogShader::Draw(const Point &center, double zoom, const PlayerInfo &player)
       static_cast<float>(left - 0.5 * GRID * zoom) / (0.5f * static_cast<float>(Screen::Width())),
       static_cast<float>(top - 0.5 * GRID * zoom) / (-0.5f * static_cast<float>(Screen::Height()))};
   const float dimensions[2] = {
-      GRID * static_cast<float>(zoom) * (static_cast<float>(columns) + 1.f) /
-          (0.5f * static_cast<float>(Screen::Width())),
-      GRID * static_cast<float>(zoom) * (static_cast<float>(rows) + 1.f) /
-          (-0.5f * static_cast<float>(Screen::Height()))};
+      GRID * static_cast<float>(zoom) * (static_cast<float>(columns) + 1.f),
+      GRID * static_cast<float>(zoom) * (static_cast<float>(rows) + 1.f)};
 
   const auto                &info = shader.GetInfo();
   std::vector<unsigned char> data_cp(info.GetUniformSize());

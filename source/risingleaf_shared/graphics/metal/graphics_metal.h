@@ -29,6 +29,7 @@ namespace File
 {
   struct ShaderString;
 }
+
 namespace MTL
 {
   class RenderPipelineState;
@@ -133,7 +134,7 @@ namespace graphics_metal
 
     void Resize(int width, int height) override;
 
-    bool StartDraw(int width, int height) override;
+    bool StartDraw(Window &window) override;
 
     void SetState(const GraphicsTypes::RenderState &state) const override;
 

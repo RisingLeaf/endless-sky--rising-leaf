@@ -100,9 +100,8 @@ namespace VulkanObjects
     [[nodiscard]] VkQueue                    GetComputeQueue() const { return ComputeQueue; }
     [[nodiscard]] VkQueue                    GetPresentQueue() const { return PresentQueue; }
     [[nodiscard]] uint8_t                    GetCurrentFrame() const { return CurrentFrame; }
-    [[nodiscard]] VkSemaphore GetImageAvailable() const { return ImageAvailableSemaphores[CurrentFrame]; }
-    [[nodiscard]] VkFence     GetFence() const { return InFlightFences[CurrentFrame]; }
-
+    [[nodiscard]] VkSemaphore                GetImageAvailable() const { return ImageAvailableSemaphores[CurrentFrame]; }
+    [[nodiscard]] VkFence                    GetFence() const { return InFlightFences[CurrentFrame]; }
   };
 } // namespace VulkanObjects
 

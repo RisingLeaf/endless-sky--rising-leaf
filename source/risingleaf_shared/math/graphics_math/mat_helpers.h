@@ -18,7 +18,7 @@
 #define MAT_HELPERS_H
 
 #include "matrix.h"
-#include "risingleaf_shared/base/ASLUtility.h"
+#include "base/ASLUtility.h"
 
 #include <cmath>
 

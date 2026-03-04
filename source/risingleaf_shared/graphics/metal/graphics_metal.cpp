@@ -459,8 +459,7 @@ namespace graphics_metal
     return it.Pipeline;
   }
 
-  MetalGraphicsInstance *
-  ConvertGraphicsInstance(GraphicsTypes::GraphicsInstance *metal_instance, const int line, const char *file = __FILE__)
+  MetalGraphicsInstance *ConvertGraphicsInstance(GraphicsTypes::GraphicsInstance *metal_instance, const int line, const char *file = __FILE__)
   {
     if(!metal_instance)
     {
@@ -484,7 +483,7 @@ namespace graphics_metal
   }
 } // namespace graphics_metal
 
-graphics_metal::MetalGraphicsInstance::MetalGraphicsInstance(int width, int height)
+graphics_metal::MetalGraphicsInstance::MetalGraphicsInstance(Window &window)
 {
   ShaderInfo::Init();
 
@@ -1053,8 +1052,7 @@ void graphics_metal::MetalGraphicsInstance::DrawIndexed(
   if(buffer_instance)
   {
     const auto metal_buffer_instance = reinterpret_cast<const MetalBufferInstance *>(buffer_instance);
-    current_encoder
-        ->drawIndexedPrimitives(mtl_prim_type, count, MTL::IndexTypeUInt32, metal_buffer_instance->Buffer, 0, 1);
+    current_encoder->drawIndexedPrimitives(mtl_prim_type, count, MTL::IndexTypeUInt32, metal_buffer_instance->Buffer, 0, 1);
   }
   else
   {
@@ -1103,6 +1101,7 @@ void graphics_metal::MetalGraphicsInstance::DrawDynamic(
     common_data_changed = false;
   }
 
+//TODO: one func
   MTL::PrimitiveType mtl_prim_type = MTL::PrimitiveTypeTriangle;
   switch(prim_type)
   {
