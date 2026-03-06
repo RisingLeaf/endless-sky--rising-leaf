@@ -18,10 +18,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Dictionary.h"
 #include "Paragraphs.h"
 
+#include <array>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 

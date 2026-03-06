@@ -24,15 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 
 #include "graphics/graphics_layer.h"
-
-#ifdef _WIN32
-#include "windows/WinVersion.h"
-
-#include <windows.h>
-
-#include <SDL3/SDL_syswm.h>
-#include <dwmapi.h>
-#endif
+#include "windows/WinWindow.h"
 
 
 namespace
@@ -50,10 +42,10 @@ namespace
   // Logs SDL errors and returns true if found
   bool checkSDLerror()
   {
-    std::string message = SDL_GetError();
+    const std::string message = SDL_GetError();
     if(!message.empty())
     {
-      Logger::Log("(SDL message: \"" + message + "\")", Logger::Level::ERROR);
+      Logger::Log( "(SDL message: \"" + message + "\")", Logger::Level::ERROR);
       SDL_ClearError();
       return true;
     }
@@ -82,8 +74,6 @@ std::string GameWindow::SDLVersions()
 bool GameWindow::Init(bool headless)
 {
 #ifdef _WIN32
-  // Tell Windows this process is high dpi aware and doesn't need to get scaled.
-  SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
 #elif defined(__linux__)
   // Set the class name for the window on Linux. Used to set the application icon.
   // This sets it for both X11 and Wayland.

@@ -31,10 +31,10 @@ namespace
 namespace Utf8
 {
 #if defined(_WIN32)
-  wstring ToUTF16(const std::string &input, bool isPath)
+  std::wstring ToUTF16(const std::string &input, bool isPath)
   {
-    const auto page = CP_UTF8;
-    wstring    result;
+    const auto   page = CP_UTF8;
+    std::wstring    result;
     if(input.empty()) return result;
 
     bool endsInSlash = isPath && (input.back() == '/' || input.back() == '\\');
@@ -46,9 +46,9 @@ namespace Utf8
   }
 
 
-  string ToUTF8(const wchar_t *str)
+  std::string ToUTF8(const wchar_t *str)
   {
-    string result;
+    std::string result;
     if(!str || !*str) return result;
 
     const auto page = CP_UTF8;

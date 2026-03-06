@@ -71,11 +71,17 @@ else()
 	target_link_libraries(ExternalLibraries INTERFACE pthread)
 endif()
 
+if(WIN32)
+	target_link_libraries(ExternalLibraries INTERFACE rpcrt4 winmm ntdll psapi)
+endif ()
+
+if(UNIX)
 if(APPLE)
 else()
 	find_library(UUID_LIB uuid REQUIRED)
 	target_link_libraries(ExternalLibraries INTERFACE "${UUID_LIB}")
 endif()
+endif ()
 
 include(CTest)
 if(BUILD_TESTING)

@@ -214,7 +214,7 @@ void GameData::LoadShaders()
       if(shaderFile.extension() == ".ps")
       {
         std::string name           = shaderFile.stem().generic_string();
-        *objects.shaders.Get(name) = File::ReadShader(shaderFile.c_str());
+        *objects.shaders.Get(name) = File::ReadShader(shaderFile.generic_string());
       }
     }
   }

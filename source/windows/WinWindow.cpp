@@ -16,9 +16,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "WinWindow.h"
 
 #include "../Preferences.h"
+#include "SDL3/SDL_version.h"
 #include "WinVersion.h"
 
-#include <SDL2/SDL_syswm.h>
 
 #include <dwmapi.h>
 
@@ -26,70 +26,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 void WinWindow::UpdateTitleBarTheme(SDL_Window *window)
 {
   if(!WinVersion::SupportsDarkTheme()) return;
-
-  SDL_SysWMinfo windowInfo;
-  SDL_VERSION(&windowInfo.version);
-  SDL_GetWindowWMInfo(window, &windowInfo);
-
-  BOOL                       value;
-  Preferences::TitleBarTheme themePreference = Preferences::GetTitleBarTheme();
-  // If the default option is selected, check the system-wide preference.
-  if(themePreference == Preferences::TitleBarTheme::DEFAULT)
-  {
-    HKEY systemPreference;
-    if(RegOpenKeyExW(
-           HKEY_CURRENT_USER,
-           L"Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-           0,
-           KEY_READ,
-           &systemPreference) == ERROR_SUCCESS)
-    {
-      DWORD size = sizeof(value);
-      if(RegQueryValueExW(
-             systemPreference,
-             L"AppsUseLightTheme",
-             0,
-             nullptr,
-             reinterpret_cast<LPBYTE>(&value),
-             &size) == ERROR_SUCCESS)
-      {
-        // The key says about light theme, while DWM expects information about dark theme.
-        value = !value;
-      }
-      else {
-        value = 1;
-      }
-      RegCloseKey(systemPreference);
-    }
-    else {
-      value = 1;
-    }
-  }
-  else {
-    value = themePreference == Preferences::TitleBarTheme::DARK;
-  }
-
-  HMODULE dwmapi = LoadLibraryW(L"dwmapi.dll");
-  auto    dwmSetWindowAttribute =
-      reinterpret_cast<HRESULT (*)(HWND, DWORD, LPCVOID, DWORD)>(GetProcAddress(dwmapi, "DwmSetWindowAttribute"));
-  dwmSetWindowAttribute(windowInfo.info.win.window, DWMWA_USE_IMMERSIVE_DARK_MODE, &value, sizeof(value));
-  FreeLibrary(dwmapi);
 }
 
 
 void WinWindow::UpdateWindowRounding(SDL_Window *window)
 {
   if(!WinVersion::SupportsWindowRounding()) return;
-
-  SDL_SysWMinfo windowInfo;
-  SDL_VERSION(&windowInfo.version);
-  SDL_GetWindowWMInfo(window, &windowInfo);
-
-  auto value = static_cast<DWM_WINDOW_CORNER_PREFERENCE>(Preferences::GetWindowRounding());
-
-  HMODULE dwmapi = LoadLibraryW(L"dwmapi.dll");
-  auto    dwmSetWindowAttribute =
-      reinterpret_cast<HRESULT (*)(HWND, DWORD, LPCVOID, DWORD)>(GetProcAddress(dwmapi, "DwmSetWindowAttribute"));
-  dwmSetWindowAttribute(windowInfo.info.win.window, DWMWA_WINDOW_CORNER_PREFERENCE, &value, sizeof(value));
-  FreeLibrary(dwmapi);
 }

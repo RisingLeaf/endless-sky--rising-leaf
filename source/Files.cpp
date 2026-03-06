@@ -337,7 +337,7 @@ std::shared_ptr<std::iostream> Files::Open(const std::filesystem::path &path, bo
 
   if(write)
 #ifdef _WIN32
-    return shared_ptr<iostream>{new fstream{path, ios::out}};
+    return std::shared_ptr<std::iostream>{new std::fstream{path, std::ios::out}};
 #else
     return std::shared_ptr<std::iostream>{new std::fstream{path, std::ios::out | std::ios::binary}};
 #endif
