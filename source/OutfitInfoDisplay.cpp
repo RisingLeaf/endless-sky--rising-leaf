@@ -367,7 +367,7 @@ void OutfitInfoDisplay::UpdateRequirements(const Outfit &outfit, const PlayerInf
 		requirementsHeight += 10;
 	}
 
-	for(const std::pair<const char *, double> &it : outfit.Attributes())
+	for(const auto &it : outfit.Attributes())
 		if(!count(BEFORE.begin(), BEFORE.end(), it.first))
 			AddRequirementAttribute(it.first, it.second);
 }
@@ -435,7 +435,7 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 		hasNormalAttributes = true;
 	}
 
-	for(const std::pair<const char *, double> &it : outfit.Attributes())
+	for(const auto &it : outfit.Attributes())
 	{
 		if(count(EXPECTED_NEGATIVE.begin(), EXPECTED_NEGATIVE.end(), it.first))
 			continue;

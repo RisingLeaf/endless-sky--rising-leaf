@@ -2710,7 +2710,7 @@ bool PlayerInfo::HasSeen(const System &system) const
 		return true;
 
 	// Shrouded systems have special considerations as to whether they're currently seen or not.
-	bool shrouded = system.Shrouded();
+	const bool shrouded = system.Shrouded();
 	if(!shrouded && seen.contains(&system))
 		return true;
 
@@ -2727,15 +2727,15 @@ bool PlayerInfo::HasSeen(const System &system) const
 				return true;
 		return m.Destination()->IsInSystem(&system);
 	};
-	if(any_of(availableJobs.begin(), availableJobs.end(), usesSystem))
+	if(std::ranges::any_of(availableJobs, usesSystem))
 		return true;
-	if(any_of(missions.begin(), missions.end(), usesSystem))
+	if(std::ranges::any_of(missions, usesSystem))
 		return true;
 
 	if(shrouded)
 	{
 		// All systems linked to a system the player can view are visible.
-		if(any_of(system.Links().begin(), system.Links().end(),
+		if(std::ranges::any_of(system.Links(),
 				[&](const System *s) noexcept -> bool { return CanView(*s); }))
 			return true;
 		// A shrouded system not linked to a viewable system must be visible from the current system.

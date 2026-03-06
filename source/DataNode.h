@@ -40,29 +40,29 @@ public:
 	DataNode &operator=(DataNode &&) noexcept;
 
 	// Get the number of tokens in this node.
-	int Size() const noexcept;
+	[[nodiscard]] int Size() const noexcept;
 	// Get all the tokens in this node as an iterable std::vector.
-	const std::vector<std::string> &Tokens() const noexcept;
+	[[nodiscard]] const std::vector<std::string> &Tokens() const noexcept;
 	// Add tokens to the node.
 	void AddToken(const std::string &token);
 	// Get the token at the given index. No bounds checking is done internally.
 	// DataFile loading guarantees index 0 always exists.
-	const std::string &Token(int index) const;
+	[[nodiscard]] const std::string &Token(int index) const;
 	// Convert the token at the given index to a number. This returns 0 and prints an
 	// error if the index is out of range or the token cannot be interpreted as a number.
-	double Value(int index) const;
+	[[nodiscard]] double Value(int index) const;
 	static double Value(const std::string &token);
 	// Check if the token at the given index is a number in a format that this
 	// class is able to parse.
-	bool IsNumber(int index) const;
+	[[nodiscard]] bool IsNumber(int index) const;
 	static bool IsNumber(const std::string &token);
 	// Convert the token at the given index to a boolean. This returns false
 	// and prints an error if the index is out of range or the token cannot
 	// be interpreted as a number.
-	bool BoolValue(int index) const;
+	[[nodiscard]] bool BoolValue(int index) const;
 	// Check if the token at the given index is a boolean, i.e. "true"/"1" or "false"/"0"
 	// as a string.
-	bool IsBool(int index) const;
+	[[nodiscard]] bool IsBool(int index) const;
 	static bool IsBool(const std::string &token);
 	// Check if the token can be used as name for a condition.
 	static bool IsConditionName(const std::string &token);
@@ -71,9 +71,9 @@ public:
 	void AddChild(const DataNode &child);
 	// Check if this node has any children. If so, the iterator functions below
 	// can be used to access them.
-	bool HasChildren() const noexcept;
-	std::list<DataNode>::const_iterator begin() const noexcept;
-	std::list<DataNode>::const_iterator end() const noexcept;
+	[[nodiscard]] bool HasChildren() const noexcept;
+	[[nodiscard]] std::list<DataNode>::const_iterator begin() const noexcept;
+	[[nodiscard]] std::list<DataNode>::const_iterator end() const noexcept;
 
 	// Print a message followed by a "trace" of this node and its parents.
 	int PrintTrace(const std::string &message = "") const;

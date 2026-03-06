@@ -9,7 +9,9 @@ TabWidth: 2
 IndentAccessModifiers: false
 AccessModifierOffset: -2
 
-AlignConsecutiveAssignments: true
+AlignConsecutiveAssignments:
+  Enabled: true
+  AlignCompound: true
 AlignConsecutiveDeclarations: true
 AlignOperands: true
 AlignTrailingComments: true

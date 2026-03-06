@@ -673,7 +673,7 @@ void OutfitterPanel::Sell(bool toStorage)
 			{
 				// Determine how many of this ammo I must sell to also sell the launcher.
 				int mustSell = 0;
-				for(const std::pair<const char *, double> &it : ship->Attributes().Attributes())
+				for(const auto &it : ship->Attributes().Attributes())
 					if(it.second < 0.)
 						mustSell = std::max<int>(mustSell, it.second / ammo->Get(it.first));
 
@@ -729,7 +729,7 @@ void OutfitterPanel::FailSell(bool toStorage) const
 		else
 		{
 			for(const Ship *ship : playerShips)
-				for(const std::pair<const char *, double> &it : selectedOutfit->Attributes())
+				for(const auto &it : selectedOutfit->Attributes())
 					if(ship->Attributes().Get(it.first) < it.second)
 					{
 						for(const auto &sit : ship->Outfits())

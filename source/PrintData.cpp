@@ -533,7 +533,7 @@ namespace {
 				std::cout << outfit.Cost() << ',';
 				std::cout << outfit.Mass();
 				for(const auto &attribute : attributes)
-					std::cout << ',' << outfit.Attributes().Get(attribute);
+					std::cout << ',' << outfit.Get(attribute);
 				std::cout << '\n';
 			}
 		};

@@ -188,8 +188,8 @@ void CollisionSet::Line(const Point &from, const Point &to, std::vector<Collisio
 				continue;
 
 			const Mask &mask = it->body->GetMask(step);
-			Point offset = from - it->body->Position();
-			const double range = mask.Collide(offset, to - from, it->body->Facing());
+      const Point &offset = from - it->body->Position();
+			const double range = mask.Collide(offset, to - from, it->body->Facing(), 1.);
 
 			if(range < 1.)
 				lineResult.emplace_back(it->body, collisionType, range);
@@ -261,8 +261,8 @@ void CollisionSet::Line(const Point &from, const Point &to, std::vector<Collisio
 				continue;
 
 			const Mask &mask = it->body->GetMask(step);
-			Point offset = from - it->body->Position();
-			const double range = mask.Collide(offset, to - from, it->body->Facing());
+			const Point &offset = from - it->body->Position();
+			const double range = mask.Collide(offset, to - from, it->body->Facing(), 1.);
 
 			if(range < 1.)
 				lineResult.emplace_back(it->body, collisionType, range);

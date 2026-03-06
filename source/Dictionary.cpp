@@ -18,35 +18,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "StringInterner.h"
 
 #include <cstring>
-#include <mutex>
-#include <set>
 #include <string>
-
+#include <algorithm>
 
 
 namespace {
-	// Perform a binary search on a sorted std::vector. Return the key's location (or
-	// proper insertion spot) in the first element of the pair, and "true" in
-	// the second element if the key is already in the std::vector.
 	std::pair<size_t, bool> Search(const char *key, const std::vector<std::pair<const char *, double>> &v)
 	{
-		// At each step of the search, we know the key is in [low, high).
-		size_t low = 0;
-		size_t high = v.size();
+    const auto it = std::lower_bound(
+      v.begin(), v.end(), key,
+      [](const auto &pair, const char *k) { return strcmp(pair.first, k) < 0; }
+    );
 
-		while(low != high)
-		{
-			size_t mid = (low + high) / 2;
-			int cmp = strcmp(key, v[mid].first);
-			if(!cmp)
-				return std::make_pair(mid, true);
-
-			if(cmp < 0)
-				high = mid;
-			else
-				low = mid + 1;
-		}
-		return std::make_pair(low, false);
+	  return {static_cast<size_t>(it - v.begin()), it != v.end() && strcmp(it->first, key) == 0};
 	}
 }
 
@@ -54,11 +38,11 @@ namespace {
 
 double &Dictionary::operator[](const char *key)
 {
-	std::pair<size_t, bool> pos = Search(key, *this);
-	if(pos.second)
-		return data()[pos.first].second;
+	auto [loc, found] = Search(key, *this);
+	if(found)
+		return data()[loc].second;
 
-	return insert(begin() + pos.first, std::make_pair(StringInterner::Intern(key), 0.))->second;
+	return insert(begin() + loc, std::make_pair(StringInterner::Intern(key), 0.))->second;
 }
 
 
@@ -72,8 +56,8 @@ double &Dictionary::operator[](const std::string &key)
 
 double Dictionary::Get(const char *key) const
 {
-	std::pair<size_t, bool> pos = Search(key, *this);
-	return (pos.second ? data()[pos.first].second : 0.);
+	auto [loc, found] = Search(key, *this);
+	return found ? data()[loc].second : 0.;
 }
 
 

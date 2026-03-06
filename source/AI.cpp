@@ -4001,7 +4001,7 @@ void AI::AutoFire(const Ship &ship, FireCommand &command, bool secondary, bool i
 		for(const auto &target : enemies)
 		{
 			// NPCs shoot ships that they just plundered.
-			bool hasBoarded = !ship.IsYours() && Has(ship, target->shared_from_this(), ShipEvent::BOARD);
+			const bool hasBoarded = !ship.IsYours() && Has(ship, target->shared_from_this(), ShipEvent::BOARD);
 			if(target->IsDisabled() && (disables || (plunders && !hasBoarded)) && !disabledOverride)
 				continue;
 			// Merciful ships let fleeing ships go.
@@ -4032,7 +4032,7 @@ void AI::AutoFire(const Ship &ship, FireCommand &command, bool secondary, bool i
 			v *= lifetime;
 
 			const Mask &mask = target->GetMask(step);
-			if(mask.Collide(-p, v, target->Facing()) < 1.)
+			if(mask.Collide(-p, v, target->Facing(), 1.) < 1.)
 			{
 				command.SetFire(index);
 				break;
@@ -4080,7 +4080,7 @@ void AI::AutoFire(const Ship &ship, FireCommand &command, const Body &target) co
 		v *= lifetime;
 
 		const Mask &mask = target.GetMask(step);
-		if(mask.Collide(-p, v, target.Facing()) < 1.)
+		if(mask.Collide(-p, v, target.Facing(), 1.) < 1.)
 			command.SetFire(index);
 	}
 }

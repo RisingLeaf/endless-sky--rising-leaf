@@ -112,7 +112,7 @@ const std::string &DataNode::Token(int index) const
 
 
 // Convert the token with the given index to a numerical value.
-double DataNode::Value(int index) const
+double DataNode::Value(const int index) const
 {
 	// Check for empty strings and out-of-bounds indices.
 	if(static_cast<size_t>(index) >= tokens.size() || tokens[index].empty())

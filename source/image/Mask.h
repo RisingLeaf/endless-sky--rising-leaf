@@ -44,7 +44,7 @@ public:
 	// while vA should be relative to sA.
 	// If this object contains the given point, the return value is 0. If there
 	// is no collision, the return value is 1.
-	double Collide(Point sA, Point vA, Angle facing) const;
+	double Collide(Point sA, Point vA, Angle facing, double threshold) const;
 
 	// Check whether the mask contains the given point.
 	bool Contains(Point point, Angle facing) const;
@@ -67,7 +67,7 @@ public:
 
 
 private:
-	double Intersection(Point sA, Point vA) const;
+	double Intersection(const Point &sA, const Point &vA, double threshold) const;
 	bool Contains(Point point) const;
 
 

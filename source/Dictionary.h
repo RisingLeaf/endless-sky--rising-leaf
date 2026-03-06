@@ -15,10 +15,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
-
 
 
 // This class stores a mapping from character string keys to values, in a way

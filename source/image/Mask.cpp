@@ -26,9 +26,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 namespace {
 	// Trace out outlines from an image frame.
-	void Trace(const ImageBuffer &image, int frame, std::vector<std::vector<Point>> &raw, const std::string &fileName)
+	void Trace(const ImageBuffer &image, const int frame, std::vector<std::vector<Point>> &raw, const std::string &fileName)
 	{
-		const uint32_t on = 0xFF000000;
+    constexpr uint32_t on = 0xFF000000;
 		const int width = image.Width();
 		const int height = image.Height();
 		const int numPixels = width * height;
@@ -93,7 +93,7 @@ namespace {
 			do {
 				hasOutline[pos] = true;
 				int firstD = d;
-				// The image pixel being inspected, in XY coords.
+				// The image pixel being inspected, in XY cords.
 				int next[] = {p[0], p[1]};
 				bool isAlone = false;
 				while(true)
@@ -189,11 +189,11 @@ namespace {
 		// Convert to a coordinate system where a is the origin.
 		p -= a;
 		b -= a;
-		double length = b.LengthSquared();
-		if(length)
+		const double length = b.LengthSquared();
+		if(length > 0.)
 		{
 			// Find out how far along the line the tangent to p intersects.
-			double u = b.Dot(p) / length;
+			const double u = b.Dot(p) / length;
 			// If it is beyond one of the endpoints, use that endpoint.
 			p -= std::max(0., std::min(1., u)) * b;
 		}
@@ -201,10 +201,10 @@ namespace {
 	}
 
 
-	void Simplify(const std::vector<Point> &p, int first, int last, std::vector<Point> &result)
+	void Simplify(const std::vector<Point> &p, const int first, const int last, std::vector<Point> &result)
 	{
 		// Find the most divergent point.
-		double dmax = 0.;
+		double div_max = 0.;
 		int imax = 0;
 
 		for(int i = first + 1; true; ++i)
@@ -217,15 +217,15 @@ namespace {
 			double d = DistanceSquared(p[i], p[first], p[last]);
 			// Enforce symmetry by using y position as a tiebreaker rather than
 			// just the order in the list.
-			if(d > dmax || (d == dmax && p[i].Y() > p[imax].Y()))
+			if(d > div_max || (d == div_max && p[i].Y() > p[imax].Y()))
 			{
-				dmax = d;
+				div_max = d;
 				imax = i;
 			}
 		}
 
 		// If the most divergent point is close enough to the outline, stop.
-		if(dmax < 1.)
+		if(div_max < 1.)
 			return;
 
 		// Recursively simplify the lines to both sides of that point.
@@ -323,7 +323,7 @@ bool Mask::IsLoaded() const
 // intersection occurs. The sA should be relative to this object's center.
 // If this object contains the given point, the return value is 0. If there
 // is no collision, the return value is 1.
-double Mask::Collide(Point sA, Point vA, Angle facing) const
+double Mask::Collide(Point sA, Point vA, Angle facing, double threshold) const
 {
 	// Bail out if we're too far away to possibly be touching.
 	double distance = sA.Length();
@@ -348,7 +348,7 @@ double Mask::Collide(Point sA, Point vA, Angle facing) const
 	if(distance <= radius && Contains(sA))
 		return 0.;
 
-	return Intersection(sA, vA);
+	return Intersection(sA, vA, threshold);
 }
 
 
@@ -389,7 +389,7 @@ bool Mask::WithinRing(Point point, Angle facing, double inner, double outer) con
 		}
 
 	// While a ring might not contain any outlines of the mask, it may be
-	// located entirely inside of the mask. This should still count as the
+	// located entirely inside the mask. This should still count as the
 	// mask being within the ring. This can only be the case if the
 	// entire ring is smaller than the radius of the mask and the center
 	// of the ring is within the mask.
@@ -399,7 +399,7 @@ bool Mask::WithinRing(Point point, Angle facing, double inner, double outer) con
 
 
 // Find out how close the given point is to the mask.
-double Mask::Range(Point point, Angle facing) const
+double Mask::Range(Point point, const Angle facing) const
 {
 	double range = std::numeric_limits<double>::infinity();
 	if(!IsLoaded())
@@ -434,7 +434,7 @@ const std::vector<std::vector<Point>> &Mask::Outlines() const
 
 
 
-Mask Mask::operator*(Point scale) const
+Mask Mask::operator*(const Point scale) const
 {
 	Mask newMask = *this;
 	newMask.radius = 0.;
@@ -442,9 +442,9 @@ Mask Mask::operator*(Point scale) const
 	{
 		for(Point &p : outline)
 			p *= scale;
-		double radius = ComputeRadius(outline);
-		if(radius > newMask.radius)
-			newMask.radius = radius;
+		const double outline_radius = ComputeRadius(outline);
+		if(outline_radius > newMask.radius)
+			newMask.radius = outline_radius;
 	}
 	return newMask;
 }
@@ -458,31 +458,34 @@ Mask operator*(Point scale, const Mask &mask)
 
 
 
-double Mask::Intersection(Point sA, Point vA) const
+double Mask::Intersection(const Point &sA, const Point &vA, const double threshold) const
 {
 	// Keep track of the closest intersection point found.
 	double closest = 1.;
 
-	for(auto &&outline : outlines)
+	for(const auto &outline : outlines)
 	{
 		Point prev = outline.back();
-		for(auto &&next : outline)
+		for(const auto &next : outline)
 		{
 			// Check if there is an intersection. (If not, the cross would be 0.) If
 			// there is, handle it only if it is a point where the segment is
 			// entering the polygon rather than exiting it (i.e. cross > 0).
 			Point vB = next - prev;
-			double cross = vB.Cross(vA);
+			const double cross = vB.Cross(vA);
 			if(cross > 0.)
 			{
 				Point vS = prev - sA;
-				double uB = vA.Cross(vS);
-				double uA = vB.Cross(vS);
+				const double uB = vA.Cross(vS);
+				const double uA = vB.Cross(vS);
 				// If the intersection occurs somewhere within this segment of the
 				// outline, find out how far along the query std::vector it occurs and
 				// remember it if it is the closest so far.
-				if((uB >= 0.) & (uB < cross) & (uA >= 0.))
-					closest = std::min(closest, uA / cross);
+				if(uB >= 0. && uB < cross && uA >= 0.)
+				{
+				  closest = std::min(closest, uA / cross);
+			    if(closest < threshold) return closest;
+				}
 			}
 
 			prev = next;
