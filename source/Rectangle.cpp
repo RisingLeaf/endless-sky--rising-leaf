@@ -18,204 +18,134 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 
 
-
-
-
 // Construct a rectangle by specifying the two corners rather than the
 // center and the dimensions. The two corners need not be in any order.
 Rectangle Rectangle::WithCorners(const Point &from, const Point &to)
 {
-	// Regardless of which corner is which, the center is always their average
-	// and the dimensions are the difference between them (which will be
-	// converted to an absolute value in the Rectangle constructor).
-	return Rectangle(.5 * (from + to), from - to);
+  // Regardless of which corner is which, the center is always their average
+  // and the dimensions are the difference between them (which will be
+  // converted to an absolute value in the Rectangle constructor).
+  return Rectangle(.5 * (from + to), from - to);
 }
-
 
 
 // Construct a rectangle beginning at the given point and having the given
 // dimensions (which are allowed to be negative).
 Rectangle Rectangle::FromCorner(const Point &corner, const Point &dimensions)
 {
-	// The center is always the corner plus half the dimensions, regardless of
-	// which corner is given and what sign the dimensions have.
-	return Rectangle(corner + .5 * dimensions, dimensions);
+  // The center is always the corner plus half the dimensions, regardless of
+  // which corner is given and what sign the dimensions have.
+  return Rectangle(corner + .5 * dimensions, dimensions);
 }
-
 
 
 // Constructor, specifying the center and the dimensions. Internally, make sure
 // that the dimensions are always positive values.
-Rectangle::Rectangle(const Point &center, const Point &dimensions)
-	: center(center), dimensions(abs(dimensions))
-{
-}
-
+Rectangle::Rectangle(const Point &center, const Point &dimensions) : center(center), dimensions(abs(dimensions)) {}
 
 
 // Shift this rectangle by the given offset.
-Rectangle Rectangle::operator+(const Point &offset) const
-{
-	return Rectangle(center + offset, dimensions);
-}
-
+Rectangle Rectangle::operator+(const Point &offset) const { return Rectangle(center + offset, dimensions); }
 
 
 // Shift this rectangle by the given offset.
 Rectangle &Rectangle::operator+=(const Point &offset)
 {
-	center += offset;
-	return *this;
+  center += offset;
+  return *this;
 }
-
 
 
 // Shift this rectangle by the given offset.
-Rectangle Rectangle::operator-(const Point &offset) const
-{
-	return Rectangle(center - offset, dimensions);
-}
-
+Rectangle Rectangle::operator-(const Point &offset) const { return Rectangle(center - offset, dimensions); }
 
 
 // Shift this rectangle by the given offset.
 Rectangle &Rectangle::operator-=(const Point &offset)
 {
-	center -= offset;
-	return *this;
+  center -= offset;
+  return *this;
 }
-
 
 
 // Get the center of this rectangle.
-Point Rectangle::Center() const
-{
-	return center;
-}
-
+Point Rectangle::Center() const { return center; }
 
 
 // Get the dimensions, i.e. the full width and height.
-Point Rectangle::Dimensions() const
-{
-	return dimensions;
-}
-
+Point Rectangle::Dimensions() const { return dimensions; }
 
 
 // Get the width of the rectangle.
-double Rectangle::Width() const
-{
-	return dimensions.X();
-}
-
+double Rectangle::Width() const { return dimensions.X(); }
 
 
 // Get the height of the rectangle.
-double Rectangle::Height() const
-{
-	return dimensions.Y();
-}
-
+double Rectangle::Height() const { return dimensions.Y(); }
 
 
 // Get the minimum X value.
-double Rectangle::Left() const
-{
-	return center.X() - .5 * dimensions.X();
-}
-
+double Rectangle::Left() const { return center.X() - .5 * dimensions.X(); }
 
 
 // Get the minimum Y value.
-double Rectangle::Top() const
-{
-	return center.Y() - .5 * dimensions.Y();
-}
-
+double Rectangle::Top() const { return center.Y() - .5 * dimensions.Y(); }
 
 
 // Get the maximum X value.
-double Rectangle::Right() const
-{
-	return center.X() + .5 * dimensions.X();
-}
-
+double Rectangle::Right() const { return center.X() + .5 * dimensions.X(); }
 
 
 // Get the maximum Y value.
-double Rectangle::Bottom() const
-{
-	return center.Y() + .5 * dimensions.Y();
-}
-
+double Rectangle::Bottom() const { return center.Y() + .5 * dimensions.Y(); }
 
 
 // Get the top left corner - that is, the minimum x and y.
-Point Rectangle::TopLeft() const
-{
-	return center - .5 * dimensions;
-}
-
+Point Rectangle::TopLeft() const { return center - .5 * dimensions; }
 
 
 // Get the top right conrer - that is, the maximum x and minimum y.
-Point Rectangle::TopRight() const
-{
-	return center + Point(.5, -.5) * dimensions;
-}
-
+Point Rectangle::TopRight() const { return center + Point(.5, -.5) * dimensions; }
 
 
 // Get the bottom left corner - that is, the minimum x and maximum y.
-Point Rectangle::BottomLeft() const
-{
-	return center + Point(-.5, .5) * dimensions;
-}
-
+Point Rectangle::BottomLeft() const { return center + Point(-.5, .5) * dimensions; }
 
 
 // Get the bottom right corner - that is, the maximum x and y.
-Point Rectangle::BottomRight() const
-{
-	return center + .5 * dimensions;
-}
-
+Point Rectangle::BottomRight() const { return center + .5 * dimensions; }
 
 
 // Check if a point is inside this rectangle.
 bool Rectangle::Contains(const Point &point) const
 {
-	// The point is within the rectangle if its distance to the center is less
-	// than half the dimensions.
-	Point d = 2. * abs(point - center);
-	return (d.X() <= dimensions.X() && d.Y() <= dimensions.Y());
+  // The point is within the rectangle if its distance to the center is less
+  // than half the dimensions.
+  Point d = 2. * abs(point - center);
+  return d.X() <= dimensions.X() && d.Y() <= dimensions.Y();
 }
-
 
 
 // Check if the given rectangle is inside this one. If one of its edges is
 // touching the edge of this one, that still counts.
 bool Rectangle::Contains(const Rectangle &other) const
 {
-	return Contains(other.TopLeft()) && Contains(other.BottomRight());
+  return Contains(other.TopLeft()) && Contains(other.BottomRight());
 }
-
 
 
 bool Rectangle::Overlaps(const Rectangle &other) const
 {
-	return !(other.Left() > Right() || other.Right() < Left() || other.Top() > Bottom() || other.Bottom() < Top());
+  return !(other.Left() > Right() || other.Right() < Left() || other.Top() > Bottom() || other.Bottom() < Top());
 }
-
 
 
 bool Rectangle::Overlaps(const Point &circle, const double radius) const
 {
-	// Handle case where circle is entirely within rectangle.
-	if(Contains(circle))
-		return true;
+  // Handle case where circle is entirely within rectangle.
+  if(Contains(circle)) return true;
 
-	const Point closest = Point(std::max(Left(), std::min(Right(), circle.X())), std::max(Top(), std::min(Bottom(), circle.Y())));
-	return (circle - closest).LengthSquared() < radius * radius;
+  const Point closest =
+      Point(std::max(Left(), std::min(Right(), circle.X())), std::max(Top(), std::min(Bottom(), circle.Y())));
+  return (circle - closest).LengthSquared() < radius * radius;
 }

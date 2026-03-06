@@ -16,12 +16,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 
-
-enum class SoundCategory {
-	// The master controls affect all categories
-	MASTER,
-	// The background music category
-	MUSIC,
-	// The sound effect types
-	UI, ANTI_MISSILE, WEAPON, ENGINE, AFTERBURNER, JUMP, EXPLOSION, SCAN, ENVIRONMENT, ALERT
+enum class SoundCategory
+{
+  // The master controls affect all categories
+  MASTER,
+  // The background music category
+  MUSIC,
+  // The sound effect types
+  UI,
+  ANTI_MISSILE,
+  WEAPON,
+  ENGINE,
+  AFTERBURNER,
+  JUMP,
+  EXPLOSION,
+  SCAN,
+  ENVIRONMENT,
+  ALERT
 };

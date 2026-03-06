@@ -20,27 +20,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <map>
 
 
-
-namespace {
-	std::map<int, Font> fonts;
+namespace
+{
+  std::map<int, Font> fonts;
 }
-
 
 
 void FontSet::Add(const std::filesystem::path &path, int size)
 {
-	if(!fonts.contains(size))
-		fonts[size].Load(path);
+  if(!fonts.contains(size)) fonts[size].Load(path);
 }
 
 
+const Font &FontSet::Get(int size) { return fonts[size]; }
 
-const Font &FontSet::Get(int size)
-{
-	return fonts[size];
-}
-
-void FontSet::Clear()
-{
-  fonts.clear();
-}
+void FontSet::Clear() { fonts.clear(); }

@@ -64,10 +64,10 @@ namespace
     {
       // Figure out the position of the first instance of this haze that is to
       // the right of and below the top left corner of the screen.
-      double startX = fmod(it.Position().X() - topLeft.X(), HAZE_WRAP);
-      startX += topLeft.X() + HAZE_WRAP * (startX < 0.);
-      double startY = fmod(it.Position().Y() - topLeft.Y(), HAZE_WRAP);
-      startY += topLeft.Y() + HAZE_WRAP * (startY < 0.);
+      double startX  = fmod(it.Position().X() - topLeft.X(), HAZE_WRAP);
+      startX        += topLeft.X() + HAZE_WRAP * (startX < 0.);
+      double startY  = fmod(it.Position().Y() - topLeft.Y(), HAZE_WRAP);
+      startY        += topLeft.Y() + HAZE_WRAP * (startY < 0.);
 
       const int x_count = std::ceil((bottomRight.X() - startX) / HAZE_WRAP);
       const int y_count = std::ceil((bottomRight.Y() - startY) / HAZE_WRAP);
@@ -159,8 +159,8 @@ void StarField::Step(Point vel, double zoom)
 {
   if(Preferences::Has("Fixed starfield zoom"))
   {
-    baseZoom = fixedZoom;
-    vel /= velocityReducer;
+    baseZoom  = fixedZoom;
+    vel      /= velocityReducer;
   }
   else if(zoom < zoomClamp)
   {
@@ -345,11 +345,11 @@ void StarField::MakeStars(int stars, int width)
     {
       for(int j = 0; j < 10; ++j)
       {
-        const asl::uint32 index = Random::Int(static_cast<uint32_t>(off.size())) & ~1;
-        x += off[index];
-        y += off[index + 1];
-        x &= widthMod;
-        y &= widthMod;
+        const asl::uint32 index  = Random::Int(static_cast<uint32_t>(off.size())) & ~1;
+        x                       += off[index];
+        y                       += off[index + 1];
+        x                       &= widthMod;
+        y                       &= widthMod;
       }
       temp.push_back(x);
       temp.push_back(y);

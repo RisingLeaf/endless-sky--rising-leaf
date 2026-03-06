@@ -161,7 +161,7 @@ namespace graphics_vulkan
         vertex_offsets.emplace_back(graphics_instance->DynamicVertexBuffersOffset);
 
         graphics_instance->DynamicVertexBuffersOffset += buffer.Data.size();
-        graphics_instance->DynamicVertexBuffersOffset = (graphics_instance->DynamicVertexBuffersOffset + 255) & ~(255);
+        graphics_instance->DynamicVertexBuffersOffset  = (graphics_instance->DynamicVertexBuffersOffset + 255) & ~(255);
       }
       graphics_instance->DynamicVertexBuffers[graphics_instance->Device->GetCurrentFrame()]->UnMap();
     }

@@ -20,18 +20,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <timeapi.h>
 
 
-
 TimerResolutionGuard::TimerResolutionGuard()
 {
-	// Make sure that the sleep timer has at least 1 ms resolution
-	// to avoid irregular frame rates.
-	timeBeginPeriod(1);
+  // Make sure that the sleep timer has at least 1 ms resolution
+  // to avoid irregular frame rates.
+  timeBeginPeriod(1);
 }
-
 
 
 TimerResolutionGuard::~TimerResolutionGuard()
 {
-	// Reset the timer resolution so that it doesn't affect performance of the whole OS.
-	timeEndPeriod(1);
+  // Reset the timer resolution so that it doesn't affect performance of the whole OS.
+  timeEndPeriod(1);
 }

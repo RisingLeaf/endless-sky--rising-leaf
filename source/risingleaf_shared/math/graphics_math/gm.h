@@ -11,16 +11,17 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKAN_ENV_GM_H
 #define VULKAN_ENV_GM_H
 
-#include "vector.h"
 #include "matrix.h"
+#include "vector.h"
 
-#include "vec_helpers.h"
 #include "mat_helpers.h"
+#include "vec_helpers.h"
 
 namespace gm
 {
@@ -43,6 +44,6 @@ namespace gm
   typedef matrix<double, 2> dmat2;
   typedef matrix<double, 3> dmat3;
   typedef matrix<double, 4> dmat4;
-}
+} // namespace gm
 
 #endif // VULKAN_ENV_GM_H

@@ -17,61 +17,50 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "StringInterner.h"
 
+#include <algorithm>
 #include <cstring>
 #include <string>
-#include <algorithm>
 
 
-namespace {
-	std::pair<size_t, bool> Search(const char *key, const std::vector<std::pair<const char *, double>> &v)
-	{
+namespace
+{
+  std::pair<size_t, bool> Search(const char *key, const std::vector<std::pair<const char *, double>> &v)
+  {
     const auto it = std::lower_bound(
-      v.begin(), v.end(), key,
-      [](const auto &pair, const char *k) { return strcmp(pair.first, k) < 0; }
-    );
+        v.begin(),
+        v.end(),
+        key,
+        [](const auto &pair, const char *k) { return strcmp(pair.first, k) < 0; });
 
-	  return {static_cast<size_t>(it - v.begin()), it != v.end() && strcmp(it->first, key) == 0};
-	}
-}
-
+    return {static_cast<size_t>(it - v.begin()), it != v.end() && strcmp(it->first, key) == 0};
+  }
+} // namespace
 
 
 double &Dictionary::operator[](const char *key)
 {
-	auto [loc, found] = Search(key, *this);
-	if(found)
-		return data()[loc].second;
+  auto [loc, found] = Search(key, *this);
+  if(found) return data()[loc].second;
 
-	return insert(begin() + loc, std::make_pair(StringInterner::Intern(key), 0.))->second;
+  return insert(begin() + loc, std::make_pair(StringInterner::Intern(key), 0.))->second;
 }
 
 
-
-double &Dictionary::operator[](const std::string &key)
-{
-	return (*this)[key.c_str()];
-}
-
+double &Dictionary::operator[](const std::string &key) { return (*this)[key.c_str()]; }
 
 
 double Dictionary::Get(const char *key) const
 {
-	auto [loc, found] = Search(key, *this);
-	return found ? data()[loc].second : 0.;
+  auto [loc, found] = Search(key, *this);
+  return found ? data()[loc].second : 0.;
 }
 
 
-
-double Dictionary::Get(const std::string &key) const
-{
-	return Get(key.c_str());
-}
-
+double Dictionary::Get(const std::string &key) const { return Get(key.c_str()); }
 
 
 void Dictionary::Erase(const char *key)
 {
-	auto [pos, exists] = Search(key, *this);
-	if(exists)
-		erase(next(this->begin(), pos));
+  auto [pos, exists] = Search(key, *this);
+  if(exists) erase(next(this->begin(), pos));
 }

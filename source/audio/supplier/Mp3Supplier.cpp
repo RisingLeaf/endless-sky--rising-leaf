@@ -24,47 +24,43 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 
 
-
-
-Mp3Supplier::Mp3Supplier(std::shared_ptr<std::iostream> data, bool looping) : AsyncAudioSupplier(std::move(data), looping) {}
+Mp3Supplier::Mp3Supplier(std::shared_ptr<std::iostream> data, bool looping) :
+  AsyncAudioSupplier(std::move(data), looping)
+{
+  StartAudioThread();
+}
 
 
 void Mp3Supplier::Decode()
 {
   std::vector<sample_t> samples;
-  ma_decoder decoder;
+  ma_decoder            decoder;
 
   ma_decoder_config config = ma_decoder_config_init(
-      ma_format_s16,  // match sample_t if int16_t
-      0,              // auto channels
-      0               // auto sample rate
+      ma_format_s16, // match sample_t if int16_t
+      0,             // auto channels
+      0              // auto sample rate
   );
 
-  if (ma_decoder_init(OnRead, nullptr, this, &config, &decoder) != MA_SUCCESS)
-    return;
+  if(ma_decoder_init(OnRead, nullptr, this, &config, &decoder) != MA_SUCCESS) return;
 
-  constexpr ma_uint64 framesPerChunk = 4096;
+  constexpr ma_uint64   framesPerChunk = 4096;
   std::vector<ma_int16> pcmBuffer(framesPerChunk * 2); // 2 = max stereo
 
-  while (true)
+  while(true)
   {
     AwaitBufferSpace();
 
-    if (done)
+    if(done)
     {
       PadBuffer();
       break;
     }
 
     ma_uint64 framesRead = 0;
-    ma_result result = ma_decoder_read_pcm_frames(
-        &decoder,
-        pcmBuffer.data(),
-        framesPerChunk,
-        &framesRead
-    );
+    ma_result result     = ma_decoder_read_pcm_frames(&decoder, pcmBuffer.data(), framesPerChunk, &framesRead);
 
-    if (result == MA_AT_END || framesRead == 0)
+    if(result == MA_AT_END || framesRead == 0)
     {
       AddBufferData(samples);
       break;

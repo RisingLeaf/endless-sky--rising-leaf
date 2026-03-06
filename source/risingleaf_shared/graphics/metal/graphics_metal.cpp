@@ -356,8 +356,7 @@ namespace graphics_metal
         break;
       }
     }
-    else
-    {
+    else {
       depthStencilDescriptor->setDepthCompareFunction(MTL::CompareFunctionAlways);
     }
 
@@ -398,8 +397,7 @@ namespace graphics_metal
       render_pipeline_descriptor->colorAttachments()->object(0)->setPixelFormat(MTL::PixelFormatInvalid);
       render_pipeline_descriptor->setSampleCount(1);
     }
-    else
-    {
+    else {
       render_pipeline_descriptor->setSampleCount(state.Info.Samples);
 
       auto color_attachment = render_pipeline_descriptor->colorAttachments()->object(0);
@@ -459,7 +457,8 @@ namespace graphics_metal
     return it.Pipeline;
   }
 
-  MetalGraphicsInstance *ConvertGraphicsInstance(GraphicsTypes::GraphicsInstance *metal_instance, const int line, const char *file = __FILE__)
+  MetalGraphicsInstance *
+  ConvertGraphicsInstance(GraphicsTypes::GraphicsInstance *metal_instance, const int line, const char *file = __FILE__)
   {
     if(!metal_instance)
     {
@@ -799,8 +798,7 @@ void graphics_metal::MetalGraphicsInstance::CreateRenderBuffer(
       colorAttachment->setTexture(metal_render_buffer_instance->OptionalColor.texture);
       colorAttachment->setResolveTexture(metal_render_buffer_instance->FrameBuffer.texture);
     }
-    else
-    {
+    else {
       colorAttachment->setTexture(metal_render_buffer_instance->FrameBuffer.texture);
     }
     colorAttachment->setLoadAction(MTL::LoadActionClear);
@@ -901,8 +899,7 @@ bool graphics_metal::MetalGraphicsInstance::StartDraw(int, int)
   {
     CurrentDrawable = next_drawable;
   }
-  else
-  {
+  else {
     CurrentDrawable = nullptr;
     return false;
   }
@@ -1052,10 +1049,10 @@ void graphics_metal::MetalGraphicsInstance::DrawIndexed(
   if(buffer_instance)
   {
     const auto metal_buffer_instance = reinterpret_cast<const MetalBufferInstance *>(buffer_instance);
-    current_encoder->drawIndexedPrimitives(mtl_prim_type, count, MTL::IndexTypeUInt32, metal_buffer_instance->Buffer, 0, 1);
+    current_encoder
+        ->drawIndexedPrimitives(mtl_prim_type, count, MTL::IndexTypeUInt32, metal_buffer_instance->Buffer, 0, 1);
   }
-  else
-  {
+  else {
     current_encoder->drawPrimitives(mtl_prim_type, start, count);
   }
 }
@@ -1101,7 +1098,7 @@ void graphics_metal::MetalGraphicsInstance::DrawDynamic(
     common_data_changed = false;
   }
 
-//TODO: one func
+  // TODO: one func
   MTL::PrimitiveType mtl_prim_type = MTL::PrimitiveTypeTriangle;
   switch(prim_type)
   {
@@ -1115,8 +1112,7 @@ void graphics_metal::MetalGraphicsInstance::DrawDynamic(
   {
     current_encoder->setVertexBytes(data, count * type_size, 0);
   }
-  else
-  {
+  else {
     memcpy(
         static_cast<unsigned char *>(DynamicVertexBuffer->contents()) + DynamicVertexBufferOffset,
         data,

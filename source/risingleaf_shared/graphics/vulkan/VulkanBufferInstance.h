@@ -11,15 +11,16 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANBUFFERINSTANCE_H
 #define VULKANBUFFERINSTANCE_H
 
 #include <vulkan/vulkan_core.h>
 
-#include "graphics/graphics_toplevel_defines.h"
 #include "external/vk_mem_alloc.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 
 namespace VulkanObjects
@@ -28,33 +29,34 @@ namespace VulkanObjects
 
   class VulkanBufferInstance final : public GraphicsTypes::BufferInstance
   {
-    size_t         Size       = 0;
-    VkBuffer       Buffer     = nullptr;
-    VmaAllocation  Allocation = nullptr;
+    size_t        Size       = 0;
+    VkBuffer      Buffer     = nullptr;
+    VmaAllocation Allocation = nullptr;
 
     const VulkanDeviceInstance *Device;
+
   public:
     explicit VulkanBufferInstance(
-      const VulkanDeviceInstance     *device,
-      GraphicsTypes::BufferType       type,
-      size_t                          size,
-      std::string_view                name);
+        const VulkanDeviceInstance *device,
+        GraphicsTypes::BufferType   type,
+        size_t                      size,
+        std::string_view            name);
 
     ~VulkanBufferInstance() override;
 
-    VulkanBufferInstance(const VulkanBufferInstance &other) = delete;
-    VulkanBufferInstance(VulkanBufferInstance &&other) noexcept = delete;
-    VulkanBufferInstance &operator=(const VulkanBufferInstance &other) = delete;
+    VulkanBufferInstance(const VulkanBufferInstance &other)                = delete;
+    VulkanBufferInstance(VulkanBufferInstance &&other) noexcept            = delete;
+    VulkanBufferInstance &operator=(const VulkanBufferInstance &other)     = delete;
     VulkanBufferInstance &operator=(VulkanBufferInstance &&other) noexcept = delete;
 
     void Map(void **map_memory) const;
 
     void UnMap() const;
 
-    [[nodiscard]] VkBuffer Get()     const { return Buffer; }
+    [[nodiscard]] VkBuffer Get() const { return Buffer; }
     [[nodiscard]] size_t   GetSize() const { return Size; }
   };
-}
+} // namespace VulkanObjects
 
 
-#endif //VULKANBUFFERINSTANCE_H
+#endif // VULKANBUFFERINSTANCE_H

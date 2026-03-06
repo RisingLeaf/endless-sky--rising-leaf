@@ -19,6 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Preferences.h"
 #include "RenderBuffer.h"
 #include "ScrollBar.h"
+#include "shader/PointerShader.h"
 #include "text/FontSet.h"
 
 

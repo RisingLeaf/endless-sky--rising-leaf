@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANFRAMEBUFFERINSTANCE_H
 #define VULKANFRAMEBUFFERINSTANCE_H
@@ -38,42 +39,42 @@ namespace VulkanObjects
     std::vector<std::unique_ptr<VulkanViewInstance>>  Views;
     std::vector<VkFramebuffer>                        FrameBuffer{nullptr};
 
-    std::unique_ptr<VulkanTextureInstance>            Texture;
+    std::unique_ptr<VulkanTextureInstance> Texture;
 
     bool InUse = false;
 
-    const VulkanDeviceInstance      *Device;
+    const VulkanDeviceInstance *Device;
+
   public:
     VulkanFrameBufferInstance(
-      const VulkanDeviceInstance           *device,
-      const GraphicsTypes::FrameBufferInfo &info,
-      const GraphicsTypes::StateInfo       &state,
-      size_t                                count,
-      std::string_view                      name);
+        const VulkanDeviceInstance           *device,
+        const GraphicsTypes::FrameBufferInfo &info,
+        const GraphicsTypes::StateInfo       &state,
+        size_t                                count,
+        std::string_view                      name);
 
     VulkanFrameBufferInstance(
-      const VulkanDeviceInstance           *device,
-      VkCommandBuffer                       cmd,
-      const GraphicsTypes::FrameBufferInfo &info,
-      const GraphicsTypes::StateInfo       &state,
-      VkImage                               image,
-      std::string_view                      name);
+        const VulkanDeviceInstance           *device,
+        VkCommandBuffer                       cmd,
+        const GraphicsTypes::FrameBufferInfo &info,
+        const GraphicsTypes::StateInfo       &state,
+        VkImage                               image,
+        std::string_view                      name);
 
-    void SetInUse(const bool state) { InUse = state; }
+    void               SetInUse(const bool state) { InUse = state; }
     [[nodiscard]] bool IsInUse() const { return InUse; }
 
     ~VulkanFrameBufferInstance() override;
-    VulkanFrameBufferInstance(const VulkanFrameBufferInstance &other) = delete;
-    VulkanFrameBufferInstance(VulkanFrameBufferInstance &&other) noexcept = delete;
-    VulkanFrameBufferInstance &operator=(const VulkanFrameBufferInstance &other) = delete;
+    VulkanFrameBufferInstance(const VulkanFrameBufferInstance &other)                = delete;
+    VulkanFrameBufferInstance(VulkanFrameBufferInstance &&other) noexcept            = delete;
+    VulkanFrameBufferInstance &operator=(const VulkanFrameBufferInstance &other)     = delete;
     VulkanFrameBufferInstance &operator=(VulkanFrameBufferInstance &&other) noexcept = delete;
 
-    [[nodiscard]] VkFramebuffer Get(const size_t i = 0) const { return FrameBuffer[i]; }
+    [[nodiscard]] VkFramebuffer                   Get(const size_t i = 0) const { return FrameBuffer[i]; }
     [[nodiscard]] const VulkanRenderPassInstance *GetRenderPass() const { return &RenderPass; }
-    [[nodiscard]] const VulkanTextureInstance    *GetTexture()    const { return Texture.get(); }
+    [[nodiscard]] const VulkanTextureInstance    *GetTexture() const { return Texture.get(); }
   };
-}
+} // namespace VulkanObjects
 
 
-
-#endif //VULKANFRAMEBUFFERINSTANCE_H
+#endif // VULKANFRAMEBUFFERINSTANCE_H

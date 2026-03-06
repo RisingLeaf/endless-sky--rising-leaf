@@ -19,6 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <string>
 #include <vector>
+#include "LoadingCircle.h"
 
 class Conversation;
 class PlayerInfo;
@@ -26,28 +27,29 @@ class TaskQueue;
 class UI;
 
 
-
 // Class representing the loading menu, which is shown when loading resources
 // (like game data and save files).
-class GameLoadingPanel final : public Panel {
+class GameLoadingPanel final : public Panel
+{
 public:
-	GameLoadingPanel(PlayerInfo &player, TaskQueue &queue, const Conversation &conversation,
-		UI &gamePanels, bool &finishedLoading);
+  GameLoadingPanel(
+      PlayerInfo         &player,
+      TaskQueue          &queue,
+      const Conversation &conversation,
+      UI                 &gamePanels,
+      bool               &finishedLoading);
 
-	void Step() final;
-	void Draw() final;
+  void Step() final;
+  void Draw() final;
 
 
 private:
-	PlayerInfo &player;
-	TaskQueue &queue;
-	const Conversation &conversation;
-	UI &gamePanels;
-	bool &finishedLoading;
+  PlayerInfo         &player;
+  TaskQueue          &queue;
+  const Conversation &conversation;
+  UI                 &gamePanels;
+  bool               &finishedLoading;
 
-	// The circular loading indicator shows 60 tick marks when all game data is loaded.
-	const int MAX_TICKS = 60;
-	const double ANGLE_OFFSET;
-	// The current number of ticks to be displayed.
-	int progress = 0;
+  double        progress = 0;
+  LoadingCircle loadingCircle;
 };

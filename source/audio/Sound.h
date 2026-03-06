@@ -22,25 +22,25 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 
 
-
 // This is a sound that can be played. The sound's file name will determine
 // whether it is looping (ends in '~') or not.
-class Sound {
+class Sound
+{
 public:
-	bool Load(const std::filesystem::path &path, const std::string &name);
+  bool Load(const std::filesystem::path &path, const std::string &name);
 
-	const std::string &Name() const;
+  const std::string &Name() const;
 
-	const std::vector<AudioSupplier::sample_t> &Buffer() const;
-	const std::vector<AudioSupplier::sample_t> &Buffer3x() const;
-	bool IsLooping() const;
+  const std::vector<AudioSupplier::sample_t> &Buffer() const;
+  const std::vector<AudioSupplier::sample_t> &Buffer3x() const;
+  bool                                        IsLooping() const;
 
-	std::unique_ptr<AudioSupplier> CreateSupplier() const;
+  std::unique_ptr<AudioSupplier> CreateSupplier() const;
 
 
 private:
-	std::string name;
-	std::vector<AudioSupplier::sample_t> buffer;
-	std::vector<AudioSupplier::sample_t> buffer3x;
-	bool isLooped = false;
+  std::string                          name;
+  std::vector<AudioSupplier::sample_t> buffer;
+  std::vector<AudioSupplier::sample_t> buffer3x;
+  bool                                 isLooped = false;
 };

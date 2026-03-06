@@ -31,11 +31,11 @@ void ShaderInfo::AddInput(GraphicsTypes::ShaderType type, size_t offset, size_t 
 
 void ShaderInfo::AddUniformVariable(GraphicsTypes::ShaderType type)
 {
-  UniformBufferEntry &entry = SpecificUniformBuffer.emplace_back(type);
-  entry.Alignment           = graphics_layer::GetAlignmentOfType(type);
-  SpecificUniformBufferSize = (SpecificUniformBufferSize + entry.Alignment - 1) & ~(entry.Alignment - 1);
-  entry.Offset              = SpecificUniformBufferSize;
-  entry.Size                = graphics_layer::GetSizeOfType(entry.Type);
+  UniformBufferEntry &entry  = SpecificUniformBuffer.emplace_back(type);
+  entry.Alignment            = graphics_layer::GetAlignmentOfType(type);
+  SpecificUniformBufferSize  = (SpecificUniformBufferSize + entry.Alignment - 1) & ~(entry.Alignment - 1);
+  entry.Offset               = SpecificUniformBufferSize;
+  entry.Size                 = graphics_layer::GetSizeOfType(entry.Type);
   SpecificUniformBufferSize += entry.Size;
 }
 
@@ -64,10 +64,10 @@ void ShaderInfo::Init()
 
     for(auto &entry : CommonUniformBuffer)
     {
-      entry.Alignment         = graphics_layer::GetAlignmentOfType(entry.Type);
-      CommonUniformBufferSize = (CommonUniformBufferSize + entry.Alignment - 1) & ~(entry.Alignment - 1);
-      entry.Offset            = CommonUniformBufferSize;
-      entry.Size              = graphics_layer::GetSizeOfType(entry.Type);
+      entry.Alignment          = graphics_layer::GetAlignmentOfType(entry.Type);
+      CommonUniformBufferSize  = (CommonUniformBufferSize + entry.Alignment - 1) & ~(entry.Alignment - 1);
+      entry.Offset             = CommonUniformBufferSize;
+      entry.Size               = graphics_layer::GetSizeOfType(entry.Type);
       CommonUniformBufferSize += entry.Size;
     }
 #ifdef ASL_BUILD_WASM

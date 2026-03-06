@@ -21,21 +21,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 
 
-
-class ImageFileData {
+class ImageFileData
+{
 public:
-	// Computes the image file data from a path. If the path has a source directory,
-	// it has to be specified here.
-	ImageFileData(const std::filesystem::path &path, const std::filesystem::path &source = {});
+  // Computes the image file data from a path. If the path has a source directory,
+  // it has to be specified here.
+  ImageFileData(const std::filesystem::path &path, const std::filesystem::path &source = {});
 
 
 public:
-	std::filesystem::path path;
-	std::string extension;
-	std::string name;
-	bool is2x = false;
-	bool noReduction = false;
-	bool isSwizzleMask = false;
-	BlendingMode blendingMode = BlendingMode::ALPHA;
-	size_t frameNumber = 0;
+  std::filesystem::path path;
+  std::string           extension;
+  std::string           name;
+  bool                  is2x          = false;
+  bool                  noReduction   = false;
+  bool                  isSwizzleMask = false;
+  BlendingMode          blendingMode  = BlendingMode::ALPHA;
+  size_t                frameNumber   = 0;
 };

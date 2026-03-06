@@ -22,92 +22,77 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 // basic mathematical operations that make sense for vectors are supported.
 // Internally the coordinates are stored in a SSE std::vector and the processor's std::vector
 // extensions are used to optimize all operations.
-class Point {
+class Point
+{
 public:
-	Point() noexcept;
-	Point(double x, double y) noexcept;
+  Point() noexcept;
+  Point(double x, double y) noexcept;
 
-	// Check if the point is anything but (0, 0).
-	explicit operator bool() const noexcept;
-	bool operator!() const noexcept;
+  // Check if the point is anything but (0, 0).
+  explicit operator bool() const noexcept;
+  bool     operator!() const noexcept;
 
-	bool operator==(const Point &other) const noexcept;
-	bool operator!=(const Point &other) const noexcept;
+  bool operator==(const Point &other) const noexcept;
+  bool operator!=(const Point &other) const noexcept;
 
-	Point operator+(const Point &point) const;
-	Point &operator+=(const Point &point);
-	Point operator-(const Point &point) const;
-	Point &operator-=(const Point &point);
-	Point operator-() const;
+  Point  operator+(const Point &point) const;
+  Point &operator+=(const Point &point);
+  Point  operator-(const Point &point) const;
+  Point &operator-=(const Point &point);
+  Point  operator-() const;
 
-	Point operator*(double scalar) const;
-	friend Point operator*(double scalar, const Point &point);
-	Point &operator*=(double scalar);
-	Point operator/(double scalar) const;
-	Point &operator/=(double scalar);
+  Point        operator*(double scalar) const;
+  friend Point operator*(double scalar, const Point &point);
+  Point       &operator*=(double scalar);
+  Point        operator/(double scalar) const;
+  Point       &operator/=(double scalar);
 
-	// Multiply the respective components of each Point.
-	Point operator*(const Point &other) const;
-	Point &operator*=(const Point &other);
+  // Multiply the respective components of each Point.
+  Point  operator*(const Point &other) const;
+  Point &operator*=(const Point &other);
 
-	double &X();
-	const double &X() const noexcept;
-	double &Y();
-	const double &Y() const noexcept;
+  double       &X();
+  const double &X() const noexcept;
+  double       &Y();
+  const double &Y() const noexcept;
 
-	void Set(double x, double y);
+  void Set(double x, double y);
 
-	// Operations that treat this point as a std::vector from (0, 0):
-	double Dot(const Point &point) const;
-	double Cross(const Point &point) const;
+  // Operations that treat this point as a std::vector from (0, 0):
+  double Dot(const Point &point) const;
+  double Cross(const Point &point) const;
 
-	double Length() const;
-	double LengthSquared() const;
-	Point Unit() const;
+  double Length() const;
+  double LengthSquared() const;
+  Point  Unit() const;
 
-	double Distance(const Point &point) const;
-	double DistanceSquared(const Point &point) const;
+  double Distance(const Point &point) const;
+  double DistanceSquared(const Point &point) const;
 
-	Point Lerp(const Point &to, const double c) const;
+  Point Lerp(const Point &to, const double c) const;
 
-	// Take the absolute value of both coordinates.
-	friend Point abs(const Point &p);
-	// Use the min of each x and each y coordinates.
-	friend Point min(const Point &p, const Point &q);
-	// Use the max of each x and each y coordinates.
-	friend Point max(const Point &p, const Point &q);
+  // Take the absolute value of both coordinates.
+  friend Point abs(const Point &p);
+  // Use the min of each x and each y coordinates.
+  friend Point min(const Point &p, const Point &q);
+  // Use the max of each x and each y coordinates.
+  friend Point max(const Point &p, const Point &q);
 
 
 private:
-	double x;
-	double y;
+  double x;
+  double y;
 };
 
 
-
 // Inline accessor functions, for speed:
-inline double &Point::X()
-{
-	return x;
-}
+inline double &Point::X() { return x; }
 
 
-
-inline const double &Point::X() const noexcept
-{
-	return x;
-}
+inline const double &Point::X() const noexcept { return x; }
 
 
-
-inline double &Point::Y()
-{
-	return y;
-}
+inline double &Point::Y() { return y; }
 
 
-
-inline const double &Point::Y() const noexcept
-{
-	return y;
-}
+inline const double &Point::Y() const noexcept { return y; }

@@ -18,14 +18,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <SDL3/SDL_events.h>
 
 
-
 // A class containing all custom events we register in SDL.
-class CustomEvents {
+class CustomEvents
+{
 public:
-	static void Init();
+  static void Init();
 
-	// Get the registered ID of the custom resize event.
-	static Uint32 GetResize();
-	// Send the custom resize event.
-	static void SendResize();
+  // Get the registered ID of the custom resize event.
+  static Uint32 GetResize();
+  // Send the custom resize event.
+  static void SendResize();
 };

@@ -23,55 +23,57 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class DataNode;
 
 
-
 // A CategoryList is a list of names that are associated to a Category of items (e.g. ships
 // or outfits). Categories within the list are sorted by the precedence of each Category.
 // Any conflicting precedences are resolved by sorting the names of the Categories
 // alphabetically.
-class CategoryList {
+class CategoryList
+{
 public:
-	// A Category is a string with some precedence to it. The precedence is used to sort
-	// the Category within the CategoryList. Only the CategoryList has access to the
-	// precedence of each Category. All outside classes can only see the Category's
-	// name.
-	class Category {
-	public:
-		Category(const std::string &name, int precedence) : name(name), precedence(precedence) {}
-		const std::string &Name() const { return name; }
-		const bool operator<(const Category &other) const { return SortHelper(*this, other); }
-		const bool operator()(const Category &a, const Category &b) const { return SortHelper(a, b); }
+  // A Category is a string with some precedence to it. The precedence is used to sort
+  // the Category within the CategoryList. Only the CategoryList has access to the
+  // precedence of each Category. All outside classes can only see the Category's
+  // name.
+  class Category
+  {
+  public:
+    Category(const std::string &name, int precedence) : name(name), precedence(precedence) {}
+    const std::string &Name() const { return name; }
+    const bool         operator<(const Category &other) const { return SortHelper(*this, other); }
+    const bool         operator()(const Category &a, const Category &b) const { return SortHelper(a, b); }
 
-	private:
-		static const bool SortHelper(const Category &a, const Category &b);
+  private:
+    static const bool SortHelper(const Category &a, const Category &b);
 
 
-	private:
-		friend class CategoryList;
-		std::string name;
-		int precedence = 0;
-	};
+  private:
+    friend class CategoryList;
+    std::string name;
+    int         precedence = 0;
+  };
 
 public:
-	CategoryList() = default;
+  CategoryList() = default;
 
-	void Load(const DataNode &node);
+  void Load(const DataNode &node);
+  void Clear();
 
-	// Sort the CategoryList. Categories are sorted by precedence. If multiple Categories
-	// share the same precedence then they are sorted alphabetically.
-	void Sort();
+  // Sort the CategoryList. Categories are sorted by precedence. If multiple Categories
+  // share the same precedence then they are sorted alphabetically.
+  void Sort();
 
-	// Determine if the CategoryList contains a Category with the given name.
-	bool Contains(const std::string &name) const;
+  // Determine if the CategoryList contains a Category with the given name.
+  bool Contains(const std::string &name) const;
 
-	const Category GetCategory(const std::string &name) const;
+  const Category GetCategory(const std::string &name) const;
 
-	typename std::vector<Category>::iterator begin() noexcept { return list.begin(); }
-	typename std::vector<Category>::const_iterator begin() const noexcept { return list.begin(); }
-	typename std::vector<Category>::iterator end() noexcept { return list.end(); }
-	typename std::vector<Category>::const_iterator end() const noexcept { return list.end(); }
+  typename std::vector<Category>::iterator       begin() noexcept { return list.begin(); }
+  typename std::vector<Category>::const_iterator begin() const noexcept { return list.begin(); }
+  typename std::vector<Category>::iterator       end() noexcept { return list.end(); }
+  typename std::vector<Category>::const_iterator end() const noexcept { return list.end(); }
 
 
 private:
-	std::vector<Category> list;
-	int currentPrecedence = 0;
+  std::vector<Category> list;
+  int                   currentPrecedence = 0;
 };

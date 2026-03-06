@@ -16,43 +16,39 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "MenuAnimationPanel.h"
 
 #include "Angle.h"
-#include "audio/Audio.h"
 #include "Color.h"
-#include "shader/PointerShader.h"
 #include "UI.h"
-
+#include "audio/Audio.h"
+#include "shader/PointerShader.h"
 
 
 MenuAnimationPanel::MenuAnimationPanel()
 {
-	SetTrapAllEvents(false);
+  SetTrapAllEvents(false);
 
-	Audio::Play(Audio::Get("landing"), SoundCategory::UI);
+  Audio::Play(Audio::Get("landing"), SoundCategory::UI);
 }
-
 
 
 void MenuAnimationPanel::Step()
 {
-	alpha -= .02f;
-	// Kill this panel if the animation is done.
-	if(alpha <= 0.f)
-		GetUI()->Pop(this);
+  alpha -= .02f;
+  // Kill this panel if the animation is done.
+  if(alpha <= 0.f) GetUI().Pop(this);
 }
-
 
 
 void MenuAnimationPanel::Draw()
 {
-	// Draw the shrinking loading circle.
-	Angle da(6.);
-	Angle a(0.);
-	Color color(.5f * alpha, 0.f);
-	PointerShader::Bind();
-	for(int i = 0; i < 60; ++i)
-	{
-		PointerShader::Add(Point(), a.Unit(), 8.f, 20.f, 140.f * alpha, color);
-		a += da;
-	}
-	PointerShader::Unbind();
+  // Draw the shrinking loading circle.
+  Angle da(6.);
+  Angle a(0.);
+  Color color(.5f * alpha, 0.f);
+  PointerShader::Bind();
+  for(int i = 0; i < 60; ++i)
+  {
+    PointerShader::Add(Point(), a.Unit(), 8.f, 20.f, 140.f * alpha, color);
+    a += da;
+  }
+  PointerShader::Unbind();
 }

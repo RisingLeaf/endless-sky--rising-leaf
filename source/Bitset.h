@@ -21,40 +21,40 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <vector>
 
 
-
 // Class representing a bitset with a dynamic size.
-class Bitset {
+class Bitset
+{
 public:
-	// Returns the number of bits this bitset can hold.
-	size_t Size() const noexcept;
-	// Returns the number of bits this bitset has reserved.
-	size_t Capacity() const noexcept;
+  // Returns the number of bits this bitset can hold.
+  size_t Size() const noexcept;
+  // Returns the number of bits this bitset has reserved.
+  size_t Capacity() const noexcept;
 
-	// Resizes the bitset to hold at least the specific amount of bits.
-	void Resize(size_t size);
-	// Clears the bitset. After this call this bitset is empty.
-	void Clear() noexcept;
+  // Resizes the bitset to hold at least the specific amount of bits.
+  void Resize(size_t size);
+  // Clears the bitset. After this call this bitset is empty.
+  void Clear() noexcept;
 
-	// Whether the given bitset has any bits that are also set in this bitset.
-	bool Intersects(const Bitset &other) const noexcept;
-	// Returns the value of the bit at the specified index.
-	bool Test(size_t index) const noexcept;
-	// Sets the bit at the specified index.
-	void Set(size_t index) noexcept;
-	// Resets all bits in the bitset.
-	void Reset() noexcept;
-	// Whether any bits are set.
-	bool Any() const noexcept;
-	// Whether no bits are set.
-	bool None() const noexcept;
+  // Whether the given bitset has any bits that are also set in this bitset.
+  bool Intersects(const Bitset &other) const noexcept;
+  // Returns the value of the bit at the specified index.
+  bool Test(size_t index) const noexcept;
+  // Sets the bit at the specified index.
+  void Set(size_t index) noexcept;
+  // Resets all bits in the bitset.
+  void Reset() noexcept;
+  // Whether any bits are set.
+  bool Any() const noexcept;
+  // Whether no bits are set.
+  bool None() const noexcept;
 
-	// Fills the current bitset with the bits of other.
-	void UpdateWith(const Bitset &other);
+  // Fills the current bitset with the bits of other.
+  void UpdateWith(const Bitset &other);
 
 
 private:
-	static constexpr size_t BITS_PER_BLOCK = std::numeric_limits<uint64_t>::digits;
+  static constexpr size_t BITS_PER_BLOCK = std::numeric_limits<uint64_t>::digits;
 
-	// Stores the bits of the bitset.
-	std::vector<uint64_t> bits;
+  // Stores the bits of the bitset.
+  std::vector<uint64_t> bits;
 };

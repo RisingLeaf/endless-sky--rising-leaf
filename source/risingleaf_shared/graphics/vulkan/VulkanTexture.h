@@ -22,8 +22,8 @@
 
 #include <vulkan/vulkan_core.h>
 
-#include "graphics/graphics_toplevel_defines.h"
 #include "external/vk_mem_alloc.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 
 namespace VulkanObjects

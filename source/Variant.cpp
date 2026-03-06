@@ -22,86 +22,58 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 
 
-
-
-
-Variant::Variant(const DataNode &node)
-{
-	Load(node);
-}
-
+Variant::Variant(const DataNode &node) { Load(node); }
 
 
 void Variant::Load(const DataNode &node)
 {
-	if(node.Token(0) == "variant" && node.Size() >= 2)
-		weight = std::max<int>(1, node.Value(1));
-	else if(node.Token(0) == "add" && node.Size() >= 3)
-		weight = std::max<int>(1, node.Value(2));
+  if(node.Token(0) == "variant" && node.Size() >= 2) weight = std::max<int>(1, node.Value(1));
+  else if(node.Token(0) == "add" && node.Size() >= 3) weight = std::max<int>(1, node.Value(2));
 
-	for(const DataNode &child : node)
-	{
-		int n = 1;
-		if(child.Size() >= 2 && child.Value(1) >= 1.)
-			n = child.Value(1);
-		ships.insert(ships.end(), n, GameData::Ships().Get(child.Token(0)));
-	}
+  for(const DataNode &child : node)
+  {
+    int n = 1;
+    if(child.Size() >= 2 && child.Value(1) >= 1.) n = child.Value(1);
+    ships.insert(ships.end(), n, GameData::Ships().Get(child.Token(0)));
+  }
 }
-
 
 
 // Determine if this variant template uses well-defined data.
 bool Variant::IsValid() const
 {
-	// At least one valid ship is enough to make the variant valid.
-	if(any_of(ships.begin(), ships.end(),
-			[](const Ship *const s) noexcept -> bool { return s->IsValid(); }))
-		return true;
+  // At least one valid ship is enough to make the variant valid.
+  if(any_of(ships.begin(), ships.end(), [](const Ship *const s) noexcept -> bool { return s->IsValid(); })) return true;
 
-	return false;
+  return false;
 }
 
 
-
-int Variant::Weight() const
-{
-	return weight;
-}
+int Variant::Weight() const { return weight; }
 
 
-
-const std::vector<const Ship *> &Variant::Ships() const
-{
-	return ships;
-}
-
+const std::vector<const Ship *> &Variant::Ships() const { return ships; }
 
 
 // The strength of a variant is the sum of the strength of its ships.
 int64_t Variant::Strength() const
 {
-	int64_t strength = 0;
-	for(const Ship *ship : ships)
-		strength += ship->Strength();
-	return strength;
+  int64_t strength = 0;
+  for(const Ship *ship : ships)
+    strength += ship->Strength();
+  return strength;
 }
-
 
 
 bool Variant::operator==(const Variant &other) const
 {
-	// Are the ships of other a permutation of this variant's?
-	if(other.ships.size() != ships.size()
-		|| !is_permutation(ships.begin(), ships.end(), other.ships.begin()))
-		return false;
+  // Are the ships of other a permutation of this variant's?
+  if(other.ships.size() != ships.size() || !is_permutation(ships.begin(), ships.end(), other.ships.begin()))
+    return false;
 
-	// If all checks have passed, these variants are equal.
-	return true;
+  // If all checks have passed, these variants are equal.
+  return true;
 }
 
 
-
-bool Variant::operator!=(const Variant &other) const
-{
-	return !(*this == other);
-}
+bool Variant::operator!=(const Variant &other) const { return !(*this == other); }

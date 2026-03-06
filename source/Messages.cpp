@@ -22,40 +22,35 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <ranges>
 
 
+namespace
+{
+  const int MAX_LOG = 10'000;
 
-namespace {
-	const int MAX_LOG = 10000;
+  std::mutex incomingMutex;
 
-	std::mutex incomingMutex;
-
-	std::vector<std::pair<std::string, const Message::Category *>> incoming;
-	std::vector<Messages::Entry> recent;
-	std::deque<std::pair<std::string, const Message::Category *>> logged;
-}
-
+  std::vector<std::pair<std::string, const Message::Category *>> incoming;
+  std::vector<Messages::Entry>                                   recent;
+  std::deque<std::pair<std::string, const Message::Category *>>  logged;
+} // namespace
 
 
 // Add a message to the list along with its level of importance.
 void Messages::Add(const Message &message)
 {
-	const Message::Category *category = message.GetCategory();
-	if(!category)
-		return;
-	std::string text = message.Text();
+  const Message::Category *category = message.GetCategory();
+  if(!category) return;
+  std::string text = message.Text();
 
-	if(category->AllowsLogDuplicates() || logged.empty() || text != logged.front().first)
-	{
-		logged.emplace_front(text, category);
-		if(logged.size() > MAX_LOG)
-			logged.pop_back();
-	}
+  if(category->AllowsLogDuplicates() || logged.empty() || text != logged.front().first)
+  {
+    logged.emplace_front(text, category);
+    if(logged.size() > MAX_LOG) logged.pop_back();
+  }
 
-	if(category->LogOnly())
-		return;
-	std::lock_guard<std::mutex> lock(incomingMutex);
-	incoming.emplace_back(text, category);
+  if(category->LogOnly()) return;
+  std::lock_guard<std::mutex> lock(incomingMutex);
+  incoming.emplace_back(text, category);
 }
-
 
 
 // Get the messages for the given game step. Any messages that are too old
@@ -63,100 +58,86 @@ void Messages::Add(const Message &message)
 // their "step" set to the given value.
 const std::vector<Messages::Entry> &Messages::Get(int step, int animationDuration)
 {
-	std::lock_guard<std::mutex> lock(incomingMutex);
+  std::lock_guard<std::mutex> lock(incomingMutex);
 
-	// Erase messages that have reached the end of their lifetime.
-	auto it = recent.begin();
-	while(it != recent.end())
-	{
-		if(step - it->step > 1000 + animationDuration || (it->deathStep >= 0 && it->deathStep <= step))
-			it = recent.erase(it);
-		else
-			++it;
-	}
+  // Erase messages that have reached the end of their lifetime.
+  auto it = recent.begin();
+  while(it != recent.end())
+    if(step - it->step > 1000 + animationDuration || (it->deathStep >= 0 && it->deathStep <= step))
+      it = recent.erase(it);
+    else ++it;
 
-	// Load the incoming messages.
-	for(const auto &[message, category] : incoming)
-	{
-		// If this message is not important and it is already being shown in the
-		// list, ignore it.
-		if(category->MainDuplicatesStrategy() == Message::Category::DuplicatesStrategy::KEEP_OLD)
-		{
-			bool skip = false;
-			for(const Messages::Entry &entry : recent)
-				skip |= (entry.message == message);
-			if(skip)
-				continue;
-		}
+  // Load the incoming messages.
+  for(const auto &[message, category] : incoming)
+  {
+    // If this message is not important and it is already being shown in the
+    // list, ignore it.
+    if(category->MainDuplicatesStrategy() == Message::Category::DuplicatesStrategy::KEEP_OLD)
+    {
+      bool skip = false;
+      for(const Messages::Entry &entry : recent)
+        skip |= (entry.message == message);
+      if(skip) continue;
+    }
 
-		for(auto &it : recent)
-		{
-			// Each time a new message comes in, "age" all the existing ones,
-			// except for cases where it would interrupt an animation, to
-			// limit how many of them appear at once.
-			if(step - it.step > animationDuration)
-				it.step -= 60;
-			// For each incoming message, if it exactly matches an existing message,
-			// replace that one with this new one by scheduling the old one for removal.
-			if(category->MainDuplicatesStrategy() == Message::Category::DuplicatesStrategy::KEEP_NEW
-					&& it.message == message && it.deathStep < 0)
-				it.deathStep = step + animationDuration;
-		}
-		recent.emplace_back(step, message, category);
-	}
-	incoming.clear();
-	return recent;
+    for(auto &it : recent)
+    {
+      // Each time a new message comes in, "age" all the existing ones,
+      // except for cases where it would interrupt an animation, to
+      // limit how many of them appear at once.
+      if(step - it.step > animationDuration) it.step -= 60;
+      // For each incoming message, if it exactly matches an existing message,
+      // replace that one with this new one by scheduling the old one for removal.
+      if(category->MainDuplicatesStrategy() == Message::Category::DuplicatesStrategy::KEEP_NEW &&
+         it.message == message && it.deathStep < 0)
+      {
+        it.deathStep = step + animationDuration;
+      }
+    }
+    recent.emplace_back(step, message, category);
+  }
+  incoming.clear();
+  return recent;
 }
 
 
-
-const std::deque<std::pair<std::string, const Message::Category *>> &Messages::GetLog()
-{
-	return logged;
-}
+const std::deque<std::pair<std::string, const Message::Category *>> &Messages::GetLog() { return logged; }
 
 
-
-void Messages::ClearLog()
-{
-	logged.clear();
-}
-
+void Messages::ClearLog() { logged.clear(); }
 
 
 // Reset the messages (i.e. because a new game was loaded).
 void Messages::Reset()
 {
-	std::lock_guard<std::mutex> lock(incomingMutex);
-	incoming.clear();
-	recent.clear();
-	logged.clear();
+  std::lock_guard<std::mutex> lock(incomingMutex);
+  incoming.clear();
+  recent.clear();
+  logged.clear();
 }
-
 
 
 void Messages::LoadLog(const DataNode &node)
 {
-	for(const DataNode &child : node)
-	{
-		if(child.Size() < 2)
-		{
-			child.PrintTrace("Skipping message log entry without category:");
-			continue;
-		}
-		logged.emplace_front(child.Token(1), GameData::MessageCategories().Get(child.Token(0)));
-	}
+  for(const DataNode &child : node)
+  {
+    if(child.Size() < 2)
+    {
+      child.PrintTrace("Skipping message log entry without category:");
+      continue;
+    }
+    logged.emplace_front(child.Token(1), GameData::MessageCategories().Get(child.Token(0)));
+  }
 }
-
 
 
 void Messages::SaveLog(DataWriter &out)
 {
-	out.Write("message log");
-	out.BeginChild();
-	{
-		for(auto &[message, category] : std::ranges::reverse_view(logged))
-			out.Write(category->Name(), message);
-	}
-	out.EndChild();
+  out.Write("message log");
+  out.BeginChild();
+  {
+    for(auto &[message, category] : std::ranges::reverse_view(logged))
+      out.Write(category->TrueName(), message);
+  }
+  out.EndChild();
 }

@@ -16,7 +16,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "PreferencesPanel.h"
 
 #include "Color.h"
-#include "Dialog.h"
+#include "DialogPanel.h"
 #include "Files.h"
 #include "GameData.h"
 #include "Information.h"
@@ -89,6 +89,7 @@ namespace
   const std::string ALERT_INDICATOR           = "Alert indicator";
   const std::string MINIMAP_DISPLAY           = "Show mini-map";
   const std::string HUD_SHIP_OUTLINES         = "Ship outlines in HUD";
+  const std::string BLOCK_SCREEN_SAVER        = "Block screen saver";
 #ifdef _WIN32
   const std::string TITLE_BAR_THEME = "Title bar theme";
   const std::string WINDOW_ROUNDING = "Window rounding";
@@ -96,11 +97,7 @@ namespace
 
   // How many pages of controls and settings there are.
   const int CONTROLS_PAGE_COUNT = 2;
-#ifdef _WIN32
   const int SETTINGS_PAGE_COUNT = 3;
-#else
-  const int SETTINGS_PAGE_COUNT = 2;
-#endif
 
   const std::map<std::string, SoundCategory> volumeBars = {
       {"volume", SoundCategory::MASTER},
@@ -285,11 +282,8 @@ bool PreferencesPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comma
   {
     if(!zones[latest].Value().Has(Command::MENU)) Command::SetKey(zones[latest].Value(), 0);
   }
-  else {
-    return false;
-  }
 
-  return true;
+  return false;
 }
 
 
@@ -317,13 +311,12 @@ bool PreferencesPanel::Click(int x, int y, MouseButton button, int clicks)
     {
       if(zones[index].Value().Has(Command::MENU))
       {
-        GetUI()->Push(new Dialog(
-            [this, index]() { this->editing = this->selected = index; },
-            "Rebinding this key will change the keypress you need to access this menu. "
-            "You really shouldn't rebind this unless needed.",
-            Truncate::NONE,
-            true,
-            true));
+        GetUI().Push(
+            DialogPanel::CallFunctionIfOk(
+                [this, index]() { this->editing = this->selected = index; },
+                "Rebinding this key will change the keypress you need to access this menu. "
+                "You really shouldn't rebind this unless needed.",
+                true));
       }
       else {
         editing = selected = index;
@@ -441,8 +434,8 @@ bool PreferencesPanel::Scroll(double dx, double dy)
       if(Screen::Zoom() != zoom) Screen::SetZoom(Screen::Zoom());
 
       // Convert to raw window coordinates, at the new zoom level.
-      Point point = hoverPoint * (Screen::Zoom() / 100.);
-      point += .5 * Point(Screen::RawWidth(), Screen::RawHeight());
+      Point point  = hoverPoint * (Screen::Zoom() / 100.);
+      point       += .5 * Point(Screen::RawWidth(), Screen::RawHeight());
       SDL_WarpMouseInWindow(nullptr, point.X(), point.Y());
     }
     else if(hoverItem == VIEW_ZOOM_FACTOR)
@@ -463,7 +456,7 @@ bool PreferencesPanel::Scroll(double dx, double dy)
       if(dy < 0.) steps = std::max(0, steps - 20);
       else steps = std::min(120, steps + 20);
       Preferences::SetTooltipActivation(steps);
-      for(auto &panel : GetUI()->Stack())
+      for(auto &panel : GetUI().Stack())
         panel->UpdateTooltipActivation();
     }
     return true;
@@ -520,7 +513,7 @@ void PreferencesPanel::Resize()
   {
     const Interface *pluginUi      = GameData::Interfaces().Get("plugins");
     Rectangle        pluginListBox = pluginUi->GetBox("plugin list");
-    pluginListClip                 = std::make_unique<RenderBuffer>(pluginListBox.Dimensions(), "plugin_list_box");
+    pluginListClip                 = std::make_unique<RenderBuffer>(pluginListBox.Dimensions(), "plugins list");
   }
 }
 
@@ -609,7 +602,8 @@ void PreferencesPanel::DrawControls()
       Command::FASTFORWARD,
       Command::PAUSE,
       Command::HELP,
-      Command::MESSAGE_LOG};
+      Command::MESSAGE_LOG,
+      Command::PERFORMANCE_DISPLAY};
 
   int page = 0;
   for(const Command &command : COMMANDS)
@@ -717,13 +711,12 @@ void PreferencesPanel::DrawSettings()
       ZOOM_FACTOR,
       VIEW_ZOOM_FACTOR,
       SCREEN_MODE_SETTING,
+      BLOCK_SCREEN_SAVER,
       VSYNC_SETTING,
-      CAMERA_ACCELERATION,
       "",
-      "Performance",
-      "Show CPU / GPU load",
+      "Graphics",
+      CAMERA_ACCELERATION,
       "Render motion blur",
-      LARGE_GRAPHICS_REDUCTION,
       "Draw background haze",
       "Draw starfield",
       "Fixed starfield zoom",
@@ -731,9 +724,38 @@ void PreferencesPanel::DrawSettings()
       "Animate main menu background",
       "Show hyperspace flash",
       EXTENDED_JUMP_EFFECTS,
+      CLOAK_OUTLINE,
+      "\t",
+      "Performance",
+      "Show CPU / GPU load",
+      LARGE_GRAPHICS_REDUCTION,
+      "Defer loading images",
       SHIP_OUTLINES,
       HUD_SHIP_OUTLINES,
-      CLOAK_OUTLINE,
+      "",
+      "Map",
+      "Deadline blink by distance",
+      "Hide unexplored map regions",
+      "Show escort systems on map",
+      "Show stored outfits on map",
+      "\n",
+      "Flagship Behavior",
+      "Control ship with mouse",
+      "Aim turrets with mouse",
+      AUTO_AIM_SETTING,
+      AUTO_FIRE_SETTING,
+      TARGET_ASTEROIDS_BASED_ON,
+      BOARDING_PRIORITY,
+      "Rehire extra crew when lost",
+      "Automatically unpark flagship",
+      FLAGSHIP_SPACE_PRIORITY,
+      "",
+      "Fleet Behavior",
+      TURRET_TRACKING,
+      EXPEND_AMMO,
+      FLOTSAM_SETTING,
+      FIGHTER_REPAIR,
+      "Fighters transfer cargo",
       "\t",
       "HUD",
       STATUS_OVERLAYS_ALL,
@@ -752,29 +774,6 @@ void PreferencesPanel::DrawSettings()
       ALERT_INDICATOR,
       "Extra fleet status messages",
       "\n",
-      "Gameplay",
-      "Control ship with mouse",
-      "Aim turrets with mouse",
-      AUTO_AIM_SETTING,
-      AUTO_FIRE_SETTING,
-      TURRET_TRACKING,
-      TARGET_ASTEROIDS_BASED_ON,
-      BOARDING_PRIORITY,
-      EXPEND_AMMO,
-      FLOTSAM_SETTING,
-      FIGHTER_REPAIR,
-      "Fighters transfer cargo",
-      "Rehire extra crew when lost",
-      "Automatically unpark flagship",
-      FLAGSHIP_SPACE_PRIORITY,
-      "\t",
-      "Map",
-      "Deadline blink by distance",
-      "Hide unexplored map regions",
-      "Show escort systems on map",
-      "Show stored outfits on map",
-      "System map sends move orders",
-      "",
       "Other",
       "Always underline shortcuts",
       REACTIVATE_HELP,
@@ -785,10 +784,9 @@ void PreferencesPanel::DrawSettings()
       DATE_FORMAT,
       "Show parenthesis",
       NOTIFY_ON_DEST,
-      "Save message log"
+      "Save message log",
 #ifdef _WIN32
-      ,
-      "\n",
+      "\t",
       "Windows Options",
       TITLE_BAR_THEME,
       WINDOW_ROUNDING
@@ -1251,7 +1249,7 @@ void PreferencesPanel::RenderPluginDescription(const Plugin &plugin)
   pluginDescriptionBuffer->SetTarget();
 
   Point top(pluginDescriptionBuffer->Left(), pluginDescriptionBuffer->Top());
-  if(sprite && sprite->Texture(false).GetTexture())
+  if(sprite && sprite->Texture().GetTexture())
   {
     Point center(0., top.Y() + .5 * sprite->Height());
     SpriteShader::Draw(sprite, center);
@@ -1283,7 +1281,7 @@ void PreferencesPanel::Exit()
 {
   if(Command::MENU.HasConflict() || !Command::MENU.HasBinding())
   {
-    GetUI()->Push(new Dialog("Menu keybind is not bound or has conflicts."));
+    GetUI().Push(DialogPanel::Info("Menu keybind is not bound or has conflicts."));
     return;
   }
 
@@ -1291,7 +1289,7 @@ void PreferencesPanel::Exit()
 
   if(recacheDeadlines) player.CacheMissionInformation(true);
 
-  GetUI()->Pop(this);
+  GetUI().Pop(this);
 }
 
 
@@ -1309,7 +1307,7 @@ void PreferencesPanel::HandleSettingsString(const std::string &str, Point cursor
       // Only show this if it's not possible to zoom the view at all, as
       // otherwise the dialog will show every time, which is annoying.
       if(newZoom == ZOOM_FACTOR_MIN + ZOOM_FACTOR_INCREMENT)
-        GetUI()->Push(new Dialog("Your screen resolution is too low to support a zoom level above 100%."));
+        GetUI().Push(DialogPanel::Info("Your screen resolution is too low to support a zoom level above 100%."));
       Screen::SetZoom(ZOOM_FACTOR_MIN);
     }
     // Convert to raw window coordinates, at the new zoom level.
@@ -1348,8 +1346,9 @@ void PreferencesPanel::HandleSettingsString(const std::string &str, Point cursor
   {
     if(!Preferences::ToggleVSync())
     {
-      GetUI()->Push(
-          new Dialog("Unable to change VSync state. (Your system's graphics settings may be controlling it instead.)"));
+      GetUI().Push(
+          DialogPanel::Info(
+              "Unable to change VSync state. (Your system's graphics settings may be controlling it instead.)"));
     }
   }
   else if(str == CAMERA_ACCELERATION)
@@ -1421,7 +1420,7 @@ void PreferencesPanel::HandleSettingsString(const std::string &str, Point cursor
     int steps = Preferences::TooltipActivation() + 20;
     if(steps > 120) steps = 0;
     Preferences::SetTooltipActivation(steps);
-    for(auto &panel : GetUI()->Stack())
+    for(auto &panel : GetUI().Stack())
       panel->UpdateTooltipActivation();
   }
   else if(str == FLAGSHIP_SPACE_PRIORITY)
@@ -1443,6 +1442,10 @@ void PreferencesPanel::HandleSettingsString(const std::string &str, Point cursor
   else if(str == MINIMAP_DISPLAY)
   {
     Preferences::ToggleMinimapDisplay();
+  }
+  else if(str == BLOCK_SCREEN_SAVER)
+  {
+    Preferences::ToggleBlockScreenSaver();
   }
 #ifdef _WIN32
   else if(str == TITLE_BAR_THEME)

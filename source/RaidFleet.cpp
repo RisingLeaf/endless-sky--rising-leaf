@@ -22,48 +22,33 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 
 
-
-
-RaidFleet::RaidFleet(const Fleet *fleet, double minAttraction, double maxAttraction)
-	: fleet(fleet), minAttraction(minAttraction), maxAttraction(maxAttraction)
+RaidFleet::RaidFleet(const Fleet *fleet, double minAttraction, double maxAttraction) :
+  fleet(fleet), minAttraction(minAttraction), maxAttraction(maxAttraction)
 {
 }
-
 
 
 void RaidFleet::Load(std::vector<RaidFleet> &raidFleets, const DataNode &node, bool remove, int valueIndex)
 {
-	const Fleet *fleet = GameData::Fleets().Get(node.Token(valueIndex));
-	if(remove)
-	{
-		auto fleetMatcher = [fleet](const RaidFleet &raidFleet) noexcept -> bool {
-			return raidFleet.GetFleet() == fleet;
-		};
-		raidFleets.erase(remove_if(raidFleets.begin(), raidFleets.end(), fleetMatcher), raidFleets.end());
-	}
-	else
-		raidFleets.emplace_back(fleet,
-			node.Size() > (valueIndex + 1) ? node.Value(valueIndex + 1) : 2.,
-			node.Size() > (valueIndex + 2) ? node.Value(valueIndex + 2) : 0.);
+  const Fleet *fleet = GameData::Fleets().Get(node.Token(valueIndex));
+  if(remove)
+  {
+    auto fleetMatcher = [fleet](const RaidFleet &raidFleet) noexcept -> bool { return raidFleet.GetFleet() == fleet; };
+    raidFleets.erase(remove_if(raidFleets.begin(), raidFleets.end(), fleetMatcher), raidFleets.end());
+  }
+  else {
+    raidFleets.emplace_back(
+        fleet,
+        node.Size() > (valueIndex + 1) ? node.Value(valueIndex + 1) : 2.,
+        node.Size() > (valueIndex + 2) ? node.Value(valueIndex + 2) : 0.);
+  }
 }
 
 
-
-const Fleet *RaidFleet::GetFleet() const
-{
-	return fleet;
-}
+const Fleet *RaidFleet::GetFleet() const { return fleet; }
 
 
-
-double RaidFleet::MinAttraction() const
-{
-	return minAttraction;
-}
+double RaidFleet::MinAttraction() const { return minAttraction; }
 
 
-
-double RaidFleet::MaxAttraction() const
-{
-	return maxAttraction;
-}
+double RaidFleet::MaxAttraction() const { return maxAttraction; }

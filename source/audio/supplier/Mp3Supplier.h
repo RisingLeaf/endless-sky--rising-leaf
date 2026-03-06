@@ -20,18 +20,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 /// Streams audio from an MP3 file.
-class Mp3Supplier : public AsyncAudioSupplier {
+class Mp3Supplier : public AsyncAudioSupplier
+{
 public:
-	explicit Mp3Supplier(std::shared_ptr<std::iostream> data, bool looping = false);
+  explicit Mp3Supplier(std::shared_ptr<std::iostream> data, bool looping = false);
 
 
 private:
-	/// This is the entry point for the decoding thread.
-	void Decode() override;
+  /// This is the entry point for the decoding thread.
+  void Decode() override;
 
-  static ma_result OnRead(
-    ma_decoder* pDecoder,
-    void* pBufferOut,
-    size_t bytesToRead,
-    size_t* pBytesRead);
+  static ma_result OnRead(ma_decoder *pDecoder, void *pBufferOut, size_t bytesToRead, size_t *pBytesRead);
 };

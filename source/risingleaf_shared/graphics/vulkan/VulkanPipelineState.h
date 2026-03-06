@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANPIPELINESTATE_H
 #define VULKANPIPELINESTATE_H
@@ -22,22 +23,19 @@ namespace VulkanObjects
 {
   struct VulkanPipelineState
   {
-    bool                                  Color         = true;
-    int                                   Samples       = 1;
-    const class VulkanShaderInstance     *Shader        = nullptr;
-    const class VulkanRenderPassInstance *RenderPass    = nullptr;
+    bool                                  Color      = true;
+    int                                   Samples    = 1;
+    const class VulkanShaderInstance     *Shader     = nullptr;
+    const class VulkanRenderPassInstance *RenderPass = nullptr;
 
-    GraphicsTypes::RenderState            RenderState{};
+    GraphicsTypes::RenderState RenderState{};
 
     bool operator==(const VulkanPipelineState &other) const
     {
-      return this->Color         == other.Color
-          && this->Samples       == other.Samples
-          && this->RenderPass    == other.RenderPass
-          && this->Shader        == other.Shader
-          && this->RenderState   == other.RenderState;
+      return this->Color == other.Color && this->Samples == other.Samples && this->RenderPass == other.RenderPass &&
+             this->Shader == other.Shader && this->RenderState == other.RenderState;
     }
   };
-}
+} // namespace VulkanObjects
 
-#endif //VULKANPIPELINESTATE_H
+#endif // VULKANPIPELINESTATE_H

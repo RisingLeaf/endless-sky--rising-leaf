@@ -22,119 +22,86 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 
 
-
-namespace {
-	constexpr int STRIDE = 4;
+namespace
+{
+  constexpr int STRIDE = 4;
 }
-
 
 
 void Swizzle::Load(const DataNode &node)
 {
-	name = node.Token(1);
+  name = node.Token(1);
 
-	for(const DataNode &child : node)
-	{
-		const std::string &key = child.Token(0);
+  for(const DataNode &child : node)
+  {
+    const std::string &key = child.Token(0);
 
-		// The corresponding row of the matrix for each channel name.
-		static const std::array<std::pair<std::string, int>, 4> channels = {{
-			{"red", 0},
-			{"green", 1},
-			{"blue", 2},
-			{"alpha", 3}
-		}};
-		auto channel = std::find_if(channels.cbegin(), channels.cend(), [key](const auto &kv)
-		{
-			return kv.first == key;
-		});
-		if(channel != channels.cend())
-		{
-			// Fill in the row of the matrix for the channel.
-			// We subtract one to account for the name being in the node.
-			int channelStartIndex = channel->second * STRIDE;
-			int elementNum = std::min(child.Size() - 1, 4);
-			for(int i = 0; i < elementNum; i++)
-				matrix[channelStartIndex + i] = child.Value(i + 1);
-		}
-		else if(key == "override")
-			overrideMask = true;
-		else
-			child.PrintTrace("Unrecognized attribute in swizzle definition:");
-	}
+    // The corresponding row of the matrix for each channel name.
+    static const std::array<std::pair<std::string, int>, 4> channels = {
+        {{"red", 0}, {"green", 1}, {"blue", 2}, {"alpha", 3}}};
+    auto channel = std::find_if(channels.cbegin(), channels.cend(), [key](const auto &kv) { return kv.first == key; });
+    if(channel != channels.cend())
+    {
+      // Fill in the row of the matrix for the channel.
+      // We subtract one to account for the name being in the node.
+      int channelStartIndex = channel->second * STRIDE;
+      int elementNum        = std::min(child.Size() - 1, 4);
+      for(int i = 0; i < elementNum; i++)
+        matrix[channelStartIndex + i] = child.Value(i + 1);
+    }
+    else if(key == "override")
+    {
+      overrideMask = true;
+    }
+    else {
+      child.PrintTrace("Unrecognized attribute in swizzle definition:");
+    }
+  }
 
-	// Special-case flag for when applying a swizzle would do nothing at all.
-	identity = matrix == IDENTITY_MATRIX;
-	loaded = true;
+  // Special-case flag for when applying a swizzle would do nothing at all.
+  identity = matrix == IDENTITY_MATRIX;
+  loaded   = true;
 }
 
 
-
-bool Swizzle::IsLoaded() const
-{
-	return loaded;
-}
+bool Swizzle::IsLoaded() const { return loaded; }
 
 
-
-const std::string &Swizzle::Name() const
-{
-	return name;
-}
+const std::string &Swizzle::Name() const { return name; }
 
 
-
-bool Swizzle::IsIdentity() const
-{
-	return identity;
-}
+bool Swizzle::IsIdentity() const { return identity; }
 
 
-
-bool Swizzle::OverrideMask() const
-{
-	return overrideMask;
-}
+bool Swizzle::OverrideMask() const { return overrideMask; }
 
 
-
-const float *Swizzle::MatrixPtr() const
-{
-	return matrix.data();
-}
-
+const float *Swizzle::MatrixPtr() const { return matrix.data(); }
 
 
 Color Swizzle::Apply(const Color &to) const
 {
-	const float *colorPtr = to.Get();
-	std::array<float, 4> newColor = {0, 0, 0, 0};
+  const float         *colorPtr = to.Get();
+  std::array<float, 4> newColor = {0, 0, 0, 0};
 
-	// Manual matrix multiply into newColor.
-	for(int i = 0; i < 4; i++)
-		for(int j = 0; j < 4; j++)
-			newColor[i] += colorPtr[j] * matrix[i * STRIDE + j];
+  // Manual matrix multiply into newColor.
+  for(int i = 0; i < 4; i++)
+    for(int j = 0; j < 4; j++)
+      newColor[i] += colorPtr[j] * matrix[i * STRIDE + j];
 
-	return Color(newColor[0], newColor[1], newColor[2], newColor[3]);
+  return Color(newColor[0], newColor[1], newColor[2], newColor[3]);
 }
-
 
 
 const Swizzle *Swizzle::None()
 {
-	static const Swizzle IDENTITY_SWIZZLE(
-		true,
-		true,
-		true,
-		IDENTITY_MATRIX
-	);
+  static const Swizzle IDENTITY_SWIZZLE(true, true, true, IDENTITY_MATRIX);
 
-	return &IDENTITY_SWIZZLE;
+  return &IDENTITY_SWIZZLE;
 }
 
 
-
-Swizzle::Swizzle(bool identity, bool loaded, bool overrideMask, std::array<float, 16> matrix)
-	: identity(identity), loaded(loaded), overrideMask(overrideMask), matrix(matrix)
+Swizzle::Swizzle(bool identity, bool loaded, bool overrideMask, std::array<float, 16> matrix) :
+  identity(identity), loaded(loaded), overrideMask(overrideMask), matrix(matrix)
 {
 }

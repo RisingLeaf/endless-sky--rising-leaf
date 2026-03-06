@@ -99,7 +99,7 @@ void OutlineShader::Draw(
   GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
 
   graphics_layer::TextureList texture_list;
-  texture_list.AddTexture(sprite->Texture(unit.Length() * Screen::Zoom() > 50.).GetTexture(), 0, false);
+  texture_list.AddTexture(sprite->Texture().GetTexture(), 0, false);
   texture_list.Bind(GameWindow::GetInstance());
 
   square.Draw(GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);

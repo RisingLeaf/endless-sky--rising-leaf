@@ -22,47 +22,32 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <mutex>
 
 
-
-namespace {
-	std::map<std::string, Sprite> sprites;
-
-	std::mutex modifyMutex;
-}
-
-
-
-const Sprite *SpriteSet::Get(const std::string &name)
+namespace
 {
-	return Modify(name);
-}
+  std::map<std::string, Sprite> sprites;
 
+  std::mutex modifyMutex;
+} // namespace
+
+
+const Sprite *SpriteSet::Get(const std::string &name) { return Modify(name); }
 
 
 void SpriteSet::CheckReferences()
 {
-	for(const auto &pair : sprites)
-	{
-		const Sprite &sprite = pair.second;
-		if(sprite.Height() == 0 && sprite.Width() == 0)
-			// Landscapes are allowed to still be empty.
-			if(!pair.first.starts_with("land/"))
-				Logger::LogError("Warning: image \"" + pair.first + "\" is referred to, but has no pixels.");
-	}
+  for(const auto &[name, sprite] : sprites)
+    if(!sprite.HasDimensions())
+      Logger::Log("Image \"" + name + "\" is referred to, but has no pixels.", Logger::Level::WARNING);
 }
-
 
 
 Sprite *SpriteSet::Modify(const std::string &name)
 {
-	std::lock_guard<std::mutex> guard(modifyMutex);
+  std::lock_guard<std::mutex> guard(modifyMutex);
 
-	auto it = sprites.find(name);
-	if(it == sprites.end())
-		it = sprites.emplace(name, Sprite(name)).first;
-	return &it->second;
+  auto it = sprites.find(name);
+  if(it == sprites.end()) it = sprites.emplace(name, Sprite(name)).first;
+  return &it->second;
 }
 
-void SpriteSet::Clear()
-{
-  sprites.clear();
-}
+void SpriteSet::Clear() { sprites.clear(); }

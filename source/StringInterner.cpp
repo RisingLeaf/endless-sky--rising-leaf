@@ -21,32 +21,24 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 
 
-
-
-
 // String interning: return a pointer to a character string that matches the
 // given string but has static storage duration.
 const char *StringInterner::Intern(const char *key)
 {
-	static std::set<std::string> interned;
-	static std::shared_mutex m;
+  static std::set<std::string> interned;
+  static std::shared_mutex     m;
 
-	// Search using a shared lock, allows parallel access by multiple threads.
-	{
-		std::shared_lock readLock(m);
-		auto it = interned.find(key);
-		if(it != interned.end())
-			return it->c_str();
-	}
+  // Search using a shared lock, allows parallel access by multiple threads.
+  {
+    std::shared_lock readLock(m);
+    auto             it = interned.find(key);
+    if(it != interned.end()) return it->c_str();
+  }
 
-	// Insert using an exclusive lock, if needed. Blocks all parallel access.
-	std::unique_lock writeLock(m);
-	return interned.insert(key).first->c_str();
+  // Insert using an exclusive lock, if needed. Blocks all parallel access.
+  std::unique_lock writeLock(m);
+  return interned.insert(key).first->c_str();
 }
 
 
-
-const char *StringInterner::Intern(const std::string key)
-{
-	return Intern(key.c_str());
-}
+const char *StringInterner::Intern(const std::string key) { return Intern(key.c_str()); }

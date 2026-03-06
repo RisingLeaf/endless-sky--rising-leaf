@@ -25,13 +25,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 // memory. Each block is 16-bit stereo, 44100 Hz. If no file is specified, or if
 // the decoding thread is not done yet, it returns silence rather than blocking,
 // so the game won't freeze if the music stops for some reason.
-class Music {
+class Music
+{
 public:
-	static void Init(const std::vector<std::filesystem::path> &sources);
+  static void Init(const std::vector<std::filesystem::path> &sources);
 
-	static std::unique_ptr<AudioSupplier> CreateSupplier(const std::string &name, bool looping);
+  static std::unique_ptr<AudioSupplier> CreateSupplier(const std::string &name, bool looping);
 
 
 public:
-	Music() = delete;
+  Music() = delete;
 };

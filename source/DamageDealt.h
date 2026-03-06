@@ -20,73 +20,72 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class Weapon;
 
 
-
 // A class representing the exact damage dealt to a ship for all
 // damage types, passed to Ship so that it can be applied. Includes
 // the weapon used, damage scale, and whether the damage was from a
 // blast for Ship::TakeDamage to access.
-class DamageDealt {
+class DamageDealt
+{
 public:
-	DamageDealt(const Weapon &weapon, double scaling)
-		: weapon(weapon), scaling(scaling) {}
+  DamageDealt(const Weapon &weapon, double scaling) : weapon(weapon), scaling(scaling) {}
 
-	// The weapon that dealt damage.
-	const Weapon &GetWeapon() const;
-	// The damage scaling that was used for this damage.
-	double Scaling() const;
+  // The weapon that dealt damage.
+  const Weapon &GetWeapon() const;
+  // The damage scaling that was used for this damage.
+  double Scaling() const;
 
-	// Instantaneous damage types.
-	double Shield() const noexcept;
-	double Hull() const noexcept;
-	double Energy() const noexcept;
-	double Heat() const noexcept;
-	double Fuel() const noexcept;
+  // Instantaneous damage types.
+  double Shield() const noexcept;
+  double Hull() const noexcept;
+  double Energy() const noexcept;
+  double Heat() const noexcept;
+  double Fuel() const noexcept;
 
-	// DoT damage types with an instantaneous analog.
-	double Discharge() const noexcept;
-	double Corrosion() const noexcept;
-	double Ion() const noexcept;
-	double Scrambling() const noexcept;
-	double Burn() const noexcept;
-	double Leak() const noexcept;
+  // DoT damage types with an instantaneous analog.
+  double Discharge() const noexcept;
+  double Corrosion() const noexcept;
+  double Ion() const noexcept;
+  double Scrambling() const noexcept;
+  double Burn() const noexcept;
+  double Leak() const noexcept;
 
-	// Unique special damage types.
-	double Disruption() const noexcept;
-	double Slowing() const noexcept;
+  // Unique special damage types.
+  double Disruption() const noexcept;
+  double Slowing() const noexcept;
 
-	// Hit force applied as a point std::vector.
-	const Point &HitForce() const noexcept;
+  // Hit force applied as a point std::vector.
+  const Point &HitForce() const noexcept;
 
 
 private:
-	// Friend of DamageProfile so that it can easily set all the damage
-	// values.
-	friend class DamageProfile;
+  // Friend of DamageProfile so that it can easily set all the damage
+  // values.
+  friend class DamageProfile;
 
-	const Weapon &weapon;
-	double scaling;
+  const Weapon &weapon;
+  double        scaling;
 
-	double hullDamage = 0.;
-	double shieldDamage = 0.;
-	double energyDamage = 0.;
-	double heatDamage = 0.;
-	double fuelDamage = 0.;
+  double hullDamage   = 0.;
+  double shieldDamage = 0.;
+  double energyDamage = 0.;
+  double heatDamage   = 0.;
+  double fuelDamage   = 0.;
 
-	double corrosionDamage = 0.;
-	double dischargeDamage = 0.;
-	double ionDamage = 0.;
-	double scramblingDamage = 0.;
-	double burnDamage = 0.;
-	double leakDamage = 0.;
+  double corrosionDamage  = 0.;
+  double dischargeDamage  = 0.;
+  double ionDamage        = 0.;
+  double scramblingDamage = 0.;
+  double burnDamage       = 0.;
+  double leakDamage       = 0.;
 
-	double disruptionDamage = 0.;
-	double slowingDamage = 0.;
+  double disruptionDamage = 0.;
+  double slowingDamage    = 0.;
 
-	Point forcePoint;
+  Point forcePoint;
 };
 
 inline const Weapon &DamageDealt::GetWeapon() const { return weapon; }
-inline double DamageDealt::Scaling() const { return scaling; }
+inline double        DamageDealt::Scaling() const { return scaling; }
 
 inline double DamageDealt::Shield() const noexcept { return shieldDamage; }
 inline double DamageDealt::Hull() const noexcept { return hullDamage; }

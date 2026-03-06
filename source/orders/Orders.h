@@ -24,48 +24,49 @@ class Ship;
 class System;
 
 
-
 // This is a base class for handling ship orders. It contains members common
 // for OrderSet and OrderSingle: information about targets and the list
 // of possible order types.
-class Orders {
+class Orders
+{
 public:
-	enum class Types {
-		HOLD_POSITION,
-		// Hold active is the same command as hold position, but it is given when a ship
-		// actively needs to move back to the position it was holding.
-		HOLD_ACTIVE,
-		MOVE_TO,
-		KEEP_STATION,
-		GATHER,
-		ATTACK,
-		FINISH_OFF,
-		HOLD_FIRE,
-		// MINE is for fleet targeting the asteroid for mining. ATTACK is used
-		// to chase and attack the asteroid.
-		MINE,
-		// HARVEST is related to MINE and is for picking up flotsam after
-		// ATTACK.
-		HARVEST,
-		// The last element needed to determine the size of the enum.
-		TYPES_COUNT
-	};
+  enum class Types
+  {
+    HOLD_POSITION,
+    // Hold active is the same command as hold position, but it is given when a ship
+    // actively needs to move back to the position it was holding.
+    HOLD_ACTIVE,
+    MOVE_TO,
+    KEEP_STATION,
+    GATHER,
+    ATTACK,
+    FINISH_OFF,
+    HOLD_FIRE,
+    // MINE is for fleet targeting the asteroid for mining. ATTACK is used
+    // to chase and attack the asteroid.
+    MINE,
+    // HARVEST is related to MINE and is for picking up flotsam after
+    // ATTACK.
+    HARVEST,
+    // The last element needed to determine the size of the enum.
+    TYPES_COUNT
+  };
 
 
 public:
-	void SetTargetShip(std::shared_ptr<Ship> ship);
-	void SetTargetAsteroid(std::shared_ptr<Minable> asteroid);
-	void SetTargetPoint(const Point &point);
-	void SetTargetSystem(const System *system);
-	std::shared_ptr<Ship> GetTargetShip() const;
-	std::shared_ptr<Minable> GetTargetAsteroid() const;
-	const Point &GetTargetPoint() const;
-	const System *GetTargetSystem() const;
+  void                     SetTargetShip(std::shared_ptr<Ship> ship);
+  void                     SetTargetAsteroid(std::shared_ptr<Minable> asteroid);
+  void                     SetTargetPoint(const Point &point);
+  void                     SetTargetSystem(const System *system);
+  std::shared_ptr<Ship>    GetTargetShip() const;
+  std::shared_ptr<Minable> GetTargetAsteroid() const;
+  const Point             &GetTargetPoint() const;
+  const System            *GetTargetSystem() const;
 
 
 protected:
-	std::weak_ptr<Ship> targetShip;
-	std::weak_ptr<Minable> targetAsteroid;
-	Point targetPoint;
-	const System *targetSystem = nullptr;
+  std::weak_ptr<Ship>    targetShip;
+  std::weak_ptr<Minable> targetAsteroid;
+  Point                  targetPoint;
+  const System          *targetSystem = nullptr;
 };

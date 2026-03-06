@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANDESCRIPTORPOOL_H
 #define VULKANDESCRIPTORPOOL_H
@@ -40,13 +41,12 @@ namespace VulkanObjects
 
     void BeginFrame() const;
 
-    VulkanDescriptorPool(const VulkanDescriptorPool &other) = delete;
-    VulkanDescriptorPool(VulkanDescriptorPool &&other) noexcept = delete;
-    VulkanDescriptorPool &operator=(const VulkanDescriptorPool &other) = delete;
+    VulkanDescriptorPool(const VulkanDescriptorPool &other)                = delete;
+    VulkanDescriptorPool(VulkanDescriptorPool &&other) noexcept            = delete;
+    VulkanDescriptorPool &operator=(const VulkanDescriptorPool &other)     = delete;
     VulkanDescriptorPool &operator=(VulkanDescriptorPool &&other) noexcept = delete;
   };
-}
+} // namespace VulkanObjects
 
 
-
-#endif //VULKANDESCRIPTORPOOL_H
+#endif // VULKANDESCRIPTORPOOL_H

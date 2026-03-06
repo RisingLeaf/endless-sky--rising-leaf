@@ -11,21 +11,18 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #include "View.h"
 
 
-View::View(const gm::dvec3 &p, const gm::dvec3 &u)
-: Position(p), Up(u)
-{
-  Direction = gm::normalize(-1. * Position);
-}
-
+View::View(const gm::dvec3 &p, const gm::dvec3 &u) : Position(p), Up(u) { Direction = gm::normalize(-1. * Position); }
 
 
 void View::Update(const double dx, const double dy)
 {
-  Direction = gm::dvec3(gm::normalize(gm::rotate(gm::rotate(gm::dmat4(1.), dx, Up), dy, gm::cross(Up, Direction)) * gm::dvec4(Direction, 0.)));
+  Direction = gm::dvec3(
+      gm::normalize(
+          gm::rotate(gm::rotate(gm::dmat4(1.), dx, Up), dy, gm::cross(Up, Direction)) * gm::dvec4(Direction, 0.)));
 }
-

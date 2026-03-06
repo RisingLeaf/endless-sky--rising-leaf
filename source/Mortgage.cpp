@@ -22,122 +22,108 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 
 
-
-namespace {
-	const int MORTGAGE_TERM = 365;
+namespace
+{
+  const int MORTGAGE_TERM = 365;
 }
-
 
 
 // Find out how much you can afford to borrow with the given annual revenue
 // and the given credit score (which should be between 200 and 800).
 int64_t Mortgage::Maximum(int64_t annualRevenue, int creditScore, double currentPayments)
 {
-	const double revenue = annualRevenue - MORTGAGE_TERM * currentPayments;
-	if(revenue <= 0.)
-		return 0;
+  const double revenue = annualRevenue - MORTGAGE_TERM * currentPayments;
+  if(revenue <= 0.) return 0;
 
-	const double interest = (600 - creditScore / 2) * .00001;
-	const double power = pow(1. + interest, MORTGAGE_TERM);
-	const double multiplier = interest * MORTGAGE_TERM * power / (power - 1.);
-	return static_cast<int64_t>(std::max(0., revenue / multiplier));
+  const double interest   = (600 - creditScore / 2) * .00001;
+  const double power      = pow(1. + interest, MORTGAGE_TERM);
+  const double multiplier = interest * MORTGAGE_TERM * power / (power - 1.);
+  return static_cast<int64_t>(std::max(0., revenue / multiplier));
 }
-
 
 
 // Create a new mortgage of the given amount.
-Mortgage::Mortgage(std::string type, int64_t principal, int creditScore, int term)
-	: type(std::move(type)),
-	principal(principal),
-	interest((600 - creditScore / 2) * .00001),
-	interestString("0." + std::to_string(600 - creditScore / 2) + "%"),
-	term(term)
+Mortgage::Mortgage(std::string type, int64_t principal, int creditScore, int term) :
+  type(std::move(type)),
+  principal(principal),
+  interest((600 - creditScore / 2) * .00001),
+  interestString("0." + std::to_string(600 - creditScore / 2) + "%"),
+  term(term)
 {
 }
-
 
 
 // Create a mortgage with a specific interest rate instead of using the player's
 // credit score. Due to how the class is set up, the interest rate must currently
 // be within the range [0, 1).
-Mortgage::Mortgage(std::string type, int64_t principal, double interest, int term)
-	: type(std::move(type)),
-	principal(principal),
-	interest(interest * .01),
-	interestString("0." + std::to_string(static_cast<int>(1000. * interest)) + "%"),
-	term(term)
+Mortgage::Mortgage(std::string type, int64_t principal, double interest, int term) :
+  type(std::move(type)),
+  principal(principal),
+  interest(interest * .01),
+  interestString("0." + std::to_string(static_cast<int>(1000. * interest)) + "%"),
+  term(term)
 {
 }
-
 
 
 // Construct and Load() at the same time.
-Mortgage::Mortgage(const DataNode &node)
-{
-	Load(node);
-}
-
+Mortgage::Mortgage(const DataNode &node) { Load(node); }
 
 
 // Load or save mortgage data.
 void Mortgage::Load(const DataNode &node)
 {
-	if(node.Size() >= 2)
-		type = node.Token(1);
-	else
-		type = "Mortgage";
+  if(node.Size() >= 2) type = node.Token(1);
+  else type = "Mortgage";
 
-	for(const DataNode &child : node)
-	{
-		const std::string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
-		if(key == "principal" && hasValue)
-			principal = child.Value(1);
-		else if(key == "interest" && hasValue)
-		{
-			interest = child.Value(1);
-			int f = 100000. * interest;
-			interestString = "0." + std::to_string(f) + "%";
-		}
-		else if(key == "term" && hasValue)
-			term = std::max(1., child.Value(1));
-	}
+  for(const DataNode &child : node)
+  {
+    const std::string &key      = child.Token(0);
+    bool               hasValue = child.Size() >= 2;
+    if(key == "principal" && hasValue)
+    {
+      principal = child.Value(1);
+    }
+    else if(key == "interest" && hasValue)
+    {
+      interest       = child.Value(1);
+      int f          = 100000. * interest;
+      interestString = "0." + std::to_string(f) + "%";
+    }
+    else if(key == "term" && hasValue)
+    {
+      term = std::max(1., child.Value(1));
+    }
+  }
 }
-
 
 
 void Mortgage::Save(DataWriter &out) const
 {
-	out.Write("mortgage", type);
-	out.BeginChild();
-	{
-		out.Write("principal", principal);
-		out.Write("interest", interest);
-		out.Write("term", term);
-	}
-	out.EndChild();
+  out.Write("mortgage", type);
+  out.BeginChild();
+  {
+    out.Write("principal", principal);
+    out.Write("interest", interest);
+    out.Write("term", term);
+  }
+  out.EndChild();
 }
-
 
 
 // Make a mortgage payment. The return value is the amount paid.
 int64_t Mortgage::MakePayment()
 {
-	int64_t payment = Payment();
-	MissPayment();
-	principal -= payment;
-	--term;
+  int64_t payment = Payment();
+  MissPayment();
+  principal -= payment;
+  --term;
 
-	return payment;
+  return payment;
 }
 
 
-
-void Mortgage::MissPayment()
-{
-	principal += lround(principal * interest);
-}
-
+void Mortgage::MissPayment() { principal += lround(principal * interest); }
 
 
 // Pay down additional principal. Unlike a "real" mortgage, this reduces
@@ -146,71 +132,49 @@ void Mortgage::MissPayment()
 // principal remaining is less than the given amount.
 int64_t Mortgage::PayExtra(int64_t amount)
 {
-	amount = std::min(principal, amount);
-	principal -= amount;
-	return amount;
+  amount     = std::min(principal, amount);
+  principal -= amount;
+  return amount;
 }
-
 
 
 // The type is "Mortgage" if this is a mortgage you applied for from a bank,
 // "Fine" if this is a fine imposed on you for illegal activities, and
 // "Debt" if this is debt given to you by a mission.
-const std::string &Mortgage::Type() const
-{
-	return type;
-}
-
+const std::string &Mortgage::Type() const { return type; }
 
 
 // Get the remaining mortgage principal.
-int64_t Mortgage::Principal() const
-{
-	return principal;
-}
-
+int64_t Mortgage::Principal() const { return principal; }
 
 
 // Get the interest rate. It is formatted as a string, because all that the
 // program will ever do with this is display it.
-const std::string &Mortgage::Interest() const
-{
-	return interestString;
-}
-
+const std::string &Mortgage::Interest() const { return interestString; }
 
 
 // Get the remaining number of payments that must be made.
-int Mortgage::Term() const
-{
-	return term;
-}
-
+int Mortgage::Term() const { return term; }
 
 
 // Check the amount of the next payment due (rounded to the nearest credit).
 int64_t Mortgage::Payment() const
 {
-	if(!term)
-		return principal;
-	if(!interest)
-		return lround(static_cast<double>(principal) / term);
+  if(!term) return principal;
+  if(!interest) return lround(static_cast<double>(principal) / term);
 
-	// Always require every payment to be at least 1 credit.
-	double power = pow(1. + interest, term);
-	return std::max<int64_t>(1, lround(principal * interest * power / (power - 1.)));
+  // Always require every payment to be at least 1 credit.
+  double power = pow(1. + interest, term);
+  return std::max<int64_t>(1, lround(principal * interest * power / (power - 1.)));
 }
-
 
 
 // Check the amount of the next payment due.
 double Mortgage::PrecisePayment() const
 {
-	if(!term)
-		return principal;
-	if(!interest)
-		return static_cast<double>(principal) / term;
+  if(!term) return principal;
+  if(!interest) return static_cast<double>(principal) / term;
 
-	const double power = pow(1. + interest, term);
-	return principal * interest * power / (power - 1.);
+  const double power = pow(1. + interest, term);
+  return principal * interest * power / (power - 1.);
 }

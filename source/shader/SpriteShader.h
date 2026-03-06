@@ -19,11 +19,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../Swizzle.h"
 #include "mat2.h"
 
-#include "risingleaf_shared/math/graphics_math/gm.h"
 #include "../risingleaf_shared/graphics/graphics_layer.h"
+#include "risingleaf_shared/math/graphics_math/gm.h"
 
 class Sprite;
-
 
 
 // Class for drawing sprites. You can optionally draw a sprite with a custom
@@ -31,35 +30,51 @@ class Sprite;
 // adjusting the scale, rotation, clipping, fading, etc. of a sprite; this is
 // most often just for use by the DrawList class, which calculates those input
 // parameters based on an object's rotation, animation frame, etc.
-class SpriteShader {
+class SpriteShader
+{
 public:
-	class Item {
-	public:
-		const GraphicsTypes::TextureInstance *texture;
-		const GraphicsTypes::TextureInstance *swizzleMask;
-		const Swizzle *swizzle = nullptr;
-		float frame = 0.f;
-		float frameCount = 1.f;
-		float position[2] = {0.f, 0.f};
-		glsl::mat2 transform;
-		float blur[2] = {0.f, 0.f};
-		float clip = 1.f;
-		float alpha = 1.f;
-	};
+  class Item
+  {
+  public:
+    const GraphicsTypes::TextureInstance *texture;
+    const GraphicsTypes::TextureInstance *swizzleMask;
+    const Swizzle                        *swizzle                 = nullptr;
+    float                                 frame                   = 0.f;
+    float                                 frameCount              = 1.f;
+    bool                                  uniqueSwizzleMaskFrames = false;
+    float                                 position[2]             = {0.f, 0.f};
+    glsl::mat2                            transform;
+    float                                 blur[2] = {0.f, 0.f};
+    float                                 clip    = 1.f;
+    float                                 alpha   = 1.f;
+  };
 
 
 public:
-	// Initialize the shaders.
-	static void Init();
-	static void Clear();
+  // Initialize the shaders.
+  static void Init();
+  static void Clear();
 
-	// Draw a sprite.
-	static void Draw(const Sprite *sprite, const Point &position, float zoom = 1.f,
-		const Swizzle *swizzle = Swizzle::None(), float frame = 0.f, const Point &unit = Point(0., -1.));
-	static Item Prepare(const Sprite *sprite, const Point &position, float zoom = 1.f,
-		const Swizzle *swizzle = Swizzle::None(), float frame = 0.f, const Point &unit = Point(0., -1.));
+  // Draw a sprite. Note that this will still attempt to draw a sprite even if it hasn't been fully loaded yet,
+  // resulting in a black rectangle with the sprite's dimensions. The caller should check if the sprite is loaded
+  // first if it wants to avoid drawing a black rectangle. (Not having the SpriteShader check if the sprite is loaded
+  // makes it obvious if the reason the sprite isn't displaying properly is because the caller forgot to load it.)
+  static void Draw(
+      const Sprite  *sprite,
+      const Point   &position,
+      float          zoom    = 1.f,
+      const Swizzle *swizzle = Swizzle::None(),
+      float          frame   = 0.f,
+      const Point   &unit    = Point(0., -1.));
+  static Item Prepare(
+      const Sprite  *sprite,
+      const Point   &position,
+      float          zoom    = 1.f,
+      const Swizzle *swizzle = Swizzle::None(),
+      float          frame   = 0.f,
+      const Point   &unit    = Point(0., -1.));
 
-	static void Bind();
-	static void Add(const Item &item, bool withBlur = false);
-	static void Unbind();
+  static void Bind();
+  static void Add(const Item &item, bool withBlur = false);
+  static void Unbind();
 };

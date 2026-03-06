@@ -24,28 +24,29 @@ class Ship;
 
 // A variant represents a collection of ships that may be spawned by a fleet.
 // Each variant contains one or more ships.
-class Variant {
+class Variant
+{
 public:
-	Variant() = default;
-	// Construct and Load() at the same time.
-	explicit Variant(const DataNode &node);
+  Variant() = default;
+  // Construct and Load() at the same time.
+  explicit Variant(const DataNode &node);
 
-	void Load(const DataNode &node);
+  void Load(const DataNode &node);
 
-	// Determine if this variant template uses well-defined data.
-	bool IsValid() const;
+  // Determine if this variant template uses well-defined data.
+  bool IsValid() const;
 
-	int Weight() const;
-	const std::vector<const Ship *> &Ships() const;
+  int                              Weight() const;
+  const std::vector<const Ship *> &Ships() const;
 
-	// The strength of a variant is the sum of the cost of its ships.
-	int64_t Strength() const;
+  // The strength of a variant is the sum of the cost of its ships.
+  int64_t Strength() const;
 
-	bool operator==(const Variant &other) const;
-	bool operator!=(const Variant &other) const;
+  bool operator==(const Variant &other) const;
+  bool operator!=(const Variant &other) const;
 
 
 private:
-	int weight = 1;
-	std::vector<const Ship *> ships;
+  int                       weight = 1;
+  std::vector<const Ship *> ships;
 };

@@ -16,6 +16,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include <map>
+#include <set>
 #include <string>
 #include <variant>
 #include <vector>
@@ -28,31 +29,34 @@ class Sprite;
 class WrappedText;
 
 
-
 // Implement a collection of text and image nodes which form a singular Logbook entry.
-class BookEntry {
+class BookEntry
+{
 public:
-	typedef std::variant<std::monostate, const Sprite *, std::string> Item;
+  typedef std::variant<std::monostate, const Sprite *, std::string> Item;
 
 
 public:
-	bool IsEmpty() const;
-	void Load(const DataNode &node, int startAt = 0);
-	void Add(const BookEntry &other);
+  bool IsEmpty() const;
+  void Load(const DataNode &node, int startAt = 0);
+  void Add(const BookEntry &other);
 
-	// When a GameAction is instantiated, substitutions are performed.
-	BookEntry Instantiate(const std::map<std::string, std::string> &subs) const;
+  // When a GameAction is instantiated, substitutions are performed.
+  BookEntry Instantiate(const std::map<std::string, std::string> &subs) const;
 
-	void Save(DataWriter &out) const;
+  void Save(DataWriter &out) const;
 
-	// Returns height.
-	int Draw(const Point &topLeft, WrappedText &wrap, const Color &color) const;
+  const std::set<const Sprite *> &GetScenes() const;
+
+  // Returns height.
+  int Draw(const Point &topLeft, WrappedText &wrap, const Color &color) const;
 
 
 private:
-	void LoadSingle(const DataNode &node, int startAt = 0);
+  void LoadSingle(const DataNode &node, int startAt = 0);
 
 
 private:
-	std::vector<Item> items;
+  std::vector<Item>        items;
+  std::set<const Sprite *> scenes;
 };

@@ -23,42 +23,37 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class DataNode;
 
 
-
-class Swizzle {
+class Swizzle
+{
 public:
-	Swizzle() = default;
+  Swizzle() = default;
 
-	void Load(const DataNode &node);
-	bool IsLoaded() const;
+  void Load(const DataNode &node);
+  bool IsLoaded() const;
 
-	const std::string &Name() const;
+  const std::string &Name() const;
 
-	bool IsIdentity() const;
-	bool OverrideMask() const;
-	const float *MatrixPtr() const;
+  bool         IsIdentity() const;
+  bool         OverrideMask() const;
+  const float *MatrixPtr() const;
 
-	Color Apply(const Color &to) const;
+  Color Apply(const Color &to) const;
 
-	static const Swizzle *None();
-
-
-private:
-	explicit Swizzle(bool identity, bool loaded, bool overrideMask, std::array<float, 16> matrix);
+  static const Swizzle *None();
 
 
 private:
-	static constexpr inline std::array<float, 16> IDENTITY_MATRIX = {
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1
-	};
+  explicit Swizzle(bool identity, bool loaded, bool overrideMask, std::array<float, 16> matrix);
 
-	std::string name;
-	// Special case for when a swizzle does not actually need to be calculated.
-	bool identity = true;
-	bool loaded = false;
-	bool overrideMask = false;
 
-	std::array<float, 16> matrix = IDENTITY_MATRIX;
+private:
+  static constexpr inline std::array<float, 16> IDENTITY_MATRIX = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+
+  std::string name;
+  // Special case for when a swizzle does not actually need to be calculated.
+  bool identity     = true;
+  bool loaded       = false;
+  bool overrideMask = false;
+
+  std::array<float, 16> matrix = IDENTITY_MATRIX;
 };

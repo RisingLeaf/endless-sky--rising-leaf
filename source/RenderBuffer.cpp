@@ -114,11 +114,11 @@ void RenderBuffer::Draw(const Point &position, const Point &clip_size, const Poi
 {
   shader.Bind();
 
-  const float u_size[2]        = {static_cast<float>(clip_size.X()), static_cast<float>(clip_size.Y())};
-  const float u_position[2]    = {static_cast<float>(position.X()), static_cast<float>(position.Y())};
+  const float u_size[2]         = {static_cast<float>(clip_size.X()), static_cast<float>(clip_size.Y())};
+  const float u_position[2]     = {static_cast<float>(position.X()), static_cast<float>(position.Y())};
   const float u_src_position[2] = {static_cast<float>(src_position.X()), static_cast<float>(src_position.Y())};
   const float u_src_scale[2]    = {static_cast<float>(1.f / size.X()), static_cast<float>(1.f / size.Y())};
-  const float u_fade[4]        = {
+  const float u_fade[4]         = {
       static_cast<float>(fadePadding[0] / clip_size.Y()),
       static_cast<float>(fadePadding[1] / clip_size.Y()),
       static_cast<float>(fadePadding[2] / clip_size.X()),

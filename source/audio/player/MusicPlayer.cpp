@@ -16,40 +16,25 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "MusicPlayer.h"
 
 
-
-
-
-MusicPlayer::MusicPlayer(std::unique_ptr<AudioSupplier> audioSupplier)
-	: AudioPlayer(SoundCategory::MUSIC, std::move(audioSupplier), false)
+MusicPlayer::MusicPlayer(std::unique_ptr<AudioSupplier> audioSupplier) :
+  AudioPlayer(SoundCategory::MUSIC, std::move(audioSupplier), false)
 {
 }
 
 
-
-void MusicPlayer::Move(double x, double y, double z) const
-{
-}
+void MusicPlayer::Move(double x, double y, double z) const {}
 
 
-
-void MusicPlayer::Pause() const
-{
-}
-
+void MusicPlayer::Pause() const {}
 
 
 void MusicPlayer::ConfigureSource()
 {
-	if(!alSource)
-		return;
+  if(!alSource) return;
 
-	alSourcef(alSource, AL_PITCH, 1.);
-	alSourcef(alSource, AL_REFERENCE_DISTANCE, 1.);
-	alSourcef(alSource, AL_ROLLOFF_FACTOR, 1.);
-	alSourcef(alSource, AL_MAX_DISTANCE, 100.);
-	AudioPlayer::Move(0, 0, 0);
+  alSourcef(alSource, AL_PITCH, 1.);
+  alSourcef(alSource, AL_REFERENCE_DISTANCE, 1.);
+  alSourcef(alSource, AL_ROLLOFF_FACTOR, 1.);
+  alSourcef(alSource, AL_MAX_DISTANCE, 100.);
+  AudioPlayer::Move(0, 0, 0);
 }
-
-
-
-

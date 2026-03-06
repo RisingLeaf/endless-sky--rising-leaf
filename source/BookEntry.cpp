@@ -17,118 +17,108 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "DataNode.h"
 #include "DataWriter.h"
-#include "text/Format.h"
 #include "image/Sprite.h"
 #include "image/SpriteSet.h"
 #include "shader/SpriteShader.h"
+#include "text/Format.h"
 #include "text/WrappedText.h"
-
-
-
 
 
 bool BookEntry::IsEmpty() const
 {
-	return all_of(items.begin(), items.end(),
-		[](const Item &item) { return holds_alternative<std::monostate>(item); });
+  return all_of(items.begin(), items.end(), [](const Item &item) { return holds_alternative<std::monostate>(item); });
 }
-
 
 
 void BookEntry::Load(const DataNode &node, int startAt)
 {
-	if(startAt < node.Size())
-		LoadSingle(node, startAt);
+  if(startAt < node.Size()) LoadSingle(node, startAt);
 
-	for(const DataNode &child : node)
-		LoadSingle(child);
+  for(const DataNode &child : node)
+    LoadSingle(child);
 }
-
 
 
 void BookEntry::Add(const BookEntry &other)
 {
-	items.insert(items.end(), other.items.begin(), other.items.end());
+  items.insert(items.end(), other.items.begin(), other.items.end());
+  for(const Item &item : other.items)
+    if(holds_alternative<const Sprite *>(item)) scenes.insert(std::get<const Sprite *>(item));
 }
-
 
 
 BookEntry BookEntry::Instantiate(const std::map<std::string, std::string> &subs) const
 {
-	BookEntry newEntry;
-	for(const Item &item : items)
-	{
-		// Perform requested substitutions on the text of this node and return a new variant.
-		if(holds_alternative<std::string>(item))
-			newEntry.items.emplace_back(Format::Replace(std::get<std::string>(item), subs));
-		else
-			newEntry.items.emplace_back(item);
-	}
-	return newEntry;
+  BookEntry newEntry;
+  for(const Item &item : items)
+  {
+    // Perform requested substitutions on the text of this node and return a new variant.
+    if(holds_alternative<std::string>(item))
+      newEntry.items.emplace_back(Format::Replace(std::get<std::string>(item), subs));
+    else newEntry.items.emplace_back(item);
+  }
+  newEntry.scenes = scenes;
+  return newEntry;
 }
-
 
 
 void BookEntry::Save(DataWriter &out) const
 {
-	out.BeginChild();
-	{
-		for(const Item &item : items)
-		{
-			// Break the text up into paragraphs.
-			if(holds_alternative<std::string>(item))
-				for(const std::string &line : Format::Split(std::get<std::string>(item), "\n\t"))
-					out.Write(line);
-			else
-				out.Write("scene", std::get<const Sprite *>(item)->Name());
-		}
-	}
-	out.EndChild();
+  out.BeginChild();
+  {
+    for(const Item &item : items)
+    {
+      // Break the text up into paragraphs.
+      if(holds_alternative<std::string>(item))
+        for(const std::string &line : Format::Split(std::get<std::string>(item), "\n\t"))
+          out.Write(line);
+      else out.Write("scene", std::get<const Sprite *>(item)->Name());
+    }
+  }
+  out.EndChild();
 }
 
+
+const std::set<const Sprite *> &BookEntry::GetScenes() const { return scenes; }
 
 
 int BookEntry::Draw(const Point &topLeft, WrappedText &wrap, const Color &color) const
 {
-	Point drawPoint = topLeft;
-	for(const Item &item : items)
-	{
-		if(holds_alternative<std::string>(item))
-		{
-			wrap.Wrap(std::get<std::string>(item));
-			wrap.Draw(drawPoint, color);
-			drawPoint.Y() += wrap.Height();
-		}
-		else
-		{
-			const Sprite *scene = std::get<const Sprite *>(item);
-			const Point sceneOffset(scene->Width() / 2, scene->Height() / 2);
-			SpriteShader::Draw(scene, drawPoint + sceneOffset);
-			drawPoint.Y() += scene->Height();
-		}
-	}
-	return drawPoint.Y() - topLeft.Y();
+  Point drawPoint = topLeft;
+  for(const Item &item : items)
+  {
+    if(holds_alternative<std::string>(item))
+    {
+      wrap.Wrap(std::get<std::string>(item));
+      wrap.Draw(drawPoint, color);
+      drawPoint.Y() += wrap.Height();
+    }
+    else {
+      const Sprite *scene = std::get<const Sprite *>(item);
+      const Point   sceneOffset(scene->Width() / 2, scene->Height() / 2);
+      SpriteShader::Draw(scene, drawPoint + sceneOffset);
+      drawPoint.Y() += scene->Height();
+    }
+  }
+  return drawPoint.Y() - topLeft.Y();
 }
-
 
 
 void BookEntry::LoadSingle(const DataNode &node, int startAt)
 {
-	if(node.Size() - startAt == 2 && node.Token(startAt) == "scene")
-		items.emplace_back(SpriteSet::Get(node.Token(startAt + 1)));
-	else
-	{
-		std::string text;
-		for(int i = startAt; i < node.Size(); ++i)
-			// Skip empty strings.
-			if(!node.Token(i).empty())
-			{
-				if(!text.empty())
-					text += "\n\t";
-				text += node.Token(i);
-			}
-
-		if(!text.empty())
-			items.emplace_back(text);
-	}
+  if(node.Size() - startAt == 2 && node.Token(startAt) == "scene")
+  {
+    const Sprite *scene = SpriteSet::Get(node.Token(startAt + 1));
+    items.emplace_back(scene);
+    scenes.insert(scene);
+  }
+  else {
+    std::string text;
+    for(int i = startAt; i < node.Size(); ++i)
+    {
+      if(!text.empty()) text += "\n\t";
+      text += node.Token(i);
+    }
+    items.emplace_back(text);
+  }
 }

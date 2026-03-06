@@ -16,11 +16,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 
-
 // All possible means of entering a system.
-enum class SystemEntry {
-	TAKE_OFF,
-	HYPERDRIVE,
-	JUMP,
-	WORMHOLE
+enum class SystemEntry
+{
+  TAKE_OFF,
+  HYPERDRIVE,
+  JUMP,
+  WORMHOLE
 };

@@ -54,7 +54,9 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
     create_info.enabledLayerCount   = static_cast<uint32_t>(VulkanHelpers::EXTENSION_LAYERS.size());
     create_info.ppEnabledLayerNames = VulkanHelpers::EXTENSION_LAYERS.data();
   }
-  else create_info.enabledLayerCount = 0;
+  else {
+    create_info.enabledLayerCount = 0;
+  }
   VulkanHelpers::VK_CHECK_RESULT(vkCreateInstance(&create_info, nullptr, &Instance), __LINE__, __FILE__);
 
   uint32_t extension_count = 0;
@@ -92,11 +94,13 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   std::vector<VkPhysicalDevice> devices(device_count);
   vkEnumeratePhysicalDevices(Instance, &device_count, devices.data());
   for(const auto &device : devices)
+  {
     if(VulkanHelpers::IsDeviceSuitable(device, Surface))
     {
       PhysicalDevice = device;
       break;
     }
+  }
   if(PhysicalDevice == VK_NULL_HANDLE) throw std::runtime_error("failed to find a suitable GPU!");
 
   vkGetPhysicalDeviceProperties(PhysicalDevice, &PhysicalDeviceProperties);
@@ -106,8 +110,8 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   ////
   VulkanHelpers::QueueFamilyIndices    indices = VulkanHelpers::FindQueueFamilies(PhysicalDevice, Surface);
   std::vector<VkDeviceQueueCreateInfo> queue_create_infos;
-  std::set                             unique_queue_families = {indices.GraphicsFamily.value(), indices.PresentFamily.value()};
-  float                                queue_priority        = 1.0f;
+  std::set unique_queue_families = {indices.GraphicsFamily.value(), indices.PresentFamily.value()};
+  float    queue_priority        = 1.0f;
   for(uint32_t queue_family : unique_queue_families)
   {
     VkDeviceQueueCreateInfo queue_create_info{};
@@ -138,9 +142,10 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   device_create_info.ppEnabledExtensionNames = VulkanHelpers::DEVICE_EXTENSIONS.data();
   device_create_info.pNext                   = &deviceFeatures2;
 
-  VulkanHelpers::VK_CHECK_RESULT(vkCreateDevice(PhysicalDevice, &device_create_info, nullptr, &Device),
-                                 __LINE__,
-                                 __FILE__);
+  VulkanHelpers::VK_CHECK_RESULT(
+      vkCreateDevice(PhysicalDevice, &device_create_info, nullptr, &Device),
+      __LINE__,
+      __FILE__);
 
   vkGetDeviceQueue(Device, indices.GraphicsFamily.value(), 0, &GraphicsQueue);
   vkGetDeviceQueue(Device, indices.GraphicsFamily.value(), 0, &ComputeQueue);
@@ -153,9 +158,10 @@ VulkanObjects::VulkanDeviceInstance::VulkanDeviceInstance()
   fence_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
   for(size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
   {
-    VulkanHelpers::VK_CHECK_RESULT(vkCreateSemaphore(Device, &semaphore_info, nullptr, &ImageAvailableSemaphores[i]),
-                                   __LINE__,
-                                   __FILE__);
+    VulkanHelpers::VK_CHECK_RESULT(
+        vkCreateSemaphore(Device, &semaphore_info, nullptr, &ImageAvailableSemaphores[i]),
+        __LINE__,
+        __FILE__);
     VulkanHelpers::VK_CHECK_RESULT(vkCreateFence(Device, &fence_info, nullptr, &InFlightFences[i]), __LINE__, __FILE__);
   }
 
@@ -202,9 +208,10 @@ void VulkanObjects::VulkanDeviceInstance::QueuePipelineForDeletion(VkPipeline pi
   PipelineDeleteQueue[CurrentFrame].emplace_back(pipeline);
 }
 
-void VulkanObjects::VulkanDeviceInstance::NameObject(const VkObjectType     object_type,
-                                                     const uint64_t         object_handle,
-                                                     const std::string_view name) const
+void VulkanObjects::VulkanDeviceInstance::NameObject(
+    const VkObjectType     object_type,
+    const uint64_t         object_handle,
+    const std::string_view name) const
 {
 #ifndef NDEBUG
   if(vkSetDebugUtilsObjectNameEXT)

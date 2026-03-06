@@ -34,74 +34,74 @@ class PlayerInfo;
 class Rectangle;
 
 
-
 // This panel displays detailed information about one of the player's ships. If
 // they are landed on a planet, it also allows the player to change weapon
 // hardpoints. In flight, this panel allows them to jettison cargo.
-class ShipInfoPanel : public Panel {
+class ShipInfoPanel : public Panel
+{
 public:
-	explicit ShipInfoPanel(PlayerInfo &player);
-	explicit ShipInfoPanel(PlayerInfo &player, InfoPanelState state);
-	virtual ~ShipInfoPanel() override;
+  explicit ShipInfoPanel(PlayerInfo &player);
+  explicit ShipInfoPanel(PlayerInfo &player, InfoPanelState state);
+  virtual ~ShipInfoPanel() override;
 
-	virtual void Step() override;
-	virtual void Draw() override;
+  virtual void Step() override;
+  virtual void Draw() override;
 
 
 protected:
-	// Only override the ones you need; the default action is to return false.
-	virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
-	virtual bool Click(int x, int y, MouseButton button, int clicks) override;
-	virtual bool Hover(int x, int y) override;
-	virtual bool Drag(double dx, double dy) override;
-	virtual bool Release(int x, int y, MouseButton button) override;
+  // Only override the ones you need; the default action is to return false.
+  virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
+  virtual bool Click(int x, int y, MouseButton button, int clicks) override;
+  virtual bool Hover(int x, int y) override;
+  virtual bool Drag(double dx, double dy) override;
+  virtual bool Release(int x, int y, MouseButton button) override;
 
 
 private:
-	// Handle a change to what ship is shown.
-	void UpdateInfo();
-	void ClearZones();
+  // Handle a change to what ship is shown.
+  void UpdateInfo();
+  void ClearZones();
 
-	// Draw the ship tab (and its subsections).
-	void DrawShipStats(const Rectangle &bounds);
-	void DrawOutfits(const Rectangle &bounds, Rectangle &cargoBounds);
-	void DrawWeapons(const Rectangle &bounds);
-	void DrawCargo(const Rectangle &bounds);
+  // Draw the ship tab (and its subsections).
+  void DrawShipStats(const Rectangle &bounds);
+  void DrawOutfits(const Rectangle &bounds, Rectangle &cargoBounds);
+  void DrawWeapons(const Rectangle &bounds);
+  void DrawCargo(const Rectangle &bounds);
 
-	// Helper functions.
-	void DrawLine(const Point &from, const Point &to, const Color &color) const;
-	bool Hover(const Point &point);
-	void Rename(const std::string &name);
-	bool CanDump() const;
-	void Dump();
-	void DumpPlunder(int count);
-	void DumpCommodities(int count);
-	void Disown();
+  // Helper functions.
+  void DrawLine(const Point &from, const Point &to, const Color &color) const;
+  bool Hover(const Point &point);
+  bool Rename(const std::string &name);
+  bool CanDump() const;
+  void Dump();
+  void DumpPlunder(int count);
+  void DumpCommodities(int count);
+  void Disown();
 
 
 private:
-	PlayerInfo &player;
-	// This is the currently selected ship.
-	std::vector<std::shared_ptr<Ship>>::const_iterator shipIt;
+  PlayerInfo &player;
+  // This is the currently selected ship.
+  std::vector<std::shared_ptr<Ship>>::const_iterator shipIt;
 
-	// Information about the currently selected ship.
-	ShipInfoDisplay info;
-	std::map<std::string, std::vector<const Outfit *>> outfits;
+  // Information about the currently selected ship.
+  ShipInfoDisplay                                    info;
+  std::map<std::string, std::vector<const Outfit *>> outfits;
 
-	// Track all the clickable parts of the UI (other than the buttons).
-	std::vector<ClickZone<int>> zones;
-	std::vector<ClickZone<std::string>> commodityZones;
-	std::vector<ClickZone<const Outfit *>> plunderZones;
-	// Keep track of which item the mouse is hovering over and which item is
-	// currently being dragged.
-	int hoverIndex = -1;
-	int draggingIndex = -1;
+  // Track all the clickable parts of the UI (other than the buttons).
+  std::vector<ClickZone<int>>            zones;
+  std::vector<ClickZone<std::string>>    commodityZones;
+  std::vector<ClickZone<const Outfit *>> plunderZones;
+  // Keep track of which item the mouse is hovering over and which item is
+  // currently being dragged.
+  int hoverIndex    = -1;
+  int draggingIndex = -1;
 
-	InfoPanelState panelState;
+  InfoPanelState panelState;
 
-	// Track the current mouse location.
-	Point hoverPoint;
-	// Track whether a commodity or plundered outfit is selected to jettison.
-	std::string selectedCommodity;
-	const Outfit *selectedPlunder = nullptr;
+  // Track the current mouse location.
+  Point hoverPoint;
+  // Track whether a commodity or plundered outfit is selected to jettison.
+  std::string   selectedCommodity;
+  const Outfit *selectedPlunder = nullptr;
 };

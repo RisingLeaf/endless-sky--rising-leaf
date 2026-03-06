@@ -18,14 +18,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Orders.h"
 
 
-
 // This class should be used in functions that expect only one type of order
 // at a time.
-class OrderSingle : public Orders {
+class OrderSingle : public Orders
+{
 public:
-	explicit OrderSingle(Types type);
+  explicit OrderSingle(Types type);
 
 
 public:
-	Types type;
+  Types type;
 };

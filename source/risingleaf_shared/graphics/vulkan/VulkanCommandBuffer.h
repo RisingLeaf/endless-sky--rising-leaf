@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANCOMMANDBUFFER_H
 #define VULKANCOMMANDBUFFER_H
@@ -21,7 +22,8 @@
 #include <vulkan/vulkan_core.h>
 
 
-namespace VulkanObjects {
+namespace VulkanObjects
+{
   class VulkanCommandPool;
   class VulkanDeviceInstance;
 
@@ -33,6 +35,7 @@ namespace VulkanObjects {
     const VulkanCommandPool    *CommandPool;
 
     uint8_t state = 0;
+
   public:
     VulkanSingleCommandBuffer(const VulkanDeviceInstance *device, const VulkanCommandPool *command_pool);
 
@@ -42,9 +45,9 @@ namespace VulkanObjects {
 
     ~VulkanSingleCommandBuffer();
 
-    VulkanSingleCommandBuffer(const VulkanSingleCommandBuffer &other) = delete;
-    VulkanSingleCommandBuffer(VulkanSingleCommandBuffer &&other) noexcept = delete;
-    VulkanSingleCommandBuffer &operator=(const VulkanSingleCommandBuffer &other) = delete;
+    VulkanSingleCommandBuffer(const VulkanSingleCommandBuffer &other)                = delete;
+    VulkanSingleCommandBuffer(VulkanSingleCommandBuffer &&other) noexcept            = delete;
+    VulkanSingleCommandBuffer &operator=(const VulkanSingleCommandBuffer &other)     = delete;
     VulkanSingleCommandBuffer &operator=(VulkanSingleCommandBuffer &&other) noexcept = delete;
 
     [[nodiscard]] VkCommandBuffer Get() const { return cmd; }
@@ -58,6 +61,7 @@ namespace VulkanObjects {
     const VulkanCommandPool    *CommandPool;
 
     uint8_t state = 0;
+
   public:
     VulkanSingleComputeCommandBuffer(const VulkanDeviceInstance *device, const VulkanCommandPool *command_pool);
 
@@ -67,14 +71,14 @@ namespace VulkanObjects {
 
     ~VulkanSingleComputeCommandBuffer();
 
-    VulkanSingleComputeCommandBuffer(const VulkanSingleComputeCommandBuffer &other) = delete;
-    VulkanSingleComputeCommandBuffer(VulkanSingleComputeCommandBuffer &&other) noexcept = delete;
-    VulkanSingleComputeCommandBuffer &operator=(const VulkanSingleComputeCommandBuffer &other) = delete;
+    VulkanSingleComputeCommandBuffer(const VulkanSingleComputeCommandBuffer &other)                = delete;
+    VulkanSingleComputeCommandBuffer(VulkanSingleComputeCommandBuffer &&other) noexcept            = delete;
+    VulkanSingleComputeCommandBuffer &operator=(const VulkanSingleComputeCommandBuffer &other)     = delete;
     VulkanSingleComputeCommandBuffer &operator=(VulkanSingleComputeCommandBuffer &&other) noexcept = delete;
 
     [[nodiscard]] VkCommandBuffer Get() const { return cmd; }
   };
-}
+} // namespace VulkanObjects
 
 
-#endif //VULKANCOMMANDBUFFER_H
+#endif // VULKANCOMMANDBUFFER_H

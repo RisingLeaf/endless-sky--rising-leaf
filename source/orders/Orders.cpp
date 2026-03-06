@@ -16,59 +16,25 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Orders.h"
 
 
+void Orders::SetTargetShip(std::shared_ptr<Ship> ship) { targetShip = ship; }
 
 
-
-void Orders::SetTargetShip(std::shared_ptr<Ship> ship)
-{
-	targetShip = ship;
-}
+void Orders::SetTargetAsteroid(std::shared_ptr<Minable> asteroid) { targetAsteroid = asteroid; }
 
 
-
-void Orders::SetTargetAsteroid(std::shared_ptr<Minable> asteroid)
-{
-	targetAsteroid = asteroid;
-}
+void Orders::SetTargetPoint(const Point &point) { targetPoint = point; }
 
 
-
-void Orders::SetTargetPoint(const Point &point)
-{
-	targetPoint = point;
-}
+void Orders::SetTargetSystem(const System *system) { targetSystem = system; }
 
 
-
-void Orders::SetTargetSystem(const System *system)
-{
-	targetSystem = system;
-}
+std::shared_ptr<Ship> Orders::GetTargetShip() const { return targetShip.lock(); }
 
 
-
-std::shared_ptr<Ship> Orders::GetTargetShip() const
-{
-	return targetShip.lock();
-}
+std::shared_ptr<Minable> Orders::GetTargetAsteroid() const { return targetAsteroid.lock(); }
 
 
-
-std::shared_ptr<Minable> Orders::GetTargetAsteroid() const
-{
-	return targetAsteroid.lock();
-}
+const Point &Orders::GetTargetPoint() const { return targetPoint; }
 
 
-
-const Point &Orders::GetTargetPoint() const
-{
-	return targetPoint;
-}
-
-
-
-const System *Orders::GetTargetSystem() const
-{
-	return targetSystem;
-}
+const System *Orders::GetTargetSystem() const { return targetSystem; }

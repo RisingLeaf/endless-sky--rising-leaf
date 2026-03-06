@@ -21,56 +21,44 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 
 
-
-
-
-WavSupplier::WavSupplier(const Sound &sound, bool is3x, bool looping)
-	: AudioSupplier(is3x, looping), sound(sound), wasStarted(false)
+WavSupplier::WavSupplier(const Sound &sound, bool is3x, bool looping) :
+  AudioSupplier(is3x, looping), sound(sound), wasStarted(false)
 {
 }
-
 
 
 size_t WavSupplier::MaxChunks() const
 {
-	if(isLooping)
-		return 2;
-	else if(wasStarted && !currentSample)
-		return 0;
-	else
-		return ceil(((is3x ? sound.Buffer3x() : sound.Buffer()).size() - currentSample) / static_cast<float>(OUTPUT_CHUNK));
+  if(isLooping) return 2;
+  else if(wasStarted && !currentSample) return 0;
+  else
+    return ceil(((is3x ? sound.Buffer3x() : sound.Buffer()).size() - currentSample) / static_cast<float>(OUTPUT_CHUNK));
 }
 
 
-
-size_t WavSupplier::AvailableChunks() const
-{
-	return MaxChunks();
-}
-
+size_t WavSupplier::AvailableChunks() const { return MaxChunks(); }
 
 
 std::vector<AudioSupplier::sample_t> WavSupplier::NextDataChunk()
 {
-	std::vector<sample_t> samples(OUTPUT_CHUNK);
-	// If we are at the beginning of the buffer and it was already played, this is a loop.
-	if(!currentSample && wasStarted && !isLooping)
-		return samples;
+  std::vector<sample_t> samples(OUTPUT_CHUNK);
+  // If we are at the beginning of the buffer and it was already played, this is a loop.
+  if(!currentSample && wasStarted && !isLooping) return samples;
 
-	size_t currentSampleCount = 0;
-	do {
-		// If restarting the buffer, check 3x status.
-		if(!currentSample)
-		{
-			is3x = nextPlaybackIs3x;
-			wasStarted = true;
-		}
-		const std::vector<sample_t> &input = is3x ? sound.Buffer3x() : sound.Buffer();
-		size_t readChunk = std::min(input.size() - currentSample, samples.size() - currentSampleCount);
-		std::copy_n(input.begin() + currentSample, readChunk, samples.begin() + currentSampleCount);
-		currentSampleCount += readChunk;
-		currentSample = (currentSample + readChunk) % input.size();
-	} while(currentSampleCount < samples.size() && isLooping);
-	return samples;
+  size_t currentSampleCount = 0;
+  do
+  {
+    // If restarting the buffer, check 3x status.
+    if(!currentSample)
+    {
+      is3x       = nextPlaybackIs3x;
+      wasStarted = true;
+    }
+    const std::vector<sample_t> &input = is3x ? sound.Buffer3x() : sound.Buffer();
+    size_t readChunk                   = std::min(input.size() - currentSample, samples.size() - currentSampleCount);
+    std::copy_n(input.begin() + currentSample, readChunk, samples.begin() + currentSampleCount);
+    currentSampleCount += readChunk;
+    currentSample       = (currentSample + readChunk) % input.size();
+  } while(currentSampleCount < samples.size() && isLooping);
+  return samples;
 }
-

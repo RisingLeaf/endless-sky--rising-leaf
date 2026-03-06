@@ -21,13 +21,13 @@ namespace glsl
   {
     float col0[2] = {0., 0.};
 #ifndef __APPLE__
-    float pad0[2] = {0.1234, 0.1234}; //for debugging
+    float pad0[2] = {0.1234, 0.1234}; // for debugging
 #endif
     float col1[2] = {0., 0.};
 #ifndef __APPLE__
     float pad1[2] = {0.1234, 0.1234};
 #endif
   };
-}
+} // namespace glsl
 
 #endif // ENDLESS_SKY_MAT2_H

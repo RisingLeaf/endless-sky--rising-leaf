@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #include "VulkanCommandPool.h"
 
@@ -22,12 +23,16 @@
 #include "VulkanHelpers.h"
 
 
-VulkanObjects::VulkanCommandPool::VulkanCommandPool(const VulkanObjects::VulkanDeviceInstance *device)
-: Device(device)
+VulkanObjects::VulkanCommandPool::VulkanCommandPool(const VulkanObjects::VulkanDeviceInstance *device) : Device(device)
 {
-  const VulkanHelpers::QueueFamilyIndices queue_family_indices = VulkanHelpers::FindQueueFamilies(Device->GetPhysicalDevice(), Device->GetSurface());
-  const auto command_pool_create_info = VulkanBootstrap::GetCommandPoolCreate(queue_family_indices.GraphicsFamily.value());
-  VulkanHelpers::VK_CHECK_RESULT(vkCreateCommandPool(Device->GetDevice(), &command_pool_create_info, nullptr, &CommandPool), __LINE__, __FILE__);
+  const VulkanHelpers::QueueFamilyIndices queue_family_indices =
+      VulkanHelpers::FindQueueFamilies(Device->GetPhysicalDevice(), Device->GetSurface());
+  const auto command_pool_create_info =
+      VulkanBootstrap::GetCommandPoolCreate(queue_family_indices.GraphicsFamily.value());
+  VulkanHelpers::VK_CHECK_RESULT(
+      vkCreateCommandPool(Device->GetDevice(), &command_pool_create_info, nullptr, &CommandPool),
+      __LINE__,
+      __FILE__);
 }
 
 VulkanObjects::VulkanCommandPool::~VulkanCommandPool()

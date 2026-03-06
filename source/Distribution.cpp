@@ -21,59 +21,51 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <vector>
 
 
+namespace
+{
+  double ManipulateNormal(double smoothness, bool inverted)
+  {
+    // Center values within [0, 1] so that fractional retention begins to accumulate
+    // at the endpoints (rather than at the center) of the distribution.
+    double randomFactor = Random::Normal(.5, smoothness);
+    // Retain only the fractional information, to keep all absolute values within [0, 1].
+    randomFactor = randomFactor - static_cast<int64_t>(randomFactor);
 
-namespace {
-	double ManipulateNormal(double smoothness, bool inverted)
-	{
-		// Center values within [0, 1] so that fractional retention begins to accumulate
-		// at the endpoints (rather than at the center) of the distribution.
-		double randomFactor = Random::Normal(.5, smoothness);
-		// Retain only the fractional information, to keep all absolute values within [0, 1].
-		randomFactor = randomFactor - static_cast<int64_t>(randomFactor);
+    // Shift negative values into [0, 1] to create redundancy at the endpoints
+    if(randomFactor < 0.) ++randomFactor;
 
-		// Shift negative values into [0, 1] to create redundancy at the endpoints
-		if(randomFactor < 0.)
-			++randomFactor;
+    // Invert probabilities so that endpoints are most probable.
+    if(inverted)
+    {
+      if(randomFactor > .5) randomFactor -= .5;
+      else if(randomFactor < .5) randomFactor += .5;
+    }
 
-		// Invert probabilities so that endpoints are most probable.
-		if(inverted)
-		{
-			if(randomFactor > .5)
-				randomFactor -= .5;
-			else if(randomFactor < .5)
-				randomFactor += .5;
-		}
+    // Transform from [0, 1] to [-1, 1] so that the return value can be simply used.
+    randomFactor *= 2;
+    --randomFactor;
 
-		// Transform from [0, 1] to [-1, 1] so that the return value can be simply used.
-		randomFactor *= 2;
-		--randomFactor;
+    return randomFactor;
+  }
 
-		return randomFactor;
-	}
-
-	// These values are paired with Distribution::Types; any change in one should be made in the other.
-	const double SMOOTHNESS_TABLE[] = {.13, .234, .314};
-}
-
+  // These values are paired with Distribution::Types; any change in one should be made in the other.
+  const double SMOOTHNESS_TABLE[] = {.13, .234, .314};
+} // namespace
 
 
 Angle Distribution::GenerateInaccuracy(double value, std::pair<Type, bool> distribution)
 {
-	// Check if there is any inaccuracy to apply
-	if(!value)
-		return Angle();
+  // Check if there is any inaccuracy to apply
+  if(!value) return Angle();
 
-	switch(distribution.first)
-	{
-		case Type::Uniform:
-			return Angle(2 * (Random::Real() - .5) * value);
-		case Type::Narrow:
-		case Type::Medium:
-		case Type::Wide:
-			return Angle(value * ManipulateNormal(SMOOTHNESS_TABLE[static_cast<int>(distribution.first)],
-					distribution.second));
-		case Type::Triangular:
-		default:
-			return Angle((Random::Real() - Random::Real()) * value);
-	}
+  switch(distribution.first)
+  {
+  case Type::Uniform: return Angle(2 * (Random::Real() - .5) * value);
+  case Type::Narrow:
+  case Type::Medium:
+  case Type::Wide:
+    return Angle(value * ManipulateNormal(SMOOTHNESS_TABLE[static_cast<int>(distribution.first)], distribution.second));
+  case Type::Triangular:
+  default:               return Angle((Random::Real() - Random::Real()) * value);
+  }
 }

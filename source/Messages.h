@@ -27,41 +27,44 @@ class Color;
 class DataWriter;
 
 
-
 // Class representing messages that should be shown to the user. The messages
 // gradually fade as the game steps forward, so each one must remember the game
 // step when it came into being. If a new message is added that exactly matches
 // an old one, the old version is removed before the new one is added; this is
 // to keep repeated messages from filling up the whole screen.
-class Messages {
+class Messages
+{
 public:
-	class Entry {
-	public:
-		Entry() = default;
-		Entry(int step, const std::string &message, const Message::Category *category)
-			: step(step), message(message), category(category) {}
+  class Entry
+  {
+  public:
+    Entry() = default;
+    Entry(int step, const std::string &message, const Message::Category *category) :
+      step(step), message(message), category(category)
+    {
+    }
 
-		int step;
-		int deathStep = -1;
-		std::string message;
-		const Message::Category *category;
-	};
+    int                      step;
+    int                      deathStep = -1;
+    std::string              message;
+    const Message::Category *category;
+  };
 
 
 public:
-	// Add a message to the list along with its level of importance.
-	static void Add(const Message &message);
+  // Add a message to the list along with its level of importance.
+  static void Add(const Message &message);
 
-	// Get the messages for the given game step. Any messages that are too old
-	// will be culled out, and new ones that have just been added will have
-	// their "step" set to the given value.
-	static const std::vector<Entry> &Get(int step, int animationDuration);
-	static const std::deque<std::pair<std::string, const Message::Category *>> &GetLog();
+  // Get the messages for the given game step. Any messages that are too old
+  // will be culled out, and new ones that have just been added will have
+  // their "step" set to the given value.
+  static const std::vector<Entry>                                            &Get(int step, int animationDuration);
+  static const std::deque<std::pair<std::string, const Message::Category *>> &GetLog();
 
-	static void ClearLog();
-	// Reset the messages (i.e. because a new game was loaded).
-	static void Reset();
+  static void ClearLog();
+  // Reset the messages (i.e. because a new game was loaded).
+  static void Reset();
 
-	static void LoadLog(const DataNode &node);
-	static void SaveLog(DataWriter &out);
+  static void LoadLog(const DataNode &node);
+  static void SaveLog(DataWriter &out);
 };

@@ -18,204 +18,144 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "PlayerInfo.h"
 
 
-
-
-
-InfoPanelState::InfoPanelState(PlayerInfo &player)
-	: player(player), ships(player.Ships()), canEdit(player.GetPlanet())
+InfoPanelState::InfoPanelState(PlayerInfo &player) : player(player), ships(player.Ships()), canEdit(player.GetPlanet())
 {
 }
 
 
-
-int InfoPanelState::SelectedIndex() const
-{
-	return allSelected.empty() ? -1 : selectedIndex;
-}
-
+int InfoPanelState::SelectedIndex() const { return allSelected.empty() ? -1 : selectedIndex; }
 
 
 void InfoPanelState::SetSelectedIndex(int newSelectedIndex)
 {
-	selectedIndex = newSelectedIndex;
-	allSelected.insert(newSelectedIndex);
+  selectedIndex = newSelectedIndex;
+  allSelected.insert(newSelectedIndex);
 }
-
 
 
 void InfoPanelState::SetSelected(std::set<int> selected)
 {
-	allSelected = std::move(selected);
-	if(!allSelected.empty())
-		selectedIndex = *allSelected.begin();
+  allSelected = std::move(selected);
+  if(!allSelected.empty()) selectedIndex = *allSelected.begin();
 }
-
 
 
 void InfoPanelState::Select(int index)
 {
-	allSelected.insert(index);
-	if(selectedIndex == -1)
-		selectedIndex = index;
+  allSelected.insert(index);
+  if(selectedIndex == -1) selectedIndex = index;
 }
-
 
 
 void InfoPanelState::SelectOnly(int index)
 {
-	allSelected.clear();
-	SetSelectedIndex(index);
+  allSelected.clear();
+  SetSelectedIndex(index);
 }
-
 
 
 void InfoPanelState::SelectMany(int start, int end)
 {
-	for(int i = start; i < end; ++i)
-		allSelected.insert(i);
+  for(int i = start; i < end; ++i)
+    allSelected.insert(i);
 
-	if(selectedIndex == -1)
-		selectedIndex = *allSelected.begin();
+  if(selectedIndex == -1) selectedIndex = *allSelected.begin();
 }
-
 
 
 bool InfoPanelState::Deselect(int index)
 {
-	bool erased = allSelected.erase(index);
-	// Select the closest ship to this.
-	if(index == selectedIndex && !allSelected.empty())
-	{
-		const auto &ind = allSelected.upper_bound(index);
-		selectedIndex = ind == allSelected.end() ? *allSelected.rbegin() : *ind;
-	}
-	return erased;
+  bool erased = allSelected.erase(index);
+  // Select the closest ship to this.
+  if(index == selectedIndex && !allSelected.empty())
+  {
+    const auto &ind = allSelected.upper_bound(index);
+    selectedIndex   = ind == allSelected.end() ? *allSelected.rbegin() : *ind;
+  }
+  return erased;
 }
-
 
 
 void InfoPanelState::DeselectAll()
 {
-	allSelected.clear();
-	selectedIndex = -1;
+  allSelected.clear();
+  selectedIndex = -1;
 }
 
 
-
-void InfoPanelState::Disown(std::vector<std::shared_ptr<Ship>>::const_iterator it)
-{
-	ships.erase(it);
-}
+void InfoPanelState::Disown(std::vector<std::shared_ptr<Ship>>::const_iterator it) { ships.erase(it); }
 
 
-
-const std::set<int> &InfoPanelState::AllSelected() const
-{
-	return allSelected;
-}
+const std::set<int> &InfoPanelState::AllSelected() const { return allSelected; }
 
 
-
-bool InfoPanelState::CanEdit() const
-{
-	return canEdit;
-}
+bool InfoPanelState::CanEdit() const { return canEdit; }
 
 
-
-int InfoPanelState::Scroll() const
-{
-	return scroll;
-}
+int InfoPanelState::Scroll() const { return scroll; }
 
 
-
-void InfoPanelState::SetScroll(int newScroll)
-{
-	scroll = newScroll;
-}
+void InfoPanelState::SetScroll(int newScroll) { scroll = newScroll; }
 
 
-
-std::vector<std::shared_ptr<Ship>> &InfoPanelState::Ships()
-{
-	return ships;
-}
+std::vector<std::shared_ptr<Ship>> &InfoPanelState::Ships() { return ships; }
 
 
-
-const std::vector<std::shared_ptr<Ship>> &InfoPanelState::Ships() const
-{
-	return ships;
-}
-
+const std::vector<std::shared_ptr<Ship>> &InfoPanelState::Ships() const { return ships; }
 
 
 bool InfoPanelState::ReorderShipsTo(int toIndex)
 {
-	bool success = ReorderShips(allSelected, toIndex);
-	if(success)
-		player.SetShipOrder(ships);
-	return success;
+  bool success = ReorderShips(allSelected, toIndex);
+  if(success) player.SetShipOrder(ships);
+  return success;
 }
-
 
 
 // If the move accesses invalid indices, no moves are done.
 bool InfoPanelState::ReorderShips(const std::set<int> &fromIndices, int toIndex)
 {
-	if(fromIndices.empty() || static_cast<unsigned>(toIndex) >= ships.size())
-		return false;
+  if(fromIndices.empty() || static_cast<unsigned>(toIndex) >= ships.size()) return false;
 
-	// When shifting ships up in the list, move to the desired index. If
-	// moving down, move after the selected index.
-	int direction = (*fromIndices.begin() < toIndex) ? 1 : 0;
+  // When shifting ships up in the list, move to the desired index. If
+  // moving down, move after the selected index.
+  int direction = (*fromIndices.begin() < toIndex) ? 1 : 0;
 
-	// Remove the ships from last to first, so that each removal leaves all the
-	// remaining indices in the set still valid.
-	std::vector<std::shared_ptr<Ship>> removed;
-	for(std::set<int>::const_iterator it = fromIndices.end(); it != fromIndices.begin(); )
-	{
-		// The "it" pointer doesn't point to the beginning of the list, so it is
-		// safe to decrement it here.
-		--it;
+  // Remove the ships from last to first, so that each removal leaves all the
+  // remaining indices in the set still valid.
+  std::vector<std::shared_ptr<Ship>> removed;
+  for(std::set<int>::const_iterator it = fromIndices.end(); it != fromIndices.begin();)
+  {
+    // The "it" pointer doesn't point to the beginning of the list, so it is
+    // safe to decrement it here.
+    --it;
 
-		// Bail out if any invalid indices are encountered.
-		if(static_cast<unsigned>(*it) >= ships.size())
-			return false;
+    // Bail out if any invalid indices are encountered.
+    if(static_cast<unsigned>(*it) >= ships.size()) return false;
 
-		removed.insert(removed.begin(), ships[*it]);
-		ships.erase(ships.begin() + *it);
-		// If this index is before the insertion point, removing it causes the
-		// insertion point to shift back one space.
-		if(*it < toIndex)
-			--toIndex;
-	}
-	// Make sure the insertion index is within the list.
-	toIndex = std::min<int>(toIndex + direction, ships.size());
-	ships.insert(ships.begin() + toIndex, removed.begin(), removed.end());
+    removed.insert(removed.begin(), ships[*it]);
+    ships.erase(ships.begin() + *it);
+    // If this index is before the insertion point, removing it causes the
+    // insertion point to shift back one space.
+    if(*it < toIndex) --toIndex;
+  }
+  // Make sure the insertion index is within the list.
+  toIndex = std::min<int>(toIndex + direction, ships.size());
+  ships.insert(ships.begin() + toIndex, removed.begin(), removed.end());
 
-	// Change the selected indices so they still refer to the block of ships
-	// that just got moved.
-	int lastIndex = toIndex + allSelected.size();
-	DeselectAll();
-	SelectMany(toIndex, lastIndex);
+  // Change the selected indices so they still refer to the block of ships
+  // that just got moved.
+  int lastIndex = toIndex + allSelected.size();
+  DeselectAll();
+  SelectMany(toIndex, lastIndex);
 
-	// The ships are no longer sorted.
-	SetCurrentSort(nullptr);
-	return true;
+  // The ships are no longer sorted.
+  SetCurrentSort(nullptr);
+  return true;
 }
 
 
-
-InfoPanelState::ShipComparator *InfoPanelState::CurrentSort() const
-{
-	return currentSort;
-}
+InfoPanelState::ShipComparator *InfoPanelState::CurrentSort() const { return currentSort; }
 
 
-
-void InfoPanelState::SetCurrentSort(ShipComparator *newSort)
-{
-	currentSort = newSort;
-}
+void InfoPanelState::SetCurrentSort(ShipComparator *newSort) { currentSort = newSort; }

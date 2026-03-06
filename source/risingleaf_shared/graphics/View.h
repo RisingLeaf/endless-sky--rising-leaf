@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VIEW_H
 #define VIEW_H
@@ -19,7 +20,8 @@
 #include "math/graphics_math/gm.h"
 
 
-class View {
+class View
+{
   gm::dvec3 Position;
   gm::dvec3 Direction;
   gm::dvec3 Up;
@@ -29,18 +31,17 @@ public:
 
   void Update(double dx, double dy);
 
-  [[nodiscard]] gm::dmat4 GetViewMatrix()           const { return gm::lookAt({0., 0., 0.}, Direction, Up); }
+  [[nodiscard]] gm::dmat4 GetViewMatrix() const { return gm::lookAt({0., 0., 0.}, Direction, Up); }
   [[nodiscard]] gm::dmat4 GetPositionalViewMatrix() const { return gm::lookAt(Position, Position + Direction, Up); }
-  [[nodiscard]] const gm::dvec3 &GetPos()           const { return Position; }
-  [[nodiscard]] const gm::dvec3 &GetDirection()     const { return Direction; }
-  [[nodiscard]] const gm::dvec3 &GetUp()            const { return Up; }
-  [[nodiscard]]       gm::dvec3  GetRight()         const { return gm::cross(Direction, Up); }
-  void SetPos(const gm::dvec3 &pos) { Position = pos; }
+  [[nodiscard]] const gm::dvec3 &GetPos() const { return Position; }
+  [[nodiscard]] const gm::dvec3 &GetDirection() const { return Direction; }
+  [[nodiscard]] const gm::dvec3 &GetUp() const { return Up; }
+  [[nodiscard]] gm::dvec3        GetRight() const { return gm::cross(Direction, Up); }
+  void                           SetPos(const gm::dvec3 &pos) { Position = pos; }
 
   void SetUp(const gm::dvec3 &up) { Up = up; }
   void Move(const double dt, const int dir) { Position += 2. * Direction * dt * static_cast<double>(dir); }
 };
 
 
-
-#endif //VIEW_H
+#endif // VIEW_H

@@ -15,91 +15,99 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Effect.h"
 
-#include "audio/Audio.h"
 #include "DataNode.h"
+#include "audio/Audio.h"
 
 #include <map>
 
 
-
-namespace {
-	const std::map<std::string, SoundCategory> categoryNames = {
-		{"ui", SoundCategory::UI},
-		{"anti-missile", SoundCategory::ANTI_MISSILE},
-		{"weapon", SoundCategory::WEAPON},
-		{"engine", SoundCategory::ENGINE},
-		{"afterburner", SoundCategory::AFTERBURNER},
-		{"jump", SoundCategory::JUMP},
-		{"explosion", SoundCategory::EXPLOSION},
-		{"scan", SoundCategory::SCAN},
-		{"environment", SoundCategory::ENVIRONMENT},
-		{"alert", SoundCategory::ALERT}
-	};
-}
-
-
-
-const std::string &Effect::TrueName() const
+namespace
 {
-	return trueName;
+  const std::map<std::string, SoundCategory> categoryNames = {
+      {"ui", SoundCategory::UI},
+      {"anti-missile", SoundCategory::ANTI_MISSILE},
+      {"weapon", SoundCategory::WEAPON},
+      {"engine", SoundCategory::ENGINE},
+      {"afterburner", SoundCategory::AFTERBURNER},
+      {"jump", SoundCategory::JUMP},
+      {"explosion", SoundCategory::EXPLOSION},
+      {"scan", SoundCategory::SCAN},
+      {"environment", SoundCategory::ENVIRONMENT},
+      {"alert", SoundCategory::ALERT}};
 }
 
 
+const std::string &Effect::TrueName() const { return trueName; }
 
-void Effect::SetTrueName(const std::string &name)
-{
-	this->trueName = name;
-}
 
+void Effect::SetTrueName(const std::string &name) { this->trueName = name; }
 
 
 void Effect::Load(const DataNode &node)
 {
-	if(node.Size() > 1)
-		trueName = node.Token(1);
+  if(node.Size() > 1) trueName = node.Token(1);
 
-	for(const DataNode &child : node)
-	{
-		const std::string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
-		if(key == "sprite")
-			LoadSprite(child);
-		else if(key == "zooms")
-			inheritsZoom = true;
-		else if(key == "sound" && hasValue)
-			sound = Audio::Get(child.Token(1));
-		else if(key == "sound category" && hasValue)
-		{
-			if(categoryNames.contains(child.Token(1)))
-				soundCategory = categoryNames.at(child.Token(1));
-			else
-				child.PrintTrace("Unknown sound category \"" + child.Token(1) + "\"");
-		}
-		else if(key == "lifetime" && hasValue)
-			lifetime = child.Value(1);
-		else if(key == "random lifetime" && hasValue)
-			randomLifetime = child.Value(1);
-		else if(key == "velocity scale" && hasValue)
-			velocityScale = child.Value(1);
-		else if(key == "random velocity" && hasValue)
-			randomVelocity = child.Value(1);
-		else if(key == "random angle" && hasValue)
-			randomAngle = child.Value(1);
-		else if(key == "random spin" && hasValue)
-			randomSpin = child.Value(1);
-		else if(key == "random frame rate" && hasValue)
-			randomFrameRate = child.Value(1);
-		else if(key == "absolute angle" && hasValue)
-		{
-			absoluteAngle = Angle(child.Value(1));
-			hasAbsoluteAngle = true;
-		}
-		else if(key == "absolute velocity" && hasValue)
-		{
-			absoluteVelocity = child.Value(1);
-			hasAbsoluteVelocity = true;
-		}
-		else
-			child.PrintTrace("Skipping unrecognized attribute:");
-	}
+  for(const DataNode &child : node)
+  {
+    const std::string &key      = child.Token(0);
+    bool               hasValue = child.Size() >= 2;
+    if(key == "sprite")
+    {
+      LoadSprite(child);
+    }
+    else if(key == "zooms")
+    {
+      inheritsZoom = true;
+    }
+    else if(key == "sound" && hasValue)
+    {
+      sound = Audio::Get(child.Token(1));
+    }
+    else if(key == "sound category" && hasValue)
+    {
+      if(categoryNames.contains(child.Token(1))) soundCategory = categoryNames.at(child.Token(1));
+      else child.PrintTrace("Unknown sound category \"" + child.Token(1) + "\"");
+    }
+    else if(key == "lifetime" && hasValue)
+    {
+      lifetime = child.Value(1);
+    }
+    else if(key == "random lifetime" && hasValue)
+    {
+      randomLifetime = child.Value(1);
+    }
+    else if(key == "velocity scale" && hasValue)
+    {
+      velocityScale = child.Value(1);
+    }
+    else if(key == "random velocity" && hasValue)
+    {
+      randomVelocity = child.Value(1);
+    }
+    else if(key == "random angle" && hasValue)
+    {
+      randomAngle = child.Value(1);
+    }
+    else if(key == "random spin" && hasValue)
+    {
+      randomSpin = child.Value(1);
+    }
+    else if(key == "random frame rate" && hasValue)
+    {
+      randomFrameRate = child.Value(1);
+    }
+    else if(key == "absolute angle" && hasValue)
+    {
+      absoluteAngle    = Angle(child.Value(1));
+      hasAbsoluteAngle = true;
+    }
+    else if(key == "absolute velocity" && hasValue)
+    {
+      absoluteVelocity    = child.Value(1);
+      hasAbsoluteVelocity = true;
+    }
+    else {
+      child.PrintTrace("Skipping unrecognized attribute:");
+    }
+  }
 }

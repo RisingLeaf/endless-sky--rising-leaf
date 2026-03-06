@@ -45,10 +45,7 @@ namespace
 Font::Font(const std::filesystem::path &imagePath) { Load(imagePath); }
 
 
-void Font::Clear()
-{
-  square = {};
-}
+void Font::Clear() { square = {}; }
 
 
 void Font::Load(const std::filesystem::path &imagePath)
@@ -263,9 +260,9 @@ void Font::CalculateAdvances(ImageBuffer &image)
   }
 
   // Set the space size based on the character width.
-  width /= 2;
+  width  /= 2;
   height /= 2;
-  space = (width + 3) / 6 + 1;
+  space   = (width + 3) / 6 + 1;
 }
 
 
@@ -314,8 +311,8 @@ int Font::WidthRawString(const char *str, char after) const noexcept
       width += space;
     }
     else {
-      width += advance[previous * GLYPHS + glyph] + KERN;
-      previous = glyph;
+      width    += advance[previous * GLYPHS + glyph] + KERN;
+      previous  = glyph;
     }
   }
   width += advance[previous * GLYPHS + std::max(0, std::min(GLYPHS - 1, after - 32))];

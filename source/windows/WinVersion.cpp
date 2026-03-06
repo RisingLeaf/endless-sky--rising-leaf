@@ -15,37 +15,33 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "WinVersion.h"
 
+#include "../text/Utf8.h"
+
 #include <windows.h>
 
-namespace {
-	bool supportsDarkTheme = false;
-	bool supportsWindowRounding = false;
-}
+// Declare RtlGetVersion here so that we don't need DDK headers.
+extern "C" NTSTATUS NTAPI RtlGetVersion(PRTL_OSVERSIONINFOW);
 
+using namespace std;
 
-
-void WinVersion::Init()
+namespace
 {
-	HMODULE ntdll = LoadLibraryW(L"ntdll.dll");
-	auto rtlGetVersion = reinterpret_cast<NTSTATUS (*)(PRTL_OSVERSIONINFOW)>(GetProcAddress(ntdll, "RtlGetVersion"));
-	RTL_OSVERSIONINFOW versionInfo = {};
-	rtlGetVersion(&versionInfo);
-	FreeLibrary(ntdll);
-
-	supportsDarkTheme = versionInfo.dwBuildNumber >= 19041;
-	supportsWindowRounding = versionInfo.dwBuildNumber >= 22000;
+  RTL_OSVERSIONINFOW versionInfo;
 }
 
 
+void WinVersion::Init() { RtlGetVersion(&versionInfo); }
 
-bool WinVersion::SupportsDarkTheme()
+
+string WinVersion::ToString()
 {
-	return supportsDarkTheme;
+  string servicePack = Utf8::ToUTF8(versionInfo.szCSDVersion);
+  return "Windows NT " + std::to_string(versionInfo.dwMajorVersion) + '.' + std::to_string(versionInfo.dwMinorVersion) + '.' +
+         to_string(versionInfo.dwBuildNumber) + (servicePack.empty() ? string{} : ' ' + servicePack);
 }
 
 
+bool WinVersion::SupportsDarkTheme() { return versionInfo.dwBuildNumber >= 19'041; }
 
-bool WinVersion::SupportsWindowRounding()
-{
-	return supportsWindowRounding;
-}
+
+bool WinVersion::SupportsWindowRounding() { return versionInfo.dwBuildNumber >= 22'000; }

@@ -18,6 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Panel.h"
 
 #include "ClickZone.h"
+#include "LoadingCircle.h"
 #include "Mission.h"
 #include "OutfitInfoDisplay.h"
 #include "Point.h"
@@ -39,202 +40,204 @@ class PlayerInfo;
 class Ship;
 
 
-
 // Class representing the common elements of both the shipyard panel and the
 // outfitter panel (e.g. the sidebar with the ships you own).
-class ShopPanel : public Panel {
+class ShopPanel : public Panel
+{
 public:
-	explicit ShopPanel(PlayerInfo &player, bool isOutfitter);
+  explicit ShopPanel(PlayerInfo &player, bool isOutfitter);
 
-	virtual void Step() override;
-	virtual void Draw() override;
+  virtual void Step() override;
+  virtual void Draw() override;
 
-	virtual void UpdateTooltipActivation() override;
-
-
-protected:
-	// BuyResult holds the result of an attempt to buy. It is implicitly
-	// created from a string or boolean in code. Any string indicates failure.
-	// True indicates success, of course, while false (without a string)
-	// indicates failure, but no need to pop up a message about it.
-	class BuyResult {
-	public:
-		BuyResult(const char *error) : success(false), message(error) {}
-		BuyResult(std::string error) : success(false), message(std::move(error)) {}
-		BuyResult(bool result) : success(result), message() {}
-
-		explicit operator bool() const noexcept { return success; }
-
-		bool HasMessage() const noexcept { return !message.empty(); }
-		const std::string &Message() const noexcept { return message; }
-
-
-	private:
-		bool success = true;
-		std::string message;
-	};
+  virtual void UpdateTooltipActivation() override;
 
 
 protected:
-	void DrawShip(const Ship &ship, const Point &center, bool isSelected);
+  // TransactionResult holds the result of an attempt to do a transaction. It is implicitly
+  // created from a string or boolean in code. Any string indicates failure.
+  // True indicates success, of course, while false (without a string)
+  // indicates failure, but no need to pop up a message about it.
+  class TransactionResult
+  {
+  public:
+    TransactionResult(const char *error) : success(false), message(error) {}
+    TransactionResult(std::string error) : success(false), message(std::move(error)) {}
+    TransactionResult(bool result) : success(result), message() {}
 
-	void CheckForMissions(Mission::Location location);
+    explicit operator bool() const noexcept { return success; }
 
-	// These are for the individual shop panels to override.
-	virtual int TileSize() const = 0;
-	virtual int VisibilityCheckboxesSize() const;
-	virtual bool HasItem(const std::string &name) const = 0;
-	virtual void DrawItem(const std::string &name, const Point &point) = 0;
-	virtual int DividerOffset() const = 0;
-	virtual int DetailWidth() const = 0;
-	virtual double DrawDetails(const Point &center) = 0;
-	virtual BuyResult CanBuy(bool onlyOwned = false) const = 0;
-	virtual void Buy(bool onlyOwned = false) = 0;
-	virtual bool CanSell(bool toStorage = false) const = 0;
-	virtual void Sell(bool toStorage = false) = 0;
-	virtual void FailSell(bool toStorage = false) const;
-	virtual bool CanSellMultiple() const;
-	virtual bool IsAlreadyOwned() const;
-	virtual bool ShouldHighlight(const Ship *ship);
-	virtual void DrawKey();
-	virtual void ToggleForSale();
-	virtual void ToggleStorage();
-	virtual void ToggleCargo();
+    bool               HasMessage() const noexcept { return !message.empty(); }
+    const std::string &Message() const noexcept { return message; }
 
-	// Only override the ones you need; the default action is to return false.
-	virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
-	virtual bool Click(int x, int y, MouseButton button, int clicks) override;
-	virtual bool Hover(int x, int y) override;
-	virtual bool Drag(double dx, double dy) override;
-	virtual bool Release(int x, int y, MouseButton button) override;
-	virtual bool Scroll(double dx, double dy) override;
 
-	void DoFind(const std::string &text);
-	virtual int FindItem(const std::string &text) const = 0;
-
-	int64_t LicenseCost(const Outfit *outfit, bool onlyOwned = false) const;
-
-	void DrawButton(const std::string &name, const Rectangle &buttonShape, bool isActive, bool hovering, char keyCode);
-	void CheckSelection();
+  private:
+    bool        success = true;
+    std::string message;
+  };
 
 
 protected:
-	class Zone : public ClickZone<const Ship *> {
-	public:
-		explicit Zone(Point center, Point size, const Ship *ship);
-		explicit Zone(Point center, Point size, const Outfit *outfit);
+  void DrawShip(const Ship &ship, const Point &center, bool isSelected);
 
-		const Ship *GetShip() const;
-		const Outfit *GetOutfit() const;
+  void CheckForMissions(Mission::Location location) const;
+  void ValidateSelectedShips();
 
-	private:
-		const Outfit *outfit = nullptr;
-	};
+  // These are for the individual shop panels to override.
+  virtual int               TileSize() const = 0;
+  virtual int               VisibilityCheckboxesSize() const;
+  virtual bool              HasItem(const std::string &name) const                = 0;
+  virtual void              DrawItem(const std::string &name, const Point &point) = 0;
+  virtual double            ButtonPanelHeight() const                             = 0;
+  virtual double            DrawDetails(const Point &center)                      = 0;
+  virtual void              DrawButtons()                                         = 0;
+  virtual TransactionResult HandleShortcuts(SDL_Keycode key)                      = 0;
 
-	enum class ShopPane : int {
-		Main,
-		Sidebar,
-		Info
-	};
+  virtual bool ShouldHighlight(const Ship *ship);
+  virtual void DrawKey() {}
+
+  // Only override the ones you need; the default action is to return false.
+  virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
+  virtual bool Click(int x, int y, MouseButton button, int clicks) override;
+  virtual bool Hover(int x, int y) override;
+  virtual bool Drag(double dx, double dy) override;
+  virtual bool Release(int x, int y, MouseButton button) override;
+  virtual bool Scroll(double dx, double dy) override;
+
+  void        DoFind(const std::string &text);
+  virtual int FindItem(const std::string &text) const = 0;
+
+  int64_t LicenseCost(const Outfit *outfit, bool onlyOwned = false) const;
+
+  void DrawButton(const std::string &name, const Rectangle &buttonShape, bool isActive, bool hovering, char keyCode);
+  void CheckSelection();
 
 
 protected:
-	static constexpr int SIDEBAR_PADDING = 5;
-	static constexpr int SIDEBAR_CONTENT = 250;
-	static constexpr int SIDEBAR_WIDTH = SIDEBAR_CONTENT + SIDEBAR_PADDING;
-	static constexpr int INFOBAR_WIDTH = 300;
-	static constexpr int SIDE_WIDTH = SIDEBAR_WIDTH + INFOBAR_WIDTH;
-	static constexpr int BUTTON_HEIGHT = 70;
-	static constexpr int SHIP_SIZE = 250;
-	static constexpr int OUTFIT_SIZE = 183;
+  class Zone : public ClickZone<const Ship *>
+  {
+  public:
+    explicit Zone(Point center, Point size, const Ship *ship);
+    explicit Zone(Point center, Point size, const Outfit *outfit);
+
+    const Ship   *GetShip() const;
+    const Outfit *GetOutfit() const;
+
+  private:
+    const Outfit *outfit = nullptr;
+  };
+
+  enum class ShopPane : int
+  {
+    Main,
+    Sidebar,
+    Info
+  };
 
 
 protected:
-	PlayerInfo &player;
-	// Remember the current day, for calculating depreciation.
-	int day;
-	const Planet *planet = nullptr;
-	const bool isOutfitter;
+  static constexpr int SIDEBAR_PADDING = 5;
+  static constexpr int SIDEBAR_CONTENT = 250;
+  static constexpr int SIDEBAR_WIDTH   = SIDEBAR_CONTENT + SIDEBAR_PADDING;
+  static constexpr int INFOBAR_WIDTH   = 300;
+  static constexpr int SIDE_WIDTH      = SIDEBAR_WIDTH + INFOBAR_WIDTH;
+  static constexpr int SHIP_SIZE       = 250;
+  static constexpr int OUTFIT_SIZE     = 183;
+  // Button size/placement info:
+  static constexpr double BUTTON_ROW_START_PAD = 10;
+  static constexpr double BUTTON_ROW_PAD       = 9.;
+  static constexpr double BUTTON_COL_PAD       = 9.;
+  static constexpr double BUTTON_HEIGHT        = 30.;
+  static constexpr double BUTTON_WIDTH         = 73.;
 
-	// The player-owned ship that was first selected in the sidebar (or most recently purchased).
-	Ship *playerShip = nullptr;
-	// The player-owned ship being reordered.
-	Ship *dragShip = nullptr;
-	bool isDraggingShip = false;
-	Point dragPoint;
-	// The group of all selected, player-owned ships.
-	std::set<Ship *> playerShips;
+protected:
+  PlayerInfo &player;
+  // Remember the current day, for calculating depreciation.
+  int           day;
+  const Planet *planet = nullptr;
+  const bool    isOutfitter;
 
-	// The currently selected Ship, for the ShipyardPanel.
-	const Ship *selectedShip = nullptr;
-	// The currently selected Outfit, for the OutfitterPanel.
-	const Outfit *selectedOutfit = nullptr;
-	// (It may be worth moving the above pointers into the derived classes in the future.)
+  // The player-owned ship that was first selected in the sidebar (or most recently purchased).
+  Ship *playerShip = nullptr;
+  // The player-owned ship being reordered.
+  Ship *dragShip       = nullptr;
+  bool  isDraggingShip = false;
+  Point dragPoint;
+  // The group of all selected, player-owned ships.
+  std::set<Ship *> playerShips;
 
-	ScrollVar<double> mainScroll;
-	ScrollVar<double> sidebarScroll;
-	ScrollVar<double> infobarScroll;
-	ShopPane activePane = ShopPane::Main;
-	char hoverButton = '\0';
+  // The currently selected Ship, for the ShipyardPanel.
+  const Ship *selectedShip = nullptr;
+  // The currently selected Outfit, for the OutfitterPanel.
+  const Outfit *selectedOutfit = nullptr;
+  // (It may be worth moving the above pointers into the derived classes in the future.)
 
-	ScrollBar mainScrollbar;
-	ScrollBar sidebarScrollbar;
-	ScrollBar infobarScrollbar;
+  ScrollVar<double> mainScroll;
+  ScrollVar<double> sidebarScroll;
+  ScrollVar<double> infobarScroll;
+  ShopPane          activePane  = ShopPane::Main;
+  char              hoverButton = '\0';
 
-	double previousX = 0.;
+  ScrollBar mainScrollbar;
+  ScrollBar sidebarScrollbar;
+  ScrollBar infobarScrollbar;
 
-	std::vector<Zone> zones;
-	std::vector<ClickZone<char>> buttonZones;
-	std::vector<ClickZone<const Ship *>> shipZones;
-	std::vector<ClickZone<std::string>> categoryZones;
+  double previousX = 0.;
 
-	std::map<std::string, std::vector<std::string>> catalog;
-	const CategoryList &categories;
-	std::set<std::string> &collapsed;
+  std::vector<Zone>                    zones;
+  std::vector<ClickZone<char>>         buttonZones;
+  std::vector<ClickZone<const Ship *>> shipZones;
+  std::vector<ClickZone<std::string>>  categoryZones;
 
-	ShipInfoDisplay shipInfo;
-	OutfitInfoDisplay outfitInfo;
+  std::map<std::string, std::vector<std::string>> catalog;
+  const CategoryList                             &categories;
+  std::set<std::string>                          &collapsed;
+
+  ShipInfoDisplay   shipInfo;
+  OutfitInfoDisplay outfitInfo;
+
+  bool  delayedAutoScroll = false;
+  Point hoverPoint;
+
+  Tooltip       shipsTooltip;
+  Tooltip       creditsTooltip;
+  Tooltip       buttonsTooltip;
+  LoadingCircle loadingCircle;
 
 
 private:
-	void DrawShipsSidebar();
-	void DrawDetailsSidebar();
-	void DrawButtons();
-	void DrawMain();
+  void DrawShipsSidebar();
+  void DrawDetailsSidebar();
+  void DrawMain();
 
-	int DrawPlayerShipInfo(const Point &point);
+  int DrawPlayerShipInfo(const Point &point);
 
-	bool DoScroll(double dy, int steps = 5);
-	bool SetScrollToTop();
-	bool SetScrollToBottom();
-	void SideSelect(int count);
-	void SideSelect(Ship *ship, int clicks = 1);
-	void MainAutoScroll(const std::vector<Zone>::const_iterator &selected);
-	void MainLeft();
-	void MainRight();
-	void MainUp();
-	void MainDown();
-	void CategoryAdvance(const std::string &category);
-	std::vector<Zone>::const_iterator Selected() const;
-	// Check if the given point is within the button zone, and if so return the
-	// letter of the button (or ' ' if it's not on a button).
-	char CheckButton(int x, int y);
+  bool                              DoScroll(double dy, int steps = 5);
+  bool                              SetScrollToTop();
+  bool                              SetScrollToBottom();
+  void                              SideSelect(int count);
+  void                              SideSelect(Ship *ship, int clicks = 1);
+  void                              MainAutoScroll(const std::vector<Zone>::const_iterator &selected);
+  void                              MainLeft();
+  void                              MainRight();
+  void                              MainUp();
+  void                              MainDown();
+  void                              CategoryAdvance(const std::string &category);
+  std::vector<Zone>::const_iterator Selected() const;
+  // Check if the given point is within the button zone, and if so return the
+  // letter of the button (or ' ' if it's not on a button).
+  char CheckButton(int x, int y);
 
 
 private:
-	bool delayedAutoScroll = false;
+  std::string shipName;
+  std::string warningType;
 
-	Point hoverPoint;
-	std::string shipName;
-	std::string warningType;
-	Tooltip shipsTooltip;
-	Tooltip creditsTooltip;
+  // Define the colors used by DrawButton, implemented at the class level to avoid repeat lookups from GameData.
+  const Color &hover;
+  const Color &active;
+  const Color &inactive;
+  const Color &back;
 
-	// Define the colors used by DrawButton, implemented at the class level to avoid repeat lookups from GameData.
-	const Color &hover;
-	const Color &active;
-	const Color &inactive;
-	const Color &back;
-
-	bool checkedHelp = false;
+  bool checkedHelp = false;
 };

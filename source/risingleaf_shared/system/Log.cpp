@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #include "Log.h"
 
@@ -31,23 +32,20 @@ namespace Log
   thread_local Stream Info("INFO ", 1);
   thread_local Stream Warn("WARN ", 2);
   thread_local Stream Error("ERROR", 3);
-}
+} // namespace Log
 
 void Log::Stream::operator<<(const EndValue &) const
 {
   if(Priority >= LOG_LEVEL)
   {
-    const auto time = std::time(nullptr);
+    const auto      time = std::time(nullptr);
     std::lock_guard guard(io_mutex);
-    std::cout
-      <<"["<<std::put_time(std::localtime(&time), "%T")<<" "
-      <<Name<<"] "
-      <<current_buffer<<std::endl;
+    std::cout << "[" << std::put_time(std::localtime(&time), "%T") << " " << Name << "] " << current_buffer
+              << std::endl;
   }
 
   current_buffer.clear();
 }
-
 
 
 void Log::ExitError(const std::string &message)
@@ -57,9 +55,4 @@ void Log::ExitError(const std::string &message)
 }
 
 
-
-void Log::SetLogLevel(const uint8_t level)
-{
-  LOG_LEVEL = level;
-}
-
+void Log::SetLogLevel(const uint8_t level) { LOG_LEVEL = level; }

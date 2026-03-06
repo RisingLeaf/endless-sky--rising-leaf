@@ -24,54 +24,54 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class ImageBuffer;
 
 
-
 // Class representing the outline of an object, with functions for checking if a
 // line segment intersects that object or if a point is within a certain distance.
 // The outline is represented in polygonal form, which allows intersection tests
 // to be done much more efficiently than if we were testing individual pixels in
 // the image itself.
-class Mask {
+class Mask
+{
 public:
-	// Construct a mask from the alpha channel of an RGBA-formatted image.
-	void Create(const ImageBuffer &image, int frame, const std::string &fileName);
+  // Construct a mask from the alpha channel of an RGBA-formatted image.
+  void Create(const ImageBuffer &image, int frame, const std::string &fileName);
 
-	// Check whether a mask was successfully generated from the image.
-	bool IsLoaded() const;
+  // Check whether a mask was successfully generated from the image.
+  bool IsLoaded() const;
 
-	// Check if this mask intersects the given line segment (from sA to vA). If
-	// it does, return the fraction of the way along the segment where the
-	// intersection occurs. The sA should be relative to this object's center,
-	// while vA should be relative to sA.
-	// If this object contains the given point, the return value is 0. If there
-	// is no collision, the return value is 1.
-	double Collide(Point sA, Point vA, Angle facing, double threshold) const;
+  // Check if this mask intersects the given line segment (from sA to vA). If
+  // it does, return the fraction of the way along the segment where the
+  // intersection occurs. The sA should be relative to this object's center,
+  // while vA should be relative to sA.
+  // If this object contains the given point, the return value is 0. If there
+  // is no collision, the return value is 1.
+  double Collide(Point sA, Point vA, Angle facing, double threshold) const;
 
-	// Check whether the mask contains the given point.
-	bool Contains(Point point, Angle facing) const;
+  // Check whether the mask contains the given point.
+  bool Contains(Point point, Angle facing) const;
 
-	// Find out whether this object (rotated and scaled as represented by the given
-	// unit std::vector) is touching a ring defined by the given inner and outer ranges.
-	bool WithinRing(Point point, Angle facing, double inner, double outer) const;
+  // Find out whether this object (rotated and scaled as represented by the given
+  // unit vector) is touching a ring defined by the given inner and outer ranges.
+  bool WithinRing(Point point, Angle facing, double inner, double outer) const;
 
-	// Find out how close the given point is to the mask.
-	double Range(Point point, Angle facing) const;
-	// Get the maximum distance from the center of this mask.
-	double Radius() const;
+  // Find out how close the given point is to the mask.
+  double Range(Point point, Angle facing) const;
+  // Get the maximum distance from the center of this mask.
+  double Radius() const;
 
-	// Get the individual outlines that comprise this mask.
-	const std::vector<std::vector<Point>> &Outlines() const;
+  // Get the individual outlines that comprise this mask.
+  const std::vector<std::vector<Point>> &Outlines() const;
 
-	// Scale all the points in the mask.
-	Mask operator*(Point scale) const;
-	friend Mask operator*(Point scale, const Mask &mask);
-
-
-private:
-	double Intersection(const Point &sA, const Point &vA, double threshold) const;
-	bool Contains(Point point) const;
+  // Scale all the points in the mask.
+  Mask        operator*(Point scale) const;
+  friend Mask operator*(Point scale, const Mask &mask);
 
 
 private:
-	std::vector<std::vector<Point>> outlines;
-	double radius = 0.;
+  double Intersection(const Point &sA, const Point &vA, double threshold) const;
+  bool   Contains(Point point) const;
+
+
+private:
+  std::vector<std::vector<Point>> outlines;
+  double                          radius = 0.;
 };

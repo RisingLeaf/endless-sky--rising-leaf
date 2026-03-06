@@ -82,7 +82,7 @@ void FogShader::Init()
 void FogShader::Clear()
 {
   shader.Clear();
-  square = {};
+  square  = {};
   texture = {};
 }
 

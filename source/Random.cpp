@@ -22,23 +22,22 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #endif
 
 
-
 // Right now thread_local storage is only supported under Linux.
-namespace {
+namespace
+{
 #ifndef __linux__
-	std::mutex workaroundMutex;
-	std::mt19937_64 gen;
-	std::uniform_int_distribution<uint32_t> uniform;
-	std::uniform_real_distribution<double> real;
-	std::normal_distribution<double> normal;
+  std::mutex                              workaroundMutex;
+  std::mt19937_64                         gen;
+  std::uniform_int_distribution<uint32_t> uniform;
+  std::uniform_real_distribution<double>  real;
+  std::normal_distribution<double>        normal;
 #else
-	thread_local std::mt19937_64 gen;
-	thread_local std::uniform_int_distribution<uint32_t> uniform;
-	thread_local std::uniform_real_distribution<double> real;
-	thread_local std::normal_distribution<double> normal;
+  thread_local std::mt19937_64                         gen;
+  thread_local std::uniform_int_distribution<uint32_t> uniform;
+  thread_local std::uniform_real_distribution<double>  real;
+  thread_local std::normal_distribution<double>        normal;
 #endif
-}
-
+} // namespace
 
 
 // Seed the generator (e.g. to make it produce exactly the same random
@@ -46,74 +45,68 @@ namespace {
 void Random::Seed(uint64_t seed)
 {
 #ifndef __linux__
-	std::lock_guard<std::mutex> lock(workaroundMutex);
+  std::lock_guard<std::mutex> lock(workaroundMutex);
 #endif
-	gen.seed(seed);
+  gen.seed(seed);
 }
-
 
 
 uint32_t Random::Int()
 {
 #ifndef __linux__
-	std::lock_guard<std::mutex> lock(workaroundMutex);
+  std::lock_guard<std::mutex> lock(workaroundMutex);
 #endif
-	return uniform(gen);
+  return uniform(gen);
 }
-
 
 
 uint32_t Random::Int(uint32_t upper_bound)
 {
 #ifndef __linux__
-	std::lock_guard<std::mutex> lock(workaroundMutex);
+  std::lock_guard<std::mutex> lock(workaroundMutex);
 #endif
-	const uint32_t x = uniform(gen);
-	return (static_cast<uint64_t>(x) * static_cast<uint64_t>(upper_bound)) >> 32;
+  const uint32_t x = uniform(gen);
+  return (static_cast<uint64_t>(x) * static_cast<uint64_t>(upper_bound)) >> 32;
 }
-
 
 
 double Random::Real()
 {
 #ifndef __linux__
-	std::lock_guard<std::mutex> lock(workaroundMutex);
+  std::lock_guard<std::mutex> lock(workaroundMutex);
 #endif
-	return real(gen);
+  return real(gen);
 }
-
 
 
 // Return the expected number of failures before k successes, when the
 // probability of success is p. The mean value will be k / (1 - p).
 uint32_t Random::Polya(uint32_t k, double p)
 {
-	std::negative_binomial_distribution<uint32_t> polya(k, p);
+  std::negative_binomial_distribution<uint32_t> polya(k, p);
 #ifndef __linux__
-	std::lock_guard<std::mutex> lock(workaroundMutex);
+  std::lock_guard<std::mutex> lock(workaroundMutex);
 #endif
-	return polya(gen);
+  return polya(gen);
 }
-
 
 
 // Get a number from a binomial distribution (i.e. integer bell curve).
 uint32_t Random::Binomial(uint32_t t, double p)
 {
-	std::binomial_distribution<uint32_t> binomial(t, p);
+  std::binomial_distribution<uint32_t> binomial(t, p);
 #ifndef __linux__
-	std::lock_guard<std::mutex> lock(workaroundMutex);
+  std::lock_guard<std::mutex> lock(workaroundMutex);
 #endif
-	return binomial(gen);
+  return binomial(gen);
 }
-
 
 
 // Get a normally distributed number with standard or specified mean and stddev.
 double Random::Normal(double mean, double sigma)
 {
 #ifndef __linux__
-	std::lock_guard<std::mutex> lock(workaroundMutex);
+  std::lock_guard<std::mutex> lock(workaroundMutex);
 #endif
-	return sigma * normal(gen) + mean;
+  return sigma * normal(gen) + mean;
 }

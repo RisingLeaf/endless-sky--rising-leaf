@@ -25,37 +25,37 @@ class ConditionsStore;
 class DataNode;
 
 
-
 // Stores a list of description paragraphs, and a condition under which each should be shown.
 // See the planet and spaceport description code for examples.
-class Paragraphs {
+class Paragraphs
+{
 public:
-	using ConditionalText = std::vector<std::pair<ConditionSet, std::string>>;
-	using ConstIterator = ConditionalText::const_iterator;
+  using ConditionalText = std::vector<std::pair<ConditionSet, std::string>>;
+  using ConstIterator   = ConditionalText::const_iterator;
 
 
 public:
-	// Load one line of text and possible conditions from the given node.
-	void Load(const DataNode &node, const ConditionsStore *playerConditions);
+  // Load one line of text and possible conditions from the given node.
+  void Load(const DataNode &node, const ConditionsStore *playerConditions);
 
-	// Discard all description lines.
-	void Clear();
+  // Discard all description lines.
+  void Clear();
 
-	// Is this object totally void of all information?
-	bool IsEmpty() const;
+  // Is this object totally void of all information?
+  bool IsEmpty() const;
 
-	// Are there any lines which match these vars?
-	bool IsEmptyFor() const;
+  // Are there any lines which match these vars?
+  bool IsEmptyFor() const;
 
-	// Concatenate all lines which match these vars.
-	std::string ToString() const;
+  // Concatenate all lines which match these vars.
+  std::string ToString() const;
 
-	// Iterate over all text. Needed to support PrintData.
-	// These must use standard naming conventions (begin, end) for compatibility with range-based for loops.
-	ConstIterator begin() const;
-	ConstIterator end() const;
+  // Iterate over all text. Needed to support PrintData.
+  // These must use standard naming conventions (begin, end) for compatibility with range-based for loops.
+  ConstIterator begin() const;
+  ConstIterator end() const;
 
 
 private:
-	ConditionalText text;
+  ConditionalText text;
 };

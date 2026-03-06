@@ -16,9 +16,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 
-
-class MinableDamageDealt {
+class MinableDamageDealt
+{
 public:
-	double hullDamage = 0.;
-	double prospecting = 0.;
+  double hullDamage  = 0.;
+  double prospecting = 0.;
 };

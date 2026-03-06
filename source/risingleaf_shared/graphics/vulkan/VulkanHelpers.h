@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANHELPERS_H
 #define VULKANHELPERS_H
@@ -29,9 +30,8 @@ namespace VulkanHelpers
   std::vector<const char *> GetRequiredExtensions();
 
   constexpr std::array<const char *, 2> EXTENSION_LAYERS = {
-    "VK_LAYER_KHRONOS_validation",
-    "VK_LAYER_KHRONOS_synchronization2"
-  };
+      "VK_LAYER_KHRONOS_validation",
+      "VK_LAYER_KHRONOS_synchronization2"};
   bool CheckValidationLayerSupport();
 
   VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
@@ -47,9 +47,9 @@ namespace VulkanHelpers
       VkDebugUtilsMessengerEXT                 *p_debug_messenger);
 
   void DestroyDebugUtilsMessengerEXT(
-    VkInstance                   instance,
-    VkDebugUtilsMessengerEXT     debug_messenger,
-    const VkAllocationCallbacks *p_allocator);
+      VkInstance                   instance,
+      VkDebugUtilsMessengerEXT     debug_messenger,
+      const VkAllocationCallbacks *p_allocator);
 
   struct QueueFamilyIndices
   {
@@ -68,12 +68,9 @@ namespace VulkanHelpers
   };
   SwapChainSupportDetails AcquireSwapChainSupportDetails(VkPhysicalDevice physical_device, VkSurfaceKHR surface);
 
-  constexpr
-
-  std::array<const char*, 2> DEVICE_EXTENSIONS = {
-    VK_KHR_SWAPCHAIN_EXTENSION_NAME,
-    VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME
-  };
+  constexpr std::array<const char *, 2> DEVICE_EXTENSIONS = {
+      VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+      VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME};
   bool IsDeviceSuitable(VkPhysicalDevice vk_physical_device, VkSurfaceKHR surface);
 
   VkSampleCountFlagBits GetMaxUsableSampleCount(VkPhysicalDevice vk_physical_device);
@@ -85,6 +82,6 @@ namespace VulkanHelpers
   VkExtent2D ChooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, uint32_t width, uint32_t height);
 
   uint32_t FindMemoryType(VkPhysicalDevice physical_device, uint32_t type_filter, VkMemoryPropertyFlags properties);
-}
+} // namespace VulkanHelpers
 
-#endif //VULKANHELPERS_H
+#endif // VULKANHELPERS_H

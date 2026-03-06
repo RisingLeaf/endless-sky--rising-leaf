@@ -26,43 +26,42 @@ class Point;
 class Ship;
 
 
-
 // Class representing the shipyard UI panel, which allows you to buy new ships
 // or to sell any of the ones you own. For certain ships, you may need to have a
 // certain license to buy them, in which case the cost of the license is added
 // to the cost of the ship. (This is intended to be an annoyance, representing
 // a government that is particularly repressive of independent pilots.)
-class ShipyardPanel : public ShopPanel {
+class ShipyardPanel : public ShopPanel
+{
 public:
-	explicit ShipyardPanel(PlayerInfo &player, Sale<Ship> stock);
+  explicit ShipyardPanel(PlayerInfo &player, Sale<Ship> stock);
 
-	virtual void Step() override;
+  virtual void Step() override;
 
 
 protected:
-	virtual int TileSize() const override;
-	virtual bool HasItem(const std::string &name) const override;
-	virtual void DrawItem(const std::string &name, const Point &point) override;
-	virtual int DividerOffset() const override;
-	virtual int DetailWidth() const override;
-	virtual double DrawDetails(const Point &center) override;
-	virtual BuyResult CanBuy(bool onlyOwned = false) const override;
-	virtual void Buy(bool onlyOwned = false) override;
-	virtual bool CanSell(bool toStorage = false) const override;
-	virtual void Sell(bool toStorage = false) override;
-	virtual bool CanSellMultiple() const override;
-	virtual int FindItem(const std::string &text) const override;
+  virtual int               TileSize() const override;
+  virtual bool              HasItem(const std::string &name) const override;
+  virtual void              DrawItem(const std::string &name, const Point &point) override;
+  virtual double            ButtonPanelHeight() const override;
+  virtual double            DrawDetails(const Point &center) override;
+  virtual void              DrawButtons() override;
+  virtual TransactionResult CanDoBuyButton() const;
+  virtual void              DoBuyButton();
+  virtual void              Sell(bool storeOutfits);
+  virtual int               FindItem(const std::string &text) const override;
+  virtual TransactionResult HandleShortcuts(SDL_Keycode key) override;
 
 
 private:
-	void BuyShip(const std::string &name);
-	void SellShipAndOutfits();
-	void SellShipChassis();
-	void SellShip(bool toStorage);
+  bool BuyShip(const std::string &name);
+  void SellShipAndOutfits();
+  void SellShipChassis();
+  void SellShip(bool toStorage);
 
 
 private:
-	int modifier;
+  int modifier;
 
-	Sale<Ship> shipyard;
+  Sale<Ship> shipyard;
 };

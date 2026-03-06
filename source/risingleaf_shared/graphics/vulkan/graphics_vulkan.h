@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef GRAPHICS_VULKAN_H
 #define GRAPHICS_VULKAN_H
@@ -60,9 +61,9 @@ namespace graphics_vulkan
 
   struct TextureBinding
   {
-    const VulkanObjects::VulkanTextureInstance *const*TextureInstances;
-    VkDescriptorSet                                   DescriptorSet;
-    int                                               Set;
+    const VulkanObjects::VulkanTextureInstance *const *TextureInstances;
+    VkDescriptorSet                                    DescriptorSet;
+    int                                                Set;
   };
 
   struct DrawCall
@@ -74,8 +75,8 @@ namespace graphics_vulkan
 
   struct DynamicDrawCall
   {
-    VkPipeline Pipeline;
-    size_t     Count;
+    VkPipeline                 Pipeline;
+    size_t                     Count;
     std::vector<unsigned char> Data;
   };
 
@@ -88,13 +89,22 @@ namespace graphics_vulkan
 
     // From here on this stuff should really be packed into some sort of command buffer info struct
 
-    mutable std::array<VkCommandBuffer, VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT>                                      CommandBuffers{};
-    mutable std::array<std::unique_ptr<VulkanObjects::VulkanBufferInstance>, VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT> DynamicUniformBuffersCommon;
-    mutable size_t                                                                                                                      DynamicUniformBuffersCommonOffset = 0;
-    mutable std::array<std::unique_ptr<VulkanObjects::VulkanBufferInstance>, VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT> DynamicUniformBuffersSpecific;
-    mutable size_t                                                                                                                      DynamicUniformBuffersSpecificOffset = 0;
-    mutable std::array<std::unique_ptr<VulkanObjects::VulkanBufferInstance>, VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT> DynamicVertexBuffers;
-    mutable size_t                                                                                                                      DynamicVertexBuffersOffset = 0;
+    mutable std::array<VkCommandBuffer, VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT> CommandBuffers{};
+    mutable std::array<
+        std::unique_ptr<VulkanObjects::VulkanBufferInstance>,
+        VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT>
+                   DynamicUniformBuffersCommon;
+    mutable size_t DynamicUniformBuffersCommonOffset = 0;
+    mutable std::array<
+        std::unique_ptr<VulkanObjects::VulkanBufferInstance>,
+        VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT>
+                   DynamicUniformBuffersSpecific;
+    mutable size_t DynamicUniformBuffersSpecificOffset = 0;
+    mutable std::array<
+        std::unique_ptr<VulkanObjects::VulkanBufferInstance>,
+        VulkanObjects::VulkanDeviceInstance::MAX_FRAMES_IN_FLIGHT>
+                   DynamicVertexBuffers;
+    mutable size_t DynamicVertexBuffersOffset = 0;
 
     mutable std::vector<const VulkanObjects::VulkanShaderInstance *> BoundShaders;
     mutable std::vector<const VulkanObjects::VulkanBufferInstance *> BoundBuffers;
@@ -110,30 +120,67 @@ namespace graphics_vulkan
     mutable bool                                CommonDataChanged = false;
     mutable VulkanObjects::VulkanPipelineState  State;
 
-    friend void BindBuffers(const VulkanGraphicsInstance *instance, const VulkanObjects::VulkanShaderInstance *current_shader_instance, const GraphicsTypes::BufferInstance *const *buffer_instance, int count, GraphicsTypes::UBOBindPoint bind_point, int set, size_t offset, size_t size);
+    friend void BindBuffers(
+        const VulkanGraphicsInstance               *instance,
+        const VulkanObjects::VulkanShaderInstance  *current_shader_instance,
+        const GraphicsTypes::BufferInstance *const *buffer_instance,
+        int                                         count,
+        GraphicsTypes::UBOBindPoint                 bind_point,
+        int                                         set,
+        size_t                                      offset,
+        size_t                                      size);
     friend void SubmitDrawCommands(const VulkanGraphicsInstance *graphics_instance);
 
   public:
     explicit VulkanGraphicsInstance(int width, int height);
 
-    void CreateShader(std::unique_ptr<GraphicsTypes::ShaderInstance> &shader_instance, const ShaderInfo &shader_info, const std::vector<File::ShaderString> &shader_code, std::string_view name) const override;
+    void CreateShader(
+        std::unique_ptr<GraphicsTypes::ShaderInstance> &shader_instance,
+        const ShaderInfo                               &shader_info,
+        const std::vector<File::ShaderString>          &shader_code,
+        std::string_view                                name) const override;
 
-    void CreateBuffer(std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance, GraphicsTypes::BufferType type, size_t buffer_size, std::string_view name) const override;
-    void CreateBuffer(std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance, GraphicsTypes::BufferType type, size_t buffer_size, const void *data, std::string_view name) const override;
+    void CreateBuffer(
+        std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance,
+        GraphicsTypes::BufferType                       type,
+        size_t                                          buffer_size,
+        std::string_view                                name) const override;
+    void CreateBuffer(
+        std::unique_ptr<GraphicsTypes::BufferInstance> &buffer_instance,
+        GraphicsTypes::BufferType                       type,
+        size_t                                          buffer_size,
+        const void                                     *data,
+        std::string_view                                name) const override;
     void MapBuffer(GraphicsTypes::BufferInstance *buffer_instance, const void *map_memory) const override;
     // Copies lhs into rhs.
-    void CopyBuffer(GraphicsTypes::BufferInstance *buffer_instance_rhs, GraphicsTypes::BufferInstance *buffer_instance_lhs) const override;
+    void CopyBuffer(
+        GraphicsTypes::BufferInstance *buffer_instance_rhs,
+        GraphicsTypes::BufferInstance *buffer_instance_lhs) const override;
 
-    void CreateTexture(std::unique_ptr<GraphicsTypes::TextureInstance> &texture_instance, const GraphicsTypes::TextureInfo &texture_info, const void *in_data, std::string_view name) const override;
+    void CreateTexture(
+        std::unique_ptr<GraphicsTypes::TextureInstance> &texture_instance,
+        const GraphicsTypes::TextureInfo                &texture_info,
+        const void                                      *in_data,
+        std::string_view                                 name) const override;
 
-    void CreateRenderBuffer(std::unique_ptr<GraphicsTypes::RenderBufferInstance> &render_buffer_instance, const GraphicsTypes::FrameBufferInfo &create_info, std::string_view name) const override;
+    void CreateRenderBuffer(
+        std::unique_ptr<GraphicsTypes::RenderBufferInstance> &render_buffer_instance,
+        const GraphicsTypes::FrameBufferInfo                 &create_info,
+        std::string_view                                      name) const override;
 
-    const GraphicsTypes::TextureInstance *GetRenderBufferTexture(GraphicsTypes::RenderBufferInstance *render_buffer_instance) const override;
+    const GraphicsTypes::TextureInstance *
+    GetRenderBufferTexture(GraphicsTypes::RenderBufferInstance *render_buffer_instance) const override;
 
-    void DispatchCompute(const GraphicsTypes::ShaderInstance *shader, const GraphicsTypes::TextureInstance *const *texture_instance, int count, int num_x, int num_y, int num_z) const override;
+    void DispatchCompute(
+        const GraphicsTypes::ShaderInstance         *shader,
+        const GraphicsTypes::TextureInstance *const *texture_instance,
+        int                                          count,
+        int                                          num_x,
+        int                                          num_y,
+        int                                          num_z) const override;
     void CreateMipMaps(const GraphicsTypes::TextureInstance *texture_instance) const override;
 
-    void Resize(int width, int height) override {};
+    void Resize(int width, int height) override {}
 
     bool StartDraw(int width, int height) override;
 
@@ -145,12 +192,18 @@ namespace graphics_vulkan
     void SetColorState(bool state) const override;
 
     void BindShader(const GraphicsTypes::ShaderInstance *shader_instance) const override;
-    void BindBufferDynamic(const std::vector<unsigned char> &data, GraphicsTypes::UBOBindPoint bind_point) const override;
+    void
+    BindBufferDynamic(const std::vector<unsigned char> &data, GraphicsTypes::UBOBindPoint bind_point) const override;
 
-    void BindTextures(const GraphicsTypes::TextureInstance *const*texture_instance, int count, int set) const override;
+    void BindTextures(const GraphicsTypes::TextureInstance *const *texture_instance, int count, int set) const override;
     void BindVertexBuffer(GraphicsTypes::BufferInstance *buffer_instance) const override;
-    void DrawIndexed(size_t start, size_t count, const GraphicsTypes::BufferInstance *buffer_instance, GraphicsTypes::PrimitiveType prim_type) const override;
-    void DrawDynamic(size_t count, size_t type_size, const void *data, GraphicsTypes::PrimitiveType prim_type) const override;
+    void DrawIndexed(
+        size_t                               start,
+        size_t                               count,
+        const GraphicsTypes::BufferInstance *buffer_instance,
+        GraphicsTypes::PrimitiveType         prim_type) const override;
+    void DrawDynamic(size_t count, size_t type_size, const void *data, GraphicsTypes::PrimitiveType prim_type)
+        const override;
 
     void BindRenderBuffer(GraphicsTypes::RenderBufferInstance *render_buffer_instance) const override;
     void EndRenderBuffer(GraphicsTypes::RenderBufferInstance *render_buffer_instance) override;

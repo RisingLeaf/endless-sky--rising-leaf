@@ -22,200 +22,170 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <numeric>
 
+using namespace std;
 
 
-
-
-namespace {
-	const auto ASSIGN_OP_TO_TEXT = std::map<ConditionAssignments::AssignOp, const std::string> {
-		{ConditionAssignments::AssignOp::ASSIGN, "="},
-		{ConditionAssignments::AssignOp::ADD, "+="},
-		{ConditionAssignments::AssignOp::SUB, "-="},
-		{ConditionAssignments::AssignOp::MUL, "*="},
-		{ConditionAssignments::AssignOp::DIV, "/="},
-		{ConditionAssignments::AssignOp::LT, "<?="},
-		{ConditionAssignments::AssignOp::GT, ">?="},
-	};
+namespace
+{
+  const auto ASSIGN_OP_TO_TEXT = map<ConditionAssignments::AssignOp, const string>{
+      {ConditionAssignments::AssignOp::ASSIGN, "="},
+      {ConditionAssignments::AssignOp::ADD, "+="},
+      {ConditionAssignments::AssignOp::SUB, "-="},
+      {ConditionAssignments::AssignOp::MUL, "*="},
+      {ConditionAssignments::AssignOp::DIV, "/="},
+      {ConditionAssignments::AssignOp::LT, "<?="},
+      {ConditionAssignments::AssignOp::GT, ">?="},
+  };
 }
-
 
 
 // Construct and Load() at the same time.
 ConditionAssignments::ConditionAssignments(const DataNode &node, const ConditionsStore *conditions)
 {
-	Load(node, conditions);
+  Load(node, conditions);
 }
-
 
 
 // Load a set of conditions from the children of this node.
 void ConditionAssignments::Load(const DataNode &node, const ConditionsStore *conditions)
 {
-	this->conditions = conditions;
-	if(!node.HasChildren())
-		node.PrintTrace("Error: Loading empty set of assignments");
+  this->conditions = conditions;
+  if(!node.HasChildren()) node.PrintTrace("Loading empty set of assignments");
 
-	// Loop through all children, and parse each line into an Assignment.
-	for(const DataNode &child : node)
-		Add(child, conditions);
+  // Loop through all children, and parse each line into an Assignment.
+  for(const DataNode &child : node)
+    Add(child, conditions);
 }
-
 
 
 // Save a set of conditions.
 void ConditionAssignments::Save(DataWriter &out) const
 {
-	for(const Assignment &assignment : assignments)
-	{
-		AssignOp aso = assignment.assignOperator;
+  for(const Assignment &assignment : assignments)
+  {
+    AssignOp aso = assignment.assignOperator;
 
-		auto it = ASSIGN_OP_TO_TEXT.find(aso);
-		if(it != ASSIGN_OP_TO_TEXT.end())
-		{
-			out.WriteToken(assignment.conditionToAssignTo);
-			out.WriteToken(it->second);
-			assignment.expressionToEvaluate.SaveSubset(out);
-			out.Write();
-		}
-	}
+    auto it = ASSIGN_OP_TO_TEXT.find(aso);
+    if(it != ASSIGN_OP_TO_TEXT.end())
+    {
+      out.WriteToken(assignment.conditionToAssignTo);
+      out.WriteToken(it->second);
+      assignment.expressionToEvaluate.SaveInline(out);
+      out.Write();
+    }
+  }
 }
-
 
 
 // Check if there are any entries in this set.
-bool ConditionAssignments::IsEmpty() const
-{
-	return assignments.empty();
-}
-
+bool ConditionAssignments::IsEmpty() const { return assignments.empty(); }
 
 
 void ConditionAssignments::Apply() const
 {
-	if(IsEmpty())
-		return;
-	if(!conditions)
-		throw std::runtime_error("Unable to Apply ConditionAssignments without a pointer to a ConditionsStore!");
-	ConditionsStore &conditionsStore = *const_cast<ConditionsStore *>(conditions);
-	for(const Assignment &assignment : assignments)
-	{
-		auto &ce = conditionsStore[assignment.conditionToAssignTo];
-		int64_t newValue = assignment.expressionToEvaluate.Evaluate();
-		switch(assignment.assignOperator)
-		{
-			case AssignOp::ASSIGN:
-				ce = newValue;
-				break;
-			case AssignOp::ADD:
-				ce += newValue;
-				break;
-			case AssignOp::SUB:
-				ce -= newValue;
-				break;
-			case AssignOp::MUL:
-				ce = static_cast<int64_t>(ce) * newValue;
-				break;
-			case AssignOp::DIV:
-				ce = newValue ? static_cast<int64_t>(ce) / newValue : std::numeric_limits<int64_t>::max();
-				break;
-			case AssignOp::LT:
-				ce = std::min(static_cast<int64_t>(ce), newValue);
-				break;
-			case AssignOp::GT:
-				ce = std::max(static_cast<int64_t>(ce), newValue);
-				break;
-		}
-	}
+  if(IsEmpty()) return;
+  if(!conditions) throw runtime_error("Unable to Apply ConditionAssignments without a pointer to a ConditionsStore!");
+  ConditionsStore &conditionsStore = *const_cast<ConditionsStore *>(conditions);
+  for(const Assignment &assignment : assignments)
+  {
+    auto   &ce       = conditionsStore[assignment.conditionToAssignTo];
+    int64_t newValue = assignment.expressionToEvaluate.Evaluate();
+    switch(assignment.assignOperator)
+    {
+    case AssignOp::ASSIGN: ce = newValue; break;
+    case AssignOp::ADD:    ce += newValue; break;
+    case AssignOp::SUB:    ce -= newValue; break;
+    case AssignOp::MUL:    ce = static_cast<int64_t>(ce) * newValue; break;
+    case AssignOp::DIV:    ce = newValue ? static_cast<int64_t>(ce) / newValue : numeric_limits<int64_t>::max(); break;
+    case AssignOp::LT:     ce = min(static_cast<int64_t>(ce), newValue); break;
+    case AssignOp::GT:     ce = max(static_cast<int64_t>(ce), newValue); break;
+    }
+  }
 }
 
 
-
-std::set<std::string> ConditionAssignments::RelevantConditions() const
+set<string> ConditionAssignments::RelevantConditions() const
 {
-	std::set<std::string> result;
-	for(const Assignment &assignment : assignments)
-	{
-		result.insert(assignment.conditionToAssignTo);
-		for(const std::string &cs : assignment.expressionToEvaluate.RelevantConditions())
-			result.insert(cs);
-	}
-	return result;
+  set<string> result;
+  for(const Assignment &assignment : assignments)
+  {
+    result.insert(assignment.conditionToAssignTo);
+    for(const string &cs : assignment.expressionToEvaluate.RelevantConditions())
+      result.insert(cs);
+  }
+  return result;
 }
 
 
-
-void ConditionAssignments::AddSetCondition(const std::string &name, const ConditionsStore *conditions)
+void ConditionAssignments::AddSetCondition(const string &name, const ConditionsStore *conditions)
 {
-	this->conditions = conditions;
-	assignments.emplace_back(name, AssignOp::ASSIGN, ConditionSet(1, conditions));
+  this->conditions = conditions;
+  assignments.emplace_back(name, AssignOp::ASSIGN, ConditionSet(1, conditions));
 }
-
 
 
 void ConditionAssignments::Add(const DataNode &node, const ConditionsStore *conditions)
 {
-	this->conditions = conditions;
-	const std::string &key = node.Token(0);
-	if(key == "set" || key == "clear")
-	{
-		if(node.Size() != 2 || !DataNode::IsConditionName(node.Token(1)))
-		{
-			node.PrintTrace("Parse error; " + key + " keyword requires a single valid condition:");
-			return;
-		}
-		assignments.emplace_back(node.Token(1), AssignOp::ASSIGN,
-			ConditionSet(key == "set" ? 1 : 0, conditions));
-	}
-	else if(node.Size() == 2 && (node.Token(1) == "++" || node.Token(1) == "--"))
-	{
-		if(!DataNode::IsConditionName(key))
-		{
-			node.PrintTrace("Parse error; " + node.Token(1) + " operator requires a single valid condition:");
-			return;
-		}
-		assignments.emplace_back(key, node.Token(1) == "++" ? AssignOp::ADD : AssignOp::SUB,
-			ConditionSet(1, conditions));
-	}
-	else if(node.Size() >= 3)
-	{
-		// Parse the assignment operator.
-		AssignOp ao = AssignOp::ASSIGN;
-		const std::string assignOpString = node.Token(1);
-		auto it = find_if(ASSIGN_OP_TO_TEXT.begin(), ASSIGN_OP_TO_TEXT.end(),
-			[&assignOpString](const std::pair<AssignOp, const std::string> &e) {
-				return e.second == assignOpString;
-			});
-		if(it != ASSIGN_OP_TO_TEXT.end())
-			ao = it->first;
-		else
-		{
-			node.PrintTrace("Parse error; Unsupported assignment operator (" + assignOpString + "):");
-			return;
-		}
+  this->conditions  = conditions;
+  const string &key = node.Token(0);
+  if(key == "set" || key == "clear")
+  {
+    if(node.Size() != 2 || !DataNode::IsConditionName(node.Token(1)))
+    {
+      node.PrintTrace("Parse error; " + key + " keyword requires a single valid condition:");
+      return;
+    }
+    assignments.emplace_back(node.Token(1), AssignOp::ASSIGN, ConditionSet(key == "set" ? 1 : 0, conditions));
+  }
+  else if(node.Size() == 2 && (node.Token(1) == "++" || node.Token(1) == "--"))
+  {
+    if(!DataNode::IsConditionName(key))
+    {
+      node.PrintTrace("Parse error; " + node.Token(1) + " operator requires a single valid condition:");
+      return;
+    }
+    assignments.emplace_back(key, node.Token(1) == "++" ? AssignOp::ADD : AssignOp::SUB, ConditionSet(1, conditions));
+  }
+  else if(node.Size() >= 3)
+  {
+    // Parse the assignment operator.
+    AssignOp     ao             = AssignOp::ASSIGN;
+    const string assignOpString = node.Token(1);
+    auto         it             = find_if(
+        ASSIGN_OP_TO_TEXT.begin(),
+        ASSIGN_OP_TO_TEXT.end(),
+        [&assignOpString](const pair<AssignOp, const string> &e) { return e.second == assignOpString; });
+    if(it != ASSIGN_OP_TO_TEXT.end())
+    {
+      ao = it->first;
+    }
+    else {
+      node.PrintTrace("Parse error; Unsupported assignment operator (" + assignOpString + "):");
+      return;
+    }
 
-		// Parse the expression.
-		ConditionSet expr(conditions);
-		int tokenNr = 2;
-		if(!expr.ParseNode(node, tokenNr))
-			return;
+    // Parse the expression.
+    ConditionSet expr(conditions);
+    int          tokenNr = 2;
+    if(!expr.ParseNode(node, tokenNr)) return;
 
-		// Perform optimization of the parsed expression.
-		expr.Optimize(node);
+    // Perform optimization of the parsed expression.
+    expr.Optimize(node);
 
-		// Add the assignment when all parsing succeeded.
-		assignments.emplace_back(key, ao, expr);
-	}
-	else
-	{
-		node.PrintTrace("Error: Incomplete assignment");
-		return;
-	}
+    // Add the assignment when all parsing succeeded.
+    assignments.emplace_back(key, ao, expr);
+  }
+  else {
+    node.PrintTrace("Incomplete assignment.");
+    return;
+  }
 }
 
 
-
-ConditionAssignments::Assignment::Assignment(std::string conditionToAssignTo, AssignOp assignOperator,
-	ConditionSet expressionToEvaluate) : conditionToAssignTo(conditionToAssignTo), assignOperator(assignOperator),
-	expressionToEvaluate(expressionToEvaluate)
+ConditionAssignments::Assignment::Assignment(
+    string       conditionToAssignTo,
+    AssignOp     assignOperator,
+    ConditionSet expressionToEvaluate) :
+  conditionToAssignTo(conditionToAssignTo), assignOperator(assignOperator), expressionToEvaluate(expressionToEvaluate)
 {
 }

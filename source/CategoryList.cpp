@@ -21,64 +21,56 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <limits>
 
 
-
-
-
 const bool CategoryList::Category::SortHelper(const CategoryList::Category &a, const CategoryList::Category &b)
 {
-	if(a.precedence == b.precedence)
-		return a.name < b.name;
-	return a.precedence < b.precedence;
+  if(a.precedence == b.precedence) return a.name < b.name;
+  return a.precedence < b.precedence;
 }
-
 
 
 void CategoryList::Load(const DataNode &node)
 {
-	for(const DataNode &child : node)
-	{
-		// Use the given precedence. If no precedence is given, use the previous
-		// precedence + 1.
-		if(child.Size() > 1)
-			currentPrecedence = child.Value(1);
-		Category cat(child.Token(0), currentPrecedence++);
+  for(const DataNode &child : node)
+  {
+    // Use the given precedence. If no precedence is given, use the previous
+    // precedence + 1.
+    if(child.Size() > 1) currentPrecedence = child.Value(1);
+    Category cat(child.Token(0), currentPrecedence++);
 
-		// If a given category name already exists, its precedence will be updated.
-		auto it = find_if(list.begin(), list.end(),
-			[&cat](const Category &c) noexcept -> bool { return cat.name == c.name; });
-		if(it != list.end())
-			it->precedence = cat.precedence;
-		else
-			list.push_back(cat);
-	}
+    // If a given category name already exists, its precedence will be updated.
+    auto it =
+        find_if(list.begin(), list.end(), [&cat](const Category &c) noexcept -> bool { return cat.name == c.name; });
+    if(it != list.end()) it->precedence = cat.precedence;
+    else list.push_back(cat);
+  }
 }
 
+
+void CategoryList::Clear()
+{
+  list.clear();
+  currentPrecedence = 0;
+}
 
 
 // Sort the CategoryList. Categories are sorted by precedence. If multiple categories
 // share the same precedence then they are sorted alphabetically.
-void CategoryList::Sort()
-{
-	sort(list.begin(), list.end());
-}
-
+void CategoryList::Sort() { sort(list.begin(), list.end()); }
 
 
 // Determine if the CategoryList contains a Category with the given name.
 bool CategoryList::Contains(const std::string &name) const
 {
-	const auto it = find_if(list.begin(), list.end(),
-		[&name](const Category &c) noexcept -> bool { return name == c.name; });
-	return it != list.end();
+  const auto it =
+      find_if(list.begin(), list.end(), [&name](const Category &c) noexcept -> bool { return name == c.name; });
+  return it != list.end();
 }
-
 
 
 const CategoryList::Category CategoryList::GetCategory(const std::string &name) const
 {
-	const auto it = find_if(list.begin(), list.end(),
-		[&name](const Category &c) noexcept -> bool { return name == c.name; });
-	if(it != list.end())
-		return *it;
-	return Category("", std::numeric_limits<int>::max());
+  const auto it =
+      find_if(list.begin(), list.end(), [&name](const Category &c) noexcept -> bool { return name == c.name; });
+  if(it != list.end()) return *it;
+  return Category("", std::numeric_limits<int>::max());
 }

@@ -35,60 +35,64 @@ class System;
 class TextArea;
 
 
-
 // Dialog that pops up when you land on a planet. The shipyard and outfitter are
 // shown in full-screen panels that pop up above this one, but the remaining views
 // (trading, jobs, bank, port, and crew) are displayed within this dialog.
-class PlanetPanel : public Panel {
+class PlanetPanel : public Panel
+{
 public:
-	PlanetPanel(PlayerInfo &player, std::function<void()> callback);
-	~PlanetPanel();
+  PlanetPanel(PlayerInfo &player, std::function<void()> callback);
+  virtual ~PlanetPanel() override;
 
-	virtual void Step() override;
-	virtual void Draw() override;
+  virtual void Step() override;
+  virtual void Draw() override;
 
 
 protected:
-	// Only override the ones you need; the default action is to return false.
-	virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
+  // Only override the ones you need; the default action is to return false.
+  virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
 
-	virtual void Resize() override;
-
-
-private:
-	void TakeOffIfReady();
-	void CheckWarningsAndTakeOff();
-	void WarningsDialogCallback(bool isOk);
-	void TakeOff(bool distributeCargo);
+  virtual void Resize() override;
 
 
 private:
-	PlayerInfo &player;
-	std::function<void()> callback = nullptr;
-	bool requestedLaunch = false;
+  void TakeOffIfReady();
+  void CheckWarningsAndTakeOff();
+  void WarningsDialogCallback(bool isOk);
+  void TakeOff(bool distributeCargo);
 
-	const Planet &planet;
-	const System &system;
 
-	// Whether this planet has a shipyard or outfitter
-	// and the items that are for sale in each shop.
-	bool initializedShops = false;
-	bool hasShipyard = false;
-	bool hasOutfitter = false;
-	Sale<Ship> shipyardStock;
-	Sale<Outfit> outfitterStock;
+private:
+  PlayerInfo           &player;
+  std::function<void()> callback        = nullptr;
+  bool                  requestedLaunch = false;
 
-	std::shared_ptr<Panel> trading;
-	std::shared_ptr<Panel> bank;
-	std::shared_ptr<SpaceportPanel> spaceport;
-	std::shared_ptr<Panel> hiring;
-	Panel *selectedPanel = nullptr;
+  const Planet &planet;
+  const System &system;
 
-	std::shared_ptr<TextArea> description;
+  // Whether this planet has a shipyard or outfitter
+  // and the items that are for sale in each shop.
+  bool         initializedShops = false;
+  bool         hasShipyard      = false;
+  bool         hasOutfitter     = false;
+  Sale<Ship>   shipyardStock;
+  Sale<Outfit> outfitterStock;
+  // Whether the thumbnails for the ships and outfits visible in the shops have been loaded.
+  // May be set back to false if a mission could have gifted the player a ship or outfit, or
+  // added new items to the shop.
+  bool hasLoadedThumbnails = false;
 
-	// Out of system (absent) ships that cannot fly for some reason.
-	std::vector<std::shared_ptr<Ship>> absentCannotFly;
+  std::shared_ptr<Panel>          trading;
+  std::shared_ptr<Panel>          bank;
+  std::shared_ptr<SpaceportPanel> spaceport;
+  std::shared_ptr<Panel>          hiring;
+  Panel                          *selectedPanel = nullptr;
 
-	// Cache flight checks to not calculate them twice before each takeoff.
-	std::map<const std::shared_ptr<Ship>, std::vector<std::string>> flightChecks;
+  std::shared_ptr<TextArea> description;
+
+  // Out of system (absent) ships that cannot fly for some reason.
+  std::vector<std::shared_ptr<Ship>> absentCannotFly;
+
+  // Cache flight checks to not calculate them twice before each takeoff.
+  std::map<const std::shared_ptr<Ship>, std::vector<std::string>> flightChecks;
 };

@@ -19,8 +19,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "ClickZone.h"
 #include "InfoPanelState.h"
-#include "text/Layout.h"
 #include "Point.h"
+#include "text/Layout.h"
 
 #include <set>
 #include <vector>
@@ -29,77 +29,83 @@ class PlayerInfo;
 class Rectangle;
 
 
-
 // This panel displays detailed information about the player and their fleet. If
 // the player is landed on a planet, it also allows them to reorder the ships in
 // their fleet (including changing which one is the flagship).
-class PlayerInfoPanel : public Panel {
+class PlayerInfoPanel : public Panel
+{
 public:
-	explicit PlayerInfoPanel(PlayerInfo &player);
-	explicit PlayerInfoPanel(PlayerInfo &player, InfoPanelState panelState);
-	virtual ~PlayerInfoPanel() override;
+  explicit PlayerInfoPanel(PlayerInfo &player);
+  explicit PlayerInfoPanel(PlayerInfo &player, InfoPanelState panelState);
+  virtual ~PlayerInfoPanel() override;
 
-	virtual void Step() override;
-	virtual void Draw() override;
+  virtual void Step() override;
+  virtual void Draw() override;
 
-	// The player info panel allow fast-forward to stay active.
-	bool AllowsFastForward() const noexcept final;
+  // The player info panel allow fast-forward to stay active.
+  bool AllowsFastForward() const noexcept final;
 
 
 protected:
-	// Only override the ones you need; the default action is to return false.
-	virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
-	virtual bool Click(int x, int y, MouseButton button, int clicks) override;
-	virtual bool Hover(int x, int y) override;
-	virtual bool Drag(double dx, double dy) override;
-	virtual bool Release(int x, int y, MouseButton button) override;
-	virtual bool Scroll(double dx, double dy) override;
+  // Only override the ones you need; the default action is to return false.
+  virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
+  virtual bool Click(int x, int y, MouseButton button, int clicks) override;
+  virtual bool Hover(int x, int y) override;
+  virtual bool Drag(double dx, double dy) override;
+  virtual bool Release(int x, int y, MouseButton button) override;
+  virtual bool Scroll(double dx, double dy) override;
 
 
 private:
-	// Draw the two subsections of this panel.
-	void DrawPlayer(const Rectangle &bounds);
-	void DrawFleet(const Rectangle &bounds);
+  // Draw the two subsections of this panel.
+  void DrawPlayer(const Rectangle &bounds);
+  void DrawFleet(const Rectangle &bounds);
 
-	// Handle mouse hover (also including hover during drag actions):
-	bool Hover(const Point &point);
-	// Adjust the scroll by the given amount. Return true if it changed.
-	bool Scroll(int distance);
-	// Try to scroll to the given position. Return true if position changed.
-	bool ScrollAbsolute(int scroll);
+  // Handle mouse hover (also including hover during drag actions):
+  bool Hover(const Point &point);
+  // Adjust the scroll by the given amount. Return true if it changed.
+  bool Scroll(int distance);
+  // Try to scroll to the given position. Return true if position changed.
+  bool ScrollAbsolute(int scroll);
 
-	void SortShips(InfoPanelState::ShipComparator *shipComparator);
+  void SortShips(InfoPanelState::ShipComparator *shipComparator);
 
-	class SortableColumn {
-	public:
-		SortableColumn(std::string name, double offset, double endX, Layout layout, InfoPanelState::ShipComparator *shipSort);
+  class SortableColumn
+  {
+  public:
+    SortableColumn(
+        std::string                     name,
+        double                          offset,
+        double                          endX,
+        Layout                          layout,
+        InfoPanelState::ShipComparator *shipSort);
 
-		std::string name;
-		double offset = 0.;
-		double endX = 0.;
-		Layout layout;
-		InfoPanelState::ShipComparator *shipSort = nullptr;
-	};
+    std::string                     name;
+    double                          offset = 0.;
+    double                          endX   = 0.;
+    Layout                          layout;
+    InfoPanelState::ShipComparator *shipSort = nullptr;
+  };
 
 private:
-	PlayerInfo &player;
+  PlayerInfo &player;
 
-	static const SortableColumn columns[];
+  static const SortableColumn columns[];
 
-	InfoPanelState panelState;
+  InfoPanelState panelState;
 
-	// Column headers that sort ships when clicked.
-	std::vector<ClickZone<InfoPanelState::ShipComparator *>> menuZones;
+  // Column headers that sort ships when clicked.
+  std::vector<ClickZone<InfoPanelState::ShipComparator *>> menuZones;
 
-	// Keep track of which ship the mouse is hovering over.
-	int hoverIndex = -1;
+  // Keep track of which ship the mouse is hovering over.
+  int hoverIndex = -1;
 
-	// Initialize mouse point to something off-screen to not
-	// make the game think the player is hovering on something.
-	Point hoverPoint = Point(-10000, -10000);
+  // Initialize mouse point to something off-screen to not
+  // make the game think the player is hovering on something.
+  Point hoverPoint = Point(-10'000, -10'000);
 
-	// When reordering ships, the names of ships being moved are displayed alongside the cursor.
-	bool isDragging = false;
+  // When reordering ships, the names of ships being moved are displayed alongside the cursor.
+  bool isDragging = false;
 
-	bool checkedHelp = false;
+  bool checkedHelp = false;
 };

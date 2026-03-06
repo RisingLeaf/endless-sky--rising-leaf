@@ -57,10 +57,11 @@ namespace VulkanObjects
     std::string Name;
 
   public:
-    VulkanShaderInstance(const VulkanDeviceInstance            *device,
-                         const ShaderInfo                      &info,
-                         const std::vector<File::ShaderString> &shader_code,
-                         std::string_view                       name);
+    VulkanShaderInstance(
+        const VulkanDeviceInstance            *device,
+        const ShaderInfo                      &info,
+        const std::vector<File::ShaderString> &shader_code,
+        std::string_view                       name);
 
     ~VulkanShaderInstance() override;
 

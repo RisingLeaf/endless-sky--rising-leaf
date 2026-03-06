@@ -27,44 +27,46 @@ class Sprite;
 class Swizzle;
 
 
-
 // A panel that displays the galaxy star map, along with a side panel showing
 // all ships that are for sale in known systems. You can click on one of them
 // to see which systems it is available in.
-class MapShipyardPanel : public MapSalesPanel {
+class MapShipyardPanel : public MapSalesPanel
+{
 public:
-	explicit MapShipyardPanel(PlayerInfo &player);
-	explicit MapShipyardPanel(const MapPanel &panel, bool onlyHere = false);
+  explicit MapShipyardPanel(PlayerInfo &player);
+  explicit MapShipyardPanel(const MapPanel &panel, bool onlyHere = false);
 
 
 protected:
-	virtual const Sprite *SelectedSprite() const override;
-	virtual const Sprite *CompareSprite() const override;
-	virtual const Swizzle *SelectedSpriteSwizzle() const override;
-	virtual const Swizzle *CompareSpriteSwizzle() const override;
-	virtual const ItemInfoDisplay &SelectedInfo() const override;
-	virtual const ItemInfoDisplay &CompareInfo() const override;
-	virtual const std::string &KeyLabel(int index) const override;
+  virtual void LoadCatalogThumbnails() const override;
 
-	virtual void Select(int index) override;
-	virtual void Compare(int index) override;
-	virtual double SystemValue(const System *system) const override;
-	virtual int FindItem(const std::string &text) const override;
+  virtual const Sprite          *SelectedSprite() const override;
+  virtual const Sprite          *CompareSprite() const override;
+  virtual const Swizzle         *SelectedSpriteSwizzle() const override;
+  virtual const Swizzle         *CompareSpriteSwizzle() const override;
+  virtual const ItemInfoDisplay &SelectedInfo() const override;
+  virtual const ItemInfoDisplay &CompareInfo() const override;
 
-	virtual void DrawItems() override;
+  virtual void   Select(int index) override;
+  virtual void   Compare(int index) override;
+  virtual double SystemValue(const System *system) const override;
+  virtual int    FindItem(const std::string &text) const override;
 
-
-private:
-	void Init();
+  virtual void DrawKey(Information &info) const override;
+  virtual void DrawItems() override;
 
 
 private:
-	std::vector<const Ship *> list;
-	std::map<const System *, std::map<const Ship *, int>> parkedShips;
+  void Init();
 
-	const Ship *selected = nullptr;
-	const Ship *compare = nullptr;
 
-	ShipInfoDisplay selectedInfo;
-	ShipInfoDisplay compareInfo;
+private:
+  std::vector<const Ship *>                             list;
+  std::map<const System *, std::map<const Ship *, int>> parkedShips;
+
+  const Ship *selected = nullptr;
+  const Ship *compare  = nullptr;
+
+  ShipInfoDisplay selectedInfo;
+  ShipInfoDisplay compareInfo;
 };

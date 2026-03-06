@@ -25,27 +25,27 @@ class DataNode;
 class PlayerInfo;
 
 
-
 // A class containing a list of text replacements. Text replacements consist of a
 // key to search for and the text to replace it with. One key can have multiple potential
 // replacement texts, with the specific text chosen being defined by whichever replacement
 // is the last valid replacement for that key, with replacement validity being defined
 // by a ConditionSet.
-class TextReplacements {
+class TextReplacements
+{
 public:
-	// Load a substitutions node.
-	void Load(const DataNode &node, const ConditionsStore *playerConditions);
+  // Load a substitutions node.
+  void Load(const DataNode &node, const ConditionsStore *playerConditions);
 
-	// Clear this TextReplacement's substitutions and insert the substitutions of other.
-	void Revert(TextReplacements &other);
+  // Clear this TextReplacement's substitutions and insert the substitutions of other.
+  void Revert(TextReplacements &other);
 
-	// Add new text replacements to the given map after evaluating all possible replacements.
-	// This TextReplacements will overwrite the value of any existing keys in the given map
-	// if the map and this TextReplacements share a key.
-	void Substitutions(std::map<std::string, std::string> &subs) const;
+  // Add new text replacements to the given map after evaluating all possible replacements.
+  // This TextReplacements will overwrite the value of any existing keys in the given map
+  // if the map and this TextReplacements share a key.
+  void Substitutions(std::map<std::string, std::string> &subs) const;
 
 
 private:
-	// std::vector with "string to be replaced", "condition when to replace", and "replacement text".
-	std::vector<std::pair<std::string, std::pair<ConditionSet, std::string>>> substitutions;
+  // Vector with "string to be replaced", "condition when to replace", and "replacement text".
+  std::vector<std::pair<std::string, std::pair<ConditionSet, std::string>>> substitutions;
 };

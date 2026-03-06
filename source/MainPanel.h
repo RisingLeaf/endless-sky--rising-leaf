@@ -26,71 +26,66 @@ class PlayerInfo;
 class ShipEvent;
 
 
-
 // Class representing the main panel (i.e. the view of your ship moving around).
 // The goal is that the Engine class will not need to know about displaying
 // panels or handling key presses; it instead focuses just on the calculations
 // needed to move the ships around and to figure out where they should be drawn.
-class MainPanel : public Panel {
+class MainPanel : public Panel
+{
 public:
-	explicit MainPanel(PlayerInfo &player);
+  explicit MainPanel(PlayerInfo &player);
 
-	virtual void Step() override;
-	virtual void Draw() override;
+  virtual void Step() override;
+  virtual void Draw() override;
 
-	// The planet panel calls this when it closes.
-	void OnCallback();
-	// The hail panel calls this when it closes.
-	void OnBribeCallback(const Government *bribed);
+  // The planet panel calls this when it closes.
+  void OnCallback();
+  // The hail panel calls this when it closes.
+  void OnBribeCallback(const Government *bribed);
 
-	// The main panel allows fast-forward.
-	bool AllowsFastForward() const noexcept final;
+  // The main panel allows fast-forward.
+  bool AllowsFastForward() const noexcept final;
 
-	// Get the underlying game engine used by the game.
-	Engine &GetEngine();
+  // Get the underlying game engine used by the game.
+  Engine &GetEngine();
 
 
 protected:
-	// Only override the ones you need; the default action is to return false.
-	virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
-	virtual bool Click(int x, int y, MouseButton button, int clicks) override;
-	virtual bool Drag(double dx, double dy) override;
-	virtual bool Release(int x, int y, MouseButton button) override;
-	virtual bool Scroll(double dx, double dy) override;
+  // Only override the ones you need; the default action is to return false.
+  virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
+  virtual bool Click(int x, int y, MouseButton button, int clicks) override;
+  virtual bool Drag(double dx, double dy) override;
+  virtual bool Release(int x, int y, MouseButton button) override;
+  virtual bool Scroll(double dx, double dy) override;
 
 
 private:
-	void ShowScanDialog(const ShipEvent &event);
-	bool ShowHailPanel();
-	bool ShowHelp(bool force);
-	void StepEvents(bool &isActive);
+  void ShowScanDialog(const ShipEvent &event);
+  bool ShowHailPanel();
+  bool ShowHelp(bool force);
+  void StepEvents(bool &isActive);
 
 
 private:
-	PlayerInfo &player;
+  PlayerInfo &player;
 
-	Engine engine;
+  Engine engine;
 
-	// These are the pending ShipEvents that have yet to be processed.
-	std::list<ShipEvent> eventQueue;
-	bool handledFront = false;
+  // These are the pending ShipEvents that have yet to be processed.
+  std::list<ShipEvent> eventQueue;
+  bool                 handledFront = false;
 
-	Command show;
+  Command show;
 
-	// For displaying the GPU load.
-	double load = 0.;
-	double loadSum = 0.;
-	int loadCount = 0;
+  // Keep track of how long a starting player has spent drifting in deep space.
+  int lostness  = 0;
+  int lostCount = 0;
 
-	// Keep track of how long a starting player has spent drifting in deep space.
-	int lostness = 0;
-	int lostCount = 0;
-
-	Point dragSource;
-	Point dragPoint;
-	bool isDragging = false;
-	bool hasShift = false;
-	bool hasControl = false;
-	bool canClick = false;
-	bool canDrag = false;
+  Point dragSource;
+  Point dragPoint;
+  bool  isDragging = false;
+  bool  hasShift   = false;
+  bool  hasControl = false;
+  bool  canClick   = false;
+  bool  canDrag    = false;
 };

@@ -16,11 +16,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 
-
 // A RAII class requesting increased timer precision on Windows
 // and withdrawing the request when it's no longer needed.
-class TimerResolutionGuard {
+class TimerResolutionGuard
+{
 public:
-	TimerResolutionGuard();
-	~TimerResolutionGuard();
+  TimerResolutionGuard();
+  ~TimerResolutionGuard();
 };

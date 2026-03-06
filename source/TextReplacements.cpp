@@ -21,63 +21,57 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <set>
 
 
-
-
-
 // Load a substitutions node.
 void TextReplacements::Load(const DataNode &node, const ConditionsStore *playerConditions)
 {
-	// Check for reserved keys. Only some hardcoded replacement keys are
-	// reserved, as these are done on the fly after all other replacements
-	// have been done.
-	const std::set<std::string> reserved = {"<first>", "<last>", "<ship>", "<model>", "<flagship>", "<flagship model>"};
+  // Check for reserved keys. Only some hardcoded replacement keys are
+  // reserved, as these ones are done on the fly after all other replacements
+  // have been done.
+  const std::set<std::string> reserved = {"<first>", "<last>", "<ship>", "<model>", "<flagship>", "<flagship model>"};
 
-	for(const DataNode &child : node)
-	{
-		if(child.Size() < 2)
-		{
-			child.PrintTrace("Skipping substitution key with no replacement:");
-			continue;
-		}
+  for(const DataNode &child : node)
+  {
+    if(child.Size() < 2)
+    {
+      child.PrintTrace("Skipping substitution key with no replacement:");
+      continue;
+    }
 
-		std::string key = child.Token(0);
-		if(key.empty())
-		{
-			child.PrintTrace("Error: Cannot replace the empty string:");
-			continue;
-		}
-		if(key.front() != '<')
-		{
-			key = "<" + key;
-			child.PrintTrace("Warning: text replacements must be prefixed by \"<\":");
-		}
-		if(key.back() != '>')
-		{
-			key += ">";
-			child.PrintTrace("Warning: text replacements must be suffixed by \">\":");
-		}
-		if(reserved.contains(key))
-		{
-			child.PrintTrace("Skipping reserved substitution key:");
-			continue;
-		}
+    std::string key = child.Token(0);
+    if(key.empty())
+    {
+      child.PrintTrace("Cannot replace the empty string:");
+      continue;
+    }
+    if(key.front() != '<')
+    {
+      key = "<" + key;
+      child.PrintTrace("Text replacements must be prefixed by \"<\":");
+    }
+    if(key.back() != '>')
+    {
+      key += ">";
+      child.PrintTrace("Text replacements must be suffixed by \">\":");
+    }
+    if(reserved.contains(key))
+    {
+      child.PrintTrace("Skipping reserved substitution key:");
+      continue;
+    }
 
-		ConditionSet toSubstitute;
-		if(child.HasChildren())
-			toSubstitute.Load(child, playerConditions);
-		substitutions.emplace_back(key, make_pair(std::move(toSubstitute), child.Token(1)));
-	}
+    ConditionSet toSubstitute;
+    if(child.HasChildren()) toSubstitute.Load(child, playerConditions);
+    substitutions.emplace_back(key, make_pair(std::move(toSubstitute), child.Token(1)));
+  }
 }
-
 
 
 // Clear this TextReplacement's substitutions and insert the substitutions of other.
 void TextReplacements::Revert(TextReplacements &other)
 {
-	substitutions.clear();
-	substitutions.insert(substitutions.begin(), other.substitutions.begin(), other.substitutions.end());
+  substitutions.clear();
+  substitutions.insert(substitutions.begin(), other.substitutions.begin(), other.substitutions.end());
 }
-
 
 
 // Add new text replacements to the given map after evaluating all possible replacements.
@@ -85,12 +79,11 @@ void TextReplacements::Revert(TextReplacements &other)
 // if the map and this TextReplacements share a key.
 void TextReplacements::Substitutions(std::map<std::string, std::string> &subs) const
 {
-	for(const auto &sub : substitutions)
-	{
-		const std::string &key = sub.first;
-		const ConditionSet &toSub = sub.second.first;
-		const std::string &replacement = sub.second.second;
-		if(toSub.Test())
-			subs[key] = replacement;
-	}
+  for(const auto &sub : substitutions)
+  {
+    const std::string  &key         = sub.first;
+    const ConditionSet &toSub       = sub.second.first;
+    const std::string  &replacement = sub.second.second;
+    if(toSub.Test()) subs[key] = replacement;
+  }
 }

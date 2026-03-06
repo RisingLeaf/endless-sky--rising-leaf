@@ -55,7 +55,7 @@ namespace VulkanObjects
 #ifdef NDEBUG
     static constexpr bool ENABLE_VALIDATION_LAYERS = false;
 #else
-    static constexpr bool ENABLE_VALIDATION_LAYERS = true;
+    static constexpr bool            ENABLE_VALIDATION_LAYERS     = true;
     PFN_vkSetDebugUtilsObjectNameEXT vkSetDebugUtilsObjectNameEXT = nullptr;
 #endif
 
@@ -100,8 +100,8 @@ namespace VulkanObjects
     [[nodiscard]] VkQueue                    GetComputeQueue() const { return ComputeQueue; }
     [[nodiscard]] VkQueue                    GetPresentQueue() const { return PresentQueue; }
     [[nodiscard]] uint8_t                    GetCurrentFrame() const { return CurrentFrame; }
-    [[nodiscard]] VkSemaphore                GetImageAvailable() const { return ImageAvailableSemaphores[CurrentFrame]; }
-    [[nodiscard]] VkFence                    GetFence() const { return InFlightFences[CurrentFrame]; }
+    [[nodiscard]] VkSemaphore GetImageAvailable() const { return ImageAvailableSemaphores[CurrentFrame]; }
+    [[nodiscard]] VkFence     GetFence() const { return InFlightFences[CurrentFrame]; }
   };
 } // namespace VulkanObjects
 

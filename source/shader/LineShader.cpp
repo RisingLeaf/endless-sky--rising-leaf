@@ -84,11 +84,11 @@ void LineShader::DrawDashed(
   // If needed, scale pattern down so we can draw at least two of them over length.
   if(segments < 2)
   {
-    segments = 2;
+    segments     = 2;
     spaceLength *= length / (segments * patternLength);
   }
-  spaceLength /= 2.;
-  float capOffset = roundCap ? width : 0.;
+  spaceLength     /= 2.;
+  float capOffset  = roundCap ? width : 0.;
   for(int i = 0; i < segments; ++i)
   {
     Draw(
@@ -150,17 +150,17 @@ void LineShader::DrawGradientDashed(
   // If needed, scale pattern down so we can draw at least two of them over length.
   if(segments < 2)
   {
-    segments = 2;
+    segments     = 2;
     spaceLength *= length / (segments * patternLength);
   }
-  spaceLength /= 2.;
-  const float capOffset = roundCap ? width : 0.;
+  spaceLength           /= 2.;
+  const float capOffset  = roundCap ? width : 0.;
   for(int i = 0; i < segments; ++i)
   {
     const float p      = static_cast<float>(i) / static_cast<float>(segments);
-    Color mixed  = Color::Combine(1.f - p, fromColor, p, toColor);
+    Color       mixed  = Color::Combine(1.f - p, fromColor, p, toColor);
     const float pv     = static_cast<float>(i + 1) / static_cast<float>(segments);
-    Color mixed2 = Color::Combine(1.f - pv, fromColor, pv, toColor);
+    Color       mixed2 = Color::Combine(1.f - pv, fromColor, pv, toColor);
     DrawGradient(
         from + unit * (i * length / segments + spaceLength + capOffset),
         from + unit * ((i + 1) * length / segments - spaceLength - capOffset),

@@ -32,7 +32,6 @@ class PlayerInfo;
 class System;
 
 
-
 // This represents something that happens that changes the universe. For
 // example, a system may be taken over by a different government, or a new type
 // of ship or weapon may become available for purchase. Events that do not
@@ -40,52 +39,60 @@ class System;
 // event always sets the "event: <name>" condition when it occurs, which allows
 // you to use the mission framework to specify a message that can be shown to
 // the player the next time they land on a planet after that event happens.
-class GameEvent {
+class GameEvent
+{
 public:
-	// Determine the universe object definitions that are defined by the given list of changes.
-	static std::map<std::string, std::set<std::string>> DeferredDefinitions(const std::list<DataNode> &changes);
+  // Determine the universe object definitions that are defined by the given list of changes.
+  static std::map<std::string, std::set<std::string>> DeferredDefinitions(const std::list<DataNode> &changes);
 
 
 public:
-	GameEvent() = default;
-	// Construct and Load() at the same time.
-	explicit GameEvent(const DataNode &node, const ConditionsStore *playerConditions);
+  GameEvent() = default;
+  // Construct and Load() at the same time.
+  explicit GameEvent(const DataNode &node, const ConditionsStore *playerConditions);
 
-	void Load(const DataNode &node, const ConditionsStore *playerConditions);
-	void Save(DataWriter &out) const;
-	// If disabled, an event will not Apply() or Save().
-	void Disable();
+  void Load(const DataNode &node, const ConditionsStore *playerConditions);
+  // Save a scheduled version of this event. This will only be called if the event is unnamed and has a scheduled
+  // date. Otherwise, PlayerInfo saves the event's name and scheduled date instead of saving the full list of
+  // data changes.
+  void Save(DataWriter &out) const;
+  // If disabled, an event will not Apply() or Save().
+  void Disable();
 
-	const std::string &TrueName() const;
-	void SetTrueName(const std::string &name);
+  const std::string &TrueName() const;
+  void               SetTrueName(const std::string &name);
 
-	// Check if this GameEvent has been loaded (vs. simply referred to) and
-	// if it references any items that have not been defined.
-	// Returns an empty string if it is valid. If not, a reason will be given in the string.
-	std::string IsValid() const;
+  // Check if this GameEvent has been loaded (vs. simply referred to) and
+  // if it references any items that have not been defined.
+  // Returns an empty string if it is valid. If not, a reason will be given in the string.
+  std::string IsValid() const;
 
-	const Date &GetDate() const;
-	void SetDate(const Date &date);
+  const Date &GetDate() const;
+  void        SetDate(const Date &date);
 
-	// Apply this event's changes to the player. Returns a list of data changes that need to
-	// be applied in a batch with other events that are applied at the same time.
-	std::list<DataNode> Apply(PlayerInfo &player);
+  // Apply this event's changes to the player. Returns a list of data changes that need to
+  // be applied in a batch with other events that are applied at the same time.
+  std::list<DataNode> Apply(PlayerInfo &player, bool onlyDataChanges = false);
 
-	const std::list<DataNode> &Changes() const;
+  const ConditionAssignments &Conditions() const;
+  const std::list<DataNode>  &Changes() const;
 
-	// Comparison operator, based on the date of the event.
-	bool operator<(const GameEvent &other) const;
+  bool SaveRawChanges() const;
+
+  // Comparison operator, based on the date of the event.
+  bool operator<(const GameEvent &other) const;
 
 private:
-	Date date;
-	std::string trueName;
-	bool isDisabled = false;
-	bool isDefined = false;
+  Date        date;
+  std::string trueName;
+  bool        isDisabled     = false;
+  bool        isDefined      = false;
+  bool        saveRawChanges = false;
 
-	ConditionAssignments conditionsToApply;
-	std::list<DataNode> changes;
-	std::vector<const System *> systemsToVisit;
-	std::vector<const Planet *> planetsToVisit;
-	std::vector<const System *> systemsToUnvisit;
-	std::vector<const Planet *> planetsToUnvisit;
+  ConditionAssignments        conditionsToApply;
+  std::list<DataNode>         changes;
+  std::vector<const System *> systemsToVisit;
+  std::vector<const Planet *> planetsToVisit;
+  std::vector<const System *> systemsToUnvisit;
+  std::vector<const Planet *> planetsToUnvisit;
 };

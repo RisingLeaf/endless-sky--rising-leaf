@@ -18,53 +18,31 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "DataNode.h"
 
 
-
-
-
-DistanceCalculationSettings::DistanceCalculationSettings(const DataNode &node)
-{
-	Load(node);
-}
-
+DistanceCalculationSettings::DistanceCalculationSettings(const DataNode &node) { Load(node); }
 
 
 bool DistanceCalculationSettings::operator!=(const DistanceCalculationSettings &other) const
 {
-	if(wormholeStrategy != other.wormholeStrategy)
-		return true;
-	return assumesJumpDrive != other.assumesJumpDrive;
+  if(wormholeStrategy != other.wormholeStrategy) return true;
+  return assumesJumpDrive != other.assumesJumpDrive;
 }
-
 
 
 void DistanceCalculationSettings::Load(const DataNode &node)
 {
-	for(const auto &child : node)
-	{
-		const std::string &key = child.Token(0);
-		if(key == "no wormholes")
-			wormholeStrategy = WormholeStrategy::NONE;
-		else if(key == "only unrestricted wormholes")
-			wormholeStrategy = WormholeStrategy::ONLY_UNRESTRICTED;
-		else if(key == "all wormholes")
-			wormholeStrategy = WormholeStrategy::ALL;
-		else if(key == "assumes jump drive")
-			assumesJumpDrive = true;
-		else
-			child.PrintTrace("Invalid distance calculation setting:");
-	}
+  for(const auto &child : node)
+  {
+    const std::string &key = child.Token(0);
+    if(key == "no wormholes") wormholeStrategy = WormholeStrategy::NONE;
+    else if(key == "only unrestricted wormholes") wormholeStrategy = WormholeStrategy::ONLY_UNRESTRICTED;
+    else if(key == "all wormholes") wormholeStrategy = WormholeStrategy::ALL;
+    else if(key == "assumes jump drive") assumesJumpDrive = true;
+    else child.PrintTrace("Invalid distance calculation setting:");
+  }
 }
 
 
-
-WormholeStrategy DistanceCalculationSettings::WormholeStrat() const
-{
-	return wormholeStrategy;
-}
+WormholeStrategy DistanceCalculationSettings::WormholeStrat() const { return wormholeStrategy; }
 
 
-
-bool DistanceCalculationSettings::AssumesJumpDrive() const
-{
-	return assumesJumpDrive;
-}
+bool DistanceCalculationSettings::AssumesJumpDrive() const { return assumesJumpDrive; }

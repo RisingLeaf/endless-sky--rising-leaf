@@ -16,12 +16,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 
-
-template<class T>
-class ByName {
+template <class T>
+class ByName
+{
 public:
-	bool operator()(const T *a, const T *b) const
-	{
-		return a->Name() < b->Name();
-	}
+  bool operator()(const T *a, const T *b) const { return a->Name() < b->Name(); }
 };

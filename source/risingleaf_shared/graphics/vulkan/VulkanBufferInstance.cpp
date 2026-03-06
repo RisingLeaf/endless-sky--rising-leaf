@@ -20,10 +20,11 @@
 #include "VulkanDeviceInstance.h"
 #include "VulkanHelpers.h"
 
-VulkanObjects::VulkanBufferInstance::VulkanBufferInstance(const VulkanDeviceInstance     *device,
-                                                          const GraphicsTypes::BufferType type,
-                                                          const size_t                    size,
-                                                          const std::string_view          name) :
+VulkanObjects::VulkanBufferInstance::VulkanBufferInstance(
+    const VulkanDeviceInstance     *device,
+    const GraphicsTypes::BufferType type,
+    const size_t                    size,
+    const std::string_view          name) :
   BufferInstance(), Size(size), Device(device)
 {
   VkMemoryPropertyFlags properties{};

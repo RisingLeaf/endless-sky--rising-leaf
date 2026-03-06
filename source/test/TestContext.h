@@ -21,31 +21,34 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class Test;
 
 // State-information used during testing with the AC/Integration test framework.
-class TestContext {
-friend class Test;
+class TestContext
+{
+  friend class Test;
+
 public:
-	TestContext() = default;
-	explicit TestContext(const Test *toRun);
-	const Test *CurrentTest() const noexcept;
+  TestContext() = default;
+  explicit TestContext(const Test *toRun);
+  const Test *CurrentTest() const noexcept;
 
 
 private:
-	// Class to describe a running test and running test-step within the test.
-	class ActiveTestStep {
-	public:
-		const Test *test;
-		unsigned int step;
+  // Class to describe a running test and running test-step within the test.
+  class ActiveTestStep
+  {
+  public:
+    const Test  *test;
+    unsigned int step;
 
 
-	public:
-		// Support operators for usage in containers like map and set.
-		bool operator==(const ActiveTestStep &rhs) const;
-		bool operator<(const ActiveTestStep &rhs) const;
-	};
+  public:
+    // Support operators for usage in containers like map and set.
+    bool operator==(const ActiveTestStep &rhs) const;
+    bool operator<(const ActiveTestStep &rhs) const;
+  };
 
 private:
-	// Reference to the currently running test and test-step within the test.
-	std::vector<ActiveTestStep> callstack;
+  // Reference to the currently running test and test-step within the test.
+  std::vector<ActiveTestStep> callstack;
 
-	std::set<ActiveTestStep> branchesSinceGameStep;
+  std::set<ActiveTestStep> branchesSinceGameStep;
 };

@@ -18,7 +18,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <numbers>
 
 
-
-constexpr double PI = std::numbers::pi;
+constexpr double PI     = std::numbers::pi;
 constexpr double TO_RAD = PI / 180.;
 constexpr double TO_DEG = 180. / PI;

@@ -18,21 +18,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "AudioPlayer.h"
 
 
-
 /// Music players are audio players that are always centered, and can't be paused/resumed.
-class MusicPlayer : public AudioPlayer {
+class MusicPlayer : public AudioPlayer
+{
 public:
-	/// Creates a new audio player with the given audio.
-	/// Please note that the audio isn't loaded from the supplier until the Play() call.
-	explicit MusicPlayer(std::unique_ptr<AudioSupplier> audioSupplier);
+  /// Creates a new audio player with the given audio.
+  /// Please note that the audio isn't loaded from the supplier until the Play() call.
+  explicit MusicPlayer(std::unique_ptr<AudioSupplier> audioSupplier);
 
-	/// Music is always centered on the listener; it can't be moved.
-	void Move(double x, double y, double z) const override;
+  /// Music is always centered on the listener; it can't be moved.
+  void Move(double x, double y, double z) const override;
 
-	/// Music is always playing; it can't be paused.
-	void Pause() const override;
+  /// Music is always playing; it can't be paused.
+  void Pause() const override;
 
 
 protected:
-	void ConfigureSource() override;
+  void ConfigureSource() override;
 };

@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef SHADERINFO_H
 #define SHADERINFO_H
@@ -25,21 +26,22 @@ namespace GraphicsTypes
   enum class ShaderType;
 }
 
-class ShaderInfo {
+class ShaderInfo
+{
 public:
   struct VertexAttrib
   {
     GraphicsTypes::ShaderType Type;
-    size_t     Offset;
-    size_t     Location;
+    size_t                    Offset;
+    size_t                    Location;
   };
 
   struct UniformBufferEntry
   {
     GraphicsTypes::ShaderType Type;
-    size_t     Offset;
-    size_t     Alignment;
-    size_t     Size;
+    size_t                    Offset;
+    size_t                    Alignment;
+    size_t                    Size;
   };
 
   struct CommonUniformBufferData
@@ -48,8 +50,8 @@ public:
   };
 
 private:
-  std::vector<VertexAttrib>       VertexAttributes;
-  size_t                          VertexSize = 0;
+  std::vector<VertexAttrib> VertexAttributes;
+  size_t                    VertexSize = 0;
 
   std::vector<std::string> Textures;
 
@@ -58,15 +60,15 @@ private:
 
   std::vector<UniformBufferEntry> SpecificUniformBuffer;
   size_t                          SpecificUniformBufferSize = 0;
-public:
 
+public:
   ShaderInfo();
   void SetInputSize(size_t size);
   void AddInput(GraphicsTypes::ShaderType type, size_t offset, size_t location);
   void AddUniformVariable(GraphicsTypes::ShaderType type);
   void AddTexture(std::string_view name);
 
-  void CopyUniformEntryToBuffer(unsigned char *destination, const void *data, size_t index ) const;
+  void                 CopyUniformEntryToBuffer(unsigned char *destination, const void *data, size_t index) const;
   [[nodiscard]] size_t GetUniformSize() const
   {
     // Metal Uniform buffers are aligned to 16bytes
@@ -78,9 +80,9 @@ public:
   }
 
   [[nodiscard]] const std::vector<VertexAttrib> &GetVertexAttribs() const { return VertexAttributes; }
-  [[nodiscard]] size_t                           GetVertexSize()    const { return VertexSize; }
+  [[nodiscard]] size_t                           GetVertexSize() const { return VertexSize; }
 
-  [[nodiscard]] size_t GetSpecificTextureCount() const { return Textures.size(); }
+  [[nodiscard]] size_t                          GetSpecificTextureCount() const { return Textures.size(); }
   [[nodiscard]] const std::vector<std::string> &GetTextures() const { return Textures; }
 
   static void Init();
@@ -89,5 +91,4 @@ public:
 };
 
 
-
-#endif //SHADERINFO_H
+#endif // SHADERINFO_H

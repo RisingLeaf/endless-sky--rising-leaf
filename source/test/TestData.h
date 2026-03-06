@@ -26,38 +26,46 @@ class Planet;
 class System;
 
 
-
 // Class representing a dataset for automated testing
-class TestData {
+class TestData
+{
 public:
-	const std::string &Name() const;
-	void Load(const DataNode &node, const std::filesystem::path &sourceDataFilePath);
-	// Function to inject the test-data into the game or into the game's
-	// environment.
-	bool Inject(const ConditionsStore *playerConditions, const std::set<const System *> *visitedSystems,
-		const std::set<const Planet *> *visitedPlanets) const;
+  const std::string &Name() const;
+  void               Load(const DataNode &node, const std::filesystem::path &sourceDataFilePath);
+  // Function to inject the test-data into the game or into the game's
+  // environment.
+  bool Inject(
+      const ConditionsStore          *playerConditions,
+      const std::set<const System *> *visitedSystems,
+      const std::set<const Planet *> *visitedPlanets) const;
 
-	// Types of datafiles that can be stored.
-	enum class Type {UNSPECIFIED, SAVEGAME, MISSION};
-
-
-
-private:
-	const DataNode *GetContentsNode(const DataFile &sourceData) const;
-
-	// Writes out testdata as savegame file.
-	bool InjectSavegame() const;
-
-	// Loads a mission stored in testdata into a Mission through GameData.
-	bool InjectMission(const ConditionsStore *playerConditions, const std::set<const System *> *visitedSystems,
-		const std::set<const Planet *> *visitedPlanets) const;
+  // Types of datafiles that can be stored.
+  enum class Type
+  {
+    UNSPECIFIED,
+    SAVEGAME,
+    MISSION
+  };
 
 
 private:
-	// Name of the dataset
-	std::string dataSetName;
-	// Type of the dataset
-	Type dataSetType = Type::UNSPECIFIED;
-	// File containing the test-data
-	std::filesystem::path sourceDataFile;
+  const DataNode *GetContentsNode(const DataFile &sourceData) const;
+
+  // Writes out testdata as savegame file.
+  bool InjectSavegame() const;
+
+  // Loads a mission stored in testdata into a Mission through GameData.
+  bool InjectMission(
+      const ConditionsStore          *playerConditions,
+      const std::set<const System *> *visitedSystems,
+      const std::set<const Planet *> *visitedPlanets) const;
+
+
+private:
+  // Name of the dataset
+  std::string dataSetName;
+  // Type of the dataset
+  Type dataSetType = Type::UNSPECIFIED;
+  // File containing the test-data
+  std::filesystem::path sourceDataFile;
 };

@@ -15,187 +15,169 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "ItemInfoDisplay.h"
 
-#include "text/Alignment.h"
 #include "Color.h"
-#include "text/FontSet.h"
-#include "text/Format.h"
 #include "GameData.h"
 #include "Rectangle.h"
 #include "Screen.h"
+#include "shader/FillShader.h"
+#include "text/Alignment.h"
+#include "text/FontSet.h"
+#include "text/Format.h"
 #include "text/Table.h"
 
 #include <algorithm>
+#include <cmath>
+
+using namespace std;
 
 
-
-
-ItemInfoDisplay::ItemInfoDisplay()
-	: tooltip(WIDTH, Alignment::JUSTIFIED, Tooltip::Direction::DOWN_LEFT, Tooltip::Corner::TOP_LEFT,
-		GameData::Colors().Get("tooltip background"), GameData::Colors().Get("medium"))
+ItemInfoDisplay::ItemInfoDisplay() :
+  tooltip(
+      WIDTH,
+      Alignment::JUSTIFIED,
+      Tooltip::Direction::DOWN_LEFT,
+      Tooltip::Corner::TOP_LEFT,
+      GameData::Colors().Get("tooltip background"),
+      GameData::Colors().Get("medium"))
 {
-	description.SetAlignment(Alignment::JUSTIFIED);
-	description.SetWrapWidth(WIDTH - 20);
-	description.SetFont(FontSet::Get(14));
+  description.SetAlignment(Alignment::JUSTIFIED);
+  description.SetWrapWidth(WIDTH - 20);
+  description.SetFont(FontSet::Get(14));
 }
-
 
 
 // Get the panel width.
-int ItemInfoDisplay::PanelWidth()
-{
-	return WIDTH;
-}
-
+int ItemInfoDisplay::PanelWidth() { return WIDTH; }
 
 
 // Get the height of each of the three panels.
-int ItemInfoDisplay::MaximumHeight() const
-{
-	return maximumHeight;
-}
+int ItemInfoDisplay::MaximumHeight() const { return maximumHeight; }
 
 
-
-int ItemInfoDisplay::DescriptionHeight() const
-{
-	return descriptionHeight;
-}
+int ItemInfoDisplay::DescriptionHeight() const { return descriptionHeight; }
 
 
-
-int ItemInfoDisplay::AttributesHeight() const
-{
-	return attributesHeight;
-}
-
+int ItemInfoDisplay::AttributesHeight() const { return attributesHeight; }
 
 
 // Draw each of the panels.
 void ItemInfoDisplay::DrawDescription(const Point &topLeft) const
 {
-	Rectangle hoverTarget = Rectangle::FromCorner(topLeft, Point(PanelWidth(), DescriptionHeight()));
-	Color color = hoverTarget.Contains(hoverPoint) ? *GameData::Colors().Get("bright") : *GameData::Colors().Get("medium");
-	description.Draw(topLeft + Point(10., 12.), color);
+  Rectangle hoverTarget = Rectangle::FromCorner(topLeft, Point(PanelWidth(), DescriptionHeight()));
+  Color     color =
+      hoverTarget.Contains(hoverPoint) ? *GameData::Colors().Get("bright") : *GameData::Colors().Get("medium");
+  description.Draw(topLeft + Point(10., 12.), color);
 }
 
 
-
-void ItemInfoDisplay::DrawAttributes(const Point &topLeft) const
-{
-	Draw(topLeft, attributeLabels, attributeValues);
-}
-
+void ItemInfoDisplay::DrawAttributes(const Point &topLeft) const { Draw(topLeft, attributeLabels, attributeValues); }
 
 
 void ItemInfoDisplay::DrawTooltips() const
 {
-	tooltip.Draw();
-	tooltip.DecrementCount();
+  if(hoveringTooltip) tooltip.Draw();
+  hoveringTooltip = false;
+  tooltip.DecrementCount();
 }
-
 
 
 // Update the location where the mouse is hovering.
 void ItemInfoDisplay::Hover(const Point &point)
 {
-	hoverPoint = point;
-	hasHover = true;
+  hoverPoint = point;
+  hasHover   = true;
 }
 
 
+void ItemInfoDisplay::ClearHover() { hasHover = false; }
 
-void ItemInfoDisplay::ClearHover()
+
+void ItemInfoDisplay::UpdateDescription(const string &text, const vector<string> &licenses, bool isShip)
 {
-	hasHover = false;
+  if(licenses.empty())
+  {
+    description.Wrap(text);
+  }
+  else {
+    static const string NOUN[2]   = {"outfit", "ship"};
+    string              fullText  = text + "\tTo purchase this " + NOUN[isShip] + " you must have ";
+    fullText                     += Format::List<vector, string>(
+        licenses,
+        [](const string &name)
+        {
+          bool isVoweled = false;
+          for(const char &c : "aeiou")
+          {
+            if(name.starts_with(c) || name.starts_with(toupper(c)))
+            {
+              isVoweled = true;
+              break;
+            }
+          }
+          return (isVoweled ? "an " : "a ") + name + " License";
+        });
+    fullText += ".\n";
+    description.Wrap(fullText);
+  }
+
+  // If there is a description, pad by 10 pixels on the top and bottom.
+  descriptionHeight = description.Height();
+  if(descriptionHeight) descriptionHeight += 20;
 }
 
 
-
-void ItemInfoDisplay::UpdateDescription(const std::string &text, const std::vector<std::string> &licenses, bool isShip)
+Point ItemInfoDisplay::Draw(Point point, const vector<string> &labels, const vector<string> &values) const
 {
-	if(licenses.empty())
-		description.Wrap(text);
-	else
-	{
-		static const std::string NOUN[2] = {"outfit", "ship"};
-		std::string fullText = text + "\tTo purchase this " + NOUN[isShip] + " you must have ";
-		fullText += Format::List<std::vector, std::string>(licenses,
-			[](const std::string &name)
-			{
-				bool isVoweled = false;
-				for(const char &c : "aeiou")
-					if(name.starts_with(c) || name.starts_with(toupper(c)))
-					{
-						isVoweled = true;
-						break;
-					}
-				return (isVoweled ? "an " : "a ") + name + " License";
-			});
-		fullText += ".\n";
-		description.Wrap(fullText);
-	}
+  // Add ten pixels of padding at the top.
+  point.Y() += 10.;
 
-	// If there is a description, pad by 10 pixels on the top and bottom.
-	descriptionHeight = description.Height();
-	if(descriptionHeight)
-		descriptionHeight += 20;
+  // Get standard colors to draw with.
+  const Color &labelColor = *GameData::Colors().Get("medium");
+  const Color &valueColor = *GameData::Colors().Get("bright");
+
+  Table table;
+  // Use 10-pixel margins on both sides.
+  table.AddColumn(10, {WIDTH - 20});
+  table.AddColumn(WIDTH - 10, {WIDTH - 20, Alignment::RIGHT});
+  table.SetHighlight(0, WIDTH);
+  table.DrawAt(point);
+
+  for(unsigned i = 0; i < labels.size() && i < values.size(); ++i)
+  {
+    if(labels[i].empty())
+    {
+      table.DrawGap(10);
+      continue;
+    }
+
+    CheckHover(table, labels[i]);
+    table.Draw(labels[i], values[i].empty() ? valueColor : labelColor);
+    table.Draw(values[i], valueColor);
+  }
+  return table.GetPoint();
 }
 
 
-
-Point ItemInfoDisplay::Draw(Point point, const std::vector<std::string> &labels, const std::vector<std::string> &values) const
+void ItemInfoDisplay::CheckHover(const Table &table, const string &label) const
 {
-	// Add ten pixels of padding at the top.
-	point.Y() += 10.;
+  if(!hasHover) return;
 
-	// Get standard colors to draw with.
-	const Color &labelColor = *GameData::Colors().Get("medium");
-	const Color &valueColor = *GameData::Colors().Get("bright");
+  Rectangle zone = table.GetRowBounds();
+  if(!zone.Contains(hoverPoint)) return;
 
-	Table table;
-	// Use 10-pixel margins on both sides.
-	table.AddColumn(10, {WIDTH - 20});
-	table.AddColumn(WIDTH - 10, {WIDTH - 20, Alignment::RIGHT});
-	table.SetHighlight(0, WIDTH);
-	table.DrawAt(point);
+  if(label == hover)
+  {
+    // The tooltip counter is decremented on every frame for this class,
+    // so double-increment the counter when hovering on a zone.
+    tooltip.IncrementCount();
+    tooltip.IncrementCount();
+  }
+  hover = label;
+  if(tooltip.ShouldDraw())
+  {
+    tooltip.SetZone(zone);
+    tooltip.SetText(GameData::Tooltip(hover));
+  }
 
-	for(unsigned i = 0; i < labels.size() && i < values.size(); ++i)
-	{
-		if(labels[i].empty())
-		{
-			table.DrawGap(10);
-			continue;
-		}
-
-		CheckHover(table, labels[i]);
-		table.Draw(labels[i], values[i].empty() ? valueColor : labelColor);
-		table.Draw(values[i], valueColor);
-	}
-	return table.GetPoint();
-}
-
-
-
-void ItemInfoDisplay::CheckHover(const Table &table, const std::string &label) const
-{
-	if(!hasHover)
-		return;
-
-	Rectangle zone = table.GetRowBounds();
-	if(!zone.Contains(hoverPoint))
-		return;
-
-	if(label == hover)
-	{
-		// The tooltip counter is decremented on every frame for this class,
-		// so double-increment the counter when hovering on a zone.
-		tooltip.IncrementCount();
-		tooltip.IncrementCount();
-	}
-	hover = label;
-	if(tooltip.ShouldDraw())
-	{
-		tooltip.SetZone(zone);
-		tooltip.SetText(GameData::Tooltip(hover));
-	}
+  hoveringTooltip |= true;
 }

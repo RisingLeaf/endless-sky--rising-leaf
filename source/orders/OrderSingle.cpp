@@ -16,8 +16,4 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "OrderSingle.h"
 
 
-
-OrderSingle::OrderSingle(Types type)
-	: type(type)
-{
-}
+OrderSingle::OrderSingle(Types type) : type(type) {}

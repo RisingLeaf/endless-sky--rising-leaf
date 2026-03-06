@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef LOG_H
 #define LOG_H
@@ -22,8 +23,11 @@
 #include "../base/concepts.h"
 
 
-namespace Log {
-  struct EndValue {};
+namespace Log
+{
+  struct EndValue
+  {
+  };
   constexpr EndValue End;
 
   class Stream
@@ -32,10 +36,10 @@ namespace Log {
     const uint8_t    Priority;
 
     mutable std::string current_buffer;
+
   public:
     Stream() = delete;
-    Stream(const std::string_view name, const uint8_t priority)
-    : Name(name), Priority(priority) {}
+    Stream(const std::string_view name, const uint8_t priority) : Name(name), Priority(priority) {}
 
     const Stream &operator<<(const std::string_view in) const
     {
@@ -49,8 +53,8 @@ namespace Log {
       return *this;
     }
 
-    template<class T>
-    requires concepts::string::to_string_able<T>
+    template <class T>
+      requires concepts::string::to_string_able<T>
     const Stream &operator<<(const T &in) const
     {
       current_buffer += std::to_string(in);
@@ -67,8 +71,7 @@ namespace Log {
   void ExitError(const std::string &message);
 
   void SetLogLevel(uint8_t level);
-}
+} // namespace Log
 
 
-
-#endif //LOG_H
+#endif // LOG_H

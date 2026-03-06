@@ -21,19 +21,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class Sprite;
 
 
-
 // Class for storing sprites, and for getting the sprite associated with a given
 // name. If a sprite has not been loaded yet, this will still return an object
 // but with no OpenGL textures associated with it (so it will draw nothing).
-class SpriteSet {
+class SpriteSet
+{
 public:
-	// Get a pointer to the sprite data with the given name.
-	static const Sprite *Get(const std::string &name);
+  // Get a pointer to the sprite data with the given name.
+  static const Sprite *Get(const std::string &name);
 
-	// Inspect the sprite map and warn if some images contain no data.
-	static void CheckReferences();
+  // Inspect the sprite map and warn if some images contain no data.
+  static void CheckReferences();
 
-	static Sprite *Modify(const std::string &name);
+  static Sprite *Modify(const std::string &name);
 
   static void Clear();
 };

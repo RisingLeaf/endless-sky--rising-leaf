@@ -23,42 +23,44 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "risingleaf_shared/graphics/graphics_toplevel_defines.h"
 
 // This class is a collection of global functions for handling SDL_Windows.
-class GameWindow {
+class GameWindow
+{
 public:
-	static struct SDL_Window* GetWindow();
-	static GraphicsTypes::GraphicsInstance *GetInstance();
-	static std::string SDLVersions();
-	static bool Init(bool headless);
-	static void Quit();
+  static struct SDL_Window               *GetWindow();
+  static GraphicsTypes::GraphicsInstance *GetInstance();
+  static std::string                      SDLVersions();
+  static bool                             Init(bool headless);
+  static void                             Quit();
 
-	// Paint the next frame in the main window.
-	static void Step();
+  // Paint the next frame in the main window.
+  static void Step();
 
-	// Handle resize events of the main window.
-	static void AdjustViewport(bool noResizeEvent = false);
+  // Handle resize events of the main window.
+  static void AdjustViewport(bool noResizeEvent = false);
 
-	// Attempt to set the game's VSync setting.
-	static bool SetVSync(Preferences::VSync state);
+  // Attempt to set the game's VSync setting.
+  static bool SetVSync(Preferences::VSync state);
 
-	// Last known windowed-mode width & height.
-	static int Width();
-	static int Height();
+  // Last known windowed-mode width & height.
+  static int Width();
+  static int Height();
 
-	// Last known drawable width & height.
-	static int DrawWidth();
-	static int DrawHeight();
+  // Last known drawable width & height.
+  static int DrawWidth();
+  static int DrawHeight();
 
-	static bool IsMaximized();
-	static bool IsFullscreen();
-	static void ToggleFullscreen();
+  static bool IsMaximized();
+  static bool IsFullscreen();
+  static void ToggleFullscreen();
+  static void ToggleBlockScreenSaver();
 
-	// Print the error message in the terminal, error file, and message box.
-	// Checks for video system errors and records those as well.
-	static void ExitWithError(const std::string &message, bool doPopUp = true);
+  // Print the error message in the terminal, error file, and message box.
+  // Checks for video system errors and records those as well.
+  static void ExitWithError(const std::string &message, bool doPopUp = true);
 
 #ifdef _WIN32
-	// Set attributes of the main window according to the current preferences.
-	static void UpdateTitleBarTheme();
-	static void UpdateWindowRounding();
+  // Set attributes of the main window according to the current preferences.
+  static void UpdateTitleBarTheme();
+  static void UpdateWindowRounding();
 #endif
 };

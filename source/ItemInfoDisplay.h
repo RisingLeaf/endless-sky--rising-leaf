@@ -25,53 +25,54 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class Table;
 
 
-
 // Class representing three panels of information about a given item. One shows
 // a text description, one shows the item's attributes, and a third may be
 // different depending on what kind of item it is (a ship or an outfit).
-class ItemInfoDisplay {
+class ItemInfoDisplay
+{
 public:
-	ItemInfoDisplay();
-	virtual ~ItemInfoDisplay() = default;
+  ItemInfoDisplay();
+  virtual ~ItemInfoDisplay() = default;
 
-	// Get the panel width.
-	static int PanelWidth();
-	// Get the height of each of the panels.
-	int MaximumHeight() const;
-	int DescriptionHeight() const;
-	int AttributesHeight() const;
+  // Get the panel width.
+  static int PanelWidth();
+  // Get the height of each of the panels.
+  int MaximumHeight() const;
+  int DescriptionHeight() const;
+  int AttributesHeight() const;
 
-	// Draw each of the panels.
-	void DrawDescription(const Point &topLeft) const;
-	virtual void DrawAttributes(const Point &topLeft) const;
-	void DrawTooltips() const;
+  // Draw each of the panels.
+  void         DrawDescription(const Point &topLeft) const;
+  virtual void DrawAttributes(const Point &topLeft) const;
+  void         DrawTooltips() const;
 
-	// Update the location where the mouse is hovering.
-	void Hover(const Point &point);
-	void ClearHover();
-
-
-protected:
-	void UpdateDescription(const std::string &text, const std::vector<std::string> &licenses, bool isShip);
-	Point Draw(Point point, const std::vector<std::string> &labels, const std::vector<std::string> &values) const;
-	void CheckHover(const Table &table, const std::string &label) const;
+  // Update the location where the mouse is hovering.
+  void Hover(const Point &point);
+  void ClearHover();
 
 
 protected:
-	static const int WIDTH = 250;
+  void  UpdateDescription(const std::string &text, const std::vector<std::string> &licenses, bool isShip);
+  Point Draw(Point point, const std::vector<std::string> &labels, const std::vector<std::string> &values) const;
+  void  CheckHover(const Table &table, const std::string &label) const;
 
-	WrappedText description;
-	int descriptionHeight = 0;
 
-	std::vector<std::string> attributeLabels;
-	std::vector<std::string> attributeValues;
-	int attributesHeight = 0;
+protected:
+  static const int WIDTH = 250;
 
-	int maximumHeight = 0;
+  WrappedText description;
+  int         descriptionHeight = 0;
 
-	// For tooltips:
-	Point hoverPoint;
-	mutable std::string hover;
-	mutable Tooltip tooltip;
-	bool hasHover = false;
+  std::vector<std::string> attributeLabels;
+  std::vector<std::string> attributeValues;
+  int                      attributesHeight = 0;
+
+  int maximumHeight = 0;
+
+  // For tooltips:
+  Point               hoverPoint;
+  mutable std::string hover;
+  mutable Tooltip     tooltip;
+  bool                hasHover        = false;
+  mutable bool        hoveringTooltip = false;
 };

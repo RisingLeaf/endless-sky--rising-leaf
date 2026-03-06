@@ -19,34 +19,31 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <vector>
 
 
-
 // Compare Ts according to the order specified at construction time.
 // Unknown Ts are considered larger than any known one.
-template<class T>
-class ByGivenOrder {
+template <class T>
+class ByGivenOrder
+{
 public:
-	explicit ByGivenOrder(const std::vector<T> &order)
-		: order(order)
-	{}
+  explicit ByGivenOrder(const std::vector<T> &order) : order(order) {}
 
-	bool operator()(const T &a, const T &b) const
-	{
-		const auto findA = std::find(order.begin(), order.end(), a);
-		const auto findB = std::find(order.begin(), order.end(), b);
+  bool operator()(const T &a, const T &b) const
+  {
+    const auto findA = std::find(order.begin(), order.end(), a);
+    const auto findB = std::find(order.begin(), order.end(), b);
 
-		if(findA == order.end() && findB == order.end())
-		{
-			// Neither a nor b is a known value. Fall back to default comparison.
-			return a < b;
-		}
-		else
-		{
-			// Whichever is first in the array is considered smaller.
-			return findA < findB;
-		}
-	}
+    if(findA == order.end() && findB == order.end())
+    {
+      // Neither a nor b is a known value. Fall back to default comparison.
+      return a < b;
+    }
+    else {
+      // Whichever is first in the array is considered smaller.
+      return findA < findB;
+    }
+  }
 
 
 private:
-	const std::vector<T> &order;
+  const std::vector<T> &order;
 };

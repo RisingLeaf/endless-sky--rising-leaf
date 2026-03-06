@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANTRANSLATE_H
 #define VULKANTRANSLATE_H
@@ -23,7 +24,6 @@
 #include <vulkan/vulkan_core.h>
 
 #include "graphics/graphics_toplevel_defines.h"
-
 
 
 namespace VulkanTranslate
@@ -60,10 +60,10 @@ namespace VulkanTranslate
     if(samples >= 64) return VK_SAMPLE_COUNT_64_BIT;
     if(samples >= 32) return VK_SAMPLE_COUNT_32_BIT;
     if(samples >= 16) return VK_SAMPLE_COUNT_16_BIT;
-    if(samples >=  8) return VK_SAMPLE_COUNT_8_BIT;
-    if(samples >=  4) return VK_SAMPLE_COUNT_4_BIT;
-    if(samples >=  2) return VK_SAMPLE_COUNT_2_BIT;
-    else              return VK_SAMPLE_COUNT_1_BIT;
+    if(samples >= 8) return VK_SAMPLE_COUNT_8_BIT;
+    if(samples >= 4) return VK_SAMPLE_COUNT_4_BIT;
+    if(samples >= 2) return VK_SAMPLE_COUNT_2_BIT;
+    else return VK_SAMPLE_COUNT_1_BIT;
   }
 
   constexpr VkImageType GetVkImageType(const GraphicsTypes::TextureType type)
@@ -147,15 +147,19 @@ namespace VulkanTranslate
   {
     switch(layout)
     {
-    case VK_IMAGE_LAYOUT_UNDEFINED:                        return {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT     , 0                                                      };
-    case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:             return {VK_PIPELINE_STAGE_TRANSFER_BIT        , VK_ACCESS_TRANSFER_WRITE_BIT                           };
-    case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:             return {VK_PIPELINE_STAGE_TRANSFER_BIT        , 0                                                      };
-    case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:         return {VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT , VK_ACCESS_SHADER_READ_BIT                              };
-    case VK_IMAGE_LAYOUT_GENERAL:                          return {VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT  , VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT };
-    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL: return {VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT    , VK_ACCESS_SHADER_WRITE_BIT                             };
-    case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:         return {VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT    , VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT                   };
-    case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:                  return {VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT  , VK_ACCESS_NONE_KHR                                     };
-    default: break;
+    case VK_IMAGE_LAYOUT_UNDEFINED:            return {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0};
+    case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL: return {VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT};
+    case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL: return {VK_PIPELINE_STAGE_TRANSFER_BIT, 0};
+    case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:
+      return {VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT};
+    case VK_IMAGE_LAYOUT_GENERAL:
+      return {VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT};
+    case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+      return {VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VK_ACCESS_SHADER_WRITE_BIT};
+    case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:
+      return {VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT};
+    case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR: return {VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_ACCESS_NONE_KHR};
+    default:                              break;
     }
     throw std::runtime_error("Layout has no associated information regarding stage and access!");
   }
@@ -164,10 +168,10 @@ namespace VulkanTranslate
   {
     switch(type)
     {
-      case GraphicsTypes::PrimitiveType::TRIANGLES: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-      case GraphicsTypes::PrimitiveType::TRIANGLE_STRIP: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
-      case GraphicsTypes::PrimitiveType::LINES:     return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
-      case GraphicsTypes::PrimitiveType::POINTS:    return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
+    case GraphicsTypes::PrimitiveType::TRIANGLES:      return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    case GraphicsTypes::PrimitiveType::TRIANGLE_STRIP: return VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP;
+    case GraphicsTypes::PrimitiveType::LINES:          return VK_PRIMITIVE_TOPOLOGY_LINE_STRIP;
+    case GraphicsTypes::PrimitiveType::POINTS:         return VK_PRIMITIVE_TOPOLOGY_POINT_LIST;
     }
 
     throw std::runtime_error("Missing Primitive Topology in Vulkan");
@@ -211,8 +215,7 @@ namespace VulkanTranslate
 
     throw std::runtime_error("Missing Depth Compare in Vulkan");
   }
-}
+} // namespace VulkanTranslate
 
 
-
-#endif //VULKANTRANSLATE_H
+#endif // VULKANTRANSLATE_H

@@ -19,27 +19,27 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "CollisionType.h"
 
 
-
 // Represents a collision between a projectile and a ship, asteroid, or minable.
-class Collision {
+class Collision
+{
 public:
-	// Initialize a Collision.
-	Collision(Body *hit, CollisionType collisionType, double range);
+  // Initialize a Collision.
+  Collision(Body *hit, CollisionType collisionType, double range);
 
-	// The Body that was hit for this collision. May be a nullptr if nothing
-	// was directly hit.
-	Body *HitBody();
-	// The type of Body that was hit.
-	CollisionType GetCollisionType() const;
-	// The intersection range at which the collision occurred with the Body.
-	double IntersectionRange() const;
+  // The Body that was hit for this collision. May be a nullptr if nothing
+  // was directly hit.
+  Body *HitBody();
+  // The type of Body that was hit.
+  CollisionType GetCollisionType() const;
+  // The intersection range at which the collision occurred with the Body.
+  double IntersectionRange() const;
 
-	// Compare two Collisions by their intersection range.
-	bool operator<(const Collision &rhs) const;
+  // Compare two Collisions by their intersection range.
+  bool operator<(const Collision &rhs) const;
 
 
 private:
-	Body *hit = nullptr;
-	CollisionType collisionType = CollisionType::NONE;
-	double range;
+  Body         *hit           = nullptr;
+  CollisionType collisionType = CollisionType::NONE;
+  double        range;
 };

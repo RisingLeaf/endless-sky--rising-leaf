@@ -15,20 +15,22 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "MapOutfitterPanel.h"
 
-#include "comparators/BySeriesAndIndex.h"
 #include "CategoryList.h"
 #include "CoreStartData.h"
-#include "text/Format.h"
 #include "GameData.h"
+#include "Information.h"
 #include "Outfit.h"
 #include "Planet.h"
 #include "PlayerInfo.h"
 #include "Point.h"
 #include "Screen.h"
-#include "image/Sprite.h"
 #include "StellarObject.h"
 #include "System.h"
 #include "UI.h"
+#include "comparators/BySeriesAndIndex.h"
+#include "image/Sprite.h"
+#include "image/SpriteLoadManager.h"
+#include "text/Format.h"
 
 #include <algorithm>
 #include <cmath>
@@ -36,275 +38,254 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <set>
 
 
+MapOutfitterPanel::MapOutfitterPanel(PlayerInfo &player) : MapSalesPanel(player, true) { Init(); }
 
 
-
-MapOutfitterPanel::MapOutfitterPanel(PlayerInfo &player)
-	: MapSalesPanel(player, true)
+MapOutfitterPanel::MapOutfitterPanel(const MapPanel &panel, bool onlyHere) : MapSalesPanel(panel, true)
 {
-	Init();
+  Init();
+  onlyShowSoldHere = onlyHere;
+  UpdateCache();
 }
 
 
-
-MapOutfitterPanel::MapOutfitterPanel(const MapPanel &panel, bool onlyHere)
-	: MapSalesPanel(panel, true)
+void MapOutfitterPanel::LoadCatalogThumbnails() const
 {
-	Init();
-	onlyShowSoldHere = onlyHere;
-	UpdateCache();
+  for(const auto &category : catalog)
+    for(const std::string &entry : category.second)
+      SpriteLoadManager::LoadDeferred(GetUI().AsyncQueue(), GameData::Outfits().Get(entry)->Thumbnail());
 }
 
 
-
-const Sprite *MapOutfitterPanel::SelectedSprite() const
-{
-	return selected ? selected->Thumbnail() : nullptr;
-}
+const Sprite *MapOutfitterPanel::SelectedSprite() const { return selected ? selected->Thumbnail() : nullptr; }
 
 
-
-const Sprite *MapOutfitterPanel::CompareSprite() const
-{
-	return compare ? compare->Thumbnail() : nullptr;
-}
+const Sprite *MapOutfitterPanel::CompareSprite() const { return compare ? compare->Thumbnail() : nullptr; }
 
 
-
-const ItemInfoDisplay &MapOutfitterPanel::SelectedInfo() const
-{
-	return selectedInfo;
-}
+const ItemInfoDisplay &MapOutfitterPanel::SelectedInfo() const { return selectedInfo; }
 
 
-
-const ItemInfoDisplay &MapOutfitterPanel::CompareInfo() const
-{
-	return compareInfo;
-}
-
-
-
-const std::string &MapOutfitterPanel::KeyLabel(int index) const
-{
-	static const std::string MINE = "Mine this here";
-	if(index == 2 && selected && selected->Get("minable") > 0.)
-		return MINE;
-
-	static const std::string LABEL[4] = {
-		"Has no outfitter",
-		"Has outfitter",
-		"Sells this outfit",
-		"Outfit in storage"
-	};
-	return LABEL[index];
-}
-
+const ItemInfoDisplay &MapOutfitterPanel::CompareInfo() const { return compareInfo; }
 
 
 void MapOutfitterPanel::Select(int index)
 {
-	if(index < 0 || index >= static_cast<int>(list.size()))
-		selected = nullptr;
-	else
-	{
-		selected = list[index];
-		selectedInfo.Update(*selected, player);
-	}
-	UpdateCache();
+  if(index < 0 || index >= static_cast<int>(list.size()))
+  {
+    selected = nullptr;
+  }
+  else {
+    selected = list[index];
+    selectedInfo.Update(*selected, player);
+  }
+  UpdateCache();
 }
-
 
 
 void MapOutfitterPanel::Compare(int index)
 {
-	if(index < 0 || index >= static_cast<int>(list.size()))
-		compare = nullptr;
-	else
-	{
-		compare = list[index];
-		compareInfo.Update(*compare, player);
-	}
+  if(index < 0 || index >= static_cast<int>(list.size()))
+  {
+    compare = nullptr;
+  }
+  else {
+    compare = list[index];
+    compareInfo.Update(*compare, player);
+  }
 }
-
 
 
 double MapOutfitterPanel::SystemValue(const System *system) const
 {
-	if(!system || !player.CanView(*system))
-		return std::numeric_limits<double>::quiet_NaN();
+  if(!system || !player.CanView(*system)) return std::numeric_limits<double>::quiet_NaN();
 
-	auto it = player.Harvested().lower_bound(std::pair<const System *, const Outfit *>(system, nullptr));
-	for( ; it != player.Harvested().end() && it->first == system; ++it)
-		if(it->second == selected)
-			return 1.;
+  auto it = player.Harvested().lower_bound(std::pair<const System *, const Outfit *>(system, nullptr));
+  for(; it != player.Harvested().end() && it->first == system; ++it)
+    if(it->second == selected) return 1.;
 
-	if(!system->IsInhabited(player.Flagship()))
-		return std::numeric_limits<double>::quiet_NaN();
+  if(!system->IsInhabited(player.Flagship())) return std::numeric_limits<double>::quiet_NaN();
 
-	// Visiting a system is sufficient to know what ports are available on its planets.
-	double value = -1.;
-	const auto &planetStorage = player.PlanetaryStorage();
-	for(const StellarObject &object : system->Objects())
-		if(object.HasSprite() && object.HasValidPlanet())
-		{
-			const auto storage = planetStorage.find(object.GetPlanet());
-			if(storage != planetStorage.end() && storage->second.Get(selected))
-				return .5;
-			const auto &outfitter = object.GetPlanet()->OutfitterStock();
-			if(outfitter.Has(selected))
-				return 1.;
-			if(!outfitter.empty())
-				value = 0.;
-		}
-	return value;
+  // Visiting a system is sufficient to know what ports are available on its planets.
+  double      value         = -1.;
+  const auto &planetStorage = player.PlanetaryStorage();
+  for(const StellarObject &object : system->Objects())
+  {
+    if(object.HasSprite() && object.HasValidPlanet())
+    {
+      const auto storage = planetStorage.find(object.GetPlanet());
+      if(storage != planetStorage.end() && storage->second.Get(selected)) return .5;
+      const auto &outfitter = object.GetPlanet()->OutfitterStock();
+      if(outfitter.Has(selected)) return 1.;
+      if(!outfitter.empty()) value = 0.;
+    }
+  }
+  return value;
 }
-
 
 
 int MapOutfitterPanel::FindItem(const std::string &text) const
 {
-	int bestIndex = 9999;
-	int bestItem = -1;
-	for(unsigned i = 0; i < list.size(); ++i)
-	{
-		int index = Format::Search(list[i]->DisplayName(), text);
-		if(index >= 0 && index < bestIndex)
-		{
-			bestIndex = index;
-			bestItem = i;
-			if(!index)
-				return i;
-		}
-	}
-	return bestItem;
+  int bestIndex = 9999;
+  int bestItem  = -1;
+  for(unsigned i = 0; i < list.size(); ++i)
+  {
+    int index = Format::Search(list[i]->DisplayName(), text);
+    if(index >= 0 && index < bestIndex)
+    {
+      bestIndex = index;
+      bestItem  = i;
+      if(!index) return i;
+    }
+  }
+  return bestItem;
 }
 
+
+void MapOutfitterPanel::DrawKey(Information &info) const
+{
+  const std::string condition = (selected && selected->Get("minable") > 0.) ? "is outfitters w/ minerals" : "is outfitters";
+
+  info.SetCondition(condition);
+
+  MapSalesPanel::DrawKey(info);
+}
 
 
 void MapOutfitterPanel::DrawItems()
 {
-	if(GetUI()->IsTop(this) && player.GetPlanet() && player.GetDate() >= player.StartData().GetDate() + 12)
-		DoHelp("map advanced shops");
-	list.clear();
-	Point corner = Screen::TopLeft() + Point(0, scroll);
-	for(const auto &cat : categories)
-	{
-		const std::string &category = cat.Name();
-		auto it = catalog.find(category);
-		if(it == catalog.end())
-			continue;
+  if(GetUI().IsTop(this) && player.GetPlanet() && player.GetDate() >= player.StartData().GetDate() + 12)
+    DoHelp("map advanced shops");
+  list.clear();
+  Point corner = Screen::TopLeft() + Point(0, scroll);
+  for(const auto &cat : categories)
+  {
+    const std::string &category = cat.Name();
+    auto               it       = catalog.find(category);
+    if(it == catalog.end()) continue;
 
-		// Draw the header. If this category is collapsed, skip drawing the items.
-		if(DrawHeader(corner, category))
-			continue;
+    // Draw the header. If this category is collapsed, skip drawing the items.
+    if(DrawHeader(corner, category)) continue;
 
-		for(const std::string &name : it->second)
-		{
-			const Outfit *outfit = GameData::Outfits().Get(name);
-			std::string price = Format::CreditString(outfit->Cost());
+    for(const std::string &name : it->second)
+    {
+      const Outfit *outfit = GameData::Outfits().Get(name);
+      std::string   price  = Format::CreditString(outfit->Cost());
 
-			std::string info;
-			if(outfit->Get("minable") > 0.)
-				info = "(Mined from asteroids)";
-			else if(outfit->Get("installable") < 0.)
-			{
-				double space = outfit->Mass();
-				info = Format::CargoString(space, "space");
-			}
-			else
-			{
-				double space = -outfit->Get("outfit space");
-				info = Format::MassString(space);
-				if(space && -outfit->Get("weapon capacity") == space)
-					info += " of weapon space";
-				else if(space && -outfit->Get("engine capacity") == space)
-					info += " of engine space";
-				else
-					info += " of outfit space";
-			}
+      std::string info;
+      if(outfit->Get("minable") > 0.)
+      {
+        info = "(Mined from asteroids)";
+      }
+      else if(outfit->Get("installable") < 0.)
+      {
+        double space = outfit->Mass();
+        info         = Format::CargoString(space, "space");
+      }
+      else {
+        double space = -outfit->Get("outfit space");
+        info         = Format::MassString(space);
+        if(space && -outfit->Get("weapon capacity") == space) info += " of weapon space";
+        else if(space && -outfit->Get("engine capacity") == space) info += " of engine space";
+        else info += " of outfit space";
+      }
 
-			bool isForSale = true;
-			unsigned storedInSystem = 0;
-			if(player.CanView(*selectedSystem))
-			{
-				isForSale = false;
-				const auto &storage = player.PlanetaryStorage();
+      bool     isForSale      = true;
+      unsigned storedInSystem = 0;
+      if(player.CanView(*selectedSystem))
+      {
+        isForSale           = false;
+        const auto &storage = player.PlanetaryStorage();
 
-				for(const StellarObject &object : selectedSystem->Objects())
-				{
-					if(!object.HasSprite() || !object.HasValidPlanet())
-						continue;
+        for(const StellarObject &object : selectedSystem->Objects())
+        {
+          if(!object.HasSprite() || !object.HasValidPlanet()) continue;
 
-					const Planet &planet = *object.GetPlanet();
-					if(planet.HasOutfitter())
-					{
-						const auto pit = storage.find(&planet);
-						if(pit != storage.end())
-							storedInSystem += pit->second.Get(outfit);
-					}
-					if(planet.OutfitterStock().Has(outfit))
-					{
-						isForSale = true;
-						break;
-					}
-				}
-			}
-			if(!isForSale && onlyShowSoldHere)
-				continue;
-			if(!storedInSystem && onlyShowStorageHere)
-				continue;
+          const Planet &planet = *object.GetPlanet();
+          if(planet.HasOutfitter())
+          {
+            const auto pit = storage.find(&planet);
+            if(pit != storage.end()) storedInSystem += pit->second.Get(outfit);
+          }
+          if(planet.OutfitterStock().Has(outfit))
+          {
+            isForSale = true;
+            break;
+          }
+        }
+      }
+      if(!isForSale && onlyShowSoldHere) continue;
+      if(!storedInSystem && onlyShowStorageHere) continue;
 
-			const std::string storage_details =
-				onlyShowSoldHere || storedInSystem == 0
-				? ""
-				: storedInSystem == 1
-				? "1 unit in storage"
-				: Format::Number(storedInSystem) + " units in storage";
-			Draw(corner, outfit->Thumbnail(), Swizzle::None(), isForSale, outfit == selected,
-				outfit->DisplayName(), "", price, info, storage_details);
-			list.push_back(outfit);
-		}
-	}
-	maxScroll = corner.Y() - scroll - .5 * Screen::Height();
+      const std::string storage_details = onlyShowSoldHere || storedInSystem == 0 ? ""
+                                          : storedInSystem == 1                   ? "1 unit in storage"
+                                                                : Format::Number(storedInSystem) + " units in storage";
+      Draw(
+          corner,
+          outfit->Thumbnail(),
+          Swizzle::None(),
+          isForSale,
+          outfit == selected,
+          outfit->DisplayName(),
+          "",
+          price,
+          info,
+          storage_details);
+      list.push_back(outfit);
+    }
+  }
+  maxScroll = corner.Y() - scroll - .5 * Screen::Height();
 }
-
 
 
 void MapOutfitterPanel::Init()
 {
-	catalog.clear();
-	std::set<const Outfit *> seen;
+  catalog.clear();
+  std::set<const Outfit *> seen;
 
-	// Add all outfits sold by outfitters of planets from viewable systems.
-	for(auto &&it : GameData::Planets())
-		if(it.second.IsValid() && player.CanView(*it.second.GetSystem()))
-			for(const Outfit *outfit : it.second.OutfitterStock())
-				if(!seen.contains(outfit))
-				{
-					catalog[outfit->Category()].push_back(outfit->TrueName());
-					seen.insert(outfit);
-				}
+  // Add all outfits sold by outfitters of planets from viewable systems.
+  for(auto &&it : GameData::Planets())
+  {
+    if(it.second.IsValid() && player.CanView(*it.second.GetSystem()))
+    {
+      for(const Outfit *outfit : it.second.OutfitterStock())
+      {
+        if(!seen.contains(outfit))
+        {
+          catalog[outfit->Category()].push_back(outfit->TrueName());
+          seen.insert(outfit);
+        }
+      }
+    }
+  }
 
-	// Add outfits in storage
-	for(const auto &it : player.PlanetaryStorage())
-		if(it.first->HasOutfitter())
-			for(const auto &oit : it.second.Outfits())
-				if(!seen.contains(oit.first))
-				{
-					catalog[oit.first->Category()].push_back(oit.first->TrueName());
-					seen.insert(oit.first);
-				}
+  // Add outfits in storage
+  for(const auto &it : player.PlanetaryStorage())
+  {
+    if(it.first->HasOutfitter())
+    {
+      for(const auto &oit : it.second.Outfits())
+      {
+        if(!seen.contains(oit.first))
+        {
+          catalog[oit.first->Category()].push_back(oit.first->TrueName());
+          seen.insert(oit.first);
+        }
+      }
+    }
+  }
 
-	// Add all known minables.
-	for(const auto &it : player.Harvested())
-		if(!seen.contains(it.second))
-		{
-			catalog[it.second->Category()].push_back(it.second->TrueName());
-			seen.insert(it.second);
-		}
+  // Add all known minables.
+  for(const auto &it : player.Harvested())
+  {
+    if(!seen.contains(it.second))
+    {
+      catalog[it.second->Category()].push_back(it.second->TrueName());
+      seen.insert(it.second);
+    }
+  }
 
-	// Sort the vectors.
-	for(auto &it : catalog)
-		sort(it.second.begin(), it.second.end(), BySeriesAndIndex<Outfit>());
+  // Sort the vectors.
+  for(auto &it : catalog)
+    sort(it.second.begin(), it.second.end(), BySeriesAndIndex<Outfit>());
 }

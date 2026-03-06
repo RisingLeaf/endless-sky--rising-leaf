@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANCOMMANDPOOL_H
 #define VULKANCOMMANDPOOL_H
@@ -28,20 +29,20 @@ namespace VulkanObjects
     VkCommandPool CommandPool = nullptr;
 
     const VulkanDeviceInstance *Device;
+
   public:
     explicit VulkanCommandPool(const VulkanDeviceInstance *device);
 
     ~VulkanCommandPool();
 
-    VulkanCommandPool(const VulkanCommandPool &other) = delete;
-    VulkanCommandPool(VulkanCommandPool &&other) noexcept = delete;
-    VulkanCommandPool &operator=(const VulkanCommandPool &other) = delete;
+    VulkanCommandPool(const VulkanCommandPool &other)                = delete;
+    VulkanCommandPool(VulkanCommandPool &&other) noexcept            = delete;
+    VulkanCommandPool &operator=(const VulkanCommandPool &other)     = delete;
     VulkanCommandPool &operator=(VulkanCommandPool &&other) noexcept = delete;
 
     [[nodiscard]] VkCommandPool Get() const { return CommandPool; }
   };
-}
+} // namespace VulkanObjects
 
 
-
-#endif //VULKANCOMMANDPOOL_H
+#endif // VULKANCOMMANDPOOL_H

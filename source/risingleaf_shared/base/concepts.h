@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef CONCEPTS_H
 #define CONCEPTS_H
@@ -28,54 +29,41 @@ namespace concepts::inheritance
 namespace concepts::string
 {
   template <class T>
-  concept to_string_able = requires(T a)
-  {
-    std::to_string(a);
-  };
-}
+  concept to_string_able = requires(T a) { std::to_string(a); };
+} // namespace concepts::string
 
 namespace concepts::mathematics
 {
-  template<class T>
-  concept comparable = requires(T a, T b)
-  {
-    a < b;
-  };
+  template <class T>
+  concept comparable = requires(T a, T b) { a < b; };
 
-  template<class T>
-  concept addable = requires(T a, T b)
-  {
-    a +  b;
+  template <class T>
+  concept addable = requires(T a, T b) {
+    a + b;
     a += b;
   };
 
-  template<class T>
-  concept subractable = requires(T a, T b)
-  {
-    a -  b;
+  template <class T>
+  concept subractable = requires(T a, T b) {
+    a - b;
     a -= b;
   };
 
-  template<class T>
-  concept multipliable = requires(T a, T b)
-  {
-    a *  b;
+  template <class T>
+  concept multipliable = requires(T a, T b) {
+    a * b;
     a *= b;
   };
 
-  template<class T>
-  concept divisable = requires(T a, T b)
-  {
-    a /  b;
+  template <class T>
+  concept divisable = requires(T a, T b) {
+    a / b;
     a /= b;
   };
 
-  template<class T>
-  concept zero_asignable = requires(T a)
-  {
-    a = static_cast<T>(0);
-  };
-}
+  template <class T>
+  concept zero_asignable = requires(T a) { a = static_cast<T>(0); };
+} // namespace concepts::mathematics
 
 
-#endif //CONCEPTS_H
+#endif // CONCEPTS_H

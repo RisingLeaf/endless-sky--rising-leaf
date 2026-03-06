@@ -21,139 +21,130 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 
 
+namespace
+{
+  // Additional distance the scrollbar's tab can be selected from.
+  constexpr float SCROLLBAR_MOUSE_ADDITIONAL_RANGE = 5.;
+} // namespace
 
-namespace {
-	// Additional distance the scrollbar's tab can be selected from.
-	constexpr float SCROLLBAR_MOUSE_ADDITIONAL_RANGE = 5.;
-}
 
-
-
-ScrollBar::ScrollBar(float fraction, float displaySizeFraction, const Point &from, const Point &to,
-	float tabWidth, float lineWidth, const Color &color, const Color &innerColor) noexcept
-	: fraction(fraction), displaySizeFraction(displaySizeFraction), from(from), to(to),
-		tabWidth(tabWidth), lineWidth(lineWidth), color(color), innerColor(innerColor)
+ScrollBar::ScrollBar(
+    float        fraction,
+    float        displaySizeFraction,
+    const Point &from,
+    const Point &to,
+    float        tabWidth,
+    float        lineWidth,
+    const Color &color,
+    const Color &innerColor) noexcept :
+  fraction(fraction),
+  displaySizeFraction(displaySizeFraction),
+  from(from),
+  to(to),
+  tabWidth(tabWidth),
+  lineWidth(lineWidth),
+  color(color),
+  innerColor(innerColor)
 {
 }
 
 
-
-ScrollBar::ScrollBar() noexcept
-	: ScrollBar(0., 0., Point(), Point(),
-		3, 3, Color(.6), Color(.25))
-{
-}
+ScrollBar::ScrollBar() noexcept : ScrollBar(0., 0., Point(), Point(), 3, 3, Color(.6), Color(.25)) {}
 
 
-
-void ScrollBar::Draw()
-{
-	DrawAt(from);
-}
-
+void ScrollBar::Draw() { DrawAt(from); }
 
 
 void ScrollBar::DrawAt(const Point &from)
 {
-	Point delta = to - this->from;
-	LineShader::Draw(
-		from,
-		from + delta,
-		lineWidth,
-		innerHighlighted ? innerColor : Color::Multiply(.5, innerColor)
-	);
+  Point delta = to - this->from;
+  LineShader::Draw(from, from + delta, lineWidth, innerHighlighted ? innerColor : Color::Multiply(.5, innerColor));
 
-	Point deltaOffset = delta * displaySizeFraction;
-	Point offset = delta * (1 - displaySizeFraction) * fraction;
-	LineShader::Draw(
-		from + offset + deltaOffset,
-		from + offset,
-		tabWidth,
-		highlighted ? color : Color::Combine(.5, color, .5, innerColor)
-	);
+  Point deltaOffset = delta * displaySizeFraction;
+  Point offset      = delta * (1 - displaySizeFraction) * fraction;
+  LineShader::Draw(
+      from + offset + deltaOffset,
+      from + offset,
+      tabWidth,
+      highlighted ? color : Color::Combine(.5, color, .5, innerColor));
 
-	PointerShader::Draw(from, Point(0., -1.), lineWidth * 3., 10.f, 5.f, fraction > 0. ? color : innerColor);
-	PointerShader::Draw(from + delta, Point(0., 1.), lineWidth * 3., 10.f, 5.f, fraction < 1. ? color : innerColor);
+  PointerShader::Draw(from, Point(0., -1.), lineWidth * 3., 10.f, 5.f, fraction > 0. ? color : innerColor);
+  PointerShader::Draw(from + delta, Point(0., 1.), lineWidth * 3., 10.f, 5.f, fraction < 1. ? color : innerColor);
 }
-
 
 
 bool ScrollBar::Hover(int x, int y)
 {
-	Point delta = to - from;
-	Point offset = delta * (1.0 - displaySizeFraction) * fraction;
+  Point delta  = to - from;
+  Point offset = delta * (1.0 - displaySizeFraction) * fraction;
 
-	// Find the distance from a point (p) to the line segment a->b
-	// From https://www.shadertoy.com/view/3tdSDj
-	constexpr auto LineSDF = [](Point a, Point b, Point p)
-	{
-		Point ab = b - a;
-		Point ap = p - a;
+  // Find the distance from a point (p) to the line segment a->b
+  // From https://www.shadertoy.com/view/3tdSDj
+  constexpr auto LineSDF = [](Point a, Point b, Point p)
+  {
+    Point ab = b - a;
+    Point ap = p - a;
 
-		double h = std::clamp(ap.Dot(ab) / ab.LengthSquared(), 0., 1.);
-		double d = (ap - ab * h).Length();
+    double h = std::clamp(ap.Dot(ab) / ab.LengthSquared(), 0., 1.);
+    double d = (ap - ab * h).Length();
 
-		return d;
-	};
+    return d;
+  };
 
-	Point a = from + offset;
-	Point b = a + delta * displaySizeFraction;
+  Point a = from + offset;
+  Point b = a + delta * displaySizeFraction;
 
-	Point p(x, y);
+  Point p(x, y);
 
-	highlighted = LineSDF(a, b, p) <= tabWidth + SCROLLBAR_MOUSE_ADDITIONAL_RANGE;
-	innerHighlighted = LineSDF(from, to, p) <= lineWidth + SCROLLBAR_MOUSE_ADDITIONAL_RANGE;
+  highlighted      = LineSDF(a, b, p) <= tabWidth + SCROLLBAR_MOUSE_ADDITIONAL_RANGE;
+  innerHighlighted = LineSDF(from, to, p) <= lineWidth + SCROLLBAR_MOUSE_ADDITIONAL_RANGE;
 
-	return false;
+  return false;
 }
-
 
 
 bool ScrollBar::Drag(double dx, double dy)
 {
-	if(!highlighted)
-		return false;
+  if(!highlighted) return false;
 
-	Point dragVector(dx, dy);
-	Point thisVector = to - from;
+  Point dragVector(dx, dy);
+  Point thisVector = to - from;
 
-	double scalarProjectionOverLength = thisVector.Dot(dragVector) / thisVector.LengthSquared();
+  double scalarProjectionOverLength = thisVector.Dot(dragVector) / thisVector.LengthSquared();
 
-	fraction += scalarProjectionOverLength / (1. - displaySizeFraction);
+  fraction += scalarProjectionOverLength / (1. - displaySizeFraction);
 
-	return true;
+  return true;
 }
-
 
 
 bool ScrollBar::Click(int x, int y, MouseButton button, int clicks)
 {
-	if(button != MouseButton::LEFT)
-		return false;
+  if(button != MouseButton::LEFT) return false;
 
-	Point clickPos(x, y);
-	if((clickPos - from).Length() < 10.)
-	{
-		fraction = std::clamp(fraction - displaySizeFraction * .6f, 0.f, 1.f);
-		return true;
-	}
-	if((clickPos - to).Length() < 10.)
-	{
-		fraction = std::clamp(fraction + displaySizeFraction * .6f, 0.f, 1.f);
-		return true;
-	}
+  Point clickPos(x, y);
+  if((clickPos - from).Length() < 10.)
+  {
+    fraction = std::clamp(fraction - displaySizeFraction * .6f, 0.f, 1.f);
+    return true;
+  }
+  if((clickPos - to).Length() < 10.)
+  {
+    fraction = std::clamp(fraction + displaySizeFraction * .6f, 0.f, 1.f);
+    return true;
+  }
 
-	if(innerHighlighted && !highlighted)
-	{
-		Point cursorVector = clickPos - from;
-		Point thisVector = to - from;
+  if(innerHighlighted && !highlighted)
+  {
+    Point cursorVector = clickPos - from;
+    Point thisVector   = to - from;
 
-		double scalarProjectionOverLength = thisVector.Dot(cursorVector) / thisVector.LengthSquared();
+    double scalarProjectionOverLength = thisVector.Dot(cursorVector) / thisVector.LengthSquared();
 
-		fraction = (scalarProjectionOverLength - .5) / (1. - displaySizeFraction) + .5;
+    fraction = (scalarProjectionOverLength - .5) / (1. - displaySizeFraction) + .5;
 
-		highlighted = true;
-	}
+    highlighted = true;
+  }
 
-	return highlighted;
+  return highlighted;
 }

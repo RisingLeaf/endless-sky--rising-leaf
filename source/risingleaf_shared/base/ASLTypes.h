@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef ASLTYPES_H
 #define ASLTYPES_H
@@ -30,7 +31,7 @@ namespace asl
   typedef std::int16_t int16;
   typedef std::int32_t int32;
   typedef std::int64_t int64;
-}
+} // namespace asl
 
 
-#endif //ASLTYPES_H
+#endif // ASLTYPES_H

@@ -15,14 +15,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include <string>
 
 
 // A wrapper class that queries the version of Windows that is running the game,
 // and provides information on support for various features.
-class WinVersion {
+class WinVersion
+{
 public:
-	static void Init();
+  static void Init();
 
-	static bool SupportsDarkTheme();
-	static bool SupportsWindowRounding();
+  static std::string ToString();
+
+  static bool SupportsDarkTheme();
+  static bool SupportsWindowRounding();
 };

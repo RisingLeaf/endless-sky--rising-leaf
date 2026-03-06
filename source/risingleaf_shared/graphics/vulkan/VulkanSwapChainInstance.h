@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #ifndef VULKANSWAPCHAININSTANCE_H
 #define VULKANSWAPCHAININSTANCE_H
@@ -29,7 +30,7 @@ namespace VulkanObjects
   class VulkanFrameBufferInstance;
   class VulkanSwapChainInstance final
   {
-    VkSwapchainKHR                                          SwapChain    = nullptr;
+    VkSwapchainKHR                                          SwapChain = nullptr;
     std::vector<std::unique_ptr<VulkanFrameBufferInstance>> FrameBuffers;
     std::vector<VkSemaphore>                                RenderFinishedSemaphores{};
     uint32_t                                                ImageIndex = 0;
@@ -40,13 +41,17 @@ namespace VulkanObjects
     void Create(const VulkanCommandPool *command_pool, uint32_t width, uint32_t height);
 
   public:
-    VulkanSwapChainInstance(const VulkanDeviceInstance *device, const VulkanCommandPool *command_pool, uint32_t width, uint32_t height);
+    VulkanSwapChainInstance(
+        const VulkanDeviceInstance *device,
+        const VulkanCommandPool    *command_pool,
+        uint32_t                    width,
+        uint32_t                    height);
 
     ~VulkanSwapChainInstance();
 
-    VulkanSwapChainInstance(const VulkanSwapChainInstance &other) = delete;
-    VulkanSwapChainInstance(VulkanSwapChainInstance &&other) noexcept = delete;
-    VulkanSwapChainInstance &operator=(const VulkanSwapChainInstance &other) = delete;
+    VulkanSwapChainInstance(const VulkanSwapChainInstance &other)                = delete;
+    VulkanSwapChainInstance(VulkanSwapChainInstance &&other) noexcept            = delete;
+    VulkanSwapChainInstance &operator=(const VulkanSwapChainInstance &other)     = delete;
     VulkanSwapChainInstance &operator=(VulkanSwapChainInstance &&other) noexcept = delete;
 
     void Recreate(const VulkanCommandPool *command_pool, uint32_t width, uint32_t height);
@@ -55,11 +60,13 @@ namespace VulkanObjects
 
     void EndFrame(const VulkanCommandPool *command_pool, uint32_t width, uint32_t height);
 
-    [[nodiscard]] const VulkanFrameBufferInstance *GetCurrentFrameBuffer() const { return FrameBuffers[Device->GetCurrentFrame()].get(); }
-    [[nodiscard]] VkSemaphore                      GetRenderFinished()     const { return RenderFinishedSemaphores[ImageIndex]; }
+    [[nodiscard]] const VulkanFrameBufferInstance *GetCurrentFrameBuffer() const
+    {
+      return FrameBuffers[Device->GetCurrentFrame()].get();
+    }
+    [[nodiscard]] VkSemaphore GetRenderFinished() const { return RenderFinishedSemaphores[ImageIndex]; }
   };
-}
+} // namespace VulkanObjects
 
 
-
-#endif //VULKANSWAPCHAININSTANCE_H
+#endif // VULKANSWAPCHAININSTANCE_H

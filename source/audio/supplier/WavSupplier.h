@@ -20,19 +20,19 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class Sound;
 
 
-
 /// A sync buffered supplier for waveform files. The audio is supplied in a single chunk.
-class WavSupplier : public AudioSupplier {
+class WavSupplier : public AudioSupplier
+{
 public:
-	WavSupplier(const Sound &sound, bool is3x, bool looping = false);
+  WavSupplier(const Sound &sound, bool is3x, bool looping = false);
 
-	// Inherited pure virtual methods
-	size_t MaxChunks() const override;
-	size_t AvailableChunks() const override;
-	std::vector<sample_t> NextDataChunk() override;
+  // Inherited pure virtual methods
+  size_t                MaxChunks() const override;
+  size_t                AvailableChunks() const override;
+  std::vector<sample_t> NextDataChunk() override;
 
 
 private:
-	const Sound &sound;
-	bool wasStarted;
+  const Sound &sound;
+  bool         wasStarted;
 };

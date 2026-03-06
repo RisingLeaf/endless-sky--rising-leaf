@@ -19,44 +19,26 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "image/SpriteSet.h"
 
 
-
-
-
 void Galaxy::Load(const DataNode &node)
 {
-	for(const DataNode &child : node)
-	{
-		const bool remove = child.Token(0) == "remove";
-		const int keyIndex = remove;
-		const bool hasKey = child.Size() > keyIndex;
-		const std::string &key = hasKey ? child.Token(keyIndex) : child.Token(0);
+  for(const DataNode &child : node)
+  {
+    const bool         remove   = child.Token(0) == "remove";
+    const int          keyIndex = remove;
+    const bool         hasKey   = child.Size() > keyIndex;
+    const std::string &key      = hasKey ? child.Token(keyIndex) : child.Token(0);
 
-		if(remove && hasKey)
-		{
-			if(key == "sprite")
-				sprite = nullptr;
-			else
-				child.PrintTrace("Skipping unsupported use of \"remove\":");
-		}
-		else if(key == "pos" && child.Size() >= 3)
-			position = Point(child.Value(1), child.Value(2));
-		else if(key == "sprite" && child.Size() >= 2)
-			sprite = SpriteSet::Get(child.Token(1));
-		else
-			child.PrintTrace("Skipping unrecognized attribute:");
-	}
+    if(remove && hasKey)
+      if(key == "sprite") sprite = nullptr;
+      else child.PrintTrace("Skipping unsupported use of \"remove\":");
+    else if(key == "pos" && child.Size() >= 3) position = Point(child.Value(1), child.Value(2));
+    else if(key == "sprite" && child.Size() >= 2) sprite = SpriteSet::Get(child.Token(1));
+    else child.PrintTrace("Skipping unrecognized attribute:");
+  }
 }
 
 
-
-const Point &Galaxy::Position() const
-{
-	return position;
-}
+const Point &Galaxy::Position() const { return position; }
 
 
-
-const Sprite *Galaxy::GetSprite() const
-{
-	return sprite;
-}
+const Sprite *Galaxy::GetSprite() const { return sprite; }

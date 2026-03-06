@@ -29,32 +29,35 @@ class Sprite;
 class System;
 
 
-
 // This represents a person you can "talk to" in the spaceport to get some local
 // news. One specification can contain many possible portraits and messages.
-class News {
+class News
+{
 public:
-	void Load(const DataNode &node, const ConditionsStore *playerConditions,
-		const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+  void Load(
+      const DataNode                 &node,
+      const ConditionsStore          *playerConditions,
+      const std::set<const System *> *visitedSystems,
+      const std::set<const Planet *> *visitedPlanets);
 
-	// Check whether this news item has anything to say.
-	bool IsEmpty() const;
-	// Check if this news item is available given the player's planet.
-	bool Matches(const Planet *planet) const;
+  // Check whether this news item has anything to say.
+  bool IsEmpty() const;
+  // Check if this news item is available given the player's planet.
+  bool Matches(const Planet *planet) const;
 
-	// Get the speaker's name.
-	std::string SpeakerName() const;
-	// Pick a portrait at random out of the possible options.
-	const Sprite *Portrait() const;
-	// Get the speaker's message, chosen randomly.
-	std::string Message() const;
+  // Get the speaker's name.
+  std::string SpeakerName() const;
+  // Pick a portrait at random out of the possible options.
+  const Sprite *Portrait() const;
+  // Get the speaker's message, chosen randomly.
+  std::string Message() const;
 
 
 private:
-	LocationFilter location;
-	ConditionSet toShow;
+  LocationFilter location;
+  ConditionSet   toShow;
 
-	Phrase speakerNames;
-	std::vector<const Sprite *> portraits;
-	Phrase messages;
+  Phrase                      speakerNames;
+  std::vector<const Sprite *> portraits;
+  Phrase                      messages;
 };

@@ -21,14 +21,19 @@ class Color;
 class Sprite;
 
 
-
 // Functions for drawing the "outline" of a sprite, i.e. a Sobel filter of its
 // alpha channel.
-class OutlineShader {
+class OutlineShader
+{
 public:
-	static void Init();
-	static void Clear();
+  static void Init();
+  static void Clear();
 
-	static void Draw(const Sprite *sprite, const Point &pos, const Point &size,
-		const Color &color, const Point &unit = Point(0., -1.), float frame = 0.f);
+  static void Draw(
+      const Sprite *sprite,
+      const Point  &pos,
+      const Point  &size,
+      const Color  &color,
+      const Point  &unit  = Point(0., -1.),
+      float         frame = 0.f);
 };

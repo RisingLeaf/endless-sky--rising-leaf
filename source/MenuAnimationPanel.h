@@ -18,17 +18,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Panel.h"
 
 
-
 // Class representing the menu animation including sound effects and music
 // that appears when the game is started and everything is loaded.
-class MenuAnimationPanel final : public Panel {
+class MenuAnimationPanel final : public Panel
+{
 public:
-	MenuAnimationPanel();
+  MenuAnimationPanel();
 
-	void Step() final;
-	void Draw() final;
+  void Step() final;
+  void Draw() final;
 
 
 private:
-	float alpha = 1.f;
+  float alpha = 1.f;
 };

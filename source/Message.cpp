@@ -18,246 +18,194 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Command.h"
 #include "DataNode.h"
 #include "DataWriter.h"
-#include "text/Format.h"
 #include "GameData.h"
 #include "Phrase.h"
 #include "TextReplacements.h"
+#include "text/Format.h"
 
 #include <cassert>
 
 
-
-
-
 void Message::Category::Load(const DataNode &node)
 {
-	if(node.Size() < 2)
-		return;
-	name = node.Token(1);
-	isLoaded = true;
+  if(node.Size() < 2) return;
+  name     = node.Token(1);
+  isLoaded = true;
 
-	auto setColor = [](const DataNode &node, ExclusiveItem<Color> &color) noexcept -> void {
-		if(node.Size() >= 4)
-			color = ExclusiveItem<Color>{{
-				static_cast<float>(node.Value(1)),
-				static_cast<float>(node.Value(2)),
-				static_cast<float>(node.Value(3))}};
-		else
-			color = ExclusiveItem<Color>{GameData::Colors().Get(node.Token(1))};
-	};
+  auto setColor = [](const DataNode &node, ExclusiveItem<Color> &color) noexcept -> void
+  {
+    if(node.Size() >= 4)
+    {
+      color = ExclusiveItem<Color>{
+          {static_cast<float>(node.Value(1)), static_cast<float>(node.Value(2)), static_cast<float>(node.Value(3))}};
+    }
+    else {
+      color = ExclusiveItem<Color>{GameData::Colors().Get(node.Token(1))};
+    }
+  };
 
-	for(const auto &child : node)
-	{
-		const std::string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+  for(const auto &child : node)
+  {
+    const std::string &key      = child.Token(0);
+    bool               hasValue = child.Size() >= 2;
 
-		if(key == "main color" && hasValue)
-			setColor(child, mainColor);
-		else if(key == "log color" && hasValue)
-			setColor(child, logColor);
-		else if(key == "main duplicates" && hasValue)
-		{
-			const std::string &value = child.Token(1);
-			if(value == "keep new")
-				mainDuplicates = DuplicatesStrategy::KEEP_NEW;
-			else if(value == "keep old")
-				mainDuplicates = DuplicatesStrategy::KEEP_OLD;
-			else if(value == "keep both")
-				mainDuplicates = DuplicatesStrategy::KEEP_BOTH;
-		}
-		else if(key == "log duplicates" && hasValue)
-		{
-			const std::string &value = child.Token(1);
-			if(value == "keep old")
-				allowsLogDuplicates = false;
-			else if(value == "keep both")
-				allowsLogDuplicates = true;
-		}
-		else if(key == "important")
-			// By default this doesn't need a value, but support
-			// explicit false if a plugin wants to override base data.
-			isImportant = !hasValue || child.BoolValue(1);
-		else if(key == "log only")
-			// By default this doesn't need a value, but support
-			// explicit false if a plugin wants to override base data.
-			logOnly = !hasValue || child.BoolValue(1);
-		else
-			child.PrintTrace("Skipping unrecognized attribute:");
-	}
+    if(key == "main color" && hasValue)
+    {
+      setColor(child, mainColor);
+    }
+    else if(key == "log color" && hasValue)
+    {
+      setColor(child, logColor);
+    }
+    else if(key == "main duplicates" && hasValue)
+    {
+      const std::string &value = child.Token(1);
+      if(value == "keep new") mainDuplicates = DuplicatesStrategy::KEEP_NEW;
+      else if(value == "keep old") mainDuplicates = DuplicatesStrategy::KEEP_OLD;
+      else if(value == "keep both") mainDuplicates = DuplicatesStrategy::KEEP_BOTH;
+    }
+    else if(key == "log duplicates" && hasValue)
+    {
+      const std::string &value = child.Token(1);
+      if(value == "keep old") allowsLogDuplicates = false;
+      else if(value == "keep both") allowsLogDuplicates = true;
+    }
+    else if(key == "important")
+    {
+      // By default this doesn't need a value, but support
+      // explicit false if a plugin wants to override base data.
+      isImportant = !hasValue || child.BoolValue(1);
+    }
+    else if(key == "log only")
+    {
+      // By default this doesn't need a value, but support
+      // explicit false if a plugin wants to override base data.
+      logOnly = !hasValue || child.BoolValue(1);
+    }
+    else {
+      child.PrintTrace("Skipping unrecognized attribute:");
+    }
+  }
 }
 
 
-
-bool Message::Category::IsLoaded() const
-{
-	return isLoaded;
-}
+bool Message::Category::IsLoaded() const { return isLoaded; }
 
 
-
-const std::string &Message::Category::Name() const
-{
-	return name;
-}
+const std::string &Message::Category::TrueName() const { return name; }
 
 
-
-const Color &Message::Category::MainColor() const
-{
-	return *mainColor;
-}
+const Color &Message::Category::MainColor() const { return *mainColor; }
 
 
-
-const Color &Message::Category::LogColor() const
-{
-	return *logColor;
-}
+const Color &Message::Category::LogColor() const { return *logColor; }
 
 
-
-Message::Category::DuplicatesStrategy Message::Category::MainDuplicatesStrategy() const
-{
-	return mainDuplicates;
-}
+Message::Category::DuplicatesStrategy Message::Category::MainDuplicatesStrategy() const { return mainDuplicates; }
 
 
-
-bool Message::Category::AllowsLogDuplicates() const
-{
-	return allowsLogDuplicates;
-}
+bool Message::Category::AllowsLogDuplicates() const { return allowsLogDuplicates; }
 
 
-
-bool Message::Category::IsImportant() const
-{
-	return isImportant;
-}
+bool Message::Category::IsImportant() const { return isImportant; }
 
 
-
-bool Message::Category::LogOnly() const
-{
-	return logOnly;
-}
+bool Message::Category::LogOnly() const { return logOnly; }
 
 
-
-Message::Message(const std::string &text, const Category *category)
-	: text{text}, category{category}
-{
-}
+Message::Message() : category(GameData::MessageCategories().Get("normal")) {}
 
 
+Message::Message(const std::string &text, const Category *category) : isLoaded{true}, text{text}, category{category} {}
 
-Message::Message(const DataNode &node)
-{
-	Load(node);
-}
 
+Message::Message(const DataNode &node) { Load(node); }
 
 
 void Message::Load(const DataNode &node)
 {
-	if(node.Size() >= 2)
-		name = node.Token(1);
-	isLoaded = true;
+  if(node.Size() >= 2) name = node.Token(1);
+  isLoaded = true;
 
-	for(const auto &child : node)
-	{
-		const std::string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+  for(const auto &child : node)
+  {
+    const std::string &key      = child.Token(0);
+    bool               hasValue = child.Size() >= 2;
 
-		if(key == "text" && hasValue)
-		{
-			text = child.Token(1);
-			isPhrase = false;
-		}
-		else if(key == "phrase" && hasValue)
-		{
-			text = child.Token(1);
-			isPhrase = true;
-		}
-		else if(key == "category" && hasValue)
-			category = GameData::MessageCategories().Get(child.Token(1));
-		else
-			child.PrintTrace("Skipping unrecognized attribute:");
-	}
+    if(key == "text" && hasValue)
+    {
+      text     = child.Token(1);
+      isPhrase = false;
+    }
+    else if(key == "phrase" && hasValue)
+    {
+      text     = child.Token(1);
+      isPhrase = true;
+    }
+    else if(key == "category" && hasValue)
+    {
+      category = GameData::MessageCategories().Get(child.Token(1));
+    }
+    else {
+      child.PrintTrace("Skipping unrecognized attribute:");
+    }
+  }
 
-	if(!category)
-		category = GameData::MessageCategories().Get("normal");
+  if(!category) category = GameData::MessageCategories().Get("normal");
 }
 
 
-
-bool Message::IsLoaded() const
-{
-	return isLoaded;
-}
-
+bool Message::IsLoaded() const { return isLoaded; }
 
 
 void Message::Save(DataWriter &out) const
 {
-	// If this message has a name, it's defined globally, so just save a reference.
-	if(!name.empty())
-	{
-		out.Write("message", name);
-		return;
-	}
+  // If this message has a name, it's defined globally, so just save a reference.
+  if(!name.empty())
+  {
+    out.Write("message", name);
+    return;
+  }
 
-	out.Write("message");
-	out.BeginChild();
-	{
-		// If we need to save a customized instance of a message, substitutions
-		// should have already been applied, so just write the text.
-		out.Write(isPhrase ? "phrase" : "text", text);
-		out.Write("category", category->Name());
-	}
-	out.EndChild();
+  out.Write("message");
+  out.BeginChild();
+  {
+    // If we need to save a customized instance of a message, substitutions
+    // should have already been applied, so just write the text.
+    out.Write(isPhrase ? "phrase" : "text", text);
+    out.Write("category", category->TrueName());
+  }
+  out.EndChild();
 }
 
 
-
-const std::string &Message::Name() const
-{
-	return name;
-}
+const std::string &Message::TrueName() const { return name; }
 
 
+void Message::SetTrueName(const std::string &name) { this->name = name; }
 
-bool Message::IsPhrase() const
-{
-	return isPhrase;
-}
 
+bool Message::IsPhrase() const { return isPhrase; }
 
 
 std::string Message::Text() const
 {
-	if(isPhrase)
-		return GameData::Phrases().Get(text)->Get();
+  if(isPhrase) return GameData::Phrases().Get(text)->Get();
 
-	std::map<std::string, std::string> subs;
-	GameData::GetTextReplacements().Substitutions(subs);
-	for(const auto &[key, value] : subs)
-		subs[key] = Phrase::ExpandPhrases(value);
-	Format::Expand(subs);
-	return Command::ReplaceNamesWithKeys(Format::Replace(Phrase::ExpandPhrases(text), subs));
+  std::map<std::string, std::string> subs;
+  GameData::GetTextReplacements().Substitutions(subs);
+  for(const auto &[key, value] : subs)
+    subs[key] = Phrase::ExpandPhrases(value);
+  Format::Expand(subs);
+  return Command::ReplaceNamesWithKeys(Format::Replace(Phrase::ExpandPhrases(text), subs));
 }
-
 
 
 std::string Message::Text(const std::map<std::string, std::string> &subs) const
 {
-	assert(!isPhrase && "Cannot apply custom substitutions to a global phrase");
-	return Command::ReplaceNamesWithKeys(Format::Replace(Phrase::ExpandPhrases(text), subs));
+  assert(!isPhrase && "Cannot apply custom substitutions to a global phrase");
+  return Command::ReplaceNamesWithKeys(Format::Replace(Phrase::ExpandPhrases(text), subs));
 }
 
 
-
-const Message::Category *Message::GetCategory() const
-{
-	return category;
-}
+const Message::Category *Message::GetCategory() const { return category; }

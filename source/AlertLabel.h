@@ -25,18 +25,19 @@ class Ship;
 
 
 // A class that holds an overlay for a missile.
-class AlertLabel {
+class AlertLabel
+{
 public:
-	AlertLabel(const Point &position, const Projectile &projectile, const std::shared_ptr<Ship> &flagship, double zoom);
+  AlertLabel(const Point &position, const Projectile &projectile, const std::shared_ptr<Ship> &flagship, double zoom);
 
-	void Draw() const;
+  void Draw() const;
 
 
 private:
-	double rotation = 0.;
-	Point position;
-	double zoom = 1.;
-	bool isTargetingFlagship = true;
-	double radius = 15.;
-	const Color *color;
+  double       rotation = 0.;
+  Point        position;
+  double       zoom                = 1.;
+  bool         isTargetingFlagship = true;
+  double       radius              = 15.;
+  const Color *color;
 };

@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 
 #ifndef MATRIX_H
@@ -21,17 +22,17 @@
 #include <initializer_list>
 #include <string>
 
+#include "vector.h"
+
 #include "base/ASLTypes.h"
 #include "base/concepts.h"
 
 namespace gm
 {
-  template<typename Type, asl::uint32 Dimension>
-  requires concepts::mathematics::addable<Type>
-        && concepts::mathematics::subractable<Type>
-        && concepts::mathematics::multipliable<Type>
-        && concepts::mathematics::divisable<Type>
-        && concepts::mathematics::zero_asignable<Type>
+  template <typename Type, asl::uint32 Dimension>
+    requires concepts::mathematics::addable<Type> && concepts::mathematics::subractable<Type> &&
+             concepts::mathematics::multipliable<Type> && concepts::mathematics::divisable<Type> &&
+             concepts::mathematics::zero_asignable<Type>
   class matrix
   {
     Type Values[Dimension][Dimension];
@@ -39,7 +40,7 @@ namespace gm
     using compatible_vector = vector<Type, Dimension>;
 
   public:
-    template<typename Other>
+    template <typename Other>
     explicit constexpr matrix(const matrix<Other, Dimension> &from) noexcept
     {
       for(asl::uint32 i = 0; i < Dimension; i++)
@@ -56,7 +57,7 @@ namespace gm
     {
       for(asl::uint32 i = 0; i < Dimension; i++)
         for(asl::uint32 j = 0; j < Dimension; j++)
-          Values[i][j] = i==j ? val : static_cast<Type>(0);
+          Values[i][j] = i == j ? val : static_cast<Type>(0);
     }
     constexpr matrix(std::initializer_list<Type> init) noexcept
     {
@@ -82,15 +83,24 @@ namespace gm
           this->Values[i][j] = base[i, j];
     }
 
-    constexpr       Type &operator[](const asl::uint32 i, const asl::uint32 j)       noexcept { assert(i < Dimension && j < Dimension); return Values[i][j]; }
-    constexpr const Type &operator[](const asl::uint32 i, const asl::uint32 j) const noexcept { assert(i < Dimension && j < Dimension); return Values[i][j]; }
+    constexpr Type &operator[](const asl::uint32 i, const asl::uint32 j) noexcept
+    {
+      assert(i < Dimension && j < Dimension);
+      return Values[i][j];
+    }
+    constexpr const Type &operator[](const asl::uint32 i, const asl::uint32 j) const noexcept
+    {
+      assert(i < Dimension && j < Dimension);
+      return Values[i][j];
+    }
 
     constexpr bool operator==(const matrix &other) const noexcept
     {
       for(asl::uint32 i = 0; i < Dimension; i++)
+      {
         for(asl::uint32 j = 0; j < Dimension; j++)
-          if (this->Values[i][j] != other.Values[i][j])
-            return false;
+          if(this->Values[i][j] != other.Values[i][j]) return false;
+      }
       return true;
     }
 
@@ -144,22 +154,22 @@ namespace gm
     {
       matrix result(static_cast<Type>(0));
       for(asl::uint32 i = 0; i < Dimension; i++)
+      {
         for(asl::uint32 j = 0; j < Dimension; j++)
-        {
           for(asl::uint32 k = 0; k < Dimension; k++)
             result.Values[i][j] += this->Values[i][k] * mult.Values[k][j];
-        }
+      }
       return result;
     }
     constexpr void operator*=(const matrix &mult) noexcept
     {
       matrix result(static_cast<Type>(0));
       for(asl::uint32 i = 0; i < Dimension; i++)
+      {
         for(asl::uint32 j = 0; j < Dimension; j++)
-        {
           for(asl::uint32 k = 0; k < Dimension; k++)
             result.Values[i][j] += this->Values[i][k] * mult.Values[k][j];
-        }
+      }
       *this = result;
     }
 
@@ -198,15 +208,15 @@ namespace gm
       return out;
     }
   };
-}
+} // namespace gm
 
 namespace std
 {
-  template<typename Type, asl::uint32 Dimension>
+  template <typename Type, asl::uint32 Dimension>
   std::string to_string(const gm::matrix<Type, Dimension> &mat)
   {
     return mat.to_string();
   }
-}
+} // namespace std
 
-#endif //MATRIX_H
+#endif // MATRIX_H

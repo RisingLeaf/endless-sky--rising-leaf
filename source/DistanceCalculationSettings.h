@@ -20,21 +20,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class DataNode;
 
 
-
-class DistanceCalculationSettings {
+class DistanceCalculationSettings
+{
 public:
-	DistanceCalculationSettings() = default;
-	explicit DistanceCalculationSettings(const DataNode &node);
+  DistanceCalculationSettings() = default;
+  explicit DistanceCalculationSettings(const DataNode &node);
 
-	bool operator!=(const DistanceCalculationSettings &other) const;
+  bool operator!=(const DistanceCalculationSettings &other) const;
 
-	void Load(const DataNode &node);
+  void Load(const DataNode &node);
 
-	WormholeStrategy WormholeStrat() const;
-	bool AssumesJumpDrive() const;
+  WormholeStrategy WormholeStrat() const;
+  bool             AssumesJumpDrive() const;
 
 
 private:
-	enum WormholeStrategy wormholeStrategy = WormholeStrategy::NONE;
-	bool assumesJumpDrive = false;
+  enum WormholeStrategy wormholeStrategy = WormholeStrategy::NONE;
+  bool                  assumesJumpDrive = false;
 };

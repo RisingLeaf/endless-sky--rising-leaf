@@ -18,25 +18,25 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Point.h"
 
 
-
 // A class that represents the viewport while in space.
-class Camera {
+class Camera
+{
 public:
-	// Instantly snap the camera to the given target.
-	void SnapTo(const Point &target, bool keepVelocity = false);
-	// Move the camera toward the given target.
-	void MoveTo(const Point &target, double hyperspaceInfluence);
+  // Instantly snap the camera to the given target.
+  void SnapTo(const Point &target, bool keepVelocity = false);
+  // Move the camera toward the given target.
+  void MoveTo(const Point &target, double hyperspaceInfluence);
 
-	// The position of the camera's center.
-	const Point &Center() const;
-	// The velocity that the camera is moving at. Used for motion blur and starfield movement.
-	const Point &Velocity() const;
+  // The position of the camera's center.
+  const Point &Center() const;
+  // The velocity that the camera is moving at. Used for motion blur and starfield movement.
+  const Point &Velocity() const;
 
 
 private:
-	Point center;
-	Point velocity;
+  Point center;
+  Point velocity;
 
-	Point accel;
-	Point oldTarget;
+  Point accel;
+  Point oldTarget;
 };

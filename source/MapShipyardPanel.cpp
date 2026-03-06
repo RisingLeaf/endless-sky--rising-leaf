@@ -15,280 +15,266 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "MapShipyardPanel.h"
 
-#include "comparators/BySeriesAndIndex.h"
 #include "CategoryList.h"
 #include "CoreStartData.h"
-#include "text/Format.h"
 #include "GameData.h"
+#include "Information.h"
 #include "Planet.h"
 #include "PlayerInfo.h"
 #include "Point.h"
 #include "Screen.h"
 #include "Ship.h"
-#include "image/Sprite.h"
 #include "StellarObject.h"
 #include "System.h"
 #include "UI.h"
+#include "comparators/BySeriesAndIndex.h"
+#include "image/Sprite.h"
+#include "image/SpriteLoadManager.h"
+#include "text/Format.h"
 
 #include <algorithm>
 #include <limits>
 #include <set>
 
 
+MapShipyardPanel::MapShipyardPanel(PlayerInfo &player) : MapSalesPanel(player, false) { Init(); }
 
 
-
-MapShipyardPanel::MapShipyardPanel(PlayerInfo &player)
-	: MapSalesPanel(player, false)
+MapShipyardPanel::MapShipyardPanel(const MapPanel &panel, bool onlyHere) : MapSalesPanel(panel, false)
 {
-	Init();
+  Init();
+  onlyShowSoldHere = onlyHere;
+  UpdateCache();
 }
 
 
-
-MapShipyardPanel::MapShipyardPanel(const MapPanel &panel, bool onlyHere)
-	: MapSalesPanel(panel, false)
+void MapShipyardPanel::LoadCatalogThumbnails() const
 {
-	Init();
-	onlyShowSoldHere = onlyHere;
-	UpdateCache();
+  for(const auto &category : catalog)
+    for(const std::string &entry : category.second)
+      SpriteLoadManager::LoadDeferred(GetUI().AsyncQueue(), GameData::Ships().Get(entry)->Thumbnail());
 }
-
 
 
 const Sprite *MapShipyardPanel::SelectedSprite() const
 {
-	return selected ? selected->Thumbnail() ? selected->Thumbnail() : selected->GetSprite() : nullptr;
+  return selected ? selected->Thumbnail() ? selected->Thumbnail() : selected->GetSprite() : nullptr;
 }
-
 
 
 const Sprite *MapShipyardPanel::CompareSprite() const
 {
-	return compare ? compare->Thumbnail() ? compare->Thumbnail() : compare->GetSprite() : nullptr;
+  return compare ? compare->Thumbnail() ? compare->Thumbnail() : compare->GetSprite() : nullptr;
 }
 
 
-
-const Swizzle *MapShipyardPanel::SelectedSpriteSwizzle() const
-{
-	return selected->CustomSwizzle();
-}
+const Swizzle *MapShipyardPanel::SelectedSpriteSwizzle() const { return selected->CustomSwizzle(); }
 
 
-
-const Swizzle *MapShipyardPanel::CompareSpriteSwizzle() const
-{
-	return compare->CustomSwizzle();
-}
+const Swizzle *MapShipyardPanel::CompareSpriteSwizzle() const { return compare->CustomSwizzle(); }
 
 
-
-const ItemInfoDisplay &MapShipyardPanel::SelectedInfo() const
-{
-	return selectedInfo;
-}
+const ItemInfoDisplay &MapShipyardPanel::SelectedInfo() const { return selectedInfo; }
 
 
-
-const ItemInfoDisplay &MapShipyardPanel::CompareInfo() const
-{
-	return compareInfo;
-}
-
-
-
-const std::string &MapShipyardPanel::KeyLabel(int index) const
-{
-	static const std::string LABEL[4] = {
-		"Has no shipyard",
-		"Has shipyard",
-		"Sells this ship",
-		"Ship parked here"
-	};
-	return LABEL[index];
-}
-
+const ItemInfoDisplay &MapShipyardPanel::CompareInfo() const { return compareInfo; }
 
 
 void MapShipyardPanel::Select(int index)
 {
-	if(index < 0 || index >= static_cast<int>(list.size()))
-		selected = nullptr;
-	else
-	{
-		selected = list[index];
-		selectedInfo.Update(*selected, player);
-	}
-	UpdateCache();
+  if(index < 0 || index >= static_cast<int>(list.size()))
+  {
+    selected = nullptr;
+  }
+  else {
+    selected = list[index];
+    selectedInfo.Update(*selected, player);
+  }
+  UpdateCache();
 }
-
 
 
 void MapShipyardPanel::Compare(int index)
 {
-	if(index < 0 || index >= static_cast<int>(list.size()))
-		compare = nullptr;
-	else
-	{
-		compare = list[index];
-		compareInfo.Update(*compare, player);
-	}
+  if(index < 0 || index >= static_cast<int>(list.size()))
+  {
+    compare = nullptr;
+  }
+  else {
+    compare = list[index];
+    compareInfo.Update(*compare, player);
+  }
 }
-
 
 
 double MapShipyardPanel::SystemValue(const System *system) const
 {
-	if(!system || !player.CanView(*system))
-		return std::numeric_limits<double>::quiet_NaN();
+  if(!system || !player.CanView(*system)) return std::numeric_limits<double>::quiet_NaN();
 
-	// If there is a shipyard with parked ships, the order of precedence is
-	// a selected parked ship, the shipyard, parked ships.
+  // If there is a shipyard with parked ships, the order of precedence is
+  // a selected parked ship, the shipyard, parked ships.
 
-	const auto &systemShips = parkedShips.find(system);
-	if(systemShips != parkedShips.end() && systemShips->second.find(selected) != systemShips->second.end())
-		return .5;
-	else if(system->IsInhabited(player.Flagship()))
-	{
-		// Visiting a system is sufficient to know what ports are available on its planets.
-		double value = -1.;
-		for(const StellarObject &object : system->Objects())
-			if(object.HasSprite() && object.HasValidPlanet())
-			{
-				const auto &shipyard = object.GetPlanet()->ShipyardStock();
-				if(shipyard.Has(selected))
-					return 1.;
-				if(!shipyard.empty())
-					value = 0.;
-			}
-		return value;
-	}
-	else if(systemShips != parkedShips.end() && !selected)
-		return .5;
-	else
-		return std::numeric_limits<double>::quiet_NaN();
+  const auto &systemShips = parkedShips.find(system);
+  if(systemShips != parkedShips.end() && systemShips->second.find(selected) != systemShips->second.end())
+  {
+    return .5;
+  }
+  else if(system->IsInhabited(player.Flagship()))
+  {
+    // Visiting a system is sufficient to know what ports are available on its planets.
+    double value = -1.;
+    for(const StellarObject &object : system->Objects())
+    {
+      if(object.HasSprite() && object.HasValidPlanet())
+      {
+        const auto &shipyard = object.GetPlanet()->ShipyardStock();
+        if(shipyard.Has(selected)) return 1.;
+        if(!shipyard.empty()) value = 0.;
+      }
+    }
+    return value;
+  }
+  else if(systemShips != parkedShips.end() && !selected)
+  {
+    return .5;
+  }
+  else {
+    return std::numeric_limits<double>::quiet_NaN();
+  }
 }
-
 
 
 int MapShipyardPanel::FindItem(const std::string &text) const
 {
-	int bestIndex = 9999;
-	int bestItem = -1;
-	for(unsigned i = 0; i < list.size(); ++i)
-	{
-		int index = Format::Search(list[i]->DisplayModelName(), text);
-		if(index >= 0 && index < bestIndex)
-		{
-			bestIndex = index;
-			bestItem = i;
-			if(!index)
-				return i;
-		}
-	}
-	return bestItem;
+  int bestIndex = 9999;
+  int bestItem  = -1;
+  for(unsigned i = 0; i < list.size(); ++i)
+  {
+    int index = Format::Search(list[i]->DisplayModelName(), text);
+    if(index >= 0 && index < bestIndex)
+    {
+      bestIndex = index;
+      bestItem  = i;
+      if(!index) return i;
+    }
+  }
+  return bestItem;
 }
 
+
+void MapShipyardPanel::DrawKey(Information &info) const
+{
+  info.SetCondition("is shipyards");
+
+  MapSalesPanel::DrawKey(info);
+}
 
 
 void MapShipyardPanel::DrawItems()
 {
-	if(GetUI()->IsTop(this) && player.GetPlanet() && player.GetDate() >= player.StartData().GetDate() + 12)
-		DoHelp("map advanced shops");
-	list.clear();
-	Point corner = Screen::TopLeft() + Point(0, scroll);
-	for(const auto &cat : categories)
-	{
-		const std::string &category = cat.Name();
-		auto it = catalog.find(category);
-		if(it == catalog.end())
-			continue;
+  if(GetUI().IsTop(this) && player.GetPlanet() && player.GetDate() >= player.StartData().GetDate() + 12)
+    DoHelp("map advanced shops");
+  list.clear();
+  Point corner = Screen::TopLeft() + Point(0, scroll);
+  for(const auto &cat : categories)
+  {
+    const std::string &category = cat.Name();
+    auto               it       = catalog.find(category);
+    if(it == catalog.end()) continue;
 
-		// Draw the header. If this category is collapsed, skip drawing the items.
-		if(DrawHeader(corner, category))
-			continue;
+    // Draw the header. If this category is collapsed, skip drawing the items.
+    if(DrawHeader(corner, category)) continue;
 
-		for(const std::string &name : it->second)
-		{
-			const Ship *ship = GameData::Ships().Get(name);
-			std::string price = Format::CreditString(ship->Cost());
+    for(const std::string &name : it->second)
+    {
+      const Ship *ship  = GameData::Ships().Get(name);
+      std::string price = Format::CreditString(ship->Cost());
 
-			std::string info = Format::Number(ship->MaxShields()) + " shields / ";
-			info += Format::Number(ship->MaxHull()) + " hull";
+      std::string info  = Format::Number(ship->MaxShields()) + " shields / ";
+      info             += Format::Number(ship->MaxHull()) + " hull";
 
-			bool isForSale = true;
-			unsigned parkedInSystem = 0;
-			if(player.CanView(*selectedSystem))
-			{
-				isForSale = false;
-				for(const StellarObject &object : selectedSystem->Objects())
-					if(object.HasSprite() && object.HasValidPlanet()
-							&& object.GetPlanet()->ShipyardStock().Has(ship))
-					{
-						isForSale = true;
-						break;
-					}
+      bool     isForSale      = true;
+      unsigned parkedInSystem = 0;
+      if(player.CanView(*selectedSystem))
+      {
+        isForSale = false;
+        for(const StellarObject &object : selectedSystem->Objects())
+        {
+          if(object.HasSprite() && object.HasValidPlanet() && object.GetPlanet()->ShipyardStock().Has(ship))
+          {
+            isForSale = true;
+            break;
+          }
+        }
 
-				const auto parked = parkedShips.find(selectedSystem);
-				if(parked != parkedShips.end())
-				{
-					const auto shipCount = parked->second.find(ship);
-					if(shipCount != parked->second.end())
-						parkedInSystem = shipCount->second;
-				}
-			}
-			if(!isForSale && onlyShowSoldHere)
-				continue;
-			if(!parkedInSystem && onlyShowStorageHere)
-				continue;
+        const auto parked = parkedShips.find(selectedSystem);
+        if(parked != parkedShips.end())
+        {
+          const auto shipCount = parked->second.find(ship);
+          if(shipCount != parked->second.end()) parkedInSystem = shipCount->second;
+        }
+      }
+      if(!isForSale && onlyShowSoldHere) continue;
+      if(!parkedInSystem && onlyShowStorageHere) continue;
 
-			const Sprite *sprite = ship->Thumbnail();
-			if(!sprite)
-				sprite = ship->GetSprite();
+      const Sprite *sprite = ship->Thumbnail();
+      if(!sprite) sprite = ship->GetSprite();
 
-			const std::string parking_details =
-				onlyShowSoldHere || parkedInSystem == 0
-				? ""
-				: parkedInSystem == 1
-				? "1 ship parked"
-				: Format::Number(parkedInSystem) + " ships parked";
-			Draw(corner, sprite, ship->CustomSwizzle(), isForSale, ship == selected,
-					ship->DisplayModelName(), ship->VariantMapShopName(), price, info, parking_details);
-			list.push_back(ship);
-		}
-	}
-	maxScroll = corner.Y() - scroll - .5 * Screen::Height();
+      const std::string parking_details = onlyShowSoldHere || parkedInSystem == 0 ? ""
+                                          : parkedInSystem == 1                   ? "1 ship parked"
+                                                                : Format::Number(parkedInSystem) + " ships parked";
+      Draw(
+          corner,
+          sprite,
+          ship->CustomSwizzle(),
+          isForSale,
+          ship == selected,
+          ship->DisplayModelName(),
+          ship->VariantMapShopName(),
+          price,
+          info,
+          parking_details);
+      list.push_back(ship);
+    }
+  }
+  maxScroll = corner.Y() - scroll - .5 * Screen::Height();
 }
-
 
 
 void MapShipyardPanel::Init()
 {
-	catalog.clear();
-	std::set<const Ship *> seen;
-	for(const auto &it : GameData::Planets())
-		if(it.second.IsValid() && player.CanView(*it.second.GetSystem()))
-			for(const Ship *ship : it.second.ShipyardStock())
-				if(!seen.contains(ship))
-				{
-					catalog[ship->Attributes().Category()].push_back(ship->VariantName());
-					seen.insert(ship);
-				}
+  catalog.clear();
+  std::set<const Ship *> seen;
+  for(const auto &it : GameData::Planets())
+  {
+    if(it.second.IsValid() && player.CanView(*it.second.GetSystem()))
+    {
+      for(const Ship *ship : it.second.ShipyardStock())
+      {
+        if(!seen.contains(ship))
+        {
+          catalog[ship->Attributes().Category()].push_back(ship->VariantName());
+          seen.insert(ship);
+        }
+      }
+    }
+  }
 
-	parkedShips.clear();
-	for(const auto &it : player.Ships())
-		if(it->IsParked())
-		{
-			const Ship *model = GameData::Ships().Get(it->TrueModelName());
-			++parkedShips[it->GetSystem()][model];
-			if(!seen.contains(model))
-			{
-				catalog[model->Attributes().Category()].push_back(model->TrueModelName());
-				seen.insert(model);
-			}
-		}
+  parkedShips.clear();
+  for(const auto &it : player.Ships())
+  {
+    if(it->IsParked())
+    {
+      const Ship *model = GameData::Ships().Get(it->TrueModelName());
+      ++parkedShips[it->GetSystem()][model];
+      if(!seen.contains(model))
+      {
+        catalog[model->Attributes().Category()].push_back(model->TrueModelName());
+        seen.insert(model);
+      }
+    }
+  }
 
-	for(auto &it : catalog)
-		sort(it.second.begin(), it.second.end(), BySeriesAndIndex<Ship>());
+  for(auto &it : catalog)
+    sort(it.second.begin(), it.second.end(), BySeriesAndIndex<Ship>());
 }

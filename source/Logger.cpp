@@ -15,31 +15,64 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Logger.h"
 
+#include "GameVersion.h"
+#include "text/Format.h"
+
+#ifdef _WIN32
+#include "windows/WinVersion.h"
+#else
+#include <sys/utsname.h>
+#endif
+
 #include <iostream>
 #include <mutex>
 
+using namespace std;
+
+namespace
+{
+  function<void(const string &message, Logger::Level)> logCallback = nullptr;
+  mutex                                                logMutex;
+} // namespace
 
 
-namespace {
-	std::function<void(const std::string &message)> logErrorCallback = nullptr;
-	std::mutex logErrorMutex;
+Logger::Session::Session(bool quiet) : quiet{quiet}
+{
+  if(quiet) return;
+
+  string message = "Logger session beginning. Game version: " + GameVersion::Running().ToString() +
+                   ". Detected operating system version: ";
+#ifdef _WIN32
+  message += WinVersion::ToString() + '.';
+#else
+  utsname uName;
+  uname(&uName);
+  message += string(uName.sysname) + ' ' + uName.release + ' ' + uName.version + '.';
+#endif
+  Log(message, Level::INFO);
 }
 
 
-
-void Logger::SetLogErrorCallback(std::function<void(const std::string &message)> callback)
+Logger::Session::~Session()
 {
-	logErrorCallback = std::move(callback);
+  if(quiet) return;
+
+  Log("Logger session end.", Level::INFO);
 }
 
 
-
-void Logger::LogError(const std::string &message)
+void Logger::SetLogCallback(function<void(const string &message, Level)> callback)
 {
-	std::lock_guard<std::mutex> lock(logErrorMutex);
-	// Log by default to stderr.
-	std::cerr << message << std::endl;
-	// Perform additional logging through callback if any is registered.
-	if(logErrorCallback)
-		logErrorCallback(message);
+  logCallback = std::move(callback);
+}
+
+
+void Logger::Log(const string &message, Level level)
+{
+  lock_guard<mutex> lock(logMutex);
+  string            formatted =
+      Format::TimestampString(chrono::system_clock::now(), true) + " | " + static_cast<char>(level) + " | " + message;
+  (level == Level::INFO ? cout : cerr) << formatted << endl;
+  // Perform additional logging through callback if any is registered.
+  if(logCallback) logCallback(formatted, level);
 }

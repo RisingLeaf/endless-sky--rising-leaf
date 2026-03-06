@@ -23,65 +23,65 @@ class PlayerInfo;
 class Ship;
 
 
-
 // This class is responsible for storing the state
 // between PlayerInfoPanel and ShipInfoPanel so that
 // things like scroll position, selection and sort are
 // saved when the user is switching between the panels.
-class InfoPanelState {
+class InfoPanelState
+{
 public:
-	using ShipComparator = bool(const std::shared_ptr<Ship> &, const std::shared_ptr<Ship> &);
+  using ShipComparator = bool(const std::shared_ptr<Ship> &, const std::shared_ptr<Ship> &);
 
-	explicit InfoPanelState(PlayerInfo &player);
+  explicit InfoPanelState(PlayerInfo &player);
 
-	int SelectedIndex() const;
-	void SetSelectedIndex(int newSelectedIndex);
+  int  SelectedIndex() const;
+  void SetSelectedIndex(int newSelectedIndex);
 
-	const std::set<int> &AllSelected() const;
-	void SetSelected(std::set<int> selected);
-	void Select(int index);
-	void SelectOnly(int index);
-	void SelectMany(int start, int end);
-	bool Deselect(int index);
-	void DeselectAll();
-	void Disown(std::vector<std::shared_ptr<Ship>>::const_iterator it);
+  const std::set<int> &AllSelected() const;
+  void                 SetSelected(std::set<int> selected);
+  void                 Select(int index);
+  void                 SelectOnly(int index);
+  void                 SelectMany(int start, int end);
+  bool                 Deselect(int index);
+  void                 DeselectAll();
+  void                 Disown(std::vector<std::shared_ptr<Ship>>::const_iterator it);
 
-	bool CanEdit() const;
+  bool CanEdit() const;
 
-	int Scroll() const;
-	void SetScroll(int newScroll);
+  int  Scroll() const;
+  void SetScroll(int newScroll);
 
-	std::vector<std::shared_ptr<Ship>> &Ships();
-	const std::vector<std::shared_ptr<Ship>> &Ships() const;
-	bool ReorderShipsTo(int toIndex);
+  std::vector<std::shared_ptr<Ship>>       &Ships();
+  const std::vector<std::shared_ptr<Ship>> &Ships() const;
+  bool                                      ReorderShipsTo(int toIndex);
 
-	ShipComparator *CurrentSort() const;
-	void SetCurrentSort(ShipComparator *s);
-
-
-private:
-	bool ReorderShips(const std::set<int> &fromIndices, int toIndex);
+  ShipComparator *CurrentSort() const;
+  void            SetCurrentSort(ShipComparator *s);
 
 
 private:
-	PlayerInfo &player;
+  bool ReorderShips(const std::set<int> &fromIndices, int toIndex);
 
-	// Most recent selected ship index.
-	int selectedIndex = -1;
 
-	// Indices of selected ships.
-	std::set<int> allSelected;
+private:
+  PlayerInfo &player;
 
-	// A copy of PlayerInfo.ships for viewing and manipulating.
-	std::vector<std::shared_ptr<Ship>> ships;
+  // Most recent selected ship index.
+  int selectedIndex = -1;
 
-	// When the player is landed, they are able to
-	// change their flagship and reorder their fleet.
-	const bool canEdit = false;
+  // Indices of selected ships.
+  std::set<int> allSelected;
 
-	// Index of the ship at the top of the fleet listing.
-	int scroll = 0;
+  // A copy of PlayerInfo.ships for viewing and manipulating.
+  std::vector<std::shared_ptr<Ship>> ships;
 
-	// Keep track of whether the ships are sorted.
-	ShipComparator *currentSort = nullptr;
+  // When the player is landed, they are able to
+  // change their flagship and reorder their fleet.
+  const bool canEdit = false;
+
+  // Index of the ship at the top of the fleet listing.
+  int scroll = 0;
+
+  // Keep track of whether the ships are sorted.
+  ShipComparator *currentSort = nullptr;
 };

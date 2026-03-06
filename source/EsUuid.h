@@ -26,64 +26,65 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 
 
-
 // Class wrapping IETF v4 GUIDs, providing lazy initialization.
-class EsUuid final {
+class EsUuid final
+{
 public:
-	// Used to represent a UUID across supported platforms.
-	struct UuidType final {
-		UuidType() = default;
-		UuidType(UuidType &&) = default;
-		UuidType &operator=(UuidType &&) = default;
-		~UuidType() = default;
-		UuidType &operator=(const UuidType &other) { return *this = UuidType(other); }
+  // Used to represent a UUID across supported platforms.
+  struct UuidType final
+  {
+    UuidType()                       = default;
+    UuidType(UuidType &&)            = default;
+    UuidType &operator=(UuidType &&) = default;
+    ~UuidType()                      = default;
+    UuidType &operator=(const UuidType &other) { return *this = UuidType(other); }
 #ifdef _WIN32
-		UuidType(const UuidType &other) = default;
-		UUID id = {};
+    UuidType(const UuidType &other) = default;
+    UUID id                         = {};
 #else
-		UuidType(const UuidType &other) { uuid_copy(id, other.id); }
-		uuid_t id = {};
+    UuidType(const UuidType &other) { uuid_copy(id, other.id); }
+    uuid_t id = {};
 #endif
-	};
+  };
 
 
 public:
-	static UuidType MakeUuid();
-	static EsUuid FromString(const std::string &input);
+  static UuidType MakeUuid();
+  static EsUuid   FromString(const std::string &input);
 
 
 public:
-	EsUuid() noexcept = default;
-	~EsUuid() noexcept = default;
-	// Copying a UUID does not copy its value. (This allows us to use simple copy operations on stock
-	// ship definitions when spawning fleets, etc.)
-	EsUuid(const EsUuid &other) noexcept : value{} {};
-	// Copy-assigning also results in an empty UUID.
-	EsUuid &operator=(const EsUuid &other) noexcept { return *this = EsUuid(other); };
-	// UUIDs can be move-constructed as-is.
-	EsUuid(EsUuid &&) noexcept = default;
-	// UUIDs can be move-assigned as-is.
-	EsUuid &operator=(EsUuid &&) noexcept = default;
+  EsUuid() noexcept  = default;
+  ~EsUuid() noexcept = default;
+  // Copying a UUID does not copy its value. (This allows us to use simple copy operations on stock
+  // ship definitions when spawning fleets, etc.)
+  EsUuid(const EsUuid &other) noexcept : value{} {}
+  // Copy-assigning also results in an empty UUID.
+  EsUuid &operator=(const EsUuid &other) noexcept { return *this = EsUuid(other); }
+  // UUIDs can be move-constructed as-is.
+  EsUuid(EsUuid &&) noexcept = default;
+  // UUIDs can be move-assigned as-is.
+  EsUuid &operator=(EsUuid &&) noexcept = default;
 
-	// UUIDs can be compared against other UUIDs.
-	bool operator==(const EsUuid &other) const noexcept(false);
-	bool operator!=(const EsUuid &other) const noexcept(false);
-	bool operator<(const EsUuid &other) const noexcept(false);
+  // UUIDs can be compared against other UUIDs.
+  bool operator==(const EsUuid &other) const noexcept(false);
+  bool operator!=(const EsUuid &other) const noexcept(false);
+  bool operator<(const EsUuid &other) const noexcept(false);
 
-	// Explicitly clone this UUID.
-	void Clone(const EsUuid &other);
+  // Explicitly clone this UUID.
+  void Clone(const EsUuid &other);
 
-	// Get a string representation of this ID, e.g. for serialization.
-	std::string ToString() const noexcept(false);
-
-
-private:
-	// Internal constructor, from a string.
-	explicit EsUuid(const std::string &input);
-	// Lazy initialization getter.
-	const UuidType &Value() const;
+  // Get a string representation of this ID, e.g. for serialization.
+  std::string ToString() const noexcept(false);
 
 
 private:
-	mutable UuidType value;
+  // Internal constructor, from a string.
+  explicit EsUuid(const std::string &input);
+  // Lazy initialization getter.
+  const UuidType &Value() const;
+
+
+private:
+  mutable UuidType value;
 };

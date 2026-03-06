@@ -19,18 +19,20 @@ class Color;
 class Point;
 
 
-
 // Functions for drawing triangular "pointers," e.g. for target crosshairs.
-class PointerShader {
+class PointerShader
+{
 public:
-	static void Init();
+  static void Init();
   static void Clear();
 
-	static void Draw(const Point &center, const Point &angle, float width, float height, float offset, const Color &color);
+  static void
+  Draw(const Point &center, const Point &angle, float width, float height, float offset, const Color &color);
 
-	static void Bind();
-	static void Add(const Point &center, const Point &angle, float width, float height, float offset, const Color &color);
-	static void Unbind();
+  static void Bind();
+  static void Add(const Point &center, const Point &angle, float width, float height, float offset, const Color &color);
+  static void Unbind();
+
 private:
-	static float scale[2];
+  static float scale[2];
 };

@@ -20,22 +20,23 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class Angle;
 
 
-
 // A class which generates an angle of inaccuracy for a projectile
 // given its inaccuracy value and type.
-class Distribution {
+class Distribution
+{
 public:
-	enum class Type {
-		Narrow = 0,
-		Medium = 1,
-		Wide = 2,
-		Uniform = 3,
-		Triangular = 4
-	};
+  enum class Type
+  {
+    Narrow     = 0,
+    Medium     = 1,
+    Wide       = 2,
+    Uniform    = 3,
+    Triangular = 4
+  };
 
 
 public:
-	// Generate an angle that gets projectile heading
-	// when combined with hardpoint aim.
-	static Angle GenerateInaccuracy(double value, std::pair<Type, bool> distribution);
+  // Generate an angle that gets projectile heading
+  // when combined with hardpoint aim.
+  static Angle GenerateInaccuracy(double value, std::pair<Type, bool> distribution);
 };

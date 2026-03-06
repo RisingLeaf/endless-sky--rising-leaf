@@ -267,7 +267,7 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
     }
     else if(key == "jump effect" && hasValue)
     {
-      ++jumpEffects[GameData::Effects().Get(child.Token(1))];
+      jumpEffects[GameData::Effects().Get(child.Token(1))] += child.Size() >= 3 ? child.Value(2) : 1.;
     }
     else if(key == "hyperdrive sound" && hasValue)
     {
@@ -370,8 +370,7 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
     if((displayName.back() == 's' || displayName.back() == 'z') && node.Token(0) == "outfit")
     {
       node.PrintTrace(
-          "Warning: explicit plural name definition required, but none is provided. Defaulting to \"" + pluralName +
-          "\".");
+          "Explicit plural name definition required, but none is provided. Defaulting to \"" + pluralName + "\".");
     }
   }
 
@@ -400,8 +399,7 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
   if(isJumpDrive && Get("jump range")) GameData::AddJumpRange(Get("jump range"));
 
   // Legacy support for turrets that don't specify a turn rate:
-  if(weapon && Get("turret mounts") && !weapon->TurretTurn() && !weapon->AntiMissile() &&
-     !weapon->TractorBeam())
+  if(weapon && Get("turret mounts") && !weapon->TurretTurn() && !weapon->AntiMissile() && !weapon->TractorBeam())
   {
     Weapon newWeapon     = *weapon;
     newWeapon.turretTurn = 4.;
@@ -419,8 +417,7 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
     {
       Set(label, 0.);
       node.PrintTrace(
-          "Warning: Deprecated use of \"" + label + "\" instead of \"" + label + " power\" and \"" + label +
-          " speed\":");
+          "Deprecated use of \"" + label + "\" instead of \"" + label + " power\" and \"" + label + " speed\":");
 
       // A scan value of 300 is equivalent to a scan power of 9.
       Set(label + " power", initial * initial * .0001);
@@ -430,12 +427,12 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
     }
 
     // Similar check for scan speed which is replaced with scan efficiency.
-    label += " speed";
-    initial = Get(label);
+    label   += " speed";
+    initial  = Get(label);
     if(initial)
     {
       Set(label, 0.);
-      node.PrintTrace("Warning: Deprecated use of \"" + label + "\" instead of \"" + kind + " scan efficiency\":");
+      node.PrintTrace("Deprecated use of \"" + label + "\" instead of \"" + kind + " scan efficiency\":");
       // A reasonable update is 15x the previous value, as the base scan time
       // is 10x what it was before scan efficiency was introduced, along with
       // ships which are larger or further away also increasing the scan time.
@@ -507,11 +504,9 @@ std::vector<std::pair<std::string, double>> Outfit::Attributes() const
 {
   std::vector<std::pair<std::string, double>> attrs;
   for(size_t i = 0; i < QuickLoadDictionary.size(); i++)
-    if(QuickLoadDictionary[i] > 0.)
-      attrs.emplace_back(AttributeNameTable[i], QuickLoadDictionary[i]);
+    if(QuickLoadDictionary[i] > 0.) attrs.emplace_back(AttributeNameTable[i], QuickLoadDictionary[i]);
   for(const auto &a : attributes)
-    if(a.second > 0.)
-      attrs.emplace_back(a);
+    if(a.second > 0.) attrs.emplace_back(a);
   return attrs;
 }
 

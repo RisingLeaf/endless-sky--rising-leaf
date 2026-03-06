@@ -20,106 +20,93 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 
 
-
-
-
-AsyncAudioSupplier::AsyncAudioSupplier(std::shared_ptr<std::iostream> data, bool looping)
-	: looping(looping), data(std::move(data))
+AsyncAudioSupplier::AsyncAudioSupplier(std::shared_ptr<std::iostream> data, bool looping) :
+  looping(looping), data(std::move(data))
 {
-	// Don't start the thread until this object is fully constructed.
-	audioThread = std::thread(&AsyncAudioSupplier::Decode, this);
 }
-
 
 
 AsyncAudioSupplier::~AsyncAudioSupplier()
 {
-	// Tell the decoding thread to stop.
-	{
-		std::lock_guard<std::mutex> lock(bufferMutex);
-		done = true;
-	}
-	bufferCondition.notify_all();
-	audioThread.join();
+  // Tell the decoding thread to stop.
+  {
+    std::lock_guard<std::mutex> lock(bufferMutex);
+    done = true;
+  }
+  bufferCondition.notify_all();
+  if(audioThread.joinable()) audioThread.join();
 }
-
 
 
 size_t AsyncAudioSupplier::MaxChunks() const
 {
-	if(done && buffer.size() < OUTPUT_CHUNK)
-		return 0;
+  if(done && buffer.size() < OUTPUT_CHUNK) return 0;
 
-	return std::max(static_cast<size_t>(2), AvailableChunks());
+  return std::max(static_cast<size_t>(2), AvailableChunks());
 }
 
 
-
-size_t AsyncAudioSupplier::AvailableChunks() const
-{
-	return buffer.size() / OUTPUT_CHUNK;
-}
+size_t AsyncAudioSupplier::AvailableChunks() const { return buffer.size() / OUTPUT_CHUNK; }
 
 
 std::vector<AudioSupplier::sample_t> AsyncAudioSupplier::NextDataChunk()
 {
-	if(AvailableChunks())
-	{
-		std::lock_guard<std::mutex> lock(bufferMutex);
+  if(AvailableChunks())
+  {
+    std::lock_guard<std::mutex> lock(bufferMutex);
 
-		std::vector<sample_t> temp{buffer.begin(), buffer.begin() + OUTPUT_CHUNK};
-		buffer.erase(buffer.begin(), buffer.begin() + OUTPUT_CHUNK);
-		bufferCondition.notify_all();
-		return temp;
-	}
-	else
-		return std::vector<sample_t>(OUTPUT_CHUNK);
+    std::vector<sample_t> temp{buffer.begin(), buffer.begin() + OUTPUT_CHUNK};
+    buffer.erase(buffer.begin(), buffer.begin() + OUTPUT_CHUNK);
+    bufferCondition.notify_all();
+    return temp;
+  }
+  else {
+    return std::vector<sample_t>(OUTPUT_CHUNK);
+  }
 }
 
+
+void AsyncAudioSupplier::StartAudioThread() { audioThread = std::thread(&AsyncAudioSupplier::Decode, this); }
 
 
 void AsyncAudioSupplier::AwaitBufferSpace()
 {
-	std::unique_lock<std::mutex> lock(bufferMutex);
-	while(!done && buffer.size() > (BUFFER_CHUNK_SIZE - 1) * OUTPUT_CHUNK)
-		bufferCondition.wait(lock);
+  std::unique_lock<std::mutex> lock(bufferMutex);
+  while(!done && buffer.size() > (BUFFER_CHUNK_SIZE - 1) * OUTPUT_CHUNK)
+    bufferCondition.wait(lock);
 }
-
 
 
 void AsyncAudioSupplier::AddBufferData(std::vector<sample_t> &samples)
 {
-	std::lock_guard<std::mutex> lock(bufferMutex);
-	buffer.insert(buffer.end(), samples.begin(), samples.end());
-	samples.clear();
-	if(done)
-		PadBuffer();
+  std::lock_guard<std::mutex> lock(bufferMutex);
+  buffer.insert(buffer.end(), samples.begin(), samples.end());
+  samples.clear();
+  if(done) PadBuffer();
 }
-
 
 
 void AsyncAudioSupplier::PadBuffer()
 {
-	buffer.resize(OUTPUT_CHUNK * ceil(static_cast<double>(buffer.size()) / static_cast<double>(OUTPUT_CHUNK)));
+  buffer.resize(OUTPUT_CHUNK * ceil(static_cast<double>(buffer.size()) / static_cast<double>(OUTPUT_CHUNK)));
 }
-
-
 
 
 size_t AsyncAudioSupplier::ReadInput(char *output, size_t bytesToRead)
 {
-	if(done)
-		return 0;
-	// Read a chunk of data from the file.
-	data->read(output, bytesToRead);
-	size_t read = data->gcount();
-	// If we get the end of the file, loop around to the beginning.
-	if(data->eof() && looping)
-	{
-		data->clear();
-		data->seekg(0, std::iostream::beg);
-	}
-	else if(data->eof())
-		done = true;
-	return read;
+  if(done) return 0;
+  // Read a chunk of data from the file.
+  data->read(output, bytesToRead);
+  size_t read = data->gcount();
+  // If we get the end of the file, loop around to the beginning.
+  if(data->eof() && looping)
+  {
+    data->clear();
+    data->seekg(0, std::iostream::beg);
+  }
+  else if(data->eof())
+  {
+    done = true;
+  }
+  return read;
 }

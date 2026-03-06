@@ -19,32 +19,32 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 
 
-
 // This class provides "data template" classes with abstracted access to an object that
 // is either a reference to a shared, "stock" data or is a locally customized instance.
-template<class Type>
-class ExclusiveItem {
+template <class Type>
+class ExclusiveItem
+{
 public:
-	ExclusiveItem() = default;
+  ExclusiveItem() = default;
 
-	explicit ExclusiveItem(const Type *item) : stockItem(item) {}
-	explicit ExclusiveItem(Type &&item) : item(std::move(item)) {}
+  explicit ExclusiveItem(const Type *item) : stockItem(item) {}
+  explicit ExclusiveItem(Type &&item) : item(std::move(item)) {}
 
-	ExclusiveItem(ExclusiveItem &&) = default;
-	ExclusiveItem &operator=(ExclusiveItem &&) = default;
-	ExclusiveItem(const ExclusiveItem &) = default;
-	ExclusiveItem &operator=(const ExclusiveItem &) = default;
+  ExclusiveItem(ExclusiveItem &&)                 = default;
+  ExclusiveItem &operator=(ExclusiveItem &&)      = default;
+  ExclusiveItem(const ExclusiveItem &)            = default;
+  ExclusiveItem &operator=(const ExclusiveItem &) = default;
 
-	bool IsStock() const noexcept { return stockItem; }
+  bool IsStock() const noexcept { return stockItem; }
 
-	const Type *operator->() const noexcept { return stockItem ? stockItem : std::addressof(item); }
-	const Type &operator*() const noexcept { return stockItem ? *stockItem : item; }
+  const Type *operator->() const noexcept { return stockItem ? stockItem : std::addressof(item); }
+  const Type &operator*() const noexcept { return stockItem ? *stockItem : item; }
 
-	bool operator==(const ExclusiveItem &other) const { return this->operator*() == other.operator*(); }
-	bool operator!=(const ExclusiveItem &other) const { return !(this->operator*() == other.operator*()); }
+  bool operator==(const ExclusiveItem &other) const { return this->operator*() == other.operator*(); }
+  bool operator!=(const ExclusiveItem &other) const { return !(this->operator*() == other.operator*()); }
 
 
 private:
-	const Type *stockItem = nullptr;
-	Type item;
+  const Type *stockItem = nullptr;
+  Type        item;
 };

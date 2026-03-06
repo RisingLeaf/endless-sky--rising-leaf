@@ -15,63 +15,65 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "ImageFileData.h"
 
-#include "../text/Format.h"
 #include "../Logger.h"
+#include "../text/Format.h"
 
 #include <cmath>
 
 
-
-namespace {
-	// Check if the given character is a valid blending mode.
-	bool IsBlend(char c)
-	{
-		return (c == static_cast<char>(BlendingMode::ALPHA) || c == static_cast<char>(BlendingMode::HALF_ADDITIVE)
-			|| c == static_cast<char>(BlendingMode::ADDITIVE) || c == static_cast<char>(BlendingMode::PREMULTIPLIED_ALPHA)
-			|| c == static_cast<char>(BlendingMode::COMPAT_HALF_ADDITIVE));
-	}
-}
-
-
-
-ImageFileData::ImageFileData(const std::filesystem::path &path, const std::filesystem::path &source)
-	: path(path), extension(Format::LowerCase(path.extension().string()))
+namespace
 {
-	std::string name = (path.lexically_relative(source).parent_path() / path.stem()).generic_string();
-	if(name.ends_with("@2x"))
-	{
-		is2x = true;
-		noReduction = true;
-		name.resize(name.size() - 3);
-	}
-	if(name.ends_with("@1x"))
-	{
-		noReduction = true;
-		name.resize(name.size() - 3);
-	}
-	if(name.ends_with("@sw"))
-	{
-		isSwizzleMask = true;
-		name.resize(name.size() - 3);
-	}
+  // Check if the given character is a valid blending mode.
+  bool IsBlend(char c)
+  {
+    return c == static_cast<char>(BlendingMode::ALPHA) || c == static_cast<char>(BlendingMode::HALF_ADDITIVE) ||
+           c == static_cast<char>(BlendingMode::ADDITIVE) ||
+           c == static_cast<char>(BlendingMode::PREMULTIPLIED_ALPHA) ||
+           c == static_cast<char>(BlendingMode::COMPAT_HALF_ADDITIVE);
+  }
+} // namespace
 
-	size_t frameNumberStart = name.size();
-	while(frameNumberStart > 0 && name[--frameNumberStart] >= '0' && name[frameNumberStart] <= '9')
-		continue;
 
-	if(frameNumberStart > 0 && IsBlend(name[frameNumberStart]))
-	{
-		frameNumber = Format::Parse(name.substr(frameNumberStart + 1));
-		blendingMode = static_cast<BlendingMode>(name[frameNumberStart]);
-		name.resize(frameNumberStart);
+ImageFileData::ImageFileData(const std::filesystem::path &path, const std::filesystem::path &source) :
+  path(path), extension(Format::LowerCase(path.extension().string()))
+{
+  std::string name = (path.lexically_relative(source).parent_path() / path.stem()).generic_string();
+  if(name.ends_with("@2x"))
+  {
+    is2x        = true;
+    noReduction = true;
+    name.resize(name.size() - 3);
+  }
+  if(name.ends_with("@1x"))
+  {
+    noReduction = true;
+    name.resize(name.size() - 3);
+  }
+  if(name.ends_with("@sw"))
+  {
+    isSwizzleMask = true;
+    name.resize(name.size() - 3);
+  }
 
-		if(blendingMode == BlendingMode::COMPAT_HALF_ADDITIVE)
-		{
-			blendingMode = BlendingMode::HALF_ADDITIVE;
-			Logger::LogError("Warning: file '" + path.string()
-				+ "'uses legacy marker for half-additive blending mode; please use '^' instead of '~'.");
-		}
-	}
+  size_t frameNumberStart = name.size();
+  while(frameNumberStart > 0 && name[--frameNumberStart] >= '0' && name[frameNumberStart] <= '9')
+    continue;
 
-	this->name = std::move(name);
+  if(frameNumberStart > 0 && IsBlend(name[frameNumberStart]))
+  {
+    frameNumber  = Format::Parse(name.substr(frameNumberStart + 1));
+    blendingMode = static_cast<BlendingMode>(name[frameNumberStart]);
+    name.resize(frameNumberStart);
+
+    if(blendingMode == BlendingMode::COMPAT_HALF_ADDITIVE)
+    {
+      blendingMode = BlendingMode::HALF_ADDITIVE;
+      Logger::Log(
+          "File '" + path.string() +
+              "'uses legacy marker for half-additive blending mode; please use '^' instead of '~'.",
+          Logger::Level::WARNING);
+    }
+  }
+
+  this->name = std::move(name);
 }

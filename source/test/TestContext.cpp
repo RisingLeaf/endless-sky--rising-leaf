@@ -18,29 +18,20 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class Test;
 
 
-
 // Constructor to be used when running an actual test.
-TestContext::TestContext(const Test *toRun) : callstack({{toRun, 0}})
-{
-}
+TestContext::TestContext(const Test *toRun) : callstack({{toRun, 0}}) {}
 
 
-
-const Test *TestContext::CurrentTest() const noexcept
-{
-	return callstack.empty() ? nullptr : callstack.back().test;
-}
-
+const Test *TestContext::CurrentTest() const noexcept { return callstack.empty() ? nullptr : callstack.back().test; }
 
 
 bool TestContext::ActiveTestStep::operator==(const ActiveTestStep &rhs) const
 {
-	return test == rhs.test && step == rhs.step;
+  return test == rhs.test && step == rhs.step;
 }
-
 
 
 bool TestContext::ActiveTestStep::operator<(const ActiveTestStep &rhs) const
 {
-	return test < rhs.test || (test == rhs.test && step < rhs.step);
+  return test < rhs.test || (test == rhs.test && step < rhs.step);
 }

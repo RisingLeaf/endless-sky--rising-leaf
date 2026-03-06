@@ -25,35 +25,37 @@ class Ship;
 class System;
 
 
-
 // RoutePlan is a wrapper for DistanceMap that uses a destination
 // and keeps only the route to that system.
-class RoutePlan {
+class RoutePlan
+{
 public:
-	explicit RoutePlan(const System &center, const System &destination, const PlayerInfo *player = nullptr);
-	explicit RoutePlan(const Ship &ship, const System &destination, const PlayerInfo *player = nullptr);
+  RoutePlan() = default;
+  RoutePlan(const System &center, const System &destination, const PlayerInfo *player = nullptr);
+  RoutePlan(const Ship &ship, const System &destination, const PlayerInfo *player = nullptr);
 
-	// Find out if the destination is reachable.
-	bool HasRoute() const;
-	// Get the first step on the route from center to the destination.
-	const System *FirstStep() const;
-	// Find out how many days away the destination is.
-	int Days() const;
-	// How much fuel is needed to travel to this system along the route.
-	int RequiredFuel() const;
+  // Find out if the destination is reachable.
+  bool HasRoute() const;
+  // Get the first step on the route from center to the destination.
+  const System *FirstStep() const;
+  // Find out how many days away the destination is.
+  int Days() const;
+  // How much fuel is needed to travel to this system along the route.
+  int RequiredFuel() const;
 
-	// Get the list of jumps to take to get to the destination.
-	std::vector<const System *> Plan() const;
-	// Get the list of jumps + fuel to take to get to the destination.
-	std::vector<std::pair<const System *, int>> FuelCosts() const;
-
-
-private:
-	void Init(const DistanceMap &distance);
+  // Get the list of jumps to take to get to the destination.
+  std::vector<const System *> Plan() const;
+  // Get the list of jumps + fuel to take to get to the destination.
+  std::vector<std::pair<const System *, int>> FuelCosts() const;
 
 
 private:
-	// The final planned route. plan.front() is the destination.
-	std::vector<std::pair<const System *, RouteEdge>> plan;
-	bool hasRoute = false;
+  // Initializer for new RoutePlans.
+  void Init(const DistanceMap &distance);
+
+
+private:
+  // The final planned route. plan.front() is the destination.
+  std::vector<std::pair<const System *, RouteEdge>> plan;
+  bool                                              hasRoute = false;
 };

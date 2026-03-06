@@ -18,7 +18,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class System;
 
 
-
 // DistanceMap is built using branching paths from 'center' to all systems.
 // The final result, though, is Edges backtracking those paths:
 // Each system has one Edge which points to the previous step along
@@ -26,22 +25,23 @@ class System;
 // the total route will take, and how much danger you will pass through.
 // While building the map, some systems have a non-optimal Edge that
 // gets replaced when a better route is found.
-class RouteEdge {
+class RouteEdge
+{
 public:
-	RouteEdge(const System *system = nullptr);
+  RouteEdge(const System *system = nullptr);
 
-	// Sorting operator to prioritize the "best" edges. The priority queue
-	// returns the "largest" item, so this should return true if this item
-	// is lower priority than the given item.
-	bool operator<(const RouteEdge &other) const;
+  // Sorting operator to prioritize the "best" edges. The priority queue
+  // returns the "largest" item, so this should return true if this item
+  // is lower priority than the given item.
+  bool operator<(const RouteEdge &other) const;
 
-	// There could be a System *thisSystem, but it would remained unused.
-	const System *prev = nullptr;
-	// Fuel/days needed to get to this system using the route through 'prev'.
-	int fuel = 0;
-	int days = 0;
-	// Danger tracks up to the 'prev' system, not to the this system.
-	// It's used for comparison purposes only. Anyone going to this system
-	// is going to hit its danger anyway, so it doesn't change anything.
-	double danger = 0.;
+  // There could be a System *thisSystem, but it would remained unused.
+  const System *prev = nullptr;
+  // Fuel/days needed to get to this system using the route through 'prev'.
+  int fuel = 0;
+  int days = 0;
+  // Danger tracks up to the 'prev' system, not to the this system.
+  // It's used for comparison purposes only. Anyone going to this system
+  // is going to hit its danger anyway, so it doesn't change anything.
+  double danger = 0.;
 };

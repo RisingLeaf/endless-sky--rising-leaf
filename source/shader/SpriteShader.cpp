@@ -73,8 +73,8 @@ void SpriteShader::Init()
 void SpriteShader::Clear()
 {
   shader.Clear();
-  square = {};
-  dummy_tex= {};
+  square    = {};
+  dummy_tex = {};
 }
 
 

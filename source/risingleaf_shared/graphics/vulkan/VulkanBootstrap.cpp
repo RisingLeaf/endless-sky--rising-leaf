@@ -11,7 +11,8 @@
 //  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 //  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 //
-//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+//  You should have received a copy of the GNU General Public License along with Astrolative. If not, see
+//  <https://www.gnu.org/licenses/>.
 //
 #include "VulkanBootstrap.h"
 
@@ -59,17 +60,20 @@ VkCommandBufferBeginInfo VulkanBootstrap::GetCommandBufferBegin(const VulkanTran
   begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
   switch(type)
   {
-  case VulkanTranslate::CommandBufferType::ONE_TIME: begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT; break;
-  case VulkanTranslate::CommandBufferType::REUSE:    begin_info.flags = 0; break;
+  case VulkanTranslate::CommandBufferType::ONE_TIME:
+    begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    break;
+  case VulkanTranslate::CommandBufferType::REUSE: begin_info.flags = 0; break;
   }
   begin_info.pInheritanceInfo = nullptr;
   return begin_info;
 }
 
-VkSubmitInfo VulkanBootstrap::GetSubmit(const std::vector<VkCommandBuffer>      &buffer,
-                                        const std::vector<VkSemaphore>          &wait_semaphores,
-                                        const std::vector<VkPipelineStageFlags> &wait_stages,
-                                        const std::vector<VkSemaphore>          &signal_semaphores)
+VkSubmitInfo VulkanBootstrap::GetSubmit(
+    const std::vector<VkCommandBuffer>      &buffer,
+    const std::vector<VkSemaphore>          &wait_semaphores,
+    const std::vector<VkPipelineStageFlags> &wait_stages,
+    const std::vector<VkSemaphore>          &signal_semaphores)
 {
   VkSubmitInfo submit_info{};
   submit_info.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -95,7 +99,8 @@ VkShaderModuleCreateInfo VulkanBootstrap::GetShaderModuleCreate(const std::vecto
   return create_info;
 }
 
-VkPipelineShaderStageCreateInfo VulkanBootstrap::GetShaderStageCreate(VkShaderModule shader, const VulkanTranslate::ShaderStage stage)
+VkPipelineShaderStageCreateInfo
+VulkanBootstrap::GetShaderStageCreate(VkShaderModule shader, const VulkanTranslate::ShaderStage stage)
 {
   VkPipelineShaderStageCreateInfo shader_stage_info{};
   shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -104,14 +109,17 @@ VkPipelineShaderStageCreateInfo VulkanBootstrap::GetShaderStageCreate(VkShaderMo
   case VulkanTranslate::ShaderStage::VERTEX:   shader_stage_info.stage = VK_SHADER_STAGE_VERTEX_BIT; break;
   case VulkanTranslate::ShaderStage::FRAGMENT: shader_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT; break;
   case VulkanTranslate::ShaderStage::COMPUTE:  shader_stage_info.stage = VK_SHADER_STAGE_COMPUTE_BIT; break;
-  case VulkanTranslate::ShaderStage::ALL:      throw std::runtime_error("Stage ShaderStage::ALL not supported in stage creation");
+  case VulkanTranslate::ShaderStage::ALL:
+    throw std::runtime_error("Stage ShaderStage::ALL not supported in stage creation");
   }
   shader_stage_info.module = shader;
   shader_stage_info.pName  = "main";
   return shader_stage_info;
 }
 
-VkPipelineLayoutCreateInfo VulkanBootstrap::GetPipelineLayoutCreate(const std::vector<VkDescriptorSetLayout> &descriptor_set_layouts, const std::vector<VkPushConstantRange> &push_constant_ranges)
+VkPipelineLayoutCreateInfo VulkanBootstrap::GetPipelineLayoutCreate(
+    const std::vector<VkDescriptorSetLayout> &descriptor_set_layouts,
+    const std::vector<VkPushConstantRange>   &push_constant_ranges)
 {
   VkPipelineLayoutCreateInfo pipeline_layout_info{};
   pipeline_layout_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -125,16 +133,25 @@ VkPipelineLayoutCreateInfo VulkanBootstrap::GetPipelineLayoutCreate(const std::v
 //////////////
 /// DESCRIPTOR SETS
 //////////////
-VkDescriptorSetLayoutBinding VulkanBootstrap::GetDescriptorSetLayoutBinding(const uint32_t binding, const VulkanTranslate::ShaderStage stage, const VulkanTranslate::DescriptorType type)
+VkDescriptorSetLayoutBinding VulkanBootstrap::GetDescriptorSetLayoutBinding(
+    const uint32_t                        binding,
+    const VulkanTranslate::ShaderStage    stage,
+    const VulkanTranslate::DescriptorType type)
 {
   VkDescriptorSetLayoutBinding binding_info{};
   binding_info.binding         = binding;
   binding_info.descriptorCount = 1;
   switch(type)
   {
-  case VulkanTranslate::DescriptorType::UNIFORM_BUFFER:  binding_info.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER; break;
-  case VulkanTranslate::DescriptorType::TEXTURE:         binding_info.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER; break;
-  case VulkanTranslate::DescriptorType::STORAGE_TEXTURE: binding_info.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE; break;
+  case VulkanTranslate::DescriptorType::UNIFORM_BUFFER:
+    binding_info.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    break;
+  case VulkanTranslate::DescriptorType::TEXTURE:
+    binding_info.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    break;
+  case VulkanTranslate::DescriptorType::STORAGE_TEXTURE:
+    binding_info.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE;
+    break;
   }
   switch(stage)
   {
@@ -147,7 +164,8 @@ VkDescriptorSetLayoutBinding VulkanBootstrap::GetDescriptorSetLayoutBinding(cons
   return binding_info;
 }
 
-VkDescriptorSetLayoutCreateInfo VulkanBootstrap::GetDescriptorSetLayoutCreate(const std::vector<VkDescriptorSetLayoutBinding> &bindings)
+VkDescriptorSetLayoutCreateInfo
+VulkanBootstrap::GetDescriptorSetLayoutCreate(const std::vector<VkDescriptorSetLayoutBinding> &bindings)
 {
   VkDescriptorSetLayoutCreateInfo descriptor_set_layout_create_info{};
   descriptor_set_layout_create_info.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -159,8 +177,11 @@ VkDescriptorSetLayoutCreateInfo VulkanBootstrap::GetDescriptorSetLayoutCreate(co
 //////////////
 /// ATTACHMENTS
 //////////////
-VkAttachmentDescription
-VulkanBootstrap::GetAttachmentDescription(const VulkanTranslate::AttachmentType type, const GraphicsTypes::ImageFormat image_format, const uint32_t sample_count, const bool presenter)
+VkAttachmentDescription VulkanBootstrap::GetAttachmentDescription(
+    const VulkanTranslate::AttachmentType type,
+    const GraphicsTypes::ImageFormat      image_format,
+    const uint32_t                        sample_count,
+    const bool                            presenter)
 {
   VkAttachmentDescription attach_desc{};
   attach_desc.format  = VulkanTranslate::GetVkFormat(image_format);
@@ -185,7 +206,8 @@ VulkanBootstrap::GetAttachmentDescription(const VulkanTranslate::AttachmentType 
   }
 
   if(presenter) attach_desc.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-  else if(image_format == GraphicsTypes::ImageFormat::DEPTH) attach_desc.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+  else if(image_format == GraphicsTypes::ImageFormat::DEPTH)
+    attach_desc.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
   else attach_desc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
   attach_desc.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
@@ -195,7 +217,8 @@ VulkanBootstrap::GetAttachmentDescription(const VulkanTranslate::AttachmentType 
 }
 
 
-VkAttachmentReference VulkanBootstrap::GetAttachmentReference(const uint32_t index, const VulkanTranslate::AttachmentType type)
+VkAttachmentReference
+VulkanBootstrap::GetAttachmentReference(const uint32_t index, const VulkanTranslate::AttachmentType type)
 {
   VkAttachmentReference ref{};
   ref.attachment = index;
@@ -208,16 +231,18 @@ VkAttachmentReference VulkanBootstrap::GetAttachmentReference(const uint32_t ind
   return ref;
 }
 
-VkSubpassDescription VulkanBootstrap::GetSubPassDescription(const std::vector<VkAttachmentReference> &color_attachments,
-                                                            const VkAttachmentReference              &depth_attachment,
-                                                            const VkAttachmentReference              &color_resolve_attachments)
+VkSubpassDescription VulkanBootstrap::GetSubPassDescription(
+    const std::vector<VkAttachmentReference> &color_attachments,
+    const VkAttachmentReference              &depth_attachment,
+    const VkAttachmentReference              &color_resolve_attachments)
 {
   VkSubpassDescription sub_pass{};
   sub_pass.pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS;
   sub_pass.colorAttachmentCount = color_attachments.size();
   sub_pass.pColorAttachments    = color_attachments.data();
   if(depth_attachment.layout != VK_IMAGE_LAYOUT_UNDEFINED) sub_pass.pDepthStencilAttachment = &depth_attachment;
-  if(color_resolve_attachments.layout != VK_IMAGE_LAYOUT_UNDEFINED) sub_pass.pResolveAttachments = &color_resolve_attachments;
+  if(color_resolve_attachments.layout != VK_IMAGE_LAYOUT_UNDEFINED)
+    sub_pass.pResolveAttachments = &color_resolve_attachments;
   return sub_pass;
 }
 
@@ -248,8 +273,10 @@ VkSubpassDependency VulkanBootstrap::GetSubPassDependencyResolveExit()
 //////////////
 /// RENDER PASS
 //////////////
-VkRenderPassCreateInfo
-VulkanBootstrap::GetRenderPassCreate(const std::vector<VkAttachmentDescription> &attachments, const std::vector<VkSubpassDescription> &sub_passes, const std::vector<VkSubpassDependency> &dependencies)
+VkRenderPassCreateInfo VulkanBootstrap::GetRenderPassCreate(
+    const std::vector<VkAttachmentDescription> &attachments,
+    const std::vector<VkSubpassDescription>    &sub_passes,
+    const std::vector<VkSubpassDependency>     &dependencies)
 {
   VkRenderPassCreateInfo render_pass_info{};
   render_pass_info.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -286,10 +313,16 @@ VkBufferCreateInfo VulkanBootstrap::GetBufferCreate(const GraphicsTypes::BufferT
   case GraphicsTypes::BufferType::UNIFORM:
   case GraphicsTypes::BufferType::UNIFORM_DYNAMIC: buffer_info.usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT; break;
   case GraphicsTypes::BufferType::TEXTURE:         buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT; break;
-  case GraphicsTypes::BufferType::VERTEX:          buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; break;
-  case GraphicsTypes::BufferType::VERTEX_DYNAMIC:  buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT; break;
-  case GraphicsTypes::BufferType::INDEX:           buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT; break;
-  case GraphicsTypes::BufferType::STAGING:         buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT; break;
+  case GraphicsTypes::BufferType::VERTEX:
+    buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    break;
+  case GraphicsTypes::BufferType::VERTEX_DYNAMIC:
+    buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+    break;
+  case GraphicsTypes::BufferType::INDEX:
+    buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    break;
+  case GraphicsTypes::BufferType::STAGING: buffer_info.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT; break;
   }
   buffer_info.size        = size;
   buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -299,15 +332,16 @@ VkBufferCreateInfo VulkanBootstrap::GetBufferCreate(const GraphicsTypes::BufferT
 //////////////
 /// IMAGE
 //////////////
-VkImageCreateInfo VulkanBootstrap::GetImageCreate(const GraphicsTypes::TextureType   type,
-                                                  const GraphicsTypes::ImageFormat   format,
-                                                  const GraphicsTypes::TextureTarget target,
-                                                  const uint32_t                     samples,
-                                                  const uint32_t                     width,
-                                                  const uint32_t                     height,
-                                                  const uint32_t                     depth,
-                                                  const uint32_t                     layers,
-                                                  const uint32_t                     mip_levels)
+VkImageCreateInfo VulkanBootstrap::GetImageCreate(
+    const GraphicsTypes::TextureType   type,
+    const GraphicsTypes::ImageFormat   format,
+    const GraphicsTypes::TextureTarget target,
+    const uint32_t                     samples,
+    const uint32_t                     width,
+    const uint32_t                     height,
+    const uint32_t                     depth,
+    const uint32_t                     layers,
+    const uint32_t                     mip_levels)
 {
   VkImageCreateInfo image_info{};
   image_info.sType         = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -323,10 +357,17 @@ VkImageCreateInfo VulkanBootstrap::GetImageCreate(const GraphicsTypes::TextureTy
   switch(target)
   {
   case GraphicsTypes::TextureTarget::READ:
-  case GraphicsTypes::TextureTarget::WRITE:      image_info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT; break;
-  case GraphicsTypes::TextureTarget::READ_WRITE: image_info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_STORAGE_BIT; break;
+  case GraphicsTypes::TextureTarget::WRITE:
+    image_info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+    break;
+  case GraphicsTypes::TextureTarget::READ_WRITE:
+    image_info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
+                       VK_IMAGE_USAGE_STORAGE_BIT;
+    break;
   case GraphicsTypes::TextureTarget::DRAW:
-    image_info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | (format == GraphicsTypes::ImageFormat::DEPTH ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
+    image_info.usage = VK_IMAGE_USAGE_SAMPLED_BIT |
+                       (format == GraphicsTypes::ImageFormat::DEPTH ? VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
+                                                                    : VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT);
     break;
   }
   image_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -336,7 +377,12 @@ VkImageCreateInfo VulkanBootstrap::GetImageCreate(const GraphicsTypes::TextureTy
 }
 
 VkImageViewCreateInfo VulkanBootstrap::GetimageViewCreate(
-    VkImage image, const VkImageAspectFlags aspect_flags, const GraphicsTypes::TextureType type, const GraphicsTypes::ImageFormat format, const uint32_t layers, const uint32_t mip_levels)
+    VkImage                          image,
+    const VkImageAspectFlags         aspect_flags,
+    const GraphicsTypes::TextureType type,
+    const GraphicsTypes::ImageFormat format,
+    const uint32_t                   layers,
+    const uint32_t                   mip_levels)
 {
   VkImageViewCreateInfo view_info{};
   view_info.sType                           = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -351,18 +397,28 @@ VkImageViewCreateInfo VulkanBootstrap::GetimageViewCreate(
   return view_info;
 }
 
-VkSamplerCreateInfo VulkanBootstrap::GetSamplerCreate(const float max_anisotropy, const float max_lod, const GraphicsTypes::TextureAddressMode address_mode, const GraphicsTypes::TextureFilter filter)
+VkSamplerCreateInfo VulkanBootstrap::GetSamplerCreate(
+    const float                             max_anisotropy,
+    const float                             max_lod,
+    const GraphicsTypes::TextureAddressMode address_mode,
+    const GraphicsTypes::TextureFilter      filter)
 {
   VkSamplerCreateInfo sampler_info{};
-  sampler_info.sType                   = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-  sampler_info.magFilter               = filter == GraphicsTypes::TextureFilter::LINEAR ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
-  sampler_info.minFilter               = filter == GraphicsTypes::TextureFilter::LINEAR ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
-  sampler_info.addressModeU            = address_mode == GraphicsTypes::TextureAddressMode::REPEAT ? VK_SAMPLER_ADDRESS_MODE_REPEAT : VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  sampler_info.addressModeV            = address_mode == GraphicsTypes::TextureAddressMode::REPEAT ? VK_SAMPLER_ADDRESS_MODE_REPEAT : VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  sampler_info.addressModeW            = address_mode == GraphicsTypes::TextureAddressMode::REPEAT ? VK_SAMPLER_ADDRESS_MODE_REPEAT : VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
-  sampler_info.anisotropyEnable        = VK_TRUE;
-  sampler_info.maxAnisotropy           = max_anisotropy;
-  sampler_info.borderColor             = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+  sampler_info.sType            = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+  sampler_info.magFilter        = filter == GraphicsTypes::TextureFilter::LINEAR ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
+  sampler_info.minFilter        = filter == GraphicsTypes::TextureFilter::LINEAR ? VK_FILTER_LINEAR : VK_FILTER_NEAREST;
+  sampler_info.addressModeU     = address_mode == GraphicsTypes::TextureAddressMode::REPEAT
+                                      ? VK_SAMPLER_ADDRESS_MODE_REPEAT
+                                      : VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  sampler_info.addressModeV     = address_mode == GraphicsTypes::TextureAddressMode::REPEAT
+                                      ? VK_SAMPLER_ADDRESS_MODE_REPEAT
+                                      : VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  sampler_info.addressModeW     = address_mode == GraphicsTypes::TextureAddressMode::REPEAT
+                                      ? VK_SAMPLER_ADDRESS_MODE_REPEAT
+                                      : VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+  sampler_info.anisotropyEnable = VK_TRUE;
+  sampler_info.maxAnisotropy    = max_anisotropy;
+  sampler_info.borderColor      = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
   sampler_info.unnormalizedCoordinates = VK_FALSE;
   // Might be important for shadow mapping
   sampler_info.compareEnable = VK_FALSE;
@@ -375,7 +431,12 @@ VkSamplerCreateInfo VulkanBootstrap::GetSamplerCreate(const float max_anisotropy
 }
 
 VkImageMemoryBarrier VulkanBootstrap::GetImageMemoryBarrierWithoutAccess(
-    VkImage image, const VkImageAspectFlags aspect, const VkImageLayout src_layout, const VkImageLayout dst_layout, const uint32_t layers, const uint32_t mip_levels)
+    VkImage                  image,
+    const VkImageAspectFlags aspect,
+    const VkImageLayout      src_layout,
+    const VkImageLayout      dst_layout,
+    const uint32_t           layers,
+    const uint32_t           mip_levels)
 {
   VkImageMemoryBarrier barrier{};
   barrier.sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -393,7 +454,13 @@ VkImageMemoryBarrier VulkanBootstrap::GetImageMemoryBarrierWithoutAccess(
 }
 
 VkBufferImageCopy VulkanBootstrap::GetSimpleBufferImageCopyRegion(
-    const VkImageAspectFlags aspect, const uint32_t width, const uint32_t height, const uint32_t depth, const uint32_t start_layer, const uint32_t end_layer, const uint32_t mip_level)
+    const VkImageAspectFlags aspect,
+    const uint32_t           width,
+    const uint32_t           height,
+    const uint32_t           depth,
+    const uint32_t           start_layer,
+    const uint32_t           end_layer,
+    const uint32_t           mip_level)
 {
   VkBufferImageCopy region{};
   region.bufferOffset                    = 0;
@@ -411,7 +478,11 @@ VkBufferImageCopy VulkanBootstrap::GetSimpleBufferImageCopyRegion(
 //////////////
 /// FRAME BUFFER
 //////////////
-VkFramebufferCreateInfo VulkanBootstrap::GetFrameBufferCreate(VkRenderPass render_pass, const std::vector<VkImageView> &attachments, const uint32_t width, const uint32_t height)
+VkFramebufferCreateInfo VulkanBootstrap::GetFrameBufferCreate(
+    VkRenderPass                    render_pass,
+    const std::vector<VkImageView> &attachments,
+    const uint32_t                  width,
+    const uint32_t                  height)
 {
   VkFramebufferCreateInfo frame_buffer_info{};
   frame_buffer_info.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -427,13 +498,14 @@ VkFramebufferCreateInfo VulkanBootstrap::GetFrameBufferCreate(VkRenderPass rende
 //////////////
 /// SWAP CHAIN
 //////////////
-VkSwapchainCreateInfoKHR VulkanBootstrap::GetSwapChainCreate(VkSurfaceKHR                        surface_khr,
-                                                             const uint32_t                      image_count,
-                                                             const VkSurfaceFormatKHR            surface_format_khr,
-                                                             const VkExtent2D                    extent_2d,
-                                                             const uint32_t                     *queueFamilyIndices,
-                                                             const VkSurfaceTransformFlagBitsKHR transform,
-                                                             const VkPresentModeKHR              present_mode_khr)
+VkSwapchainCreateInfoKHR VulkanBootstrap::GetSwapChainCreate(
+    VkSurfaceKHR                        surface_khr,
+    const uint32_t                      image_count,
+    const VkSurfaceFormatKHR            surface_format_khr,
+    const VkExtent2D                    extent_2d,
+    const uint32_t                     *queueFamilyIndices,
+    const VkSurfaceTransformFlagBitsKHR transform,
+    const VkPresentModeKHR              present_mode_khr)
 {
   VkSwapchainCreateInfoKHR create_info{};
   create_info.sType            = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -450,8 +522,7 @@ VkSwapchainCreateInfoKHR VulkanBootstrap::GetSwapChainCreate(VkSurfaceKHR       
     create_info.queueFamilyIndexCount = 2;
     create_info.pQueueFamilyIndices   = queueFamilyIndices;
   }
-  else
-  {
+  else {
     create_info.imageSharingMode      = VK_SHARING_MODE_EXCLUSIVE;
     create_info.queueFamilyIndexCount = 0;
     create_info.pQueueFamilyIndices   = nullptr;
