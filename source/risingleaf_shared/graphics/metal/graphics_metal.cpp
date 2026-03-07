@@ -482,7 +482,7 @@ namespace graphics_metal
   }
 } // namespace graphics_metal
 
-graphics_metal::MetalGraphicsInstance::MetalGraphicsInstance(Window &window)
+graphics_metal::MetalGraphicsInstance::MetalGraphicsInstance(int width, int height)
 {
   ShaderInfo::Init();
 
