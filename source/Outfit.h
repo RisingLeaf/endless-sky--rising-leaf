@@ -55,7 +55,7 @@ public:
   #x " energy", #x " fuel", #x " heat", #x " ion", #x " scramble", #x " disruption", #x " slowing", #x " discharge",   \
       #x " corrosion", #x " leakage", #x " burn"
 
-  static constexpr std::array<std::string_view, 171> AttributeNameTable = {
+  static constexpr std::array<std::string_view, 172> AttributeNameTable = {
       "cargo space",
       "outfit space",
       "weapon capacity",
@@ -70,6 +70,7 @@ public:
 
       "atrocity",
       "illegal",
+      "installable",
 
       "shields",
       "shield generation",

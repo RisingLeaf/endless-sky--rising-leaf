@@ -696,23 +696,24 @@ bool System::Inaccessible() const { return inaccessible; }
 // for a ship with the attributes and position.
 System::SolarGeneration System::GetSolarGeneration(
     const Point &shipPosition,
-    double       shipRamscoop,
-    double       shipCollection,
-    double       shipCollectionHeat) const
+    const double shipRamscoop,
+    const double shipCollection,
+    const double shipCollectionHeat) const
 {
   SolarGeneration generation{ramscoopAddend, 0., 0.};
+  const double universal  = .05 * universalRamscoop * GameData::GetGamerules().UniversalRamscoopActive();
+  const double ship_ramscoop = sqrt(shipRamscoop);
   for(const auto &stellar : objects)
   {
-    double power = GameData::SolarPower(stellar.GetSprite());
-    double wind  = GameData::SolarWind(stellar.GetSprite());
-    double scale = .2 + 1.8 / (.001 * stellar.position.Distance(shipPosition) + 1);
+    const double power = GameData::SolarPower(stellar.GetSprite());
+    const double wind  = GameData::SolarWind(stellar.GetSprite());
+    const double scale = .2 + 1.8 / (.00005 * stellar.position.DistanceSquared(shipPosition) + 1);
     // Even if a ship has no ramscoop, it can harvest a tiny bit of fuel by flying close to the star,
     // provided the system allows it. Both the system and the gamerule must allow the universal ramscoop
     // in order for it to function.
-    double universal   = .05 * scale * universalRamscoop * GameData::GetGamerules().UniversalRamscoopActive();
-    generation.fuel   += wind * .03 * scale * ramscoopMultiplier * (sqrt(shipRamscoop) + universal);
-    generation.energy += power * shipCollection * scale;
-    generation.heat   += power * shipCollectionHeat * scale;
+    generation.fuel        += wind * .03 * scale * ramscoopMultiplier * (ship_ramscoop + universal * scale);
+    generation.energy      += power * shipCollection * scale;
+    generation.heat        += power * shipCollectionHeat * scale;
   }
   generation.fuel = std::max(0., generation.fuel);
   return generation;

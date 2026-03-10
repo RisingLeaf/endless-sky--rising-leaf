@@ -29,6 +29,7 @@ namespace
   std::queue<TaskQueue::Task> tasks;
   std::mutex                  asyncMutex;
   std::condition_variable     asyncCondition;
+  std::condition_variable     waitCondition;
   bool                        shouldQuit = false;
 
   // Worker threads for executing tasks.
@@ -105,8 +106,8 @@ void TaskQueue::ProcessSyncTasks()
 // Waits for all of this queue's task to finish. Ignores any sync tasks to be processed.
 void TaskQueue::Wait()
 {
-  while(!IsDone())
-    std::this_thread::yield();
+  std::unique_lock<std::mutex> lock(asyncMutex);
+  waitCondition.wait(lock, [this] { return futures.empty(); });
 }
 
 
@@ -167,6 +168,7 @@ void TaskQueue::ThreadLoop() noexcept
       // Now that the task has been executed, stop tracking the future internally.
       // Anybody who still cares about the future will have a copy themselves.
       task.queue->futures.erase(task.futureIt);
+      waitCondition.notify_all();
     }
 
     asyncCondition.wait(lock, [] { return shouldQuit || !tasks.empty(); });

@@ -50,7 +50,7 @@ public:
   // Add a ship, and all its outfits, to the depreciation record.
   void Buy(const Ship &ship, int day, Depreciation *source = nullptr, bool chassisOnly = false);
   // Add a single outfit to the depreciation record.
-  void Buy(const Outfit *outfit, int day, Depreciation *source = nullptr);
+  void Buy(const Outfit *outfit, int day, Depreciation *source = nullptr, int count = 1);
 
   // Get the value of an entire fleet.
   int64_t Value(const std::vector<std::shared_ptr<Ship>> &fleet, int day, bool chassisOnly = false) const;

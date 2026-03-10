@@ -1836,8 +1836,7 @@ bool PlayerInfo::TakeOff(UI &ui, const bool distributeCargo)
         // Compute the total value for each type of excess outfit.
         if(!outfit.second) continue;
         int64_t cost = depreciation.Value(outfit.first, day, outfit.second);
-        for(int i = 0; i < outfit.second; ++i)
-          stockDepreciation.Buy(outfit.first, day, &depreciation);
+        stockDepreciation.Buy(outfit.first, day, &depreciation, outfit.second);
         income += cost;
       }
     }
@@ -3128,14 +3127,12 @@ void PlayerInfo::AddStock(const Outfit *outfit, int count)
   if(count > 0)
   {
     // Remember how depreciated these items are.
-    for(int i = 0; i < count; ++i)
-      stockDepreciation.Buy(outfit, day, &depreciation);
+    stockDepreciation.Buy(outfit, day, &depreciation, count);
   }
   else {
     // If the count is negative, outfits are being transferred from stock
     // into the player's possession.
-    for(int i = 0; i < -count; ++i)
-      depreciation.Buy(outfit, day, &stockDepreciation);
+    depreciation.Buy(outfit, day, &stockDepreciation, -count);
   }
 }
 

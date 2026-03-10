@@ -419,11 +419,15 @@ void GameLoop(
     int                                 step                      = 0;
     int                                 drawStep                  = 0;
 
+    std::chrono::steady_clock::time_point base_start = std::chrono::steady_clock::now();
     while(!menuPanels.IsDone())
     {
       if(++step == 60) step = 0;
       if(toggleTimeout) --toggleTimeout;
       std::chrono::steady_clock::time_point start = std::chrono::steady_clock::now();
+
+      if(!isFastForward || step % 3 == 0)
+        base_start = std::chrono::steady_clock::now();
 
       ProcessEvents();
 
@@ -517,7 +521,6 @@ void GameLoop(
         else if(isFastForward)
           SpriteShader::Draw(SpriteSet::Get("ui/fast forward"), Screen::TopLeft() + Point(10., 10.));
 
-        gpuLoadSum += std::chrono::steady_clock::now() - drawStart;
 
         if(Preferences::Has("Show CPU / GPU load"))
         {
@@ -537,7 +540,7 @@ void GameLoop(
             // Percentages are the percentage of a second that was required for the calculations and drawing,
             // so divide by the number of nanoseconds in a second (10^9).
             auto cpuNano  = std::chrono::duration_cast<std::chrono::nanoseconds>(cpuLoadSum).count();
-            cpuLoadString = "CPU: " + Format::Number(cpuNano / (isFastForward && inFlight ? 1.8e8 : 6e7), 2, false) +
+            cpuLoadString = "CPU: " + Format::Number(static_cast<double>(cpuNano) / (60. * 1e6), 2, false) +
                             " ms (" + Format::Percentage(cpuNano / 1e9, 0) + ")";
             cpuLoadSum    = {};
             auto gpuNano  = std::chrono::duration_cast<std::chrono::nanoseconds>(gpuLoadSum).count();
@@ -576,6 +579,9 @@ void GameLoop(
 
         GameWindow::GetInstance()->EndRenderPass();
         GameWindow::GetInstance()->EndDraw(Screen::Width(), Screen::Height());
+        gpuLoadSum += std::chrono::steady_clock::now() - drawStart;
+
+        Logger::Log(std::to_string((std::chrono::steady_clock::now() - base_start).count() / 1e6), Logger::Level::INFO);
       }
 
 
