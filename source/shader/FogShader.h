@@ -15,16 +15,21 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+	class GraphicsInstance;
+} // namespace GraphicsTypes
 class PlayerInfo;
 class Point;
 
 
+
 // Shader for drawing a "fog of war" overlay on the map.
-class FogShader
-{
+class FogShader {
 public:
-  static void Init();
-  static void Clear();
-  static void Redraw();
-  static void Draw(const Point &center, double zoom, const PlayerInfo &player);
+	static void Init(const GraphicsTypes::GraphicsInstance *graphics_instance);
+	static void Redraw();
+	static void Draw(const GraphicsTypes::GraphicsInstance *graphics_instance, GraphicsTypes::CommandBufferInstance *cb,
+	                 const Point &center, double zoom, const PlayerInfo &player);
+	static void Clear();
 };

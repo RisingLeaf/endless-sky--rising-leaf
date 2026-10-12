@@ -18,7 +18,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <filesystem>
 #include <string>
 
+class DataNode;
+class DataWriter;
+class Information;
+class PlayerInfo;
 class Sprite;
+
 
 
 // This class represents a saved game file. It reads the bare amount of
@@ -26,40 +31,46 @@ class Sprite;
 // without doing all the complicated parsing that PlayerInfo does. This is so
 // that we only need to have one PlayerInfo instance, and there does not need
 // to be logic for copying one PlayerInfo into another.
-class SavedGame
-{
+class SavedGame {
 public:
-  SavedGame() = default;
-  explicit SavedGame(const std::filesystem::path &path);
+	SavedGame() = default;
+	explicit SavedGame(const std::filesystem::path &path);
+	explicit SavedGame(const PlayerInfo &player);
 
-  void                         Load(const std::filesystem::path &path);
-  const std::filesystem::path &Path() const;
-  bool                         IsLoaded() const;
-  void                         Clear();
+	void Load(const std::filesystem::path &path);
+	void Load(const DataNode &node);
+	void Save(DataWriter &out) const;
 
-  const std::string &Name() const;
-  const std::string &Credits() const;
-  const std::string &GetDate() const;
+	const std::filesystem::path &Path() const;
+	std::string Identifier() const;
+	bool IsEmpty() const;
+	void Clear();
 
-  const std::string &GetSystem() const;
-  const std::string &GetPlanet() const;
-  const std::string &GetPlayTime() const;
+	const std::string &Name() const;
+	const std::string &Credits() const;
+	const std::string &GetDate() const;
 
-  const Sprite      *ShipSprite() const;
-  const std::string &ShipName() const;
+	const std::string &GetSystem() const;
+	const std::string &GetPlanet() const;
+	const std::string &GetPlayTime() const;
+
+	const Sprite *ShipSprite() const;
+	const std::string &ShipName() const;
+
+	void PopulateInfo(Information &info) const;
 
 
 private:
-  std::filesystem::path path;
+	std::filesystem::path path;
 
-  std::string name;
-  std::string credits;
-  std::string date;
+	std::string name;
+	std::string credits;
+	std::string date;
 
-  std::string system;
-  std::string planet;
-  std::string playTime;
+	std::string system;
+	std::string planet;
+	std::string playTime;
 
-  const Sprite *shipSprite = nullptr;
-  std::string   shipName;
+	const Sprite *shipSprite = nullptr;
+	std::string shipName;
 };

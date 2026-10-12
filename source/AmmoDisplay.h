@@ -16,6 +16,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "ClickZone.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 #include <map>
 #include <vector>
@@ -27,19 +28,19 @@ class Rectangle;
 class Ship;
 
 
+
 // A class for handling the secondary weapon icons displayed in the HUD.
-class AmmoDisplay
-{
+class AmmoDisplay {
 public:
-  explicit AmmoDisplay(PlayerInfo &player);
-  void Reset();
-  void Update(const Ship &flagship);
-  void Draw(const Rectangle &ammoBox, const Point &iconDimensions) const;
-  bool Click(const Point &clickPoint, bool control);
-  bool Click(const Rectangle &clickBox);
+	explicit AmmoDisplay(PlayerInfo &player);
+	void Reset();
+	void Update(const Ship &flagship);
+	void Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &ammoBox, const Point &iconDimensions) const;
+	bool Click(const Point &clickPoint, bool control);
+	bool Click(const Rectangle &clickBox);
 
 private:
-  std::map<const Outfit *, int>                  ammo;
-  mutable std::vector<ClickZone<const Outfit *>> ammoIconZones;
-  PlayerInfo                                    &player;
+	std::map<const Outfit *, int> ammo;
+	mutable std::vector<ClickZone<const Outfit *>> ammoIconZones;
+	PlayerInfo &player;
 };

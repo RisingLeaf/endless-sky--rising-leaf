@@ -21,9 +21,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cstdint>
 #include <vector>
 
+class Angle;
 class Body;
+class Drawable;
 class Sprite;
 class Swizzle;
+
 
 
 // Class for storing a list of textures to blit to the screen. This allows the
@@ -31,39 +34,43 @@ class Swizzle;
 // thread from the graphics thread. However, the SpriteShader class is also
 // available for drawing individual sprites in contexts where putting them into
 // a DrawList first does not make sense.
-class DrawList
-{
+class DrawList {
 public:
-  // Clear the list, also setting the global time step for animation.
-  void Clear(int step = 0, double zoom = 1.);
-  void SetCenter(const Point &center, const Point &centerVelocity = Point());
+	// Clear the list, also setting the global time step for animation.
+	void Clear(int step = 0, double zoom = 1.);
+	void SetCenter(const Point &center, const Point &centerVelocity = Point());
 
-  // Add an object based on the Body class.
-  bool Add(const Body &body, double cloak = 0.);
-  // Add an object at the given position (rather than its own).
-  bool Add(const Body &body, Point position, double cloak = 0.);
+	// Add an object based on the Body class.
+	bool Add(const Body &body, double cloak = 0.);
+	// Add an object at the given position (rather than its own).
+	bool Add(const Body &body, Point position, double cloak = 0.);
+	bool Add(const Drawable &drawable, Point position, const Angle &facing, double cloak = 0.);
 
-  // Add an object that should not be drawn with motion blur.
-  bool AddUnblurred(const Body &body);
-  // Add an object using a specific swizzle (rather than its own).
-  bool AddSwizzled(const Body &body, const Swizzle *swizzle, double cloak = 0.);
+	// Add an object that should not be drawn with motion blur.
+	bool AddUnblurred(const Body &body);
+	bool AddUnblurred(const Drawable &drawable, Point position, const Angle &facing);
+	// Add an object using a specific swizzle (rather than its own).
+	bool AddSwizzled(const Body &body, const Swizzle *swizzle, double cloak = 0.);
+	bool AddSwizzled(const Drawable &drawable, Point position, const Angle &facing, const Swizzle *swizzle,
+	                 double cloak = 0.);
 
-  // Draw all the items in this list.
-  void Draw() const;
-
-
-private:
-  // Determine if the given object should be drawn at all.
-  bool Cull(const Body &body, const Point &position, const Point &blur) const;
-
-  void Push(const Body &body, Point pos, Point blur, double cloak, const Swizzle *swizzle);
+	// Draw all the items in this list.
+	void Draw(GraphicsTypes::CommandBufferInstance *cb) const;
 
 
 private:
-  int                             step      = 0;
-  double                          zoom      = 1.;
-  std::vector<SpriteShader::Item> items;
+	// Determine if the given object should be drawn at all.
+	bool Cull(const Drawable &drawable, const Point &position, const Angle &facing, const Point &blur) const;
 
-  Point center;
-  Point centerVelocity;
+	void Push(const Drawable &drawable, const Point &pos, const Angle &facing, Point blur, double alpha, double cloak,
+	          const Swizzle *swizzle);
+
+
+private:
+	int step = 0;
+	double zoom = 1.;
+	std::vector<SpriteShader::Item> items;
+
+	Point center;
+	Point centerVelocity;
 };

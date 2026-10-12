@@ -15,13 +15,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include "Panel.h"
-
 #include "Animate.h"
 #include "Color.h"
 #include "DistanceMap.h"
+#include "Panel.h"
 #include "Point.h"
 #include "Tooltip.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 #include <map>
 #include <string>
@@ -36,212 +36,209 @@ class PlayerInfo;
 class System;
 
 
+
 // This class provides the base class for both the "map details" panel and the
 // missions panel, and handles drawing of the underlying starmap and coloring
 // the systems based on a selected criterion. It also handles finding and
 // drawing routes in between systems.
-class MapPanel : public Panel
-{
+class MapPanel : public Panel {
 public:
-  // Enumeration for how the systems should be colored:
-  static constexpr int SHOW_SHIPYARD   = -1;
-  static constexpr int SHOW_OUTFITTER  = -2;
-  static constexpr int SHOW_VISITED    = -3;
-  static constexpr int SHOW_SPECIAL    = -4;
-  static constexpr int SHOW_GOVERNMENT = -5;
-  static constexpr int SHOW_REPUTATION = -6;
-  static constexpr int SHOW_DANGER     = -7;
-  static constexpr int SHOW_STARS      = -8;
+	// Enumeration for how the systems should be colored:
+	static constexpr int SHOW_SHIPYARD = -1;
+	static constexpr int SHOW_OUTFITTER = -2;
+	static constexpr int SHOW_VISITED = -3;
+	static constexpr int SHOW_SPECIAL = -4;
+	static constexpr int SHOW_GOVERNMENT = -5;
+	static constexpr int SHOW_REPUTATION = -6;
+	static constexpr int SHOW_DANGER = -7;
+	static constexpr int SHOW_STARS = -8;
 
-  static const unsigned MAX_MISSION_POINTERS_DRAWN;
-  static const float    OUTER;
-  static const float    INNER;
-  static const float    LINK_WIDTH;
-  static const float    LINK_OFFSET;
+	static const unsigned MAX_MISSION_POINTERS_DRAWN;
+	static const float OUTER;
+	static const float INNER;
+	static const float LINK_WIDTH;
+	static const float LINK_OFFSET;
 
-  class SystemTooltipData
-  {
-  public:
-    // Number of ships that are in flight
-    unsigned activeShips = 0;
-    // Number of ships that are parked
-    unsigned parkedShips = 0;
-    // Maps planet to number of outfits on that planet
-    std::map<const Planet *, unsigned> outfits;
-  };
+	class SystemTooltipData {
+	public:
+		// Number of ships that are in flight
+		unsigned activeShips = 0;
+		// Number of ships that are parked
+		unsigned parkedShips = 0;
+		// Maps planet to number of outfits on that planet
+		std::map<const Planet *, unsigned> outfits;
+	};
 
 
 public:
-  static void
-  DrawPointer(Point position, unsigned &systemCount, const Color &color, bool drawBack = true, bool bigger = false);
-  static std::pair<bool, bool> BlinkMissionIndicator(const PlayerInfo &player, const Mission &mission, int step);
+	static void DrawPointer(GraphicsTypes::CommandBufferInstance *cb, Point position, unsigned &systemCount,
+	                        const Color &color, bool drawBack = true, bool bigger = false);
+	static std::pair<bool, bool> BlinkMissionIndicator(const PlayerInfo &player, const Mission &mission, int step);
 
 
 public:
-  explicit MapPanel(
-      PlayerInfo   &player,
-      int           commodity   = SHOW_REPUTATION,
-      const System *special     = nullptr,
-      bool          fromMission = false);
-  virtual ~MapPanel() override;
+	explicit MapPanel(PlayerInfo &player, int commodity = SHOW_REPUTATION, const System *special = nullptr,
+	                  bool fromMission = false);
+	virtual ~MapPanel() override;
 
-  virtual void Step() override;
-  virtual void Draw() override;
+	virtual void Step() override;
+	virtual void Draw(GraphicsTypes::CommandBufferInstance *cb) override;
 
-  // Draw elements common for all map panels that need to be placed
-  // on top of everything else. This includes distance info, map mode buttons,
-  // escort/storage tooltips, and the non-routable system warning.
-  void FinishDrawing(const std::string &buttonCondition);
+	// Draw the planet orbits in the currently selected system, on the current day.
+	void DrawOrbits(GraphicsTypes::CommandBufferInstance *cb);
+	// Draw the legend, correlating between a system's color and the value of the
+	// selected "commodity," which may be reputation level, outfitter size, etc.
+	virtual void DrawKey(GraphicsTypes::CommandBufferInstance *cb) const;
+	// Draw elements common for all map panels that need to be placed
+	// on top of everything else. This includes distance info, map mode buttons,
+	// escort/storage tooltips, and the non-routable system warning.
+	void FinishDrawing(GraphicsTypes::CommandBufferInstance *cb, const std::string &buttonCondition);
 
-  // Map panels allow fast-forward to stay active.
-  bool AllowsFastForward() const noexcept final;
+	// Map panels allow fast-forward to stay active.
+	bool AllowsFastForward() const noexcept final;
 
-  virtual void UpdateTooltipActivation() override;
+	virtual void UpdateTooltipActivation() override;
 
 
 protected:
-  // Only override the ones you need; the default action is to return false.
-  virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
-  virtual bool Click(int x, int y, MouseButton button, int clicks) override;
-  virtual bool Hover(int x, int y) override;
-  virtual bool Drag(double dx, double dy) override;
-  virtual bool Scroll(double dx, double dy) override;
+	// Only override the ones you need; the default action is to return false.
+	virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
+	virtual bool Click(int x, int y, MouseButton button, int clicks) override;
+	virtual bool Hover(int x, int y) override;
+	virtual bool Drag(double dx, double dy) override;
+	virtual bool Scroll(double dx, double dy) override;
 
-  // Get the color mapping for various system attributes.
-  static Color MapColor(double value);
-  static Color ReputationColor(double reputation, bool canLand, bool hasDominated);
-  static Color GovernmentColor(const Government *government);
-  static Color DangerColor(double danger);
-  static Color UninhabitedColor();
-  static Color UnexploredColor();
+	// Get the color mapping for various system attributes.
+	static Color MapColor(double value);
+	static Color ReputationColor(double reputation, bool canLand, bool hasDominated);
+	static Color GovernmentColor(const Government *government);
+	static Color DangerColor(double danger);
+	static Color UninhabitedColor();
+	static Color UnexploredColor();
 
-  virtual double SystemValue(const System *system) const;
+	virtual double SystemValue(const System *system) const;
 
-  void Select(const System *system);
-  void Find(const std::string &name);
+	const System *ClickedSystem(int x, int y) const;
+	void Select(const System *system);
+	void Find(const std::string &name);
 
-  double Zoom() const;
+	double Zoom() const;
 
-  // Check whether the NPC and waypoint conditions of the given mission have
-  // been satisfied.
-  bool        IsSatisfied(const Mission &mission) const;
-  static bool IsSatisfied(const PlayerInfo &player, const Mission &mission);
+	// Check whether the NPC and waypoint conditions of the given mission have
+	// been satisfied.
+	bool IsSatisfied(const Mission &mission) const;
+	static bool IsSatisfied(const PlayerInfo &player, const Mission &mission);
 
-  // Returns if previous->next can be done with a known travel type.
-  bool GetTravelInfo(
-      const System *previous,
-      const System *next,
-      double        jumpRange,
-      bool         &isJump,
-      bool         &isWormhole,
-      bool         &isMappable,
-      Color        *wormholeColor) const;
+	// Returns if previous->next can be done with a known travel type.
+	bool GetTravelInfo(const System *previous, const System *next, double jumpRange, bool &isJump, bool &isWormhole,
+	                   bool &isMappable, Color *wormholeColor) const;
 
 
 protected:
-  PlayerInfo &player;
+	PlayerInfo &player;
 
-  DistanceMap distance;
+	DistanceMap distance;
 
-  // The system in which the player is located.
-  const System &playerSystem;
-  // The (non-null) system which is currently selected.
-  const System *selectedSystem;
-  // The selected planet, if any.
-  const Planet *selectedPlanet = nullptr;
-  // A system associated with a dialog or conversation.
-  const System *specialSystem;
+	// The system in which the player is located.
+	const System &playerSystem;
+	// The (non-null) system which is currently selected.
+	const System *selectedSystem;
+	// The selected planet, if any.
+	const Planet *selectedPlanet = nullptr;
+	// A system associated with a dialog or conversation.
+	const System *specialSystem;
 
-  double playerJumpDistance;
+	double playerJumpDistance;
 
-  Point           center;
-  Point           recenterVector;
-  int             recentering = 0;
-  Animate<double> zoom;
-  int             commodity;
-  int             step = 0;
-  std::string     buttonCondition;
+	Point center;
+	Point recenterVector;
+	int recentering = 0;
+	Animate<double> zoom;
+	int commodity;
+	int step = 0;
+	std::string buttonCondition;
 
-  // Distance from the screen center to the nearest owned system,
-  // for use in determining which governments are in the legend.
-  std::map<const Government *, double> closeGovernments;
-  // Systems in which your (active and parked) escorts and stored outfits are located.
-  std::map<const System *, SystemTooltipData> escortSystems;
-  // Center the view on the given system (may actually be slightly offset
-  // to account for panels on the screen).
-  void CenterOnSystem(const System *system, bool immediate = false);
+	// Default display scaling for orbits within the currently displayed system.
+	double scale = .03;
+	// Vector offsets from the center of the "orbits" UI.
+	std::map<const Planet *, Point> planets;
 
-  // Cache the map layout, so it doesn't have to be re-calculated every frame.
-  // The cache must be updated when the coloring mode changes.
-  void UpdateCache();
+	// Distance from the screen center to the nearest owned system,
+	// for use in determining which governments are in the legend.
+	std::map<const Government *, double> closeGovernments;
+	// Systems in which your (active and parked) escorts and stored outfits are located.
+	std::map<const System *, SystemTooltipData> escortSystems;
+	// Center the view on the given system (may actually be slightly offset
+	// to account for panels on the screen).
+	void CenterOnSystem(const System *system, bool immediate = false);
 
-  // For tooltips:
-  const System *hoverSystem = nullptr;
-  Tooltip       tooltip;
+	// Cache the map layout, so it doesn't have to be re-calculated every frame.
+	// The cache must be updated when the coloring mode changes.
+	void UpdateCache();
 
-  // An X offset in pixels to be applied to the selected system UI if something
-  // else gets in the way of its default position.
-  int selectedSystemOffset = 0;
+	// For tooltips:
+	const System *hoverSystem = nullptr;
+	Tooltip tooltip;
 
-  bool fromMission = false;
-
-
-private:
-  class Node
-  {
-  public:
-    Node(
-        const Point                       &position,
-        const Color                       &color,
-        const std::string                 &name,
-        const Color                       &nameColor,
-        const Government                  *government,
-        const std::vector<const Sprite *> &mapIcons) :
-      position(position), color(color), name(name), nameColor(nameColor), government(government), mapIcons(mapIcons)
-    {
-    }
-
-    Point                       position;
-    Color                       color;
-    std::string                 name;
-    Color                       nameColor;
-    const Government           *government;
-    std::vector<const Sprite *> mapIcons;
-  };
-
-  class Link
-  {
-  public:
-    Link(const Point &start, const Point &end, const Color &color) : start(start), end(end), color(color) {}
-
-    Point start;
-    Point end;
-    Color color;
-  };
+	bool fromMission = false;
+	// A simplified map panel shows less buttons and has less features.
+	// Used for panels where the map is a backdrop rather than being the main focus.
+	bool isSimplified = false;
 
 
 private:
-  void DrawTravelPlan();
-  // Display the name of and distance to the selected system.
-  void DrawSelectedSystem();
-  // Indicate which other systems have player escorts.
-  void DrawEscorts();
-  void DrawWormholes();
-  void DrawLinks();
-  // Draw systems in accordance to the set commodity color scheme.
-  void DrawSystems();
-  void DrawNames();
-  void DrawMissions();
-  void DrawPointer(const System *system, unsigned &systemCount, unsigned max, const Color &color, bool bigger = false);
+	class Node {
+	public:
+		Node(const Point &position, const Color &color, const std::string &name, const Color &nameColor,
+		     const Government *government, const std::vector<const Sprite *> &mapIcons)
+		    : position(position), color(color), name(name), nameColor(nameColor), government(government),
+		      mapIcons(mapIcons)
+		{
+		}
 
-  void IncrementZoom();
-  void DecrementZoom();
+		Point position;
+		Color color;
+		std::string name;
+		Color nameColor;
+		const Government *government;
+		std::vector<const Sprite *> mapIcons;
+	};
+
+	class Link {
+	public:
+		Link(const Point &start, const Point &end, const Color &color) : start(start), end(end), color(color)
+		{
+		}
+
+		Point start;
+		Point end;
+		Color color;
+	};
 
 
 private:
-  // This is the coloring mode currently used in the cache.
-  int cachedCommodity = -10;
+	void DrawTravelPlan(GraphicsTypes::CommandBufferInstance *cb);
+	// Display the name of and distance to the selected system.
+	void DrawSelectedSystem(GraphicsTypes::CommandBufferInstance *cb);
+	// Indicate which other systems have player escorts.
+	void DrawEscorts(GraphicsTypes::CommandBufferInstance *cb);
+	void DrawWormholes(GraphicsTypes::CommandBufferInstance *cb);
+	void DrawLinks(GraphicsTypes::CommandBufferInstance *cb);
+	// Draw systems in accordance to the set commodity color scheme.
+	void DrawSystems(GraphicsTypes::CommandBufferInstance *cb);
+	void DrawNames(GraphicsTypes::CommandBufferInstance *cb);
+	void DrawMissions(GraphicsTypes::CommandBufferInstance *cb);
+	void DrawPointer(GraphicsTypes::CommandBufferInstance *cb, const System *system, unsigned &systemCount,
+	                 unsigned max, const Color &color, bool bigger = false);
 
-  std::vector<Node> nodes;
-  std::vector<Link> links;
+	void IncrementZoom();
+	void DecrementZoom();
+
+
+private:
+	// This is the coloring mode currently used in the cache.
+	int cachedCommodity = -10;
+
+	std::vector<Node> nodes;
+	std::vector<Link> links;
 };

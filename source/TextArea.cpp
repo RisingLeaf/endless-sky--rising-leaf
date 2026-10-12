@@ -16,212 +16,126 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "TextArea.h"
 
 #include "GameData.h"
-#include "Preferences.h"
-#include "RenderBuffer.h"
 #include "ScrollBar.h"
-#include "shader/PointerShader.h"
 #include "text/FontSet.h"
+
+using namespace std;
+
 
 
 TextArea::TextArea()
 {
-  SetInterruptible(true);
-  SetTrapAllEvents(false);
-  SetIsFullScreen(false);
-
-  SetFont(FontSet::Get(14));
-  SetColor(*GameData::Colors().Get("medium"));
+	SetFont(FontSet::Get(14));
+	SetColor(*GameData::Colors().Get("medium"));
 }
 
 
-TextArea::TextArea(const Rectangle &r) : TextArea() { SetRect(r); }
+
+TextArea::TextArea(const Rectangle &r) : TextArea()
+{
+	TextArea::SetRect(r);
+}
+
 
 
 // Stub destructor, so that unique_ptrs are destructed in the correct scope.
-TextArea::~TextArea() = default;
-
-
-void TextArea::SetText(const std::string &s)
+TextArea::~TextArea()
 {
-  text = s;
-  Invalidate();
 }
+
 
 
 void TextArea::SetRect(const Rectangle &r)
 {
-  // TODO: Is there a use case where we would want the WrapWidth to be
-  //       larger than the display width? We could handle this case by
-  //       allowing the user to scroll left or right instead of up or
-  //       down. This might be useful for overly long single lined text,
-  //       or for vertical text layout.
-  position = r.Center();
-  size     = r.Dimensions();
-  buffer.reset();
-  wrappedText.SetWrapWidth(static_cast<int>(r.Width()));
-  scroll.SetDisplaySize(r.Height());
-  scrollBar.displaySizeFraction = static_cast<float>(scroll.DisplaySize() / scroll.MaxValue());
-  Invalidate();
+	// TODO: Is there a use case where we would want the WrapWidth to be
+	//       larger than the display width? We could handle this case by
+	//       allowing the user to scroll left or right instead of up or
+	//       down. This might be useful for overly long single lined text,
+	//       or for vertical text layout.
+	wrappedText.SetWrapWidth(r.Width());
+	ScrollArea::SetRect(r);
 }
+
+
+
+void TextArea::SetText(const string &s)
+{
+	text = s;
+	Invalidate();
+}
+
 
 
 void TextArea::SetFont(const Font &f)
 {
-  wrappedText.SetFont(f);
-  Invalidate();
+	wrappedText.SetFont(f);
+	Invalidate();
 }
+
+
+
+void TextArea::SetParagraphBreak(int height)
+{
+	wrappedText.SetParagraphBreak(height);
+	Invalidate();
+}
+
 
 
 void TextArea::SetColor(const Color &c)
 {
-  color = c;
-  Invalidate();
+	color = c;
+	Invalidate();
 }
+
 
 
 void TextArea::SetAlignment(Alignment a)
 {
-  wrappedText.SetAlignment(a);
-  Invalidate();
+	wrappedText.SetAlignment(a);
+	Invalidate();
 }
+
 
 
 void TextArea::SetTruncate(Truncate t)
 {
-  wrappedText.SetTruncate(t);
-  Invalidate();
+	wrappedText.SetTruncate(t);
+	Invalidate();
 }
+
 
 
 int TextArea::GetTextHeight(bool trailingBreak)
 {
-  Validate(trailingBreak);
-  return wrappedText.Height(trailingBreak);
+	Validate(trailingBreak);
+	return wrappedText.Height(trailingBreak);
 }
+
 
 
 int TextArea::GetLongestLineWidth()
 {
-  Validate(scrollHeightIncludesTrailingBreak);
-  return wrappedText.LongestLineWidth();
+	Validate(scrollHeightIncludesTrailingBreak);
+	return wrappedText.LongestLineWidth();
 }
 
 
-void TextArea::PreDraw()
+
+void TextArea::Validate(bool trailingBreak)
 {
-  if(!buffer) buffer = std::make_unique<RenderBuffer>(size, "text_area_buffer");
-
-  Validate(scrollHeightIncludesTrailingBreak);
-  if(!bufferIsValid || !scroll.IsAnimationDone())
-  {
-    scroll.Step();
-
-    buffer->SetTarget();
-    Point topLeft(buffer->Left(), buffer->Top() - scroll.AnimatedValue());
-    wrappedText.Draw(topLeft, color);
-    buffer->Deactivate();
-
-    buffer->SetFadePadding(scroll.IsScrollAtMin() ? 0 : 20, scroll.IsScrollAtMax() ? 0 : 20);
-    bufferIsValid = true;
-  }
+	if(!contentsIsValid || trailingBreak != scrollHeightIncludesTrailingBreak)
+	{
+		wrappedText.Wrap(text);
+		scroll.SetMaxValue(wrappedText.Height(trailingBreak));
+		scrollHeightIncludesTrailingBreak = trailingBreak;
+		contentsIsValid = true;
+	}
 }
 
 
-void TextArea::Draw()
+
+void TextArea::DrawText(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft)
 {
-  buffer->Draw(position);
-
-  if(scroll.Scrollable())
-  {
-    constexpr float POINTER_OFFSET   = 5;
-    constexpr float SCROLLBAR_OFFSET = 5;
-    const Point     topRight(position + Point(buffer->Right() + SCROLLBAR_OFFSET, buffer->Top() + POINTER_OFFSET));
-    const Point bottomRight(position + Point(buffer->Right() + SCROLLBAR_OFFSET, buffer->Bottom() - POINTER_OFFSET));
-
-    scrollBar.SyncDraw(scroll, topRight, bottomRight);
-  }
-}
-
-
-bool TextArea::Click(int x, int y, MouseButton button, int clicks)
-{
-  if(scroll.Scrollable() && scrollBar.SyncClick(scroll, x, y, button, clicks))
-  {
-    bufferIsValid = false;
-    return true;
-  }
-  if(button != MouseButton::LEFT) return false;
-
-  if(!buffer) return false;
-  Rectangle bounds(position, {buffer->Width(), buffer->Height()});
-  dragging = bounds.Contains(Point(x, y));
-  return dragging;
-}
-
-
-bool TextArea::Drag(double dx, double dy)
-{
-  if(scrollBar.SyncDrag(scroll, dx, dy))
-  {
-    bufferIsValid = false;
-    return true;
-  }
-  if(dragging)
-  {
-    scroll.Scroll(-dy, 0);
-    bufferIsValid = false;
-    return true;
-  }
-  return false;
-}
-
-
-bool TextArea::Release(int, int, const MouseButton button)
-{
-  if(button != MouseButton::LEFT) return false;
-
-  const bool ret = dragging;
-  dragging       = false;
-  return ret;
-}
-
-
-bool TextArea::Hover(int x, int y)
-{
-  scrollBar.Hover(x, y);
-
-  if(!buffer) return false;
-  Rectangle bounds(position, {buffer->Width(), buffer->Height()});
-  hovering = bounds.Contains(Point(x, y));
-  return hovering;
-}
-
-
-bool TextArea::Scroll(double, const double dy)
-{
-  if(hovering)
-  {
-    scroll.Scroll(-dy * Preferences::ScrollSpeed());
-    bufferIsValid = false;
-  }
-  return hovering;
-}
-
-
-void TextArea::Invalidate()
-{
-  bufferIsValid = false;
-  textIsValid   = false;
-}
-
-
-void TextArea::Validate(const bool trailingBreak)
-{
-  if(!textIsValid || trailingBreak != scrollHeightIncludesTrailingBreak)
-  {
-    wrappedText.Wrap(text);
-    scroll.SetMaxValue(wrappedText.Height(trailingBreak));
-    scrollHeightIncludesTrailingBreak = trailingBreak;
-    textIsValid                       = true;
-  }
+	wrappedText.Draw(cb, topLeft, color);
 }

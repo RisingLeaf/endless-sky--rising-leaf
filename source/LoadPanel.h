@@ -16,76 +16,82 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "Panel.h"
-
 #include "Point.h"
 #include "Rectangle.h"
 #include "SavedGame.h"
 #include "Tooltip.h"
+#include "graphics/graphics_toplevel_defines.h"
 
-#include <ctime>
 #include <filesystem>
 #include <map>
+#include <memory>
+#include <optional>
 #include <string>
-#include <utility>
-#include <vector>
 
+class PilotProfile;
 class PlayerInfo;
 class UI;
+
 
 
 // UI panel for loading and saving games. The game is automatically saved when
 // the player takes off from any planet, so if they want to be able to go back
 // to a previous game state they must save a "snapshot" of that state.
-class LoadPanel : public Panel
-{
+class LoadPanel : public Panel {
 public:
-  LoadPanel(PlayerInfo &player, UI &gamePanels);
+	LoadPanel(PlayerInfo &player, UI &gamePanels);
 
-  virtual void Draw() override;
+	virtual void Draw(GraphicsTypes::CommandBufferInstance *cb) override;
 
-  virtual void UpdateTooltipActivation() override;
+	virtual void UpdateTooltipActivation() override;
+	virtual void UpdateTextDisplay() override;
 
 
 protected:
-  // Only override the ones you need; the default action is to return false.
-  virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
-  virtual bool Click(int x, int y, MouseButton button, int clicks) override;
-  virtual bool Hover(int x, int y) override;
-  virtual bool Drag(double dx, double dy) override;
-  virtual bool Scroll(double dx, double dy) override;
+	// Only override the ones you need; the default action is to return false.
+	virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
+	virtual bool Click(int x, int y, MouseButton button, int clicks) override;
+	virtual bool Hover(int x, int y) override;
+	virtual bool Drag(double dx, double dy) override;
+	virtual bool Scroll(double dx, double dy) override;
 
 
 private:
-  void UpdateLists();
+	void UpdateLists();
 
-  // Snapshot name callback.
-  void SnapshotCallback(const std::string &name);
-  void WriteSnapshot(const std::filesystem::path &sourceFile, const std::filesystem::path &snapshotName);
-  // Load snapshot callback.
-  void LoadCallback();
-  // Delete callbacks.
-  void DeletePilot(const std::string &);
-  void DeleteSave();
+	std::optional<std::filesystem::path> SnapshotPathBase() const;
+	// Snapshot name callbacks.
+	bool SnapshotNameFilter(const std::string &name, char ch);
+	void SnapshotCallback(const std::string &name);
+	void WriteSnapshot(const std::filesystem::path &sourceFile, const std::filesystem::path &snapshotName);
+	// Load snapshot callback.
+	void LoadCallback();
+	// Delete callbacks.
+	void DeletePilot(const std::string &);
+	void DeleteSave();
 
 
 private:
-  PlayerInfo &player;
-  SavedGame   loadedInfo;
-  UI         &gamePanels;
+	PlayerInfo &player;
+	SavedGame loadedInfo;
+	UI &gamePanels;
 
-  std::map<std::string, std::vector<std::pair<std::string, std::filesystem::file_time_type>>> files;
-  std::string                                                                                 selectedPilot;
-  std::string                                                                                 selectedFile;
-  // If the player enters a filename that exists, prompt before overwriting it.
-  std::string nameToConfirm;
+	std::vector<std::shared_ptr<PilotProfile>> pilots;
+	std::shared_ptr<PilotProfile> selectedPilot;
+	std::string selectedFile;
+	// If the player enters a filename that exists, prompt before overwriting it.
+	std::string nameToConfirm;
 
-  const Rectangle pilotBox;
-  const Rectangle snapshotBox;
+	const Rectangle pilotBox;
+	const Rectangle snapshotBox;
 
-  Point   hoverPoint;
-  Tooltip tooltip;
-  bool    hasHover     = false;
-  bool    sideHasFocus = false;
-  double  sideScroll   = 0;
-  double  centerScroll = 0;
+	Point hoverPoint;
+	Tooltip tooltip;
+	bool hasHover = false;
+	bool sideHasFocus = false;
+	double sideScroll = 0;
+	double centerScroll = 0;
+
+	std::string hoverFile;
+	std::string hoverFileTimestamp;
 };

@@ -1,26 +1,22 @@
-// The (x, y) coordinates of the top left corner of the glyph.
-u_in vec2 position;
-// The glyph to draw. (ASCII value - 32).
-u_in int glyph;
-// Aspect ratio of rendered glyph (unity by default).
+u_in vec2  scale;
+u_in vec2  position;
+u_in int   glyph;
 u_in float aspect;
-// Glyph size (in pixels).
-u_in vec2 glyphSize;
-// text color
-u_in vec4 color;
+u_in vec2  glyphSize;
+u_in vec4  color;
 
-// Inputs from the VBO.
+
 v_in vec2 vert;
 v_in vec2 corner;
 
-// Output to the fragment shader.
 v_out vec2 texCoord;
 
-// Pick the proper glyph out of the texture.
 VS_BEGIN
-	texCoord = vec2((float(spec.glyph) + corner.x) / 98.f, corner.y);
-	vec2 pos = vert * spec.glyphSize;
-	gl_Position = vec4((spec.aspect * pos.x + spec.position.x) * glob.scale.x, (pos.y + spec.position.y) * glob.scale.y, 0.f, 1.f);
+	texCoord = vec2((float(spec.glyph) + corner.x) / 98.0, corner.y);
+	const vec2 pos = vert * spec.glyphSize;
+    gl_Position = vec4(
+        vec2(spec.aspect * pos.x + spec.position.x, pos.y + spec.position.y) * spec.scale,
+        0.0, 1.0);
 VS_END
 
 

@@ -15,28 +15,30 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+#ifdef ES_USE_SDL3
 #include <SDL3/SDL_keycode.h>
+#else
+#include <SDL2/SDL_keycode.h>
+#endif
+
+#include <functional>
 #include <string>
 
 
+
 // A helper interface for SDL functions related to the clipboard functionality.
-class Clipboard
-{
+class Clipboard {
 public:
-  // Handle keys used for clipboard operations on inputBuffer. Return false if the keys
-  // don't have any functionality assigned to them. Optionally, size limit of the input buffer
-  // and a set of forbidden characters can be provided.
-  static bool KeyDown(
-      std::string       &inputBuffer,
-      SDL_Keycode        key,
-      Uint16             mod,
-      size_t             maxSize   = -1,
-      const std::string &forbidden = {});
+	// Handle keys used for clipboard operations on inputBuffer. Return false if the keys
+	// don't have any functionality assigned to them. Optionally, size limit of the input buffer
+	// and a set of forbidden characters can be provided.
+	static bool KeyDown(std::string &inputBuffer, SDL_Keycode key, Uint16 mod, size_t maxSize = -1,
+	                    const std::function<bool(char32_t)> &forbidden = nullptr);
 
 
 private:
-  // Replace the current contents with the provided string.
-  static void Set(const std::string &inputBuffer);
-  // Get the current clipboard contents, excluding characters we don't want.
-  static std::string Get(size_t maxSize, const std::string &forbidden);
+	// Replace the current contents with the provided string.
+	static void Set(const std::string &inputBuffer);
+	// Get the current clipboard contents, excluding characters we don't want.
+	static std::string Get(size_t maxSize, const std::function<bool(char32_t)> &forbidden);
 };

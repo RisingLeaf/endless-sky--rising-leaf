@@ -18,10 +18,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 class SDL_Window;
 
 
+
 // A helper class for setting attributes of the main window according to the current preferences.
-class WinWindow
-{
+class WinWindow {
 public:
-  static void UpdateTitleBarTheme(SDL_Window *window);
-  static void UpdateWindowRounding(SDL_Window *window);
+	static void UpdateTitleBarTheme(SDL_Window *window);
+	static void UpdateWindowRounding(SDL_Window *window);
 };

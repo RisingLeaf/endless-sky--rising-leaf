@@ -15,306 +15,458 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "GameWindow.h"
 
+#include "../shared/graphics/graphics_layer.h"
+#include "../shared/graphics/vulkan/VulkanCommandBuffer.h"
+#include "GameData.h"
 #include "Logger.h"
+#include "RenderBuffer.h"
 #include "Screen.h"
+#include "image/SpriteSet.h"
+#include "shader/BatchShader.h"
+#include "shader/FillShader.h"
+#include "shader/FogShader.h"
+#include "shader/LineShader.h"
+#include "shader/OutlineShader.h"
+#include "shader/PointerShader.h"
+#include "shader/RingShader.h"
+#include "shader/SpriteShader.h"
+#include "shader/StarField.h"
+#include "text/FontSet.h"
 
-#include <SDL3/SDL.h>
+#ifdef _WIN32
+#include "windows/WinWindow.h"
+#endif
 
+#include "SDL.h"
+
+#include <cstring>
 #include <sstream>
 #include <string>
 
-#include "graphics/graphics_layer.h"
-#include "windows/WinWindow.h"
+using namespace std;
 
+namespace {
+	// The minimal screen resolution requirements.
+	constexpr int minWidth = 1024;
+	constexpr int minHeight = 768;
 
-namespace
-{
-  // The minimal screen resolution requirements.
-  constexpr int minWidth  = 1024;
-  constexpr int minHeight = 768;
+	SDL_Window *mainWindow = nullptr;
+	std::unique_ptr<GraphicsTypes::GraphicsInstance> graphics_instance;
+	int width = 0;
+	int height = 0;
+	int drawWidth = 0;
+	int drawHeight = 0;
 
-  SDL_Window *mainWindow = nullptr;
-  int         width      = 0;
-  int         height     = 0;
-  int         drawWidth  = 0;
-  int         drawHeight = 0;
+	// Logs SDL errors and returns true if found
+	bool checkSDLerror()
+	{
+		string message = SDL_GetError();
+		if(!message.empty())
+		{
+			Logger::Log("(SDL message: \"" + message + "\")", Logger::Level::ERROR);
+			SDL_ClearError();
+			return true;
+		}
 
-  // Logs SDL errors and returns true if found
-  bool checkSDLerror()
-  {
-    const std::string message = SDL_GetError();
-    if(!message.empty())
-    {
-      Logger::Log( "(SDL message: \"" + message + "\")", Logger::Level::ERROR);
-      SDL_ClearError();
-      return true;
-    }
+		return false;
+	}
 
-    return false;
-  }
-
-  std::unique_ptr<GraphicsTypes::GraphicsInstance> Instance;
+	// Checks if the SDL call succeeded. Wrapper for SDL2/3 compatibility for non-C APIs.
+	// Returns true on success.
+#ifdef ES_USE_SDL3
+	bool checkSDL(bool result)
+	{
+		if(!result)
+			checkSDLerror();
+		return result;
+	}
+#else
+	bool checkSDL(int result)
+	{
+		if(result != 0)
+		{
+			checkSDLerror();
+			return false;
+		}
+		return true;
+	}
+#endif
 } // namespace
 
 
-SDL_Window *GameWindow::GetWindow() { return mainWindow; }
 
-GraphicsTypes::GraphicsInstance *GameWindow::GetInstance() { return Instance.get(); }
-
-
-std::string GameWindow::SDLVersions()
+string GameWindow::SDLVersions()
 {
-  constexpr int built  = SDL_VERSION;
-  const int     linked = SDL_GetVersion();
+#ifdef ES_USE_SDL3
+	int built = SDL_VERSION;
+	int linked = SDL_GetVersion();
 
-  return "Compiled against SDL v" + std::to_string(built) + "\nUsing SDL v" + std::to_string(linked);
+	auto toString = [](int v) -> string {
+		return to_string(SDL_VERSIONNUM_MAJOR(v)) + "." + to_string(SDL_VERSIONNUM_MINOR(v)) + "." +
+		       to_string(SDL_VERSIONNUM_MICRO(v));
+	};
+#else
+	SDL_version built;
+	SDL_version linked;
+	SDL_VERSION(&built);
+	SDL_GetVersion(&linked);
+
+	auto toString = [](const SDL_version &v) -> string {
+		return to_string(v.major) + "." + to_string(v.minor) + "." + to_string(v.patch);
+	};
+#endif
+	return "Compiled against SDL v" + toString(built) + "\nUsing SDL v" + toString(linked);
 }
+
 
 
 bool GameWindow::Init(bool headless)
 {
 #ifdef _WIN32
+#ifndef ES_USE_SDL3
+	// Tell Windows this process is high dpi aware and doesn't need to get scaled.
+	SDL_SetHint(SDL_HINT_WINDOWS_DPI_AWARENESS, "permonitorv2");
+#endif
 #elif defined(__linux__)
-  // Set the class name for the window on Linux. Used to set the application icon.
-  // This sets it for both X11 and Wayland.
-  setenv("SDL_VIDEO_X11_WMCLASS", "io.github.endless_sky.endless_sky", true);
+	// Set the class name for the window on Linux. Used to set the application icon.
+	// This sets it for both X11 and Wayland.
+	setenv("SDL_VIDEO_X11_WMCLASS", "io.github.endless_sky.endless_sky", true);
 #endif
 
-  // When running the integration tests, don't create a window nor an OpenGL context.
-  if(headless)
-#if defined(__linux__) && !SDL_VERSION_ATLEAST(2, 0, 22)
-    setenv("SDL_VIDEODRIVER", "dummy", true);
+	// When running the integration tests, don't create a window nor an OpenGL context.
+	if(headless)
+	{
+#if defined(__linux__)
+		setenv("SDL_VIDEODRIVER", "dummy", true);
+#endif
+		SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "dummy");
+	}
+	//else
+	//	SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "x11");
+
+	// This needs to be called before any other SDL commands.
+	if(!checkSDL(SDL_Init(SDL_INIT_VIDEO)))
+		return false;
+
+	// Get details about the current display.
+#ifdef ES_USE_SDL3
+	SDL_DisplayID primaryDisplay = SDL_GetPrimaryDisplay();
+	if(primaryDisplay == 0)
+	{
+		checkSDLerror();
+		ExitWithError("Unable to query primary display!");
+		return false;
+	}
+	const SDL_DisplayMode *modePtr = SDL_GetCurrentDisplayMode(primaryDisplay);
+	if(!modePtr)
+	{
+		checkSDLerror();
+		ExitWithError("Unable to query monitor resolution!");
+		return false;
+	}
+	const SDL_DisplayMode &mode = *modePtr;
 #else
-    SDL_SetHint(SDL_HINT_VIDEO_DRIVER, "dummy");
+	SDL_DisplayMode mode;
+	if(SDL_GetCurrentDisplayMode(0, &mode))
+	{
+		ExitWithError("Unable to query monitor resolution!");
+		return false;
+	}
 #endif
+	if(mode.refresh_rate && mode.refresh_rate < 60)
+		Logger::Log("Low monitor frame rate detected (" + to_string(mode.refresh_rate) +
+		                ")."
+		                " The game will run more slowly.",
+		            Logger::Level::WARNING);
 
-  // This needs to be called before any other SDL commands.
-  const bool sdl_init = SDL_Init(SDL_INIT_VIDEO);
-  if(!sdl_init)
-  {
-    checkSDLerror();
-    return false;
-  }
+	// Make the window just slightly smaller than the monitor resolution.
+	int maxWidth = mode.w;
+	int maxHeight = mode.h;
+	if(maxWidth < minWidth || maxHeight < minHeight)
+		Logger::Log("Monitor resolution is too small! Minimal requirement is " + to_string(minWidth) + 'x' +
+		                to_string(minHeight) + ", while your resolution is " + to_string(maxWidth) + 'x' +
+		                to_string(maxHeight) + '.',
+		            Logger::Level::WARNING);
 
-  int            count = 0;
-  SDL_DisplayID *ids   = SDL_GetDisplays(&count);
-  if(!count)
-  {
-    ExitWithError("No displays found!");
-    return false;
-  }
+	int windowWidth = maxWidth - 100;
+	int windowHeight = maxHeight - 100;
 
-  // Get details about the current display.
-  const SDL_DisplayMode *mode = SDL_GetCurrentDisplayMode(ids[0]);
-  if(!mode)
-  {
-    ExitWithError("Unable to query monitor resolution!");
-    return false;
-  }
-  if(mode->refresh_rate && mode->refresh_rate < 60)
-  {
-    Logger::Log(
-        "low monitor frame rate detected (" + std::to_string(mode->refresh_rate) +
-        ")."
-        " The game will run more slowly.", Logger::Level::WARNING);
-  }
+	// Decide how big the window should be.
+	if(Screen::RawWidth() && Screen::RawHeight())
+	{
+		// Load the previously saved window dimensions.
+		windowWidth = min(windowWidth, Screen::RawWidth());
+		windowHeight = min(windowHeight, Screen::RawHeight());
+	}
 
-  SDL_free(ids);
+	if(!Preferences::Has("Block screen saver"))
+		SDL_EnableScreenSaver();
 
-  // Make the window just slightly smaller than the monitor resolution.
-  const int maxWidth  = mode->w;
-  const int maxHeight = mode->h;
-  if(maxWidth < minWidth || maxHeight < minHeight)
-  {
-    Logger::Log(
-        "Monitor resolution is too small! Minimal requirement is " + std::to_string(minWidth) + 'x' +
-        std::to_string(minHeight) + ", while your resolution is " + std::to_string(maxWidth) + 'x' +
-        std::to_string(maxHeight) + '.', Logger::Level::ERROR);
-  }
+	// Settings that must be declared before the window creation.
+	constexpr static Uint32 WINDOW_CREATION_FLAGS =
+	    SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 
-  int windowWidth  = maxWidth - 100;
-  int windowHeight = maxHeight - 100;
+	const bool fullscreen = Preferences::ScreenModeSetting() == "fullscreen";
 
-  // Decide how big the window should be.
-  if(Screen::RawWidth() && Screen::RawHeight())
-  {
-    // Load the previously saved window dimensions.
-    windowWidth  = std::min(windowWidth, Screen::RawWidth());
-    windowHeight = std::min(windowHeight, Screen::RawHeight());
-  }
+	// The main window spawns visibly at this point.
+	mainWindow = SDL_CreateWindow("Endless Sky", windowWidth, windowHeight, headless ? 0 : WINDOW_CREATION_FLAGS);
 
-  if(!Preferences::Has("Block screen saver")) SDL_EnableScreenSaver();
+	if(!mainWindow)
+	{
+		ExitWithError("Unable to create window!");
+		return false;
+	}
 
-  // Settings that must be declared before the window creation.
-#ifndef __APPLE__
-  Uint32 flags = SDL_WINDOW_VULKAN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-#else
-  Uint32 flags = SDL_WINDOW_METAL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-#endif
+	SDL_SetWindowFullscreen(mainWindow, fullscreen);
 
+	// Bail out early if we are in headless mode; no need to initialize all the OpenGL stuff.
+	if(headless)
+	{
+		width = windowWidth;
+		height = windowHeight;
+		Screen::SetRaw(width, height, true);
+		return true;
+	}
 
-  if(Preferences::ScreenModeSetting() == "fullscreen") flags |= SDL_WINDOW_FULLSCREEN;
-  else if(Preferences::Has("maximized")) flags |= SDL_WINDOW_MAXIMIZED;
+	// Enable the user's preferred VSync state, otherwise update to an available
+	// value (e.g. if an external program is forcing a particular VSync state).
+	if(!SetVSync(Preferences::VSyncState()))
+		Preferences::ToggleVSync();
 
-  // The main window spawns visibly at this point.
-  mainWindow = SDL_CreateWindow("Endless Sky", windowWidth, windowHeight, headless ? 0 : flags);
+	// Make sure the screen size and view-port are set correctly.
+	AdjustViewport(true);
 
-  if(!mainWindow)
-  {
-    ExitWithError("Unable to create window!");
-    return false;
-  }
-
-  // Bail out early if we are in headless mode; no need to initialize all the OpenGL stuff.
-  if(headless)
-  {
-    width  = windowWidth;
-    height = windowHeight;
-    Screen::SetRaw(width, height, true);
-    return true;
-  }
-
-  // Make sure the screen size and view-port are set correctly.
-  AdjustViewport(true);
+	graphics_instance = graphics_layer::Init(mainWindow, width, height);
 
 #ifdef _WIN32
-  UpdateTitleBarTheme();
-  UpdateWindowRounding();
+	UpdateTitleBarTheme();
+	UpdateWindowRounding();
 #endif
 
-  Instance = graphics_layer::Init(width, height);
-
-  return true;
+	return true;
 }
+
 
 
 // Clean up the SDL context, window, and shut down SDL.
 void GameWindow::Quit()
 {
-  Instance.reset();
+	// Make sure the cursor is visible.
+#ifdef ES_USE_SDL3
+	SDL_ShowCursor();
+#else
+	SDL_ShowCursor(true);
+#endif
 
-  // Make sure the cursor is visible.
-  SDL_ShowCursor();
 
-  if(mainWindow) SDL_DestroyWindow(mainWindow);
+	FillShader::Clear();
+	FogShader::Clear();
+	LineShader::Clear();
+	OutlineShader::Clear();
+	PointerShader::Clear();
+	RingShader::Clear();
+	SpriteShader::Clear();
+	BatchShader::Clear();
+	GameData::ClearBackground();
+	RenderBuffer::Clear();
 
-  SDL_Quit();
+	FontSet::Clear();
+
+	SpriteSet::Clear();
+
+	graphics_instance.reset();
+	if(mainWindow)
+		SDL_DestroyWindow(mainWindow);
+
+	SDL_Quit();
 }
 
 
-void GameWindow::Step() {}
+
+void GameWindow::Step()
+{
+	SDL_GL_SwapWindow(mainWindow);
+}
+
 
 
 void GameWindow::AdjustViewport(bool noResizeEvent)
 {
-  if(!mainWindow) return;
+	if(!mainWindow)
+		return;
 
-  // Get the window's size in screen coordinates.
-  int windowWidth, windowHeight;
-  SDL_GetWindowSize(mainWindow, &windowWidth, &windowHeight);
+	// Get the window's size in screen coordinates.
+	int windowWidth, windowHeight;
+	SDL_GetWindowSize(mainWindow, &windowWidth, &windowHeight);
 
-  // Only save the window size when not in fullscreen mode.
-  if(!GameWindow::IsFullscreen())
-  {
-    width  = windowWidth;
-    height = windowHeight;
-  }
+	// Only save the window size when not in fullscreen mode.
+	if(!GameWindow::IsFullscreen())
+	{
+		width = windowWidth;
+		height = windowHeight;
+	}
 
-  // Round the window size up to a multiple of 2, even if this
-  // means one pixel of the display will be clipped.
-  int roundWidth  = (windowWidth + 1) & ~1;
-  int roundHeight = (windowHeight + 1) & ~1;
-  Screen::SetRaw(roundWidth, roundHeight, noResizeEvent);
+	// Round the window size up to a multiple of 2, even if this
+	// means one pixel of the display will be clipped.
+	int roundWidth = (windowWidth + 1) & ~1;
+	int roundHeight = (windowHeight + 1) & ~1;
+	Screen::SetRaw(roundWidth, roundHeight, noResizeEvent);
 
-  // Find out the drawable dimensions. If this is a high- DPI display, this
-  // may be larger than the window.
-  SDL_GetWindowSizeInPixels(mainWindow, &drawWidth, &drawHeight);
-  // Set the viewport to go off the edge of the window, if necessary, to get
-  // everything pixel-aligned.
-  drawWidth  = (drawWidth * roundWidth) / windowWidth;
-  drawHeight = (drawHeight * roundHeight) / windowHeight;
+	// Find out the drawable dimensions. If this is a high-DPI display, this
+	// may be larger than the window.
+	SDL_GetWindowSizeInPixels(mainWindow, &drawWidth, &drawHeight);
+
+	// Set the viewport to go off the edge of the window, if necessary, to get
+	// everything pixel-aligned.
+	drawWidth = (drawWidth * roundWidth) / windowWidth;
+	drawHeight = (drawHeight * roundHeight) / windowHeight;
 }
+
 
 
 // Attempts to set the requested SDL Window VSync to the given state. Returns false
 // if the operation could not be completed successfully.
-bool GameWindow::SetVSync(Preferences::VSync state) { return true; }
+bool GameWindow::SetVSync(Preferences::VSync state)
+{
+	return true;
+}
+
 
 
 // Last window width, in windowed mode.
-int GameWindow::Width() { return width; }
+int GameWindow::Width()
+{
+	return width;
+}
+
 
 
 // Last window height, in windowed mode.
-int GameWindow::Height() { return height; }
+int GameWindow::Height()
+{
+	return height;
+}
 
 
-int GameWindow::DrawWidth() { return drawWidth; }
+
+int GameWindow::DrawWidth()
+{
+	return drawWidth;
+}
 
 
-int GameWindow::DrawHeight() { return drawHeight; }
+
+int GameWindow::DrawHeight()
+{
+	return drawHeight;
+}
 
 
-bool GameWindow::IsMaximized() { return SDL_GetWindowFlags(mainWindow) & SDL_WINDOW_MAXIMIZED; }
+
+bool GameWindow::IsMaximized()
+{
+	return SDL_GetWindowFlags(mainWindow) & SDL_WINDOW_MAXIMIZED;
+}
 
 
-bool GameWindow::IsFullscreen() { return SDL_GetWindowFlags(mainWindow) & SDL_WINDOW_FULLSCREEN; }
+
+bool GameWindow::IsFullscreen()
+{
+	return SDL_GetWindowFlags(mainWindow) & SDL_WINDOW_FULLSCREEN;
+}
+
 
 
 void GameWindow::ToggleFullscreen()
 {
-  // This will generate a window size change event,
-  // no need to adjust the viewport here.
-  if(IsFullscreen())
-  {
-    SDL_SetWindowFullscreen(mainWindow, 0);
-    SDL_SetWindowSize(mainWindow, width, height);
-  }
-  else {
-    SDL_SetWindowFullscreen(mainWindow, true);
-  }
+	// This will generate a window size change event,
+	// no need to adjust the viewport here.
+	if(IsFullscreen())
+	{
+		SDL_SetWindowFullscreen(mainWindow, false);
+		SDL_SetWindowSize(mainWindow, width, height);
+	}
+	else
+		SDL_SetWindowFullscreen(mainWindow, true);
 }
+
+
 
 void GameWindow::ToggleBlockScreenSaver()
 {
-  if(SDL_ScreenSaverEnabled()) SDL_DisableScreenSaver();
-  else SDL_EnableScreenSaver();
+	if(SDL_ScreenSaverEnabled())
+		SDL_DisableScreenSaver();
+	else
+		SDL_EnableScreenSaver();
 }
 
 
-void GameWindow::ExitWithError(const std::string &message, bool doPopUp)
+
+float GameWindow::RenderScale()
 {
-  // Print the error message in the terminal and the error file.
-  Logger::Log(message, Logger::Level::ERROR);
-  checkSDLerror();
+	int window_w, window_h;
+	int pixel_w, pixel_h;
 
-  // Show the error message in a message box.
-  if(doPopUp)
-  {
-    SDL_MessageBoxData box;
-    box.flags       = SDL_MESSAGEBOX_ERROR;
-    box.window      = nullptr;
-    box.title       = "Endless Sky: Error";
-    box.message     = message.c_str();
-    box.colorScheme = nullptr;
+	SDL_GetWindowSize(mainWindow, &window_w, &window_h);
+	SDL_GetWindowSizeInPixels(mainWindow, &pixel_w, &pixel_h);
 
-    SDL_MessageBoxButtonData button;
-    button.flags    = SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT;
-    button.text     = "OK";
-    box.numbuttons  = 1;
-    box.buttons     = &button;
-
-    int result = 0;
-    SDL_ShowMessageBox(&box, &result);
-  }
-
-  GameWindow::Quit();
+	const auto scale_x = static_cast<float>(pixel_w) / window_w;
+	return scale_x;
 }
+
+
+
+void GameWindow::ExitWithError(const string &message, bool doPopUp)
+{
+	// Print the error message in the terminal and the error file.
+	Logger::Log(message, Logger::Level::ERROR);
+	checkSDLerror();
+
+	// Show the error message in a message box.
+	if(doPopUp)
+	{
+		SDL_MessageBoxData box;
+		box.flags = SDL_MESSAGEBOX_ERROR;
+		box.window = nullptr;
+		box.title = "Endless Sky: Error";
+		box.message = message.c_str();
+		box.colorScheme = nullptr;
+
+		SDL_MessageBoxButtonData button;
+		button.flags = SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT;
+#ifdef ES_USE_SDL3
+		button.buttonID = 0;
+#else
+		button.buttonid = 0;
+#endif
+		button.text = "OK";
+		box.numbuttons = 1;
+		box.buttons = &button;
+
+		int result = 0;
+		SDL_ShowMessageBox(&box, &result);
+	}
+
+	GameWindow::Quit();
+}
+
+GraphicsTypes::GraphicsInstance *GameWindow::GraphicsInstance()
+{
+	return graphics_instance.get();
+}
+
 
 
 #ifdef _WIN32
-void GameWindow::UpdateTitleBarTheme() { WinWindow::UpdateTitleBarTheme(mainWindow); }
+void GameWindow::UpdateTitleBarTheme()
+{
+	WinWindow::UpdateTitleBarTheme(mainWindow);
+}
 
 
-void GameWindow::UpdateWindowRounding() { WinWindow::UpdateWindowRounding(mainWindow); }
+
+void GameWindow::UpdateWindowRounding()
+{
+	WinWindow::UpdateWindowRounding(mainWindow);
+}
 #endif

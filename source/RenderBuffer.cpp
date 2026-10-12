@@ -17,158 +17,190 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "GameData.h"
 #include "GameWindow.h"
+#include "Logger.h"
 #include "Screen.h"
-#include "shader/Shader.h"
-
+#include "graphics/bootstrap/graphics_default_states.h"
 #include "graphics/graphics_layer.h"
-#include "shader/SpriteShader.h"
+#include "system/File.h"
 
+using namespace std;
 
-namespace
-{
-  Shader shader("renderBuffer shader");
+namespace {
+	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
+	ShaderInfo info;
 
-  graphics_layer::ObjectHandle square;
+	graphics_layer::ObjectHandle geometry;
 } // namespace
 
 
+
 // Initialize the shaders.
-void RenderBuffer::Init()
+void RenderBuffer::Init(const GraphicsTypes::GraphicsInstance *graphics_instance)
 {
-  auto &info = shader.GetInfo();
+	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
+	info.SetInputSize(2 * sizeof(float));
 
-  info.SetInputSize(2 * sizeof(float));
-  info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // size
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // position
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // scale
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // srcposition
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // srcscale
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4); // fade
 
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4);
+	info.AddTexture("tex");
 
-  info.AddTexture("tex");
+	const auto shader_code = File::ReadShader("../shaders/compilation/renderBuffer.ps");
+	graphics_instance->CreateShader(shader, info, shader_code, "renderBuffer");
 
-  shader.Create(*GameData::Shaders().Find("renderBuffer"));
 
-  constexpr float vertexData[] = {-0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f};
-
-  square = graphics_layer::ObjectHandle(
-      GameWindow::GetInstance(),
-      4,
-      2 * sizeof(float),
-      vertexData,
-      {},
-      "render_buffer_quad");
+	constexpr float vertexData[] = {-.5f, -.5f, -.5f, .5f, .5f, -.5f, .5f, .5f};
+	geometry = graphics_layer::ObjectHandle(graphics_instance, 4, 2 * sizeof(float), vertexData, {}, "renderBuffer");
 }
 
 
 void RenderBuffer::Clear()
 {
-  shader.Clear();
-  square = {};
+	geometry = graphics_layer::ObjectHandle();
+	shader.reset();
 }
 
 
 // Create a texture of the given size that can be used as a render target.
-RenderBuffer::RenderBuffer(const Point &dimensions, const std::string_view name) :
-  size(dimensions), FrameBuffer(GameWindow::GetInstance(), 1, 1, GraphicsTypes::RenderBufferType::COLOR, 1, name)
+RenderBuffer::RenderBuffer(const gm::ivec2 &dimensions)
+    : framebuffer(GameWindow::GraphicsInstance(), dimensions[0], dimensions[1],
+	              GraphicsTypes::RenderBufferType::COLOR32, 1, "render_buffer"),
+      size(dimensions)
 {
-  multiplier = Point(
-      static_cast<float>(GameWindow::DrawWidth()) / static_cast<float>(Screen::RawWidth()),
-      static_cast<float>(GameWindow::DrawHeight()) / static_cast<float>(Screen::RawHeight()));
-
-  // Attach a blank image to the texture.
-  const Point scaledSize = size * multiplier * Screen::Zoom() / 100.0;
-
-  FrameBuffer.Resize(static_cast<uint32_t>(scaledSize.X()), static_cast<uint32_t>(scaledSize.Y()));
+	GameWindow::GraphicsInstance()->CreateCommandBuffer(RenderCmd);
 }
 
 
-RenderBuffer::~RenderBuffer() = default;
 
-
-void RenderBuffer::SetTarget()
+// Destructor. Frees the texture and renderbuffers.
+RenderBuffer::~RenderBuffer()
 {
-  FrameBuffer.Bind();
-
-  SpriteShader::Bind();
-  ShaderInfo::CommonUniformBufferData cm_data;
-#ifdef __APPLE__
-  cm_data.scale = {2.f / static_cast<float>(size.X()), -2.f / static_cast<float>(size.Y())};
-#else
-  cm_data.scale = {-2.f / static_cast<float>(size.X()), -2.f / static_cast<float>(size.Y())};
-#endif
-  GameWindow::GetInstance()->SetCommonUniforms(cm_data);
 }
+
+
+
+// Turn this buffer on as a render target. The render target is restored if
+// the Activation object goes out of scope.
+GraphicsTypes::CommandBufferInstance *RenderBuffer::SetTarget()
+{
+	RenderCmd->Begin();
+	framebuffer.Bind(RenderCmd.get());
+	const auto render_state = graphics_bootstrap::RenderStateSimpleBlending(size[0], size[1]);
+	RenderCmd->SetState(render_state);
+	last_dimensions = {Screen::RawWidth(), Screen::RawHeight()};
+	Screen::SetRaw(size[0], size[1], true);
+	return RenderCmd.get();
+}
+
 
 
 // Reset the render target and viewport to the original settings.
-void RenderBuffer::Deactivate() const { FrameBuffer.Finish(); }
-
-
-void RenderBuffer::Draw(const Point &position) { Draw(position, size); }
-
-
-// Draw the contents of this buffer at the specified position.
-void RenderBuffer::Draw(const Point &position, const Point &clip_size, const Point &src_position)
+void RenderBuffer::Deactivate()
 {
-  shader.Bind();
-
-  const float u_size[2]         = {static_cast<float>(clip_size.X()), static_cast<float>(clip_size.Y())};
-  const float u_position[2]     = {static_cast<float>(position.X()), static_cast<float>(position.Y())};
-  const float u_src_position[2] = {static_cast<float>(src_position.X()), static_cast<float>(src_position.Y())};
-  const float u_src_scale[2]    = {static_cast<float>(1.f / size.X()), static_cast<float>(1.f / size.Y())};
-  const float u_fade[4]         = {
-      static_cast<float>(fadePadding[0] / clip_size.Y()),
-      static_cast<float>(fadePadding[1] / clip_size.Y()),
-      static_cast<float>(fadePadding[2] / clip_size.X()),
-      static_cast<float>(fadePadding[3] / clip_size.X())};
-
-  const auto                &info = shader.GetInfo();
-  std::vector<unsigned char> data_cp(info.GetUniformSize());
-
-  int i = -1;
-  info.CopyUniformEntryToBuffer(data_cp.data(), u_size, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), u_position, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), u_src_position, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), u_src_scale, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), u_fade, ++i);
-
-  GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
-
-  graphics_layer::TextureList texture_list;
-  texture_list.AddTexture(FrameBuffer.GetTexture(), 0, false);
-  texture_list.Bind(GameWindow::GetInstance());
-
-  square.Draw(GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
+	framebuffer.Finish(RenderCmd.get());
+	RenderCmd->End();
+	RenderCmd->Submit();
+	RenderCmd->Wait();
+	Screen::SetRaw(last_dimensions[0], last_dimensions[1], true);
 }
 
 
-double RenderBuffer::Top() const { return -size.Y() / 2; }
+
+void RenderBuffer::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &position)
+{
+	Draw(cb, position, Point(size[0], size[1]));
+}
 
 
-double RenderBuffer::Bottom() const { return size.Y() / 2; }
+
+// Draw the contents of this buffer at the specified position.
+void RenderBuffer::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &position, const Point &clipsize,
+                        const Point &srcposition)
+{
+	cb->BindShader(shader.get());
+	graphics_layer::QuickBindTextures(cb, {framebuffer.GetTexture()});
+
+	const auto sizeV = gm::vec2(clipsize.X(), clipsize.Y());
+	const auto positionV = gm::vec2(position.X(), position.Y());
+	const auto scaleV = gm::vec2(2.f / Screen::Width(), -2.f / Screen::Height());
+	const auto srcPositionV = gm::vec2(srcposition.X(), srcposition.Y());
+	const auto srcScaleV = gm::vec2(1.f / size[0], 1.f / size[1]);
+	const auto fadePaddingV = gm::vec4(fadePadding[0] / clipsize.Y(), fadePadding[1] / clipsize.Y(),
+	                                   fadePadding[2] / clipsize.X(), fadePadding[3] / clipsize.X());
 
 
-double RenderBuffer::Left() const { return -size.X() / 2; }
+	std::vector<unsigned char> data_cp(info.GetUniformSize());
+	int i = -1;
+	info.CopyUniformEntryToBuffer(data_cp.data(), &sizeV, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &positionV, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &scaleV, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &srcPositionV, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &srcScaleV, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &fadePaddingV, ++i);
+	cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
+
+	geometry.Draw(cb, GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
+}
 
 
-double RenderBuffer::Right() const { return size.X() / 2; }
+
+double RenderBuffer::Top() const
+{
+	return -size[1] / 2;
+}
 
 
-const Point &RenderBuffer::Dimensions() const { return size; }
+
+double RenderBuffer::Bottom() const
+{
+	return size[1] / 2;
+}
 
 
-double RenderBuffer::Height() const { return size.Y(); }
+
+double RenderBuffer::Left() const
+{
+	return -size[0] / 2;
+}
 
 
-double RenderBuffer::Width() const { return size.X(); }
+
+double RenderBuffer::Right() const
+{
+	return size[0] / 2;
+}
+
+
+
+Point RenderBuffer::Dimensions() const
+{
+	return Point(size[0], size[1]);
+}
+
+
+
+double RenderBuffer::Height() const
+{
+	return size[1];
+}
+
+
+
+double RenderBuffer::Width() const
+{
+	return size[0];
+}
+
 
 
 void RenderBuffer::SetFadePadding(float top, float bottom, float left, float right)
 {
-  fadePadding[0] = top;
-  fadePadding[1] = bottom;
-  fadePadding[2] = left;
-  fadePadding[3] = right;
+	fadePadding[0] = top;
+	fadePadding[1] = bottom;
+	fadePadding[2] = left;
+	fadePadding[3] = right;
 }

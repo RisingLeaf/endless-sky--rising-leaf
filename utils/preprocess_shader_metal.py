@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 #
-# This file is part of Astrolative.
+# This file is part of GameJamBase.
 #
 # Copyright (c) 2025 by Torben Hans
 #
-# Astrolative is free software: you can redistribute it and/or modify it under the
+# GameJamBase is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later version.
 #
-#  Astrolative is distributed in the hope that it will be useful, but WITHOUT ANY
+#  GameJamBase is distributed in the hope that it will be useful, but WITHOUT ANY
 #  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 #  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
-#  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+#  You should have received a copy of the GNU General Public License along with GameJamBase. If not, see <https://www.gnu.org/licenses/>.
 #
 import os
 import struct
 import sys
 
-common_data_path   = sys.argv[1]
-include_path       = sys.argv[2]
-original_shader    = sys.argv[3]
+common_data_path = sys.argv[1]
+include_path = sys.argv[2]
+original_shader = sys.argv[3]
 destination_shader = sys.argv[4] + ".prs"
 
 with open(common_data_path, 'r') as file:
@@ -47,11 +47,15 @@ for line in shader_code.split("\n"):
     else:
         new_shader_code += line + "\n"
 
-ubo_vars      = []
-v_in_vars     = []
-v_out_vars    = []
-c_in_objects  = []
-textures      = []
+new_shader_code = new_shader_code.replace("//!COMMON_DATA", common_data_code)
+
+ubo_vars = []
+v_in_vars = []
+v_out_vars = []
+c_in_objects = []
+textures = []
+rw_buffers = []
+
 
 def resolve_argument_line(to_list, identifier, in_line):
     pos = in_line.find(identifier)
@@ -66,6 +70,7 @@ def resolve_argument_line(to_list, identifier, in_line):
         return True
     return False
 
+
 def resolve_texture_line(to_list, identifier, in_line):
     pos = in_line.find(identifier)
     if pos > -1:
@@ -79,8 +84,9 @@ def resolve_texture_line(to_list, identifier, in_line):
         return True
     return False
 
+
 def get_texture_type(in_type):
-    if   in_type == "2d":
+    if in_type == "2d":
         return "sampled_texture2d<float>"
     elif in_type == "2darray":
         return "sampled_texture2d_array<float>"
@@ -90,14 +96,16 @@ def get_texture_type(in_type):
         print(f"ERROR: unknown texture type: {in_type}, defaulting to 2d")
         return "sampled_texture2d<float>"
 
+
 pruned_code = ""
 
 for line in new_shader_code.split("\n"):
-    if  (  resolve_argument_line(ubo_vars,      "u_in",       line)
-        or resolve_argument_line(v_in_vars,     "v_in",       line)
-        or resolve_argument_line(v_out_vars,    "v_out",      line)
-        or resolve_argument_line(c_in_objects,  "cs_in",      line)
-        or resolve_texture_line( textures,      "in_texture", line)):
+    if (resolve_argument_line(ubo_vars, "u_in", line)
+            or resolve_argument_line(v_in_vars, "v_in", line)
+            or resolve_argument_line(v_out_vars, "v_out", line)
+            or resolve_argument_line(c_in_objects, "cs_in", line)
+            or resolve_argument_line(rw_buffers, "buffer_rw", line)
+            or resolve_texture_line(textures, "in_texture", line)):
         continue
     pruned_code += line + "\n"
 
@@ -126,23 +134,23 @@ vs_begin_replacement += spec_struct
 vs_begin_replacement += v_in_struct
 vs_begin_replacement += v_out_struct
 
-vs_begin_replacement += "vertex OutVert vertexShader("\
+vs_begin_replacement += "vertex OutVert vertexShader(" \
                         "uint vertexID [[vertex_id]], " \
-                        "InVert in_data [[stage_in]], "\
-                        "constant const CmUBO   *in_glob [[buffer(2)]], "\
+                        "uint gl_InstanceID [[instance_id]], " \
+                        "InVert in_data [[stage_in]], " \
+                        "constant const CmUBO   *in_glob [[buffer(2)]], " \
                         "constant const SpecUBO *in_spec [[buffer(3)]]"
 texture_counter = 0
 for tex in textures:
     vs_begin_replacement += f",\n    constant {get_texture_type(tex[0])} *{tex[1]} [[buffer({4 + texture_counter})]]"
     texture_counter += 1
 
-vs_begin_replacement += ")"\
+vs_begin_replacement += ")" \
                         "{\n"
 
 vs_begin_replacement += "  OutVert out;\n"
 for var in v_in_vars:
     vs_begin_replacement += f"  {var[0]} {var[1]} = in_data.{var[1]};\n"
-
 
 vs_begin_replacement += f"  float4 gl_Position;\n"
 for var in v_out_vars:
@@ -151,7 +159,7 @@ for var in v_out_vars:
 new_shader_code = pruned_code.replace("VS_BEGIN", vs_begin_replacement)
 
 ##### CREATE VS_END replacement
-vs_end_replacement  = "  out.gl_Position = gl_Position;\n"
+vs_end_replacement = "  out.gl_Position = gl_Position;\n"
 vs_end_replacement += "  out.gl_PointSize = 2.;\n"
 for var in v_out_vars:
     vs_end_replacement += f"  out.{var[1]} = {var[1]};\n"
@@ -161,36 +169,50 @@ vs_end_replacement += "}\n"
 new_shader_code = new_shader_code.replace("VS_END", vs_end_replacement)
 
 ##### CREATE FS_BEGIN replacement
-fs_begin_replacement      = "fragment float4 fragmentShader(OutVert in [[stage_in]], " \
-                            "constant const CmUBO   *in_glob [[buffer(2)]], " \
-                            "constant const SpecUBO *in_spec [[buffer(3)]]"
-texture_counter  = 0
-f_texture_use_define  = ""
+fs_has_frag_depth = new_shader_code.find("gl_FragDepth", new_shader_code.find("FS_BEGIN"),
+                                         new_shader_code.find("FS_END")) != -1
+fs_out_struct = "struct FragmentOut {\n"
+fs_out_struct += "  float4 color[[color(0)]];\n"
+if fs_has_frag_depth:
+    fs_out_struct += "  float depth [[depth(any)]];\n"
+fs_out_struct += "};\n"
+fs_begin_replacement = fs_out_struct
+fs_begin_replacement += "fragment FragmentOut fragmentShader(OutVert in [[stage_in]], " \
+                        "constant const CmUBO   *in_glob [[buffer(2)]], " \
+                        "constant const SpecUBO *in_spec [[buffer(3)]]"
+texture_counter = 0
+f_texture_use_define = ""
 f_texture_pass_define = ""
 for tex in textures:
-    fs_begin_replacement  += f",\n    constant {get_texture_type(tex[0])} *{tex[1]} [[buffer({4 + texture_counter})]]"
-    f_texture_use_define  += f"constant {get_texture_type(tex[0])} *{tex[1]} [[buffer({texture_counter})]], "
+    fs_begin_replacement += f",\n    constant {get_texture_type(tex[0])} *{tex[1]} [[buffer({4 + texture_counter})]]"
+    f_texture_use_define += f"constant {get_texture_type(tex[0])} *{tex[1]} [[buffer({texture_counter})]], "
     f_texture_pass_define += f"{tex[1]}, "
-    texture_counter      += 1
-fs_begin_replacement     += ")\n{\n"
-fs_begin_replacement     += "  float4 out_color;\n"
+    texture_counter += 1
+rw_buffer_counter = 0
+for buffer in rw_buffers:
+    fs_begin_replacement += f",\n  device atomic_{buffer[0]} *{buffer[1]} [[buffer({4 + texture_counter + rw_buffer_counter})]]"
+    rw_buffer_counter += 1
+fs_begin_replacement += ")\n{\n"
+fs_begin_replacement += "  float4 out_color;\n"
+if fs_has_frag_depth:
+    fs_begin_replacement += "  float gl_FragDepth;\n"
 for var in v_out_vars:
     fs_begin_replacement += f"  {var[0]} {var[1]} = in.{var[1]};\n"
 
-
-new_shader_code    = new_shader_code.replace("FS_BEGIN", fs_begin_replacement)
-
-fs_end_replacement = "  return out_color;\n}"
-
-new_shader_code    = new_shader_code.replace("FS_END", fs_end_replacement)
-
+new_shader_code = new_shader_code.replace("FS_BEGIN", fs_begin_replacement)
+fs_end_replacement = " FragmentOut return_values; return_values.color = out_color;"
+if fs_has_frag_depth:
+    fs_end_replacement += "  return_values.depth = gl_FragDepth;\n"
+fs_end_replacement += "  return return_values;\n}"
+new_shader_code = new_shader_code.replace("FS_END", fs_end_replacement)
 
 ## COMPUTE
 cs_begin_replacement = "kernel void kernel_main(uint3 gl_GlobalInvocationID [[thread_position_in_grid]]"
 if len(c_in_objects) > 0:
     tex_id = 0
     for c_in_object in c_in_objects:
-        cs_begin_replacement += ",texture" + c_in_object[0] + "<float, access::write> " + c_in_object[1] + "[[texture(" + str(tex_id) + ")]]"
+        cs_begin_replacement += ",texture" + c_in_object[0] + "<float, access::write> " + c_in_object[
+            1] + "[[texture(" + str(tex_id) + ")]]"
         tex_id += 1
 cs_begin_replacement += "){\n"
 
@@ -198,10 +220,10 @@ new_shader_code = new_shader_code.replace("CS_BEGIN", cs_begin_replacement)
 new_shader_code = new_shader_code.replace("CS_END", "}\n")
 
 ## Replace pointer access
-new_shader_code    = new_shader_code.replace("glob.", "in_glob->")
-new_shader_code    = new_shader_code.replace("spec.", "in_spec->")
+new_shader_code = new_shader_code.replace("glob.", "in_glob->")
+new_shader_code = new_shader_code.replace("spec.", "in_spec->")
 
-header  = "#include <metal_stdlib>\n"
+header = "#include <metal_stdlib>\n"
 header += "using namespace metal;\n"
 header += "#define discard discard_fragment()\n"
 header += "\n"
@@ -209,7 +231,6 @@ header += "//Type conversions\n"
 header += "typedef float2   vec2;\n"
 header += "typedef float3   vec3;\n"
 header += "typedef float4   vec4;\n"
-
 header += "typedef int2     ivec2;\n"
 header += "typedef int3     ivec3;\n"
 header += "typedef int4     ivec4;\n"
@@ -220,7 +241,6 @@ header += "\n"
 header += "//Math functions\n"
 header += "template<typename A, typename B> A atan(A x, B y) { return atan2(x, y); }\n"
 header += "template<typename A> A fwidth(A x) { return abs(dfdx(x)) + abs(dfdy(x)); }\n"
-header += "int mod(int x, int y) { return x % y; }\n"
 header += "#define M_PI 3.1415926535897932384626433832795\n"
 header += "\n"
 header += "//Texture stuff\n"
@@ -244,14 +264,13 @@ header += "float4 texture(constant sampled_texture3d<float> *tex, float3 point)\
 header += "{\n"
 header += "  return tex->texture.sample(tex->tex_sampler, point);\n"
 header += "}\n"
-header += "\n"
 header += "//Texture write\n"
 header += "void imageStore( texture3d<float, access::write> tex, int3 point, float4 value)\n"
 header += "{\n"
 header += "  tex.write(value, uint3(point), 0);\n"
-header += "}\n\n"
-header += "\n"
+header += "}\n"
 ## Passing of objects that are only available in main scope in metal
+header += "\n"
 header += f"#define USE_TEXTURES {f_texture_use_define}\n"
 header += f"#define PASS_TEXTURES {f_texture_pass_define}\n"
 header += f"#define USE_UBO constant const CmUBO *in_glob, constant const SpecUBO *in_spec,\n"
@@ -259,7 +278,9 @@ header += f"#define PASS_UBO in_glob, in_spec,\n"
 header += f"typedef const constant sampled_texture2d<float>* sampler2D;\n"
 header += f"typedef const constant sampled_texture2d_array<float>* sampler2DArray;\n"
 
-header += "\n" + common_data_code
+## Atomics
+header += "\n"
+header += "template <typename T> inline T atomicAdd(device atomic<T>* addr, T value) { return atomic_fetch_add_explicit(addr, value, memory_order_relaxed); }\n"
 
 ## Final assembly
 new_shader_code = header + new_shader_code + "\n"
@@ -273,9 +294,9 @@ else:
 with open(f"{sys.argv[4]}.ps", mode) as file:
     length = len(new_shader_code.encode('ascii'))
 
-    file.write('m'.encode('ascii'))                         # 1 byte
-    file.write(struct.pack('<I', length))                   # 4 bytes
-    file.write(new_shader_code.encode('ascii'))             # length bytes
+    file.write('m'.encode('ascii'))  # 1 byte
+    file.write(struct.pack('<I', length))  # 4 bytes
+    file.write(new_shader_code.encode('ascii'))  # length bytes
 
 ## Write out
 if os.path.exists(destination_shader):

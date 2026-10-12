@@ -16,16 +16,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "../Point.h"
-#include "Shader.h"
+#include "shared/graphics/graphics_layer.h"
 
+#include <memory>
 #include <vector>
-
-#include "graphics/graphics_layer.h"
 
 class Body;
 class Interface;
 class Sprite;
 class System;
+
 
 
 // Object to hold a set of "stars" to be drawn as a backdrop. The star pattern
@@ -34,46 +34,47 @@ class System;
 // interesting than if the stars were evenly spread out in perfectly random
 // noise. If the view is moving, the stars are elongated in a motion blur to
 // match the motion; otherwise they would seem to jitter around.
-class StarField
-{
+class StarField {
 public:
-  void         Init(int stars, int width);
-  void         Clear();
-  void         FinishLoading();
-  const Point &Position() const;
-  void         SetPosition(const Point &position);
-  void         SetHaze(const Sprite *sprite, bool allowAnimation);
+	void Init(const GraphicsTypes::GraphicsInstance *graphics_instance, int stars, int width);
+	void FinishLoading();
+	const Point &Position() const;
+	void SetPosition(const Point &position);
+	void SetHaze(const Sprite *sprite, bool allowAnimation);
 
-  void Step(Point vel, double zoom = 1.);
-  void Draw(const Point &blur, const System *system = nullptr) const;
+	void Step(Point vel, double zoom = 1.);
+	void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &blur, const System *system = nullptr) const;
+	void Clear();
+
+private:
+	void SetUpGraphics(const GraphicsTypes::GraphicsInstance *graphics_instance);
+	void MakeStars(const GraphicsTypes::GraphicsInstance *graphics_instance, int stars, int width);
+
 
 
 private:
-  void SetUpGraphics();
-  void MakeStars(int stars, int width);
+	int widthMod;
+	int tileCols;
+	std::vector<int> tileIndex;
 
+	// Constants from an Interface that modify the starfield's behavior.
+	double fixedZoom = 1.;
+	double velocityReducer = 1.;
 
-private:
-  int              widthMod;
-  int              tileCols;
-  std::vector<int> tileIndex;
+	Point pos;
+	double baseZoom = 1.;
 
-  // Constants from an Interface that modify the starfield's behavior.
-  double fixedZoom       = 1.;
-  double velocityReducer = 1.;
+	double minZoom;
+	double zoomClamp;
+	double clampSlope;
 
-  Point  pos;
-  double baseZoom = 1.;
+	// Track the haze sprite, so we can animate the transition between different hazes.
+	const Sprite *lastSprite;
+	mutable double transparency = 0.;
+	std::vector<Body> haze[2];
 
-  double minZoom;
-  double zoomClamp;
-  double clampSlope;
+	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
+	ShaderInfo info;
 
-  // Track the haze sprite, so we can animate the transition between different hazes.
-  const Sprite     *lastSprite;
-  mutable double    transparency = 0.;
-  std::vector<Body> haze[2];
-
-  Shader                       shader = Shader("starfield shader");
-  graphics_layer::ObjectHandle vertices;
+	graphics_layer::ObjectHandle geometry;
 };

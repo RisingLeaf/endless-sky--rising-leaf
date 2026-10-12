@@ -29,50 +29,52 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 using namespace std;
 
-namespace
-{
-  function<void(const string &message, Logger::Level)> logCallback = nullptr;
-  mutex                                                logMutex;
+namespace {
+	function<void(const string &message, Logger::Level)> logCallback = nullptr;
+	mutex logMutex;
 } // namespace
 
 
 Logger::Session::Session(bool quiet) : quiet{quiet}
 {
-  if(quiet) return;
+	if(quiet)
+		return;
 
-  string message = "Logger session beginning. Game version: " + GameVersion::Running().ToString() +
-                   ". Detected operating system version: ";
+	string message = "Logger session beginning. Game version: " + GameVersion::Running().ToString() +
+	                 ". Detected operating system version: ";
 #ifdef _WIN32
-  message += WinVersion::ToString() + '.';
+	message += WinVersion::ToString() + '.';
 #else
-  utsname uName;
-  uname(&uName);
-  message += string(uName.sysname) + ' ' + uName.release + ' ' + uName.version + '.';
+	utsname uName;
+	uname(&uName);
+	message += string(uName.sysname) + ' ' + uName.release + ' ' + uName.version + '.';
 #endif
-  Log(message, Level::INFO);
+	Log(message, Level::INFO);
 }
 
 
 Logger::Session::~Session()
 {
-  if(quiet) return;
+	if(quiet)
+		return;
 
-  Log("Logger session end.", Level::INFO);
+	Log("Logger session end.", Level::INFO);
 }
 
 
 void Logger::SetLogCallback(function<void(const string &message, Level)> callback)
 {
-  logCallback = std::move(callback);
+	logCallback = std::move(callback);
 }
 
 
 void Logger::Log(const string &message, Level level)
 {
-  lock_guard<mutex> lock(logMutex);
-  string            formatted =
-      Format::TimestampString(chrono::system_clock::now(), true) + " | " + static_cast<char>(level) + " | " + message;
-  (level == Level::INFO ? cout : cerr) << formatted << endl;
-  // Perform additional logging through callback if any is registered.
-  if(logCallback) logCallback(formatted, level);
+	lock_guard<mutex> lock(logMutex);
+	string formatted =
+	    Format::TimestampString(chrono::system_clock::now(), true) + " | " + static_cast<char>(level) + " | " + message;
+	(level == Level::INFO ? cout : cerr) << formatted << endl;
+	// Perform additional logging through callback if any is registered.
+	if(logCallback)
+		logCallback(formatted, level);
 }

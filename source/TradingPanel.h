@@ -16,45 +16,50 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "Panel.h"
+#include "graphics/graphics_toplevel_defines.h"
 
+class Planet;
 class PlayerInfo;
 class System;
+
 
 
 // Overlay on the PlanetPanel showing commodity prices and inventory, and allowing
 // buying and selling. This also lets you sell any plundered outfits you are
 // carrying, although if you want to sell only certain ones and not others you
 // will need to select them individually in the outfitter panel.
-class TradingPanel : public Panel
-{
+class TradingPanel : public Panel {
 public:
-  explicit TradingPanel(PlayerInfo &player);
-  ~TradingPanel();
+	explicit TradingPanel(PlayerInfo &player);
+	~TradingPanel();
 
-  virtual void Step() override;
-  virtual void Draw() override;
+	virtual void Step() override;
+	virtual void Draw(GraphicsTypes::CommandBufferInstance *cb) override;
 
 
 protected:
-  // Only override the ones you need; the default action is to return false.
-  virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
-  virtual bool Click(int x, int y, MouseButton button, int clicks) override;
+	// Only override the ones you need; the default action is to return false.
+	virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
+	virtual bool Click(int x, int y, MouseButton button, int clicks) override;
 
 
 private:
-  void Buy(int64_t amount);
+	void Buy(int64_t amount);
+	void SellOutfitsOrMinables(bool sellMinables);
+	std::string OutfitSalesMessage(bool sellMinables) const;
+	void StoreOutfitsFromCargo() const;
 
 
 private:
-  PlayerInfo   &player;
-  const System &system;
-  const int     COMMODITY_COUNT;
+	PlayerInfo &player;
+	const Planet &planet;
+	const System &system;
+	const int COMMODITY_COUNT;
+	// There are multiple requirements to selling or storing outfits. This caches the calculation in Step().
+	bool canSellOutfits = false;
+	bool canStoreOutfits = false;
 
-  // Remember whether the "sell all" button will sell all outfits, or sell
-  // everything except outfits.
-  bool sellOutfits = false;
-
-  // Keep track of how much we sold and how much profit was made.
-  int     tonsSold = 0;
-  int64_t profit   = 0;
+	// Keep track of how much we sold and how much profit was made.
+	int tonsSold = 0;
+	int64_t profit = 0;
 };

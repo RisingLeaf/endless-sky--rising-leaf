@@ -4,39 +4,60 @@ cmake_minimum_required(VERSION 3.18)
 file(GLOB GLSL_SOURCE_FILES "*.pps")
 
 list(LENGTH GLSL_SOURCE_FILES shader_count)
-list(JOIN   GLSL_SOURCE_FILES "\n   " shader_out_string)
-message(STATUS "Found ${shader_count} shaders:\n   ${shader_out_string}")
+list(JOIN   GLSL_SOURCE_FILES "\n\t" shader_out_string)
+message(STATUS "Found ${shader_count} shaders:\n\t${shader_out_string}")
 
-if(APPLE)
-    foreach(GLSL ${GLSL_SOURCE_FILES})
-        get_filename_component(GLSL_NAME ${GLSL} NAME_WLE)
-        get_filename_component(GLSL_EXTENSION ${GLSL} EXT)
-        set(PRE_PROCESSED ${CMAKE_SOURCE_DIR}/shaders/compilation/${GLSL_NAME}.prs${GLSL_EXTENSION})
-        set(SPIRV ${CMAKE_SOURCE_DIR}/shaders/compilation/${GLSL_NAME})
-        add_custom_command(
-                OUTPUT ${SPIRV}.ps
-                COMMAND
-                ${CMAKE_SOURCE_DIR}/utils/preprocess_shader_metal.py ${CMAKE_SOURCE_DIR}/shaders/common_uniform_data.metal ${CMAKE_SOURCE_DIR}/shaders/ ${GLSL} ${SPIRV}
-                DEPENDS ${GLSL} ${CMAKE_SOURCE_DIR}/utils/preprocess_shader_metal.py)
-        list(APPEND PRE_PROCESSED_FILES ${SPIRV}.ps)
-    endforeach(GLSL)
+if(ASTROLATIVE_BUILD_SYSTEM STREQUAL "apple")
+  foreach(GLSL ${GLSL_SOURCE_FILES})
+    get_filename_component(GLSL_NAME ${GLSL} NAME_WLE)
+    get_filename_component(GLSL_EXTENSION ${GLSL} EXT)
 
-    add_custom_target(Shaders DEPENDS ${PRE_PROCESSED_FILES})
+    set(PRE_PROCESSED ${CMAKE_SOURCE_DIR}/shaders/compilation/${GLSL_NAME}.prs${GLSL_EXTENSION})
+    set(SPIRV ${CMAKE_SOURCE_DIR}/shaders/compilation/${GLSL_NAME})
+
+    add_custom_command(
+      OUTPUT ${SPIRV}.ps
+      COMMAND
+        ${CMAKE_SOURCE_DIR}/utils/preprocess_shader_metal.py
+            ${CMAKE_SOURCE_DIR}/shaders/common_uniform_data.metal
+            ${CMAKE_SOURCE_DIR}/shaders/
+            ${GLSL}
+            ${SPIRV}
+      DEPENDS ${GLSL} ${CMAKE_SOURCE_DIR}/utils/preprocess_shader_metal.py)
+    list(APPEND PRE_PROCESSED_FILES ${SPIRV}.ps)
+  endforeach(GLSL)
+
+  add_custom_target(Shaders DEPENDS ${PRE_PROCESSED_FILES})
 else ()
-    message("SPIRV Compiler: ${Vulkan_GLSLC_EXECUTABLE}")
+  find_program(SPIRV_OPT_EXECUTABLE NAMES spirv-opt HINTS $ENV{VULKAN_SDK}/Bin)
+  if(NOT SPIRV_OPT_EXECUTABLE)
+    message(FATAL_ERROR "Could not find spirv-opt")
+  endif()
 
-    foreach(GLSL ${GLSL_SOURCE_FILES})
-        get_filename_component(GLSL_NAME ${GLSL} NAME_WLE)
-        set(PRE_PROCESSED ${CMAKE_SOURCE_DIR}/shaders/compilation/${GLSL_NAME})
-        set(SPIRV ${CMAKE_SOURCE_DIR}/shaders/compilation/${GLSL_NAME})
-        add_custom_command(
-                OUTPUT ${SPIRV}.vert.spv ${SPIRV}.frag.spv
-                COMMAND
-                ${CMAKE_SOURCE_DIR}/utils/preprocess_shader.py ${Vulkan_GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/shaders/common_uniform_data.glsl ${CMAKE_SOURCE_DIR}/shaders/ ${GLSL} ${PRE_PROCESSED}
-                DEPENDS ${GLSL} ${CMAKE_SOURCE_DIR}/utils/preprocess_shader.py)
-        list(APPEND SPIRV_BINARY_FILES ${SPIRV}.vert.spv)
-        list(APPEND SPIRV_BINARY_FILES ${SPIRV}.frag.spv)
-    endforeach(GLSL)
+  message("SPIRV Compiler:  ${Vulkan_GLSLC_EXECUTABLE}")
+  message("SPIRV Optimizer: ${SPIRV_OPT_EXECUTABLE}")
 
-    add_custom_target(Shaders DEPENDS ${SPIRV_BINARY_FILES})
+  foreach(GLSL ${GLSL_SOURCE_FILES})
+    get_filename_component(GLSL_NAME ${GLSL} NAME_WLE)
+
+    set(PRE_PROCESSED ${CMAKE_SOURCE_DIR}/shaders/compilation/${GLSL_NAME})
+    set(SPIRV ${CMAKE_SOURCE_DIR}/shaders/compilation/${GLSL_NAME})
+
+    add_custom_command(
+      OUTPUT ${SPIRV}.vert.spv ${SPIRV}.frag.spv
+      COMMAND
+        ${CMAKE_SOURCE_DIR}/utils/preprocess_shader.py
+          --glslc ${Vulkan_GLSLC_EXECUTABLE}
+          --spirv-opt ${SPIRV_OPT_EXECUTABLE}
+          --common-data ${CMAKE_SOURCE_DIR}/shaders/common_uniform_data.glsl
+          --include-path ${CMAKE_SOURCE_DIR}/shaders/
+          --shader ${GLSL}
+          --destination ${PRE_PROCESSED}
+      DEPENDS ${GLSL} ${CMAKE_SOURCE_DIR}/utils/preprocess_shader.py)
+    list(APPEND SPIRV_BINARY_FILES ${SPIRV}.vert.spv)
+    list(APPEND SPIRV_BINARY_FILES ${SPIRV}.frag.spv)
+  endforeach(GLSL)
+
+  add_custom_target(Shaders DEPENDS ${SPIRV_BINARY_FILES})
 endif ()
+

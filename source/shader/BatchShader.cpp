@@ -16,60 +16,74 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "BatchShader.h"
 
 #include "../GameData.h"
-#include "../GameWindow.h"
+#include "../Screen.h"
 #include "../image/Sprite.h"
-#include "Shader.h"
-#include "graphics/graphics_layer.h"
+#include "shared/graphics/graphics_layer.h"
+#include "shared/system/File.h"
 
+using namespace std;
 
-namespace
-{
-  Shader shader("batch shader");
-}
+namespace {
+	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
+	ShaderInfo info;
+} // namespace
+
 
 
 // Initialize the shaders.
-void BatchShader::Init()
+void BatchShader::Init(const GraphicsTypes::GraphicsInstance *graphics_instance)
 {
-  auto &info = shader.GetInfo();
-  info.SetInputSize(6 * sizeof(float));
-  info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);                 // vert
-  info.AddInput(GraphicsTypes::ShaderType::FLOAT3, 2 * sizeof(float), 1); // texCoord
-  info.AddInput(GraphicsTypes::ShaderType::FLOAT, 5 * sizeof(float), 2);  // alpha
+	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
+	info.AddInput(GraphicsTypes::ShaderType::FLOAT3, 2 * sizeof(float), 0);
+	info.AddInput(GraphicsTypes::ShaderType::FLOAT, 5 * sizeof(float), 0);
+	info.SetInputSize(6 * sizeof(float));
 
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT); // frameCount
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // scale
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // frameCount
 
-  info.AddTexture("tex");
+	info.AddTexture("tex");
 
-  shader.Create(*GameData::Shaders().Find("batch"));
+	const auto shader_code = File::ReadShader("../shaders/compilation/batch.ps");
+	graphics_instance->CreateShader(shader, info, shader_code, "batch");
 }
 
 
-void BatchShader::Clear() { shader.Clear(); }
 
-
-void BatchShader::Bind() { shader.Bind(); }
-
-
-void BatchShader::Add(const Sprite *sprite, const std::vector<float> &data)
+void BatchShader::Bind(GraphicsTypes::CommandBufferInstance *cb)
 {
-  // Do nothing if there are no sprites to draw.
-  if(data.empty()) return;
+	cb->BindShader(shader.get());
+}
 
-  graphics_layer::TextureList texture_list;
-  texture_list.AddTexture(sprite->Texture().GetTexture(), 0, false);
-  texture_list.Bind(GameWindow::GetInstance());
 
-  const auto                 info = shader.GetInfo();
-  std::vector<unsigned char> data_cp(info.GetUniformSize());
 
-  const auto frame_count = static_cast<float>(sprite->Frames());
+void BatchShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Sprite *sprite, const vector<float> &data)
+{
+	// Do nothing if there are no sprites to draw.
+	if(data.empty())
+		return;
 
-  int i = -1;
-  info.CopyUniformEntryToBuffer(data_cp.data(), &frame_count, ++i);
+	const gm::vec2 scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
+	const int frame_count = sprite->Frames();
 
-  GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
 
-  GameWindow::GetInstance()
-      ->DrawDynamic(data.size() / 6, 6 * sizeof(float), data.data(), GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
+	std::vector<unsigned char> data_cp(info.GetUniformSize());
+	int i = -1;
+	info.CopyUniformEntryToBuffer(data_cp.data(), &scale, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &frame_count, ++i);
+	cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
+
+	graphics_layer::QuickBindTextures(cb, {sprite->Texture().GetTexture()});
+
+	cb->DrawDynamic(data.size() / 6, sizeof(float) * 6, data.data(), GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
+}
+
+
+
+void BatchShader::Unbind()
+{
+}
+
+void BatchShader::Clear()
+{
+	shader.reset();
 }

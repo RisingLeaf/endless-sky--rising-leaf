@@ -21,33 +21,43 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <map>
 #include <mutex>
 
+using namespace std;
 
-namespace
-{
-  std::map<std::string, Sprite> sprites;
+namespace {
+	map<string, Sprite> sprites;
 
-  std::mutex modifyMutex;
+	mutex modifyMutex;
 } // namespace
 
 
-const Sprite *SpriteSet::Get(const std::string &name) { return Modify(name); }
+
+const Sprite *SpriteSet::Get(const string &name)
+{
+	return Modify(name);
+}
+
 
 
 void SpriteSet::CheckReferences()
 {
-  for(const auto &[name, sprite] : sprites)
-    if(!sprite.HasDimensions())
-      Logger::Log("Image \"" + name + "\" is referred to, but has no pixels.", Logger::Level::WARNING);
+	for(const auto &[name, sprite] : sprites)
+		if(!sprite.HasDimensions())
+			Logger::Log("Image \"" + name + "\" is referred to, but has no pixels.", Logger::Level::WARNING);
 }
 
 
-Sprite *SpriteSet::Modify(const std::string &name)
+
+Sprite *SpriteSet::Modify(const string &name)
 {
-  std::lock_guard<std::mutex> guard(modifyMutex);
+	lock_guard<mutex> guard(modifyMutex);
 
-  auto it = sprites.find(name);
-  if(it == sprites.end()) it = sprites.emplace(name, Sprite(name)).first;
-  return &it->second;
+	auto it = sprites.find(name);
+	if(it == sprites.end())
+		it = sprites.emplace(name, Sprite(name)).first;
+	return &it->second;
 }
 
-void SpriteSet::Clear() { sprites.clear(); }
+void SpriteSet::Clear()
+{
+	sprites.clear();
+}

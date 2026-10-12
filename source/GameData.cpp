@@ -28,6 +28,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "FormationPattern.h"
 #include "Galaxy.h"
 #include "GameEvent.h"
+#include "GameWindow.h"
 #include "Government.h"
 #include "Hazard.h"
 #include "Interface.h"
@@ -38,11 +39,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Person.h"
 #include "Phrase.h"
 #include "Planet.h"
-#include "Plugins.h"
+#include "Plugin.h"
+#include "PluginManager.h"
 #include "Politics.h"
 #include "RenderBuffer.h"
 #include "Ship.h"
 #include "StartConditions.h"
+#include "StellarObjectSpriteData.h"
 #include "System.h"
 #include "TaskQueue.h"
 #include "UniverseObjects.h"
@@ -53,7 +56,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "image/MaskManager.h"
 #include "image/Sprite.h"
 #include "image/SpriteLoadManager.h"
-#include "image/SpriteSet.h"
 #include "shader/BatchShader.h"
 #include "shader/FillShader.h"
 #include "shader/FogShader.h"
@@ -70,657 +72,904 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <algorithm>
 #include <cassert>
 #include <filesystem>
-#include <iostream>
 #include <queue>
+#include <ranges>
 #include <utility>
 #include <vector>
 
-#include "risingleaf_shared/system/File.h"
-#include "text/Font.h"
+using namespace std;
 
+namespace {
+	UniverseObjects objects;
+	Set<Fleet> defaultFleets;
+	Set<Government> defaultGovernments;
+	Set<Planet> defaultPlanets;
+	Set<System> defaultSystems;
+	Set<Galaxy> defaultGalaxies;
+	Set<Shop<Ship>> defaultShipSales;
+	Set<Shop<Outfit>> defaultOutfitSales;
+	Set<Wormhole> defaultWormholes;
+	Set<Person> defaultPersons;
+	TextReplacements defaultSubstitutions;
 
-namespace
-{
-  UniverseObjects   objects;
-  Set<Fleet>        defaultFleets;
-  Set<Government>   defaultGovernments;
-  Set<Planet>       defaultPlanets;
-  Set<System>       defaultSystems;
-  Set<Galaxy>       defaultGalaxies;
-  Set<Shop<Ship>>   defaultShipSales;
-  Set<Shop<Outfit>> defaultOutfitSales;
-  Set<Wormhole>     defaultWormholes;
-  Set<Person>       defaultPersons;
-  TextReplacements  defaultSubstitutions;
+	const Gamerules *activeGamerules = nullptr;
 
-  const Gamerules *activeGamerules = nullptr;
+	Politics politics;
 
-  Politics politics;
+	StarField background;
 
-  StarField background;
+	vector<filesystem::path> sources;
 
-  std::vector<std::filesystem::path> sources;
+	MaskManager maskManager;
 
-  MaskManager maskManager;
+	const Government *playerGovernment = nullptr;
+	map<const System *, map<string, int>> purchases;
 
-  const Government                                    *playerGovernment = nullptr;
-  std::map<const System *, std::map<std::string, int>> purchases;
+	ConditionsStore globalConditions;
 
-  ConditionsStore globalConditions;
+	void LoadPlugin(TaskQueue &queue, const filesystem::path &path)
+	{
+		const auto *plugin = PluginManager::Load(path);
+		if(!plugin)
+			return;
 
-  void LoadPlugin(TaskQueue &queue, const std::filesystem::path &path)
-  {
-    const auto *plugin = Plugins::Load(path);
-    if(!plugin) return;
+		if(plugin->enabled)
+			sources.push_back(path);
 
-    if(plugin->enabled) sources.push_back(path);
+		// Load the icon for the plugin, if any.
+		auto icon = make_shared<ImageSet>(plugin->name);
 
-    // Load the icon for the plugin, if any.
-    auto icon = make_shared<ImageSet>(plugin->name);
+		// Try adding all the possible icon variants.
+		for(const string &extension : ImageBuffer::ImageExtensions())
+		{
+			filesystem::path iconPath = path / ("icon" + extension);
+			if(Files::Exists(iconPath))
+			{
+				icon->Add(iconPath);
+				break;
+			}
+		}
+		for(const string &extension : ImageBuffer::ImageExtensions())
+		{
+			filesystem::path iconPath = path / ("icon@2x" + extension);
+			if(Files::Exists(iconPath))
+			{
+				icon->Add(iconPath);
+				break;
+			}
+		}
 
-    // Try adding all the possible icon variants.
-    for(const std::string &extension : ImageBuffer::ImageExtensions())
-    {
-      std::filesystem::path iconPath = path / ("icon" + extension);
-      if(Files::Exists(iconPath))
-      {
-        icon->Add(iconPath);
-        break;
-      }
-    }
-    for(const std::string &extension : ImageBuffer::ImageExtensions())
-    {
-      std::filesystem::path iconPath = path / ("icon@2x" + extension);
-      if(Files::Exists(iconPath))
-      {
-        icon->Add(iconPath);
-        break;
-      }
-    }
+		if(!icon->IsEmpty())
+		{
+			icon->ValidateFrames();
+			SpriteLoadManager::LoadSprite(queue, icon);
+		}
+	}
 
-    if(!icon->IsEmpty())
-    {
-      icon->ValidateFrames();
-      SpriteLoadManager::LoadSprite(queue, icon);
-    }
-  }
+	const char *const FONT_14_NAME = "font/ubuntu14r.png";
+	const char *const FONT_18_NAME = "font/ubuntu18r.png";
 } // namespace
 
 
-std::shared_future<void>
-GameData::BeginLoad(TaskQueue &queue, const PlayerInfo &player, bool onlyLoadData, bool debugMode, bool preventUpload)
+
+shared_future<void> GameData::BeginLoad(TaskQueue &queue, const PlayerInfo &player, bool onlyLoadData, bool debugMode,
+                                        bool preventUpload)
 {
-  if(preventUpload) SpriteLoadManager::PreventSpriteUpload();
-  SpriteLoadManager::FindDeferredFolders();
+	if(preventUpload)
+		SpriteLoadManager::PreventSpriteUpload();
+	SpriteLoadManager::FindDeferredFolders();
 
-  // Initialize the list of "source" folders based on any active plugins.
-  LoadSources(queue);
+	// Initialize the list of "source" folders based on any active plugins.
+	LoadSources(queue);
 
-  if(!onlyLoadData)
-  {
-    queue.Run(
-        [&queue]
-        {
-          SpriteLoadManager::Init(queue, FindImages());
-          // Generate a catalog of music files.
-          Music::Init(sources);
-        });
-  }
+	if(!onlyLoadData)
+	{
+		queue.Run([&queue] {
+			SpriteLoadManager::Init(queue, FindImages());
+			// Generate a catalog of music files.
+			Music::Init(sources);
+		});
+	}
 
-  return objects.Load(queue, sources, player, &globalConditions, debugMode);
+	return objects.Load(queue, sources, player, &globalConditions, debugMode);
 }
+
 
 
 void GameData::FinishLoading()
 {
-  // Store the current state, to revert back to later.
-  defaultFleets        = objects.fleets;
-  defaultGovernments   = objects.governments;
-  defaultPlanets       = objects.planets;
-  defaultSystems       = objects.systems;
-  defaultGalaxies      = objects.galaxies;
-  defaultShipSales     = objects.shipSales;
-  defaultOutfitSales   = objects.outfitSales;
-  defaultWormholes     = objects.wormholes;
-  defaultPersons       = objects.persons;
-  defaultSubstitutions = objects.substitutions;
+	// Store the current state, to revert back to later.
+	defaultFleets = objects.fleets;
+	defaultGovernments = objects.governments;
+	defaultPlanets = objects.planets;
+	defaultSystems = objects.systems;
+	defaultGalaxies = objects.galaxies;
+	defaultShipSales = objects.shipSales;
+	defaultOutfitSales = objects.outfitSales;
+	defaultWormholes = objects.wormholes;
+	defaultPersons = objects.persons;
+	defaultSubstitutions = objects.substitutions;
 
-  activeGamerules  = objects.gamerulesPresets.Get("Default");
-  playerGovernment = objects.governments.Get("Escort");
+	activeGamerules = objects.gamerulesPresets.Get("Default");
+	playerGovernment = objects.governments.Get("Escort");
 
-  politics.Reset();
-  background.FinishLoading();
+	politics.Reset();
+	background.FinishLoading();
 }
 
 
-void GameData::CheckReferences() { objects.CheckReferences(); }
+
+void GameData::CheckReferences()
+{
+	objects.CheckReferences();
+}
+
 
 
 void GameData::LoadSettings()
 {
-  // Load the key settings.
-  Command::LoadSettings(Files::Resources() / "keys.txt");
-  Command::LoadSettings(Files::Config() / "keys.txt");
+	// Load the key settings.
+	Command::LoadSettings(Files::Resources() / "keys.txt");
+	Command::LoadSettings(Files::Config() / "keys.txt");
 }
+
 
 
 void GameData::LoadShaders()
 {
-  const std::filesystem::path base = Files::Resources() / "shaders" / "compilation";
-  if(Files::Exists(base))
-  {
-    for(const std::filesystem::path &shaderFile : Files::RecursiveList(base))
-    {
-      if(shaderFile.extension() == ".ps")
-      {
-        std::string name           = shaderFile.stem().generic_string();
-        *objects.shaders.Get(name) = File::ReadShader(shaderFile.generic_string());
-      }
-    }
-  }
+	// The found shader files. The first element is the vertex shader,
+	// the second is the fragment shader.
+	map<string, pair<string, string>> loaded;
+	// The paths to standard fonts, possibly overridden by plugins.
+	filesystem::path font14Path = Files::Images() / FONT_14_NAME;
+	filesystem::path font18Path = Files::Images() / FONT_18_NAME;
+	for(const filesystem::path &source : sources)
+	{
+		filesystem::path base = source / "shaders";
+		if(Files::Exists(base))
+			for(filesystem::path shaderFile : Files::RecursiveList(base))
+			{
+				filesystem::path shader = shaderFile;
+#ifdef ES_GLES
+				// Allow specifying different shaders for GL and GLES.
+				// In this case, only the appropriate shader is loaded.
+				if(shaderFile.extension() == ".gles")
+					shader = shader.parent_path() / shader.stem();
+#else
+				if(shaderFile.extension() == ".gl")
+					shader = shader.parent_path() / shader.stem();
+#endif
+				string name = (shader.parent_path() / shader.stem()).lexically_relative(base).generic_string();
+				if(shader.extension() == ".vert")
+					loaded[name].first = shaderFile.string();
+				else if(shader.extension() == ".frag")
+					loaded[name].second = shaderFile.string();
+			}
+		filesystem::path fontCandidate = source / "images" / FONT_14_NAME;
+		if(Files::Exists(fontCandidate))
+			font14Path = fontCandidate;
+		fontCandidate = source / "images" / FONT_18_NAME;
+		if(Files::Exists(fontCandidate))
+			font18Path = fontCandidate;
+	}
 
-  FillShader::Init();
-  FogShader::Init();
-  LineShader::Init();
-  OutlineShader::Init();
-  PointerShader::Init();
-  RingShader::Init();
-  SpriteShader::Init();
-  BatchShader::Init();
-  RenderBuffer::Init();
+	FillShader::Init(GameWindow::GraphicsInstance());
+	FogShader::Init(GameWindow::GraphicsInstance());
+	LineShader::Init(GameWindow::GraphicsInstance());
+	OutlineShader::Init(GameWindow::GraphicsInstance());
+	PointerShader::Init(GameWindow::GraphicsInstance());
+	RingShader::Init(GameWindow::GraphicsInstance());
+	SpriteShader::Init(GameWindow::GraphicsInstance());
+	BatchShader::Init(GameWindow::GraphicsInstance());
+	RenderBuffer::Init(GameWindow::GraphicsInstance());
 
-  FontSet::Add(Files::Images() / "font/ubuntu14r.png", 14);
-  FontSet::Add(Files::Images() / "font/ubuntu18r.png", 18);
+	FontSet::Add(font14Path, 14);
+	FontSet::Add(font18Path, 18);
 
-  background.Init(16'384, 4096);
+	background.Init(GameWindow::GraphicsInstance(), 16384, 4096);
 }
 
-
-void GameData::ClearShaders()
-{
-  FillShader::Clear();
-  FogShader::Clear();
-  LineShader::Clear();
-  OutlineShader::Clear();
-  PointerShader::Clear();
-  RingShader::Clear();
-  SpriteShader::Clear();
-  BatchShader::Clear();
-  RenderBuffer::Clear();
-
-  FontSet::Clear();
-  Font::Clear();
-
-  SpriteSet::Clear();
-
-  background.Clear();
-}
 
 
 double GameData::GetProgress()
 {
-  return std::min({SpriteLoadManager::Progress(), Audio::GetProgress(), objects.GetProgress()});
+	return min({SpriteLoadManager::Progress(), Audio::GetProgress(), objects.GetProgress()});
 }
 
 
-bool GameData::IsLoaded() { return GetProgress() == 1.; }
+
+bool GameData::IsLoaded()
+{
+	return GetProgress() == 1.;
+}
+
 
 
 // Get the list of resource sources (i.e. plugin folders).
-const std::vector<std::filesystem::path> &GameData::Sources() { return sources; }
+const vector<filesystem::path> &GameData::Sources()
+{
+	return sources;
+}
+
 
 
 // Get a reference to the UniverseObjects object.
-UniverseObjects &GameData::Objects() { return objects; }
+UniverseObjects &GameData::Objects()
+{
+	return objects;
+}
+
 
 
 // Revert any changes that have been made to the universe.
 void GameData::Revert()
 {
-  objects.fleets.Revert(defaultFleets);
-  objects.governments.Revert(defaultGovernments);
-  objects.planets.Revert(defaultPlanets);
-  objects.systems.Revert(defaultSystems);
-  objects.galaxies.Revert(defaultGalaxies);
-  objects.shipSales.Revert(defaultShipSales);
-  objects.outfitSales.Revert(defaultOutfitSales);
-  objects.wormholes.Revert(defaultWormholes);
-  objects.persons.Revert(defaultPersons);
-  objects.substitutions.Revert(defaultSubstitutions);
+	objects.fleets.Revert(defaultFleets);
+	objects.governments.Revert(defaultGovernments);
+	objects.planets.Revert(defaultPlanets);
+	objects.systems.Revert(defaultSystems);
+	objects.galaxies.Revert(defaultGalaxies);
+	objects.shipSales.Revert(defaultShipSales);
+	objects.outfitSales.Revert(defaultOutfitSales);
+	objects.wormholes.Revert(defaultWormholes);
+	objects.persons.Revert(defaultPersons);
+	objects.substitutions.Revert(defaultSubstitutions);
 
-  activeGamerules = objects.gamerulesPresets.Get("Default");
+	activeGamerules = objects.gamerulesPresets.Get("Default");
 
-  for(auto &it : objects.persons)
-    it.second.Restore();
+	for(auto &it : objects.persons)
+		it.second.Restore();
 
-  politics.Reset();
-  purchases.clear();
+	politics.Reset();
+	purchases.clear();
 }
+
 
 
 void GameData::SetDate(const Date &date)
 {
-  for(auto &it : objects.systems)
-    it.second.SetDate(date);
-  politics.ResetDaily();
+	for(auto &it : objects.systems)
+		it.second.SetDate(date);
+	politics.ResetDaily();
 }
+
 
 
 void GameData::ReadEconomy(const DataNode &node)
 {
-  if(!node.Size() || node.Token(0) != "economy") return;
+	if(!node.Size() || node.Token(0) != "economy")
+		return;
 
-  std::vector<std::string> headings;
-  for(const DataNode &child : node)
-  {
-    const std::string &key = child.Token(0);
-    if(key == "purchases")
-    {
-      for(const DataNode &grand : child)
-        if(grand.Size() >= 3 && grand.Value(2))
-          purchases[Systems().Get(grand.Token(0))][grand.Token(1)] += grand.Value(2);
-    }
-    else if(key == "system")
-    {
-      headings.clear();
-      for(int index = 1; index < child.Size(); ++index)
-        headings.push_back(child.Token(index));
-    }
-    else {
-      System &system = *objects.systems.Get(key);
+	vector<string> headings;
+	for(const DataNode &child : node)
+	{
+		const string &key = child.Token(0);
+		if(key == "purchases")
+		{
+			for(const DataNode &grand : child)
+				if(grand.Size() >= 3 && grand.Value(2))
+					purchases[Systems().Get(grand.Token(0))][grand.Token(1)] += grand.Value(2);
+		}
+		else if(key == "system")
+		{
+			headings.clear();
+			for(int index = 1; index < child.Size(); ++index)
+				headings.push_back(child.Token(index));
+		}
+		else
+		{
+			System &system = *objects.systems.Get(key);
 
-      int index = 0;
-      for(const std::string &commodity : headings)
-        system.SetSupply(commodity, child.Value(++index));
-    }
-  }
+			int index = 0;
+			for(const string &commodity : headings)
+				system.SetSupply(commodity, child.Value(++index));
+		}
+	}
 }
+
 
 
 void GameData::WriteEconomy(DataWriter &out)
 {
-  out.Write("economy");
-  out.BeginChild();
-  {
-    // Write each system and the commodity quantities purchased there.
-    if(!purchases.empty())
-    {
-      out.Write("purchases");
-      out.BeginChild();
-      using Purchase = std::pair<const System *const, std::map<std::string, int>>;
-      WriteSorted(
-          purchases,
-          [](const Purchase *lhs, const Purchase *rhs) { return lhs->first->TrueName() < rhs->first->TrueName(); },
-          [&out](const Purchase &pit)
-          {
-            // Write purchases for all systems, even ones from removed plugins.
-            for(const auto &cit : pit.second)
-              out.Write(pit.first->TrueName(), cit.first, cit.second);
-          });
-      out.EndChild();
-    }
-    // Write the "header" row.
-    out.WriteToken("system");
-    for(const auto &cit : GameData::Commodities())
-      out.WriteToken(cit.name);
-    out.Write();
+	out.Write("economy");
+	out.BeginChild();
+	{
+		// Write each system and the commodity quantities purchased there.
+		if(!purchases.empty())
+		{
+			out.Write("purchases");
+			out.BeginChild();
+			using Purchase = pair<const System *const, map<string, int>>;
+			WriteSorted(
+			    purchases,
+			    [](const Purchase *lhs, const Purchase *rhs) {
+				    return lhs->first->TrueName() < rhs->first->TrueName();
+			    },
+			    [&out](const Purchase &pit) {
+				    // Write purchases for all systems, even ones from removed plugins.
+				    for(const auto &cit : pit.second)
+					    out.Write(pit.first->TrueName(), cit.first, cit.second);
+			    });
+			out.EndChild();
+		}
+		// Write the "header" row.
+		out.WriteToken("system");
+		for(const auto &cit : GameData::Commodities())
+			out.WriteToken(cit.name);
+		out.Write();
 
-    // Write the per-system data for all systems that are either known-valid, or non-empty.
-    for(const auto &sit : GameData::Systems())
-    {
-      if(!sit.second.IsValid() && !sit.second.HasTrade()) continue;
+		// Write the per-system data for all systems that are either known-valid, or non-empty.
+		for(const auto &sit : GameData::Systems())
+		{
+			if(!sit.second.IsValid() && !sit.second.HasTrade())
+				continue;
 
-      out.WriteToken(sit.second.TrueName());
-      for(const auto &cit : GameData::Commodities())
-        out.WriteToken(static_cast<int>(sit.second.Supply(cit.name)));
-      out.Write();
-    }
-  }
-  out.EndChild();
+			out.WriteToken(sit.second.TrueName());
+			for(const auto &cit : GameData::Commodities())
+				out.WriteToken(static_cast<int>(sit.second.Supply(cit.name)));
+			out.Write();
+		}
+	}
+	out.EndChild();
 }
+
 
 
 void GameData::StepEconomy()
 {
-  // First, apply any purchases the player made. These are deferred until now
-  // so that prices will not change as you are buying or selling goods.
-  for(const auto &pit : purchases)
-  {
-    System &system = const_cast<System &>(*pit.first);
-    for(const auto &cit : pit.second)
-      system.SetSupply(cit.first, system.Supply(cit.first) - cit.second);
-  }
-  purchases.clear();
+	// First, apply any purchases the player made. These are deferred until now
+	// so that prices will not change as you are buying or selling goods.
+	for(const auto &pit : purchases)
+	{
+		System &system = const_cast<System &>(*pit.first);
+		for(const auto &cit : pit.second)
+			system.SetSupply(cit.first, system.Supply(cit.first) - cit.second);
+	}
+	purchases.clear();
 
-  // Then, have each system generate new goods for local use and trade.
-  for(auto &it : objects.systems)
-    it.second.StepEconomy();
+	// Then, have each system generate new goods for local use and trade.
+	for(auto &it : objects.systems)
+		it.second.StepEconomy();
 
-  // Finally, send out the trade goods. This has to be done in a separate step
-  // because otherwise whichever systems trade last would already have gotten
-  // supplied by the other systems.
-  for(auto &it : objects.systems)
-  {
-    System &system = it.second;
-    if(!system.Links().empty())
-    {
-      for(const Trade::Commodity &commodity : Commodities())
-      {
-        double supply = system.Supply(commodity.name);
-        for(const System *neighbor : system.Links())
-        {
-          double scale = neighbor->Links().size();
-          if(scale) supply += neighbor->Exports(commodity.name) / scale;
-        }
-        system.SetSupply(commodity.name, supply);
-      }
-    }
-  }
+	// Finally, send out the trade goods. This has to be done in a separate step
+	// because otherwise whichever systems trade last would already have gotten
+	// supplied by the other systems.
+	for(auto &it : objects.systems)
+	{
+		System &system = it.second;
+		if(!system.Links().empty())
+			for(const Trade::Commodity &commodity : Commodities())
+			{
+				double supply = system.Supply(commodity.name);
+				for(const System *neighbor : system.Links())
+				{
+					double scale = neighbor->Links().size();
+					if(scale)
+						supply += neighbor->Exports(commodity.name) / scale;
+				}
+				system.SetSupply(commodity.name, supply);
+			}
+	}
 }
 
 
-void GameData::AddPurchase(const System &system, const std::string &commodity, int tons)
+
+void GameData::AddPurchase(const System &system, const string &commodity, int tons)
 {
-  if(tons < 0) purchases[&system][commodity] += tons;
+	if(tons < 0)
+		purchases[&system][commodity] += tons;
 }
+
 
 
 // Apply the given change to the universe.
-void GameData::Change(const DataNode &node, PlayerInfo &player) { objects.Change(node, player); }
+void GameData::Change(const DataNode &node, PlayerInfo &player)
+{
+	objects.Change(node, player);
+}
+
 
 
 // Update the neighbor lists and other information for all the systems.
 // This must be done any time that a change creates or moves a system.
-void GameData::UpdateSystems() { objects.UpdateSystems(); }
+void GameData::UpdateSystems()
+{
+	objects.UpdateSystems();
+}
 
 
-void GameData::RecomputeWormholeRequirements() { objects.RecomputeWormholeRequirements(); }
+
+void GameData::RecomputeWormholeRequirements()
+{
+	objects.RecomputeWormholeRequirements();
+}
 
 
-void GameData::AddJumpRange(double neighborDistance) { objects.neighborDistances.insert(neighborDistance); }
+
+void GameData::AddJumpRange(double neighborDistance)
+{
+	objects.neighborDistances.insert(neighborDistance);
+}
+
 
 
 // Re-activate any special persons that were created previously but that are
 // still alive.
 void GameData::ResetPersons()
 {
-  for(auto &it : objects.persons)
-    it.second.ClearPlacement();
+	for(auto &it : objects.persons)
+		it.second.ClearPlacement();
 }
+
 
 
 // Mark all persons in the given list as dead.
-void GameData::DestroyPersons(std::vector<std::string> &names)
+void GameData::DestroyPersons(vector<string> &names)
 {
-  for(const std::string &name : names)
-    objects.persons.Get(name)->Destroy();
+	for(const string &name : names)
+		objects.persons.Get(name)->Destroy();
 }
 
 
-const Set<Color> &GameData::Colors() { return objects.colors; }
 
-
-const Set<Swizzle> &GameData::Swizzles() { return objects.swizzles; }
-
-
-const Set<Conversation> &GameData::Conversations() { return objects.conversations; }
-
-
-const Set<Effect> &GameData::Effects() { return objects.effects; }
-
-
-const Set<GameEvent> &GameData::Events() { return objects.events; }
-
-
-const Set<Fleet> &GameData::Fleets() { return objects.fleets; }
-
-
-const Set<FormationPattern> &GameData::Formations() { return objects.formations; }
-
-
-const Set<Galaxy> &GameData::Galaxies() { return objects.galaxies; }
-
-
-const Set<Government> &GameData::Governments() { return objects.governments; }
-
-
-const Set<Hazard> &GameData::Hazards() { return objects.hazards; }
-
-
-const Set<Interface> &GameData::Interfaces() { return objects.interfaces; }
-
-
-const Set<Message::Category> &GameData::MessageCategories() { return objects.messageCategories; }
-
-
-const Set<Message> &GameData::Messages() { return objects.messages; }
-
-
-const Set<Minable> &GameData::Minables() { return objects.minables; }
-
-
-const Set<Mission> &GameData::Missions() { return objects.missions; }
-
-
-const Set<News> &GameData::SpaceportNews() { return objects.news; }
-
-
-const Set<Outfit> &GameData::Outfits() { return objects.outfits; }
-
-
-const Set<Shop<Outfit>> &GameData::Outfitters() { return objects.outfitSales; }
-
-
-const Set<Person> &GameData::Persons() { return objects.persons; }
-
-
-const Set<Phrase> &GameData::Phrases() { return objects.phrases; }
-
-
-const Set<Planet> &GameData::Planets() { return objects.planets; }
-
-
-const Set<std::vector<File::ShaderString>> &GameData::Shaders() { return objects.shaders; }
-
-
-const Set<Ship> &GameData::Ships() { return objects.ships; }
-
-
-const Set<Test> &GameData::Tests() { return objects.tests; }
-
-
-const Set<TestData> &GameData::TestDataSets() { return objects.testDataSets; }
-
-
-ConditionsStore &GameData::GlobalConditions() { return globalConditions; }
-
-
-const Set<Shop<Ship>> &GameData::Shipyards() { return objects.shipSales; }
-
-
-const Set<System> &GameData::Systems() { return objects.systems; }
-
-
-const Set<Wormhole> &GameData::Wormholes() { return objects.wormholes; }
-
-
-const Set<Gamerules> &GameData::GamerulesPresets() { return objects.gamerulesPresets; }
-
-
-const std::set<std::string> &GameData::UniverseWormholeRequirements() { return objects.universeWormholeRequirements; }
-
-
-const Government *GameData::PlayerGovernment() { return playerGovernment; }
-
-
-Politics &GameData::GetPolitics() { return politics; }
-
-
-const std::vector<StartConditions> &GameData::StartOptions() { return objects.startConditions; }
-
-
-const std::vector<Trade::Commodity> &GameData::Commodities() { return objects.trade.Commodities(); }
-
-
-const std::vector<Trade::Commodity> &GameData::SpecialCommodities() { return objects.trade.SpecialCommodities(); }
-
-
-// Custom messages to be shown when trying to land on certain stellar objects.
-bool GameData::HasLandingMessage(const Sprite *sprite) { return objects.landingMessages.contains(sprite); }
-
-
-const std::string &GameData::LandingMessage(const Sprite *sprite)
+void GameData::HandleEvent(const ShipEvent &event)
 {
-  static const std::string EMPTY;
-  auto                     it = objects.landingMessages.find(sprite);
-  return it == objects.landingMessages.end() ? EMPTY : it->second;
+	for(Person &person : objects.persons | views::values)
+		if(person.Do(event))
+			break;
 }
 
 
-// Get the solar power and wind output of the given stellar object sprite.
-double GameData::SolarPower(const Sprite *sprite)
+
+const Set<Color> &GameData::Colors()
 {
-  auto it = objects.solarPower.find(sprite);
-  return it == objects.solarPower.end() ? 0. : it->second;
+	return objects.colors;
 }
 
 
-double GameData::SolarWind(const Sprite *sprite)
+
+const Set<Swizzle> &GameData::Swizzles()
 {
-  auto it = objects.solarWind.find(sprite);
-  return it == objects.solarWind.end() ? 0. : it->second;
+	return objects.swizzles;
 }
 
 
-// Get the map icon of the given stellar object sprite.
-const Sprite *GameData::StarIcon(const Sprite *sprite)
+
+const Set<Confusion> &GameData::Confusions()
 {
-  const auto it = objects.starIcons.find(sprite);
-  return it == objects.starIcons.end() ? nullptr : it->second;
+	return objects.confusions;
 }
+
+
+
+const Set<Conversation> &GameData::Conversations()
+{
+	return objects.conversations;
+}
+
+
+
+const Set<Effect> &GameData::Effects()
+{
+	return objects.effects;
+}
+
+
+
+const Set<GameEvent> &GameData::Events()
+{
+	return objects.events;
+}
+
+
+
+const Set<Fleet> &GameData::Fleets()
+{
+	return objects.fleets;
+}
+
+
+
+const Set<FormationPattern> &GameData::Formations()
+{
+	return objects.formations;
+}
+
+
+
+const Set<Galaxy> &GameData::Galaxies()
+{
+	return objects.galaxies;
+}
+
+
+
+const Set<Government> &GameData::Governments()
+{
+	return objects.governments;
+}
+
+
+
+const Set<Hazard> &GameData::Hazards()
+{
+	return objects.hazards;
+}
+
+
+
+const Set<Interface> &GameData::Interfaces()
+{
+	return objects.interfaces;
+}
+
+
+
+const Set<Message::Category> &GameData::MessageCategories()
+{
+	return objects.messageCategories;
+}
+
+
+
+const Set<Message> &GameData::Messages()
+{
+	return objects.messages;
+}
+
+
+
+const Set<Minable> &GameData::Minables()
+{
+	return objects.minables;
+}
+
+
+
+const Set<Mission> &GameData::Missions()
+{
+	return objects.missions;
+}
+
+
+
+const Set<News> &GameData::SpaceportNews()
+{
+	return objects.news;
+}
+
+
+
+const Set<Outfit> &GameData::Outfits()
+{
+	return objects.outfits;
+}
+
+
+
+const Set<Shop<Outfit>> &GameData::Outfitters()
+{
+	return objects.outfitSales;
+}
+
+
+
+const Set<Person> &GameData::Persons()
+{
+	return objects.persons;
+}
+
+
+
+const Set<Phrase> &GameData::Phrases()
+{
+	return objects.phrases;
+}
+
+
+
+const Set<Planet> &GameData::Planets()
+{
+	return objects.planets;
+}
+
+
+
+const Set<Ship> &GameData::Ships()
+{
+	return objects.ships;
+}
+
+
+
+const Set<Test> &GameData::Tests()
+{
+	return objects.tests;
+}
+
+
+
+const Set<TestData> &GameData::TestDataSets()
+{
+	return objects.testDataSets;
+}
+
+
+
+ConditionsStore &GameData::GlobalConditions()
+{
+	return globalConditions;
+}
+
+
+
+const Set<Shop<Ship>> &GameData::Shipyards()
+{
+	return objects.shipSales;
+}
+
+
+
+const Set<System> &GameData::Systems()
+{
+	return objects.systems;
+}
+
+
+
+const Set<Wormhole> &GameData::Wormholes()
+{
+	return objects.wormholes;
+}
+
+
+
+const Set<Gamerules> &GameData::GamerulesPresets()
+{
+	return objects.gamerulesPresets;
+}
+
+
+
+const std::set<std::string> &GameData::UniverseWormholeRequirements()
+{
+	return objects.universeWormholeRequirements;
+}
+
+
+
+const Government *GameData::PlayerGovernment()
+{
+	return playerGovernment;
+}
+
+
+
+Politics &GameData::GetPolitics()
+{
+	return politics;
+}
+
+
+
+const vector<StartConditions> &GameData::StartOptions()
+{
+	return objects.startConditions;
+}
+
+
+
+const vector<Trade::Commodity> &GameData::Commodities()
+{
+	return objects.trade.Commodities();
+}
+
+
+
+const vector<Trade::Commodity> &GameData::SpecialCommodities()
+{
+	return objects.trade.SpecialCommodities();
+}
+
+
+
+const StellarObjectSpriteData &GameData::ObjectSpriteData(const Sprite *sprite)
+{
+	static const StellarObjectSpriteData EMPTY;
+	auto it = objects.objectSpriteData.find(sprite);
+	return (it == objects.objectSpriteData.end() ? EMPTY : it->second);
+}
+
 
 
 // Strings for combat rating levels, etc.
-const std::string &GameData::Rating(const std::string &type, int level)
+const string &GameData::Rating(const string &type, int level)
 {
-  static const std::string EMPTY;
-  auto                     it = objects.ratings.find(type);
-  if(it == objects.ratings.end() || it->second.empty()) return EMPTY;
+	static const string EMPTY;
+	auto it = objects.ratings.find(type);
+	if(it == objects.ratings.end() || it->second.empty())
+		return EMPTY;
 
-  level = std::max(0, std::min<int>(it->second.size() - 1, level));
-  return it->second[level];
+	level = max(0, min<int>(it->second.size() - 1, level));
+	return it->second[level];
 }
+
 
 
 // Collections for ship, bay type, outfit, and other categories.
-const CategoryList &GameData::GetCategory(const CategoryType type) { return objects.categories[type]; }
-
-
-const StarField &GameData::Background() { return background; }
-
-
-void GameData::StepBackground(const Point &vel, double zoom) { background.Step(vel, zoom); }
-
-
-const Point &GameData::GetBackgroundPosition() { return background.Position(); }
-
-
-void GameData::SetBackgroundPosition(const Point &position) { background.SetPosition(position); }
-
-
-void GameData::SetHaze(const Sprite *sprite, bool allowAnimation) { background.SetHaze(sprite, allowAnimation); }
-
-
-const std::string &GameData::Tooltip(const std::string &label)
+const CategoryList &GameData::GetCategory(const CategoryType type)
 {
-  static const std::string EMPTY;
-  auto                     it = objects.tooltips.find(label);
-  // Special case: the "cost" and "sells for" labels include the percentage of
-  // the full price, so they will not match exactly.
-  if(it == objects.tooltips.end() && label.starts_with("cost")) it = objects.tooltips.find("cost:");
-  if(it == objects.tooltips.end() && label.starts_with("sells for")) it = objects.tooltips.find("sells for:");
-  return it == objects.tooltips.end() ? EMPTY : it->second;
+	return objects.categories[type];
 }
 
 
-std::string GameData::HelpMessage(const std::string &name)
+
+const StarField &GameData::Background()
 {
-  static const std::string EMPTY;
-  auto                     it = objects.helpMessages.find(name);
-  return Command::ReplaceNamesWithKeys(it == objects.helpMessages.end() ? EMPTY : it->second);
+	return background;
 }
 
 
-const std::map<std::string, std::string> &GameData::HelpTemplates() { return objects.helpMessages; }
+
+void GameData::ClearBackground()
+{
+	background.Clear();
+}
 
 
-MaskManager &GameData::GetMaskManager() { return maskManager; }
+
+void GameData::StepBackground(const Point &vel, double zoom)
+{
+	background.Step(vel, zoom);
+}
 
 
-const TextReplacements &GameData::GetTextReplacements() { return objects.substitutions; }
+
+const Point &GameData::GetBackgroundPosition()
+{
+	return background.Position();
+}
+
+
+
+void GameData::SetBackgroundPosition(const Point &position)
+{
+	background.SetPosition(position);
+}
+
+
+
+void GameData::SetHaze(const Sprite *sprite, bool allowAnimation)
+{
+	background.SetHaze(sprite, allowAnimation);
+}
+
+
+
+const string &GameData::Tooltip(const string &label)
+{
+	static const string EMPTY;
+	auto it = objects.tooltips.find(label);
+	// Special case: the "cost" and "sells for" labels include the percentage of
+	// the full price, so they will not match exactly.
+	if(it == objects.tooltips.end() && label.starts_with("cost"))
+		it = objects.tooltips.find("cost:");
+	if(it == objects.tooltips.end() && label.starts_with("sells for"))
+		it = objects.tooltips.find("sells for:");
+	return (it == objects.tooltips.end() ? EMPTY : it->second);
+}
+
+
+
+string GameData::HelpMessage(const string &name)
+{
+	static const string EMPTY;
+	auto it = objects.helpMessages.find(name);
+	return Command::ReplaceNamesWithKeys(it == objects.helpMessages.end() ? EMPTY : it->second);
+}
+
+
+
+const map<string, string> &GameData::HelpTemplates()
+{
+	return objects.helpMessages;
+}
+
+
+
+MaskManager &GameData::GetMaskManager()
+{
+	return maskManager;
+}
+
+
+
+const TextReplacements &GameData::GetTextReplacements()
+{
+	return objects.substitutions;
+}
+
 
 
 const Gamerules &GameData::GetGamerules()
 {
-  if(!activeGamerules) activeGamerules = objects.gamerulesPresets.Get("Default");
+	if(!activeGamerules)
+		activeGamerules = objects.gamerulesPresets.Get("Default");
 
-  return *activeGamerules;
+	return *activeGamerules;
 }
 
 
-void GameData::SetGamerules(const Gamerules *gamerules) { activeGamerules = gamerules; }
+
+void GameData::SetGamerules(const Gamerules *gamerules)
+{
+	activeGamerules = gamerules;
+}
 
 
-const Gamerules &GameData::DefaultGamerules() { return *(objects.gamerulesPresets.Get("Default")); }
+
+const Gamerules &GameData::DefaultGamerules()
+{
+	return *(objects.gamerulesPresets.Get("Default"));
+}
+
 
 
 void GameData::LoadSources(TaskQueue &queue)
 {
-  sources.clear();
-  sources.push_back(Files::Resources());
+	sources.clear();
+	sources.push_back(Files::Resources());
 
-  std::vector<std::filesystem::path> globalPlugins = Files::ListDirectories(Files::GlobalPlugins());
-  for(const auto &path : globalPlugins)
-    if(Plugins::IsPlugin(path)) LoadPlugin(queue, path);
-  // Load unzipped plugins first to give them precedence, then load the zipped plugins.
-  globalPlugins = Files::List(Files::GlobalPlugins());
-  for(const auto &path : globalPlugins)
-    if(path.extension() == ".zip" && Plugins::IsPlugin(path)) LoadPlugin(queue, path);
+	vector<filesystem::path> globalPlugins = Files::ListDirectories(Files::GlobalPlugins());
+	for(const auto &path : globalPlugins)
+		if(PluginManager::IsPlugin(path))
+			LoadPlugin(queue, path);
+	// Load unzipped plugins first to give them precedence, then load the zipped plugins.
+	globalPlugins = Files::List(Files::GlobalPlugins());
+	for(const auto &path : globalPlugins)
+		if(path.extension() == ".zip" && PluginManager::IsPlugin(path))
+			LoadPlugin(queue, path);
 
-  std::vector<std::filesystem::path> localPlugins = Files::ListDirectories(Files::UserPlugins());
-  for(const auto &path : localPlugins)
-    if(Plugins::IsPlugin(path)) LoadPlugin(queue, path);
-  localPlugins = Files::List(Files::UserPlugins());
-  for(const auto &path : localPlugins)
-    if(path.extension() == ".zip" && Plugins::IsPlugin(path)) LoadPlugin(queue, path);
+	vector<filesystem::path> localPlugins = Files::ListDirectories(Files::UserPlugins());
+	for(const auto &path : localPlugins)
+		if(PluginManager::IsPlugin(path))
+			LoadPlugin(queue, path);
+	localPlugins = Files::List(Files::UserPlugins());
+	for(const auto &path : localPlugins)
+		if(path.extension() == ".zip" && PluginManager::IsPlugin(path))
+			LoadPlugin(queue, path);
 }
 
 
-std::map<std::string, std::shared_ptr<ImageSet>> GameData::FindImages()
+
+map<string, shared_ptr<ImageSet>> GameData::FindImages()
 {
-  std::map<std::string, std::shared_ptr<ImageSet>> images;
-  for(const auto &source : sources)
-  {
-    // All names will only include the portion of the path that comes after
-    // this directory prefix.
-    std::filesystem::path directoryPath = source / "images";
+	map<string, shared_ptr<ImageSet>> images;
+	for(const auto &source : sources)
+	{
+		// All names will only include the portion of the path that comes after
+		// this directory prefix.
+		filesystem::path directoryPath = source / "images";
 
-    std::vector<std::filesystem::path> imageFiles = Files::RecursiveList(directoryPath);
-    for(auto &path : imageFiles)
-    {
-      if(ImageSet::IsImage(path))
-      {
-        ImageFileData data(path, directoryPath);
+		vector<filesystem::path> imageFiles = Files::RecursiveList(directoryPath);
+		for(auto &path : imageFiles)
+			if(ImageSet::IsImage(path))
+			{
+				ImageFileData data(path, directoryPath);
 
-        std::shared_ptr<ImageSet> &imageSet = images[data.name];
-        if(!imageSet) imageSet.reset(new ImageSet(data.name));
-        imageSet->Add(std::move(data));
-      }
-    }
-  }
-  return images;
+				shared_ptr<ImageSet> &imageSet = images[data.name];
+				if(!imageSet)
+					imageSet.reset(new ImageSet(data.name));
+				imageSet->Add(std::move(data));
+			}
+	}
+	return images;
 }
+
 
 
 // Thread-safe way to draw the menu background.
-void GameData::DrawMenuBackground(Panel *panel) { objects.DrawMenuBackground(panel); }
+void GameData::DrawMenuBackground(GraphicsTypes::CommandBufferInstance *cb, Panel *panel)
+{
+	objects.DrawMenuBackground(cb, panel);
+}

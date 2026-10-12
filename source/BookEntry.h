@@ -15,7 +15,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include "graphics/graphics_toplevel_defines.h"
+
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
 #include <variant>
@@ -26,37 +29,54 @@ class DataNode;
 class DataWriter;
 class Point;
 class Sprite;
+class System;
 class WrappedText;
 
 
+
 // Implement a collection of text and image nodes which form a singular Logbook entry.
-class BookEntry
-{
+class BookEntry {
 public:
-  typedef std::variant<std::monostate, const Sprite *, std::string> Item;
+	typedef std::variant<std::monostate, const Sprite *, std::string> Item;
 
 
 public:
-  bool IsEmpty() const;
-  void Load(const DataNode &node, int startAt = 0);
-  void Add(const BookEntry &other);
+	bool IsEmpty() const;
+	void Load(const DataNode &node, std::optional<int> startAt = std::nullopt);
+	void Add(const BookEntry &other);
 
-  // When a GameAction is instantiated, substitutions are performed.
-  BookEntry Instantiate(const std::map<std::string, std::string> &subs) const;
+	// When a GameAction is instantiated, substitutions are performed.
+	BookEntry Instantiate(const std::map<std::string, std::string> &subs) const;
 
-  void Save(DataWriter &out) const;
+	void Save(DataWriter &out) const;
 
-  const std::set<const Sprite *> &GetScenes() const;
+	const std::set<const Sprite *> &GetScenes() const;
 
-  // Returns height.
-  int Draw(const Point &topLeft, WrappedText &wrap, const Color &color) const;
+	// Returns height.
+	int Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft, WrappedText &wrap,
+	         const Color &color) const;
+
+	const System *SourceSystem() const;
+	void SetSourceSystem(const System *system);
+	const std::set<const System *> &MarkSystems() const;
+	const std::set<const System *> &CircleSystems() const;
+	bool HasSystems() const;
 
 
 private:
-  void LoadSingle(const DataNode &node, int startAt = 0);
+	void LoadContents(const DataNode &node, int startAt = 0);
 
 
 private:
-  std::vector<Item>        items;
-  std::set<const Sprite *> scenes;
+	// The contents of the entry.
+	std::vector<Item> items;
+	// A set of the scenes from the contents. For use in easily ensuring that all scenes are loaded.
+	std::set<const Sprite *> scenes;
+
+	// The source of a book entry is the system it was written in.
+	// Only applies to dated entries.
+	const System *source = nullptr;
+	// Any entry can mark or circle systems on the map.
+	std::set<const System *> markSystems;
+	std::set<const System *> circleSystems;
 };

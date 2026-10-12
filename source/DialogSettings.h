@@ -29,47 +29,45 @@ class DataWriter;
 class UI;
 
 
+
 // A class that parses "dialog" nodes. Dialogs are short texts where the player
 // is only able to respond with one or two buttons. Generally used for displaying
 // short messages that don't necessitate the use of a full conversation panel.
-class DialogSettings
-{
+class DialogSettings {
 public:
-  DialogSettings() = default;
-  // Construct and Load() at the same time.
-  DialogSettings(const DataNode &node, const ConditionsStore *playerConditions);
+	DialogSettings() = default;
+	// Construct and Load() at the same time.
+	DialogSettings(const DataNode &node, const ConditionsStore *playerConditions);
 
-  void Load(const DataNode &node, const ConditionsStore *playerConditions);
-  void Save(DataWriter &out) const;
+	void Load(const DataNode &node, const ConditionsStore *playerConditions);
+	void Save(DataWriter &out) const;
 
-  bool Validate() const;
+	bool Validate() const;
 
-  // Apply any replacements, evaluate any condition sets, and generate from any phrases.
-  DialogSettings Instantiate(const std::map<std::string, std::string> &subs) const;
+	// Apply any replacements and generate from any phrases.
+	DialogSettings Instantiate(const std::map<std::string, std::string> &subs) const;
 
-  // Get the text of this dialog (after it has been instantiated and converted into a single block of text).
-  const std::string &Text() const;
-  bool               IsEmpty() const;
-
-
-private:
-  // For individual lines under the dialog.
-  class DialogLine
-  {
-  public:
-    explicit DialogLine(std::string text);
-    explicit DialogLine(const ExclusiveItem<Phrase> &phrase);
-    DialogLine(const DataNode &node, const ConditionsStore *playerConditions);
-
-    std::string           text;
-    ConditionSet          condition;
-    ExclusiveItem<Phrase> phrase;
-  };
+	// Get the text of this dialog, evaluating any conditions.
+	std::string Text() const;
+	bool IsEmpty() const;
 
 
 private:
-  // Lines of text under the `dialog` node that haven't yet been instantiated into a single paragraph.
-  std::vector<DialogLine> lines;
-  // The instantiated string from the dialog lines, with all text substitions applied and phrases expanded.
-  std::string text;
+	// For individual lines under the dialog.
+	class DialogLine {
+	public:
+		explicit DialogLine(std::string text);
+		explicit DialogLine(const ExclusiveItem<Phrase> &phrase);
+		DialogLine(const std::string &text, const ConditionSet &condition);
+		DialogLine(const DataNode &node, const ConditionsStore *playerConditions);
+
+		std::string text;
+		ConditionSet condition;
+		ExclusiveItem<Phrase> phrase;
+	};
+
+
+private:
+	// Lines of text under the `dialog` node that haven't yet been instantiated into a single paragraph.
+	std::vector<DialogLine> lines;
 };

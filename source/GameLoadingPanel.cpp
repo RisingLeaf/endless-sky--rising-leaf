@@ -15,90 +15,84 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "GameLoadingPanel.h"
 
-#include "Angle.h"
-#include "Color.h"
 #include "Conversation.h"
 #include "ConversationPanel.h"
 #include "GameData.h"
 #include "MenuAnimationPanel.h"
 #include "MenuPanel.h"
+#include "PilotProfile.h"
 #include "PlayerInfo.h"
 #include "Point.h"
-#include "Ship.h"
-#include "System.h"
 #include "TaskQueue.h"
 #include "UI.h"
 #include "audio/Audio.h"
 #include "image/MaskManager.h"
 #include "image/SpriteSet.h"
-#include "shader/PointerShader.h"
 #include "shader/StarField.h"
 
 
-GameLoadingPanel::GameLoadingPanel(
-    PlayerInfo         &player,
-    TaskQueue          &queue,
-    const Conversation &conversation,
-    UI                 &gamePanels,
-    bool               &finishedLoading) :
-  player(player),
-  queue(queue),
-  conversation(conversation),
-  gamePanels(gamePanels),
-  finishedLoading(finishedLoading),
-  loadingCircle(140.f, 60)
+GameLoadingPanel::GameLoadingPanel(PlayerInfo &player, TaskQueue &queue, const Conversation &conversation,
+                                   UI &gamePanels, bool &finishedLoading)
+    : player(player), queue(queue), conversation(conversation), gamePanels(gamePanels),
+      finishedLoading(finishedLoading), loadingCircle(140.f, 60)
 {
-  SetIsFullScreen(true);
+	SetIsFullScreen(true);
 }
+
 
 
 void GameLoadingPanel::Step()
 {
-  progress = GameData::GetProgress();
+	progress = GameData::GetProgress();
 
-  queue.ProcessSyncTasks();
-  if(GameData::IsLoaded())
-  {
-    // Now that we have finished loading all the basic sprites and sounds, we can look for invalid file paths,
-    // e.g. due to capitalization errors or other typos.
-    SpriteSet::CheckReferences();
-    Audio::CheckReferences();
-    // Set the game's initial internal state.
-    GameData::FinishLoading();
+	queue.ProcessSyncTasks();
+	if(GameData::IsLoaded())
+	{
+		// Now that we have finished loading all the basic sprites and sounds, we can look for invalid file paths,
+		// e.g. due to capitalization errors or other typos.
+		SpriteSet::CheckReferences();
+		Audio::CheckReferences();
+		// Set the game's initial internal state.
+		GameData::FinishLoading();
 
-    player.LoadRecent();
+		PilotProfile::LoadProfiles();
+		player.LoadRecent();
 
-    // All sprites with collision masks should also have their 1x scaled versions, so create
-    // any additional scaled masks from the default one.
-    GameData::GetMaskManager().ScaleMasks();
+		// All sprites with collision masks should also have their 1x scaled versions, so create
+		// any additional scaled masks from the default one.
+		GameData::GetMaskManager().ScaleMasks();
 
-    GetUI().Pop(this);
-    if(conversation.IsEmpty())
-    {
-      GetUI().Push(new MenuPanel(player, gamePanels));
-      GetUI().Push(new MenuAnimationPanel());
-    }
-    else {
-      GetUI().Push(new MenuAnimationPanel());
+		GetUI().Pop(this);
+		if(conversation.IsEmpty())
+		{
+			GetUI().Push(new MenuPanel(player, gamePanels));
+			GetUI().Push(new MenuAnimationPanel());
+		}
+		else
+		{
+			GetUI().Push(new MenuAnimationPanel());
 
-      auto *talk = new ConversationPanel(player, conversation);
+			auto *talk = new ConversationPanel(player, conversation);
 
-      UI &ui = GetUI();
-      talk->SetCallback([&ui](int response) { ui.Quit(); });
-      GetUI().Push(talk);
-    }
+			UI &ui = GetUI();
+			talk->SetCallback([&ui](int response) {
+				ui.Quit();
+			});
+			GetUI().Push(talk);
+		}
 
-    finishedLoading = true;
-  }
+		finishedLoading = true;
+	}
 }
 
 
-void GameLoadingPanel::Draw()
+
+void GameLoadingPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 {
-  GameData::Background().Draw(Point());
+	GameData::Background().Draw(cb, Point());
 
-  GameData::DrawMenuBackground(this);
+	GameData::DrawMenuBackground(cb, this);
 
-  // Draw the loading circle.
-  loadingCircle.Draw(Point(), progress);
+	// Draw the loading circle.
+	loadingCircle.Draw(cb, Point(), progress);
 }

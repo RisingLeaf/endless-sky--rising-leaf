@@ -17,30 +17,34 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Angle.h"
 
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+}
 class Point;
 
 
-// A class for drawing loading circles.
-class LoadingCircle
-{
-public:
-  LoadingCircle(float size, int ticks, double rotationSpeed = 0.);
 
-  // Rotate the initial tick mark position, if this loading circle has a rotation speed.
-  void Step();
-  // Provide the position of the center of the circle and the progress percentage.
-  void Draw(const Point &position, double progress = 1.) const;
+// A class for drawing loading circles.
+class LoadingCircle {
+public:
+	LoadingCircle(float size, int ticks, double rotationSpeed = 0.);
+
+	// Rotate the initial tick mark position, if this loading circle has a rotation speed.
+	void Step();
+	// Provide the position of the center of the circle and the progress percentage.
+	void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &position, double progress = 1.,
+	          double zoom = 1.) const;
 
 
 private:
-  // The size of the circle;
-  float size;
-  // The number of tick marks that should be displayed.
-  int ticks;
-  // The number of degrees that each tick is offset from the previous one.
-  Angle angleOffset;
-  // The amount of rotation to apply to the position of the starting tick in the circle every step.
-  double rotationSpeed;
-  // The current amount of rotation applied to the starting tick.
-  double rotation;
+	// The size of the circle;
+	float size;
+	// The number of tick marks that should be displayed.
+	int ticks;
+	// The number of degrees that each tick is offset from the previous one.
+	Angle angleOffset;
+	// The amount of rotation to apply to the position of the starting tick in the circle every step.
+	double rotationSpeed;
+	// The current amount of rotation applied to the starting tick.
+	double rotation;
 };

@@ -29,27 +29,26 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 // it, it is a "child" of that node. Otherwise, it is a "sibling." Each node is
 // just a collection of one or more tokens that can be interpreted either as
 // strings or as floating point values; see DataNode for more information.
-class DataFile
-{
+class DataFile {
 public:
-  // A DataFile can be loaded either from a file path or an istream.
-  DataFile() = default;
-  explicit DataFile(const std::filesystem::path &path);
-  explicit DataFile(std::istream &in);
+	// A DataFile can be loaded either from a file path or an istream.
+	DataFile() = default;
+	explicit DataFile(const std::filesystem::path &path);
+	explicit DataFile(std::istream &in);
 
-  void Load(const std::filesystem::path &path);
-  void Load(std::istream &in);
+	void Load(const std::filesystem::path &path);
+	void Load(std::istream &in);
 
-  // Functions for iterating through all DataNodes in this file.
-  std::list<DataNode>::const_iterator begin() const;
-  std::list<DataNode>::const_iterator end() const;
-
-
-private:
-  void LoadData(const std::string &data);
+	// Functions for iterating through all DataNodes in this file.
+	std::list<DataNode>::const_iterator begin() const;
+	std::list<DataNode>::const_iterator end() const;
 
 
 private:
-  // This is the container for all DataNodes in this file.
-  DataNode root;
+	void LoadData(const std::string &data);
+
+
+private:
+	// This is the container for all DataNodes in this file.
+	DataNode root;
 };

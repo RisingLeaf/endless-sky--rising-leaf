@@ -16,192 +16,184 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "DamageProfile.h"
 
 #include "DamageDealt.h"
-#include "Minable.h"
-#include "MinableDamageDealt.h"
-#include "Outfit.h"
-#include "Ship.h"
+#include "Entity.h"
 #include "Weapon.h"
 #include "image/Mask.h"
 
+using namespace std;
 
-DamageProfile::DamageProfile(Projectile::ImpactInfo info) :
-  weapon(info.weapon), position(std::move(info.position)), isBlast(weapon.BlastRadius() > 0.)
+
+
+DamageProfile::DamageProfile(const Entity &entity, const Projectile::ImpactInfo &info, bool ignoreBlast)
+    : entity(&entity), weapon(&info.weapon), position(info.position),
+      isBlast(!ignoreBlast && weapon->BlastRadius() > 0.)
 {
-  CalculateBlast();
-  // For weapon projectiles, the distance traveled for the projectile
-  // is the same regardless of the ship being impacted, so calculate
-  // its effect on the damage scale here.
-  if(weapon.HasDamageDropoff()) inputScaling *= weapon.DamageDropoff(info.distanceTraveled);
+	// The damage dropoff of projectiles is influenced by the distance it traveled.
+	if(weapon->HasDamageDropoff())
+		scaling *= weapon->DamageDropoff(info.distanceTraveled);
+	CalculateScaling();
 }
 
 
-DamageProfile::DamageProfile(Weather::ImpactInfo info) :
-  weapon(info.weapon), position(std::move(info.position)), isBlast(weapon.BlastRadius() > 0.), inputScaling(info.scale)
+
+DamageProfile::DamageProfile(const Entity &entity, const Weather::ImpactInfo &info, bool ignoreBlast)
+    : entity(&entity), weapon(&info.weapon), position(info.position),
+      isBlast(!ignoreBlast && weapon->BlastRadius() > 0.), scaling(info.scale), isHazard(true)
 {
-  CalculateBlast();
-  isHazard = true;
+	CalculateScaling();
 }
 
 
-// Calculate the damage dealt to the given ship.
-DamageDealt DamageProfile::CalculateDamage(const Ship &ship, bool ignoreBlast) const
-{
-  bool        blast = (isBlast && !ignoreBlast);
-  DamageDealt damage(weapon, Scale(inputScaling, ship, blast));
-  PopulateDamage(damage, ship);
 
-  return damage;
+const Weapon &DamageProfile::GetWeapon() const
+{
+	return *weapon;
 }
 
 
-MinableDamageDealt DamageProfile::CalculateDamage(const Minable &minable) const
+
+const Entity &DamageProfile::GetEntity() const
 {
-  double scale = Scale(inputScaling, minable, isBlast);
-  return {
-      scale * (weapon.MinableDamage() + weapon.RelativeMinableDamage() * minable.MaxHull()),
-      scale * weapon.Prospecting()};
+	return *entity;
 }
 
 
-// Calculate the value of certain variables necessary for determining
-// the impact of an explosion that are shared across all ships that
-// this hazard could impact.
-void DamageProfile::CalculateBlast()
+
+double DamageProfile::Scaling() const
 {
-  if(isBlast && weapon.IsDamageScaled())
-  {
-    // Scale blast damage based on the distance from the blast
-    // origin and if the projectile uses a trigger radius. The
-    // point of contact must be measured on the sprite outline.
-    // scale = (1 + (tr / (2 * br))^2) / (1 + r^4)^2
-    double blastRadius = std::max(1., weapon.BlastRadius());
-    double radiusRatio = weapon.TriggerRadius() / blastRadius;
-    k                  = !radiusRatio ? 1. : (1. + .25 * radiusRatio * radiusRatio);
-    rSquared           = 1. / (blastRadius * blastRadius);
-  }
+	return scaling;
 }
 
 
-// Determine the damage scale for the given body.
-double DamageProfile::Scale(double scale, const Body &body, bool blast) const
-{
-  // Now that we have a specific ship, we can finish the blast damage
-  // calculations.
-  if(blast && weapon.IsDamageScaled())
-  {
-    // Rather than exactly compute the distance between the explosion and
-    // the closest point on the ship, estimate it using the mask's Radius.
-    double distance  = std::max(0., position.Distance(body.Position()) - body.GetMask().Radius());
-    double finalR    = distance * distance * rSquared;
-    scale           *= k / ((1. + finalR * finalR) * (1. + finalR * finalR));
-  }
-  // Hazards must wait to evaluate any damage dropoff until now as the ship
-  // position for each ship influences the distance used for the damage dropoff.
-  if(isHazard && weapon.HasDamageDropoff())
-  {
-    double distance  = std::max(0., position.Distance(body.Position()) - body.GetMask().Radius());
-    scale           *= weapon.DamageDropoff(distance);
-  }
 
-  return scale;
+DamageDealt DamageProfile::CalculateDamage() const
+{
+	const Weapon &weapon = GetWeapon();
+	const Entity &entity = GetEntity();
+
+	double shieldFraction = 0.;
+	DamageDealt damage(weapon, scaling);
+
+	// Lambda for returning the damage scale that a damage type should
+	// use given the default percentage that is blocked by shields and hull,
+	// and the value of its protection attribute.
+	auto ScaleType = [&](double shieldBlocked, double hullBlocked, double protection) {
+		double blocked = (1. - shieldBlocked) * (shieldFraction) + (1. - hullBlocked) * (1. - shieldFraction);
+		return scaling * blocked / protection;
+	};
+
+	// Determine the shieldFraction, which dictates how much damage
+	// bleeds through the shields that would normally be blocked.
+	double shields = entity.ShieldLevel();
+	if(shields > 0.)
+	{
+		double piercing =
+		    max(0., min(1., (weapon.Piercing() / entity.PiercingProtection()) - entity.PiercingResistance()));
+		double highPermeability = entity.HighShieldPermeability();
+		double lowPermeability = entity.LowShieldPermeability();
+		double permeability = entity.Cloaking() * entity.CloakedShieldPermeability();
+		if(highPermeability || lowPermeability)
+		{
+			// Determine what portion of its maximum shields the entity is currently at.
+			// Only do this if there is nonzero permeability involved, otherwise don't.
+			double shieldPortion = shields / entity.MaxShields();
+			permeability += max((highPermeability * shieldPortion) + (lowPermeability * (1. - shieldPortion)), 0.);
+		}
+		shieldFraction = (1. - min(piercing + permeability, 1.)) / (1. + entity.DisruptionLevel() * .01);
+
+		damage.levels.shields =
+		    (weapon.ShieldDamage() + weapon.RelativeShieldDamage() * entity.MaxShields()) *
+		    ScaleType(0., 0.,
+			          entity.DamageProtection().shields + (entity.IsCloaked() ? entity.CloakedShieldProtection() : 0.));
+		if(damage.levels.shields > shields)
+			shieldFraction = min(shieldFraction, shields / damage.levels.shields);
+	}
+
+	// Instantaneous damage types.
+	// Energy, heat, and fuel damage are blocked 50% by shields.
+	// Hull damage is blocked 100%.
+	// Shield damage is blocked 0%.
+	damage.levels.shields *= shieldFraction;
+	double totalHullProtection = (ScaleType(
+	    1., 0., entity.DamageProtection().hull + (entity.IsCloaked() ? entity.CloakedHullProtection() : 0.)));
+	bool isMinable = entity.EntityType() == Entity::Type::MINABLE;
+	double hullDamage = isMinable ? weapon.MinableDamage() : weapon.HullDamage();
+	double relativeHullDamage = isMinable ? weapon.RelativeMinableDamage() : weapon.RelativeHullDamage();
+	damage.levels.hull = (hullDamage + relativeHullDamage * entity.MaxHull()) * totalHullProtection;
+	double hull = entity.HullLevelUntilDisabled();
+	if(damage.levels.hull > hull)
+	{
+		double hullFraction = hull / damage.levels.hull;
+		damage.levels.hull *= hullFraction;
+		damage.levels.hull += (weapon.DisabledDamage() + weapon.RelativeDisabledDamage() * entity.MaxHull()) *
+		                      totalHullProtection * (1. - hullFraction);
+	}
+	damage.levels.energy = (weapon.EnergyDamage() + weapon.RelativeEnergyDamage() * entity.MaxEnergy()) *
+	                       ScaleType(.5, 0., entity.DamageProtection().energy);
+	damage.levels.heat = (weapon.HeatDamage() + weapon.RelativeHeatDamage() * entity.MaxHeat()) *
+	                     ScaleType(.5, 0., entity.DamageProtection().heat);
+	damage.levels.fuel = (weapon.FuelDamage() + weapon.RelativeFuelDamage() * entity.MaxFuel()) *
+	                     ScaleType(.5, 0., entity.DamageProtection().fuel);
+
+	// DoT damage types with an instantaneous analog.
+	// Ion and burn damage are blocked 50% by shields.
+	// Corrosion and leak damage are blocked 100%.
+	// Discharge damage is blocked 50% by the absence of shields.
+	damage.levels.discharge = weapon.DischargeDamage() * ScaleType(0., .5, entity.DamageProtection().discharge);
+	damage.levels.corrosion = weapon.CorrosionDamage() * ScaleType(1., 0., entity.DamageProtection().corrosion);
+	damage.levels.ionization = weapon.IonDamage() * ScaleType(.5, 0., entity.DamageProtection().ionization);
+	damage.levels.burning = weapon.BurnDamage() * ScaleType(.5, 0., entity.DamageProtection().burning);
+	damage.levels.leakage = weapon.LeakDamage() * ScaleType(1., 0., entity.DamageProtection().leakage);
+
+	// Unique special damage types.
+	// Slowing and scrambling are blocked 50% by shields.
+	// Disruption is blocked 50% by the absence of shields.
+	damage.levels.slowness = weapon.SlowingDamage() * ScaleType(.5, 0., entity.DamageProtection().slowness);
+	damage.levels.scrambling = weapon.ScramblingDamage() * ScaleType(.5, 0., entity.DamageProtection().scrambling);
+	damage.levels.disruption = weapon.DisruptionDamage() * ScaleType(0., .5, entity.DamageProtection().disruption);
+
+	// Hit force is unaffected by shields.
+	double hitForce = weapon.HitForce() * ScaleType(0., 0., entity.ForceProtection());
+	if(hitForce)
+	{
+		Point d = entity.Position() - position;
+		double distance = d.Length();
+		if(distance)
+			damage.forcePoint = (hitForce / distance) * d;
+	}
+
+	// Prospecting is unaffected by anything aside from the base damage scaling right now.
+	damage.prospecting = weapon.Prospecting() * scaling;
+
+	return damage;
 }
 
 
-// Populate the given DamageDealt object with values.
-void DamageProfile::PopulateDamage(DamageDealt &damage, const Ship &ship) const
+
+void DamageProfile::CalculateScaling()
 {
-  const Outfit &attributes     = ship.Attributes();
-  const Weapon &weapon         = damage.GetWeapon();
-  double        shieldFraction = 0.;
+	// Always use the closest possible point between the impact position and the entity
+	// by using the radius of the mask, as opposed to considering how the entity was
+	// rotated relative to the impact position.
+	double distance = max(0., position.Distance(entity->Position()) - entity->GetMask().Radius());
 
-  // Lambda for returning the damage scale that a damage type should
-  // use given the default percentage that is blocked by shields and hull,
-  // and the value of its protection attribute.
-  auto ScaleType = [&](double shieldBlocked, double hullBlocked, double protection)
-  {
-    double blocked = (1. - shieldBlocked) * (shieldFraction) + (1. - hullBlocked) * (1. - shieldFraction);
-    return damage.scaling * blocked / (1. + protection);
-  };
+	if(isBlast && weapon->IsDamageScaled())
+	{
+		// Scale blast damage based on the distance from the blast
+		// origin and if the projectile uses a trigger radius. The
+		// point of contact must be measured on the sprite outline.
+		// scale = (1 + (tr / (2 * br))^2) / (1 + r^4)^2
+		double blastRadius = max(1., weapon->BlastRadius());
+		double radiusRatio = weapon->TriggerRadius() / blastRadius;
+		double k = !radiusRatio ? 1. : (1. + .25 * radiusRatio * radiusRatio);
+		double rSquared = 1. / (blastRadius * blastRadius);
 
-  // Determine the shieldFraction, which dictates how much damage
-  // bleeds through the shields that would normally be blocked.
-  double shields = ship.ShieldLevel();
-  if(shields > 0.)
-  {
-    double piercing = std::max(
-        0.,
-        std::min(
-            1.,
-            weapon.Piercing() / (1. + attributes.GetIndexed(Outfit::INTERNAL_ATTR("piercing protection"))) - attributes.GetIndexed(Outfit::INTERNAL_ATTR("piercing resistance"))));
-    const double &highPermeability = attributes.GetIndexed(Outfit::INTERNAL_ATTR("high shield permeability"));
-    const double &lowPermeability  = attributes.GetIndexed(Outfit::INTERNAL_ATTR("low shield permeability"));
-    double permeability     = ship.Cloaking() * attributes.GetIndexed(Outfit::INTERNAL_ATTR("cloaked shield permeability"));
-    if(highPermeability || lowPermeability)
-    {
-      // Determine what portion of its maximum shields the ship is currently at.
-      // Only do this if there is nonzero permeability involved, otherwise don't.
-      double shieldPortion = shields / ship.MaxShields();
-      permeability += std::max((highPermeability * shieldPortion) + (lowPermeability * (1. - shieldPortion)), 0.);
-    }
-    shieldFraction = (1. - std::min(piercing + permeability, 1.)) / (1. + ship.DisruptionLevel() * .01);
-
-    damage.shieldDamage =
-        (weapon.ShieldDamage() + weapon.RelativeShieldDamage() * ship.MaxShields()) *
-        ScaleType(
-            0.,
-            0.,
-            attributes.GetIndexed(Outfit::INTERNAL_ATTR("shield protection")) + (ship.IsCloaked() ? attributes.GetIndexed(Outfit::INTERNAL_ATTR("cloak shield protection")) : 0.));
-    if(damage.shieldDamage > shields) shieldFraction = std::min(shieldFraction, shields / damage.shieldDamage);
-  }
-
-  // Instantaneous damage types.
-  // Energy, heat, and fuel damage are blocked 50% by shields.
-  // Hull damage is blocked 100%.
-  // Shield damage is blocked 0%.
-  damage.shieldDamage        *= shieldFraction;
-  double totalHullProtection  = (ScaleType(
-      1.,
-      0.,
-      attributes.GetIndexed(Outfit::INTERNAL_ATTR("hull protection")) + (ship.IsCloaked() ? attributes.GetIndexed(Outfit::INTERNAL_ATTR("cloak hull protection")) : 0.)));
-  damage.hullDamage = (weapon.HullDamage() + weapon.RelativeHullDamage() * ship.MaxHull()) * totalHullProtection;
-  double hull       = ship.HullUntilDisabled();
-  if(damage.hullDamage > hull)
-  {
-    double hullFraction  = hull / damage.hullDamage;
-    damage.hullDamage   *= hullFraction;
-    damage.hullDamage   += (weapon.DisabledDamage() + weapon.RelativeDisabledDamage() * ship.MaxHull()) *
-                         totalHullProtection * (1. - hullFraction);
-  }
-  damage.energyDamage = (weapon.EnergyDamage() + weapon.RelativeEnergyDamage() * attributes.GetIndexed(Outfit::INTERNAL_ATTR("energy capacity"))) *
-                        ScaleType(.5, 0., attributes.GetIndexed(Outfit::INTERNAL_ATTR("energy protection")));
-  damage.heatDamage = (weapon.HeatDamage() + weapon.RelativeHeatDamage() * ship.MaximumHeat()) *
-                      ScaleType(.5, 0., attributes.GetIndexed(Outfit::INTERNAL_ATTR("heat protection")));
-  damage.fuelDamage = (weapon.FuelDamage() + weapon.RelativeFuelDamage() * attributes.GetIndexed(Outfit::INTERNAL_ATTR("fuel capacity"))) *
-                      ScaleType(.5, 0., attributes.GetIndexed(Outfit::INTERNAL_ATTR("fuel protection")));
-
-  // DoT damage types with an instantaneous analog.
-  // Ion and burn damage are blocked 50% by shields.
-  // Corrosion and leak damage are blocked 100%.
-  // Discharge damage is blocked 50% by the absence of shields.
-  damage.dischargeDamage = weapon.DischargeDamage() * ScaleType(0., .5, attributes.GetIndexed(Outfit::INTERNAL_ATTR("discharge protection")));
-  damage.corrosionDamage = weapon.CorrosionDamage() * ScaleType(1., 0., attributes.GetIndexed(Outfit::INTERNAL_ATTR("corrosion protection")));
-  damage.ionDamage       = weapon.IonDamage()       * ScaleType(.5, 0., attributes.GetIndexed(Outfit::INTERNAL_ATTR("ion protection")));
-  damage.burnDamage      = weapon.BurnDamage()      * ScaleType(.5, 0., attributes.GetIndexed(Outfit::INTERNAL_ATTR("burn protection")));
-  damage.leakDamage      = weapon.LeakDamage()      * ScaleType(1., 0., attributes.GetIndexed(Outfit::INTERNAL_ATTR("leak protection")));
-
-  // Unique special damage types.
-  // Slowing and scrambling are blocked 50% by shields.
-  // Disruption is blocked 50% by the absence of shields.
-  damage.slowingDamage    = weapon.SlowingDamage()    * ScaleType(.5, 0., attributes.GetIndexed(Outfit::INTERNAL_ATTR("slowing protection")));
-  damage.scramblingDamage = weapon.ScramblingDamage() * ScaleType(.5, 0., attributes.GetIndexed(Outfit::INTERNAL_ATTR("scramble protection")));
-  damage.disruptionDamage = weapon.DisruptionDamage() * ScaleType(0., .5, attributes.GetIndexed(Outfit::INTERNAL_ATTR("disruption protection")));
-
-  // Hit force is unaffected by shields.
-  double hitForce = weapon.HitForce() * ScaleType(0., 0., attributes.GetIndexed(Outfit::INTERNAL_ATTR("force protection")));
-  if(hitForce)
-  {
-    Point  d        = ship.Position() - position;
-    double distance = d.Length();
-    if(distance) damage.forcePoint = (hitForce / distance) * d;
-  }
+		// Rather than exactly compute the distance between the explosion and
+		// the closest point on the entity, estimate it using the mask's Radius.
+		double finalR = distance * distance * rSquared;
+		scaling *= k / ((1. + finalR * finalR) * (1. + finalR * finalR));
+	}
+	// The damage dropoff of hazards is influenced by the distance to the target.
+	if(isHazard && weapon->HasDamageDropoff())
+		scaling *= weapon->DamageDropoff(distance);
 }

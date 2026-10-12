@@ -15,24 +15,25 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+	class GraphicsInstance;
+} // namespace GraphicsTypes
 class Color;
 class Point;
 
 
+
 // Functions for drawing triangular "pointers," e.g. for target crosshairs.
-class PointerShader
-{
+class PointerShader {
 public:
-  static void Init();
-  static void Clear();
+	static void Init(const GraphicsTypes::GraphicsInstance *graphics_instance);
 
-  static void
-  Draw(const Point &center, const Point &angle, float width, float height, float offset, const Color &color);
+	static void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &angle, float width,
+	                 float height, float offset, const Color &color);
 
-  static void Bind();
-  static void Add(const Point &center, const Point &angle, float width, float height, float offset, const Color &color);
-  static void Unbind();
-
-private:
-  static float scale[2];
+	static void Bind(GraphicsTypes::CommandBufferInstance *cb);
+	static void Add(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &angle, float width,
+	                float height, float offset, const Color &color);
+	static void Clear();
 };

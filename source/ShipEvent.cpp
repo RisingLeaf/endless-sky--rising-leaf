@@ -17,32 +17,59 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Ship.h"
 
+using namespace std;
 
-ShipEvent::ShipEvent(const Government *actor, const std::shared_ptr<Ship> &target, int type) :
-  actorGovernment(actor), target(target), type(type)
+
+
+ShipEvent::ShipEvent(const Government *actor, const shared_ptr<Ship> &target, int type)
+    : actorGovernment(actor), target(target), type(type)
 {
-  if(target) targetGovernment = target->GetGovernment();
+	if(target)
+		targetGovernment = target->GetGovernment();
 }
 
 
-ShipEvent::ShipEvent(const std::shared_ptr<Ship> &actor, const std::shared_ptr<Ship> &target, int type) :
-  actor(actor), target(target), type(type)
+
+ShipEvent::ShipEvent(const shared_ptr<Ship> &actor, const shared_ptr<Ship> &target, int type)
+    : actor(actor), target(target), type(type)
 {
-  if(actor) actorGovernment = actor->GetGovernment();
-  if(target) targetGovernment = target->GetGovernment();
+	if(actor)
+		actorGovernment = actor->GetGovernment();
+	if(target)
+		targetGovernment = target->GetGovernment();
 }
 
 
-const std::shared_ptr<Ship> &ShipEvent::Actor() const { return actor; }
+
+const shared_ptr<Ship> &ShipEvent::Actor() const
+{
+	return actor;
+}
 
 
-const Government *ShipEvent::ActorGovernment() const { return actorGovernment; }
+
+const Government *ShipEvent::ActorGovernment() const
+{
+	return actorGovernment;
+}
 
 
-const std::shared_ptr<Ship> &ShipEvent::Target() const { return target; }
+
+const shared_ptr<Ship> &ShipEvent::Target() const
+{
+	return target;
+}
 
 
-const Government *ShipEvent::TargetGovernment() const { return targetGovernment; }
+
+const Government *ShipEvent::TargetGovernment() const
+{
+	return targetGovernment;
+}
 
 
-int ShipEvent::Type() const { return type; }
+
+int ShipEvent::Type() const
+{
+	return type;
+}

@@ -1,25 +1,29 @@
+u_in vec2  scale;
 u_in float frameCount;
 
-v_in  vec2 vert;
-v_in  vec3 texCoord;
+
+v_in  vec2  vert;
+v_in  vec3  texCoord;
 v_in  float alpha;
-v_out vec3 fragTexCoord;
+
+v_out vec3  fragTexCoord;
 v_out float fragAlpha;
 
 VS_BEGIN
-	gl_Position  = vec4(vert * glob.scale, 0, 1);
+	gl_Position = vec4(vert * spec.scale, 0, 1);
 	fragTexCoord = texCoord;
-	fragAlpha    = alpha;
+	fragAlpha = alpha;
 VS_END
 
 in_texture 2darray tex;
 
 FS_BEGIN
-	float first  = floor(fragTexCoord.z);
-	float second = mod(ceil(fragTexCoord.z), spec.frameCount);
-	float fade = fragTexCoord.z - first;
+	const float first = floor(fragTexCoord.z);
+	const float second = mod(ceil(fragTexCoord.z), spec.frameCount);
+	const float fade = fragTexCoord.z - first;
 	out_color = mix(
 		texture(tex, vec3(fragTexCoord.xy, first)),
-		texture(tex, vec3(fragTexCoord.xy, second)), fade);
+		texture(tex, vec3(fragTexCoord.xy, second)),
+		fade);
 	out_color *= vec4(fragAlpha);
 FS_END

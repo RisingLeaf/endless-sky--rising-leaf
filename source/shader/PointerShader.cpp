@@ -17,103 +17,92 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "../Color.h"
 #include "../GameData.h"
-#include "../GameWindow.h"
 #include "../Point.h"
-#include "Shader.h"
+#include "../Screen.h"
+#include "shared/graphics/graphics_layer.h"
+#include "shared/graphics/graphics_toplevel_defines.h"
+#include "shared/system/File.h"
 
-#include "graphics/graphics_layer.h"
+#include <stdexcept>
 
+using namespace std;
 
-namespace
-{
-  Shader shader("pointer shader");
+namespace {
+	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
+	ShaderInfo info;
 
-  graphics_layer::ObjectHandle square;
+	graphics_layer::ObjectHandle geometry;
 } // namespace
 
 
-void PointerShader::Init()
+
+void PointerShader::Init(const GraphicsTypes::GraphicsInstance *graphics_instance)
 {
-  auto &info = shader.GetInfo();
+	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
+	info.SetInputSize(2 * sizeof(float));
 
-  info.SetInputSize(2 * sizeof(float));
-  info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // scale
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // center
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // angle
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // size
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // offset
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4); // color
 
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2);
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4);
+	const auto shader_code = File::ReadShader("../shaders/compilation/pointer.ps");
+	graphics_instance->CreateShader(shader, info, shader_code, "pointer");
 
-  shader.Create(*GameData::Shaders().Find("pointer"));
-
-  constexpr float vertexData[] = {
-      0.f,
-      0.f,
-      0.f,
-      1.f,
-      1.f,
-      0.f,
-  };
-
-  square =
-      graphics_layer::ObjectHandle(GameWindow::GetInstance(), 3, 2 * sizeof(float), vertexData, {}, "pointer_quad");
+	constexpr float vertexData[] = {
+	    0.f, 0.f, 0.f, 1.f, 1.f, 0.f,
+	};
+	geometry = graphics_layer::ObjectHandle(graphics_instance, 3, 2 * sizeof(float), vertexData, {}, "pointer");
 }
+
+
+
+void PointerShader::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &angle,
+                         const float width, const float height, const float offset, const Color &color)
+{
+	Bind(cb);
+
+	Add(cb, center, angle, width, height, offset, color);
+}
+
+
+
+void PointerShader::Bind(GraphicsTypes::CommandBufferInstance *cb)
+{
+	if(!shader)
+		throw runtime_error("PointerShader: Bind() called before Init().");
+
+	cb->BindShader(shader.get());
+}
+
+
+
+void PointerShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &angle,
+                        const float width, const float height, float offset, const Color &color)
+{
+	const gm::vec2 scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
+	const gm::vec2 c = {static_cast<float>(center.X()), static_cast<float>(center.Y())};
+	const gm::vec2 a = {static_cast<float>(angle.X()), static_cast<float>(angle.Y())};
+	const gm::vec2 size = {width, height};
+
+	std::vector<unsigned char> data_cp(info.GetUniformSize());
+	int i = -1;
+	info.CopyUniformEntryToBuffer(data_cp.data(), &scale, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &c, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &a, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &size, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &offset, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
+	cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
+
+	geometry.Draw(cb, GraphicsTypes::PrimitiveType::TRIANGLES);
+}
+
 
 void PointerShader::Clear()
 {
-  shader.Clear();
-  square = {};
+	geometry = graphics_layer::ObjectHandle();
+	shader.reset();
 }
-
-
-void PointerShader::Draw(
-    const Point &center,
-    const Point &angle,
-    float        width,
-    float        height,
-    float        offset,
-    const Color &color)
-{
-  Bind();
-
-  Add(center, angle, width, height, offset, color);
-
-  Unbind();
-}
-
-
-void PointerShader::Bind() { shader.Bind(); }
-
-
-void PointerShader::Add(
-    const Point &center,
-    const Point &angle,
-    const float  width,
-    const float  height,
-    const float  offset,
-    const Color &color)
-{
-
-  const float c[2]    = {static_cast<float>(center.X()), static_cast<float>(center.Y())};
-  const float a[2]    = {static_cast<float>(angle.X()), static_cast<float>(angle.Y())};
-  const float size[2] = {width, height};
-
-  const auto                &info = shader.GetInfo();
-  std::vector<unsigned char> data_cp(info.GetUniformSize());
-
-  int i = -1;
-  info.CopyUniformEntryToBuffer(data_cp.data(), c, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), a, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), size, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), &offset, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
-
-  GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
-
-
-  square.Draw(GraphicsTypes::PrimitiveType::TRIANGLES);
-}
-
-
-void PointerShader::Unbind() {}

@@ -23,26 +23,26 @@ using namespace std;
 
 ShipNameDialogPanel *ShipNameDialogPanel::Create(const FunctionButton &buttonOne, string message, string initialValue)
 {
-  DialogInit init;
-  init.message      = std::move(message);
-  init.initialValue = std::move(initialValue);
-  init.buttonOne    = buttonOne;
-  return new ShipNameDialogPanel(init);
+	DialogInit init;
+	init.message = std::move(message);
+	init.initialValue = std::move(initialValue);
+	init.buttonOne = buttonOne;
+	return new ShipNameDialogPanel(init);
 }
 
 
 ShipNameDialogPanel::ShipNameDialogPanel(DialogInit &init) : DialogPanel(init)
 {
-  buttonThree = FunctionButton(this, "Random", 'r', &ShipNameDialogPanel::RandomName);
-  numButtons  = 3;
+	buttonThree = FunctionButton(this, "Random", 'r', &ShipNameDialogPanel::RandomName);
+	numButtons = 3;
 }
 
 
 bool ShipNameDialogPanel::RandomName(const string &)
 {
-  // TODO: This always chooses human names, even for alien ships. Add a method
-  // of setting the phrase based off of ship and/or purchase location.
-  input = GameData::Phrases().Get("civilian")->Get();
-  // False means to keep the dialog box open.
-  return false;
+	// TODO: This always chooses human names, even for alien ships. Add a method
+	// of setting the phrase based off of ship and/or purchase location.
+	input = GameData::Phrases().Get("civilian")->Get();
+	// False means to keep the dialog box open.
+	return false;
 }

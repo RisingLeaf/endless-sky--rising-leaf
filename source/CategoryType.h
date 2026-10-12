@@ -15,10 +15,4 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-enum class CategoryType : int
-{
-  SHIP,
-  BAY,
-  OUTFIT,
-  SERIES
-};
+enum class CategoryType : int { SHIP, BAY, OUTFIT, SERIES };

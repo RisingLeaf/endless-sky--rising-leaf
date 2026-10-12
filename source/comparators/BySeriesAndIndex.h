@@ -21,45 +21,43 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../Outfit.h"
 #include "../Ship.h"
 
-namespace
-{
-  bool Helper(const Outfit &a, const Outfit &b, const std::string &nameA, const std::string &nameB)
-  {
-    static const CategoryList &series = GameData::GetCategory(CategoryType::SERIES);
-    if(a.Series() == b.Series())
-    {
-      if(a.Index() == b.Index()) return nameA < nameB;
-      return a.Index() < b.Index();
-    }
-    const CategoryList::Category catA = series.GetCategory(a.Series());
-    const CategoryList::Category catB = series.GetCategory(b.Series());
-    return catA < catB;
-  }
+namespace {
+	bool Helper(const Outfit &a, const Outfit &b, const std::string &nameA, const std::string &nameB)
+	{
+		static const CategoryList &series = GameData::GetCategory(CategoryType::SERIES);
+		if(a.Series() == b.Series())
+		{
+			if(a.Index() == b.Index())
+				return nameA < nameB;
+			return a.Index() < b.Index();
+		}
+		const CategoryList::Category catA = series.GetCategory(a.Series());
+		const CategoryList::Category catB = series.GetCategory(b.Series());
+		return catA < catB;
+	}
 } // namespace
 
 template <class T>
 class BySeriesAndIndex;
 
 template <>
-class BySeriesAndIndex<Ship>
-{
+class BySeriesAndIndex<Ship> {
 public:
-  bool operator()(const std::string &nameA, const std::string &nameB) const
-  {
-    const Ship &shipA = *GameData::Ships().Get(nameA);
-    const Ship &shipB = *GameData::Ships().Get(nameB);
-    return Helper(shipA.Attributes(), shipB.Attributes(), shipA.DisplayModelName(), shipB.DisplayModelName());
-  }
+	bool operator()(const std::string &nameA, const std::string &nameB) const
+	{
+		const Ship &shipA = *GameData::Ships().Get(nameA);
+		const Ship &shipB = *GameData::Ships().Get(nameB);
+		return Helper(shipA.Attributes(), shipB.Attributes(), shipA.DisplayModelName(), shipB.DisplayModelName());
+	}
 };
 
 template <>
-class BySeriesAndIndex<Outfit>
-{
+class BySeriesAndIndex<Outfit> {
 public:
-  bool operator()(const std::string &nameA, const std::string &nameB) const
-  {
-    const Outfit &outfitA = *GameData::Outfits().Get(nameA);
-    const Outfit &outfitB = *GameData::Outfits().Get(nameB);
-    return Helper(outfitA, outfitB, outfitA.DisplayName(), outfitB.DisplayName());
-  }
+	bool operator()(const std::string &nameA, const std::string &nameB) const
+	{
+		const Outfit &outfitA = *GameData::Outfits().Get(nameA);
+		const Outfit &outfitB = *GameData::Outfits().Get(nameB);
+		return Helper(outfitA, outfitB, outfitA.DisplayName(), outfitB.DisplayName());
+	}
 };

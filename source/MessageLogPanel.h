@@ -15,34 +15,34 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include "Panel.h"
-
 #include "Messages.h"
+#include "Panel.h"
+#include "graphics/graphics_toplevel_defines.h"
+
 
 
 // User interface panel that displays the message log.
-class MessageLogPanel : public Panel
-{
+class MessageLogPanel : public Panel {
 public:
-  MessageLogPanel();
-  virtual ~MessageLogPanel() override;
+	MessageLogPanel();
+	virtual ~MessageLogPanel() override;
 
-  virtual void Draw() override;
+	virtual void Draw(GraphicsTypes::CommandBufferInstance *cb) override;
 
 
 protected:
-  // Event handlers.
-  virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
-  virtual bool Drag(double dx, double dy) override;
-  virtual bool Scroll(double dx, double dy) override;
+	// Event handlers.
+	virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
+	virtual bool Drag(double dx, double dy) override;
+	virtual bool Scroll(double dx, double dy) override;
 
 
 private:
-  const std::deque<std::pair<std::string, const Message::Category *>> &messages;
+	const std::deque<std::pair<std::string, const Message::Category *>> &messages;
 
-  const double width;
-  bool         importantOnly = false;
-  // Current scroll:
-  double scroll    = 0.;
-  double maxScroll = 0.;
+	const double width;
+	bool importantOnly = false;
+	// Current scroll:
+	double scroll = 0.;
+	double maxScroll = 0.;
 };

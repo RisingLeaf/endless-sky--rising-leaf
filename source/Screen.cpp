@@ -19,110 +19,180 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
+using namespace std;
 
-namespace
-{
-  int RAW_WIDTH      = 0;
-  int RAW_HEIGHT     = 0;
-  int WIDTH          = 0;
-  int HEIGHT         = 0;
-  int USER_ZOOM      = 100;
-  int EFFECTIVE_ZOOM = 100;
+namespace {
+	int RAW_WIDTH = 0;
+	int RAW_HEIGHT = 0;
+	int WIDTH = 0;
+	int HEIGHT = 0;
+	int USER_ZOOM = 100;
+	int EFFECTIVE_ZOOM = 100;
 } // namespace
 
 
-Screen::ScreenDimensionsGuard::ScreenDimensionsGuard(int width, int height) :
-  valid(true), oldWidth(WIDTH), oldHeight(HEIGHT)
+
+Screen::ScreenDimensionsGuard::ScreenDimensionsGuard(int width, int height)
+    : valid(true), oldWidth(WIDTH), oldHeight(HEIGHT)
 {
-  WIDTH  = width;
-  HEIGHT = height;
+	WIDTH = width;
+	HEIGHT = height;
 }
 
 
-Screen::ScreenDimensionsGuard::~ScreenDimensionsGuard() { Deactivate(); }
+
+Screen::ScreenDimensionsGuard::~ScreenDimensionsGuard()
+{
+	Deactivate();
+}
+
 
 
 void Screen::ScreenDimensionsGuard::Deactivate()
 {
-  if(!valid) return;
+	if(!valid)
+		return;
 
-  WIDTH  = oldWidth;
-  HEIGHT = oldHeight;
-  valid  = false;
+	WIDTH = oldWidth;
+	HEIGHT = oldHeight;
+	valid = false;
 }
+
 
 
 void Screen::SetRaw(int width, int height, bool noResizeEvent)
 {
-  RAW_WIDTH  = width;
-  RAW_HEIGHT = height;
-  SetZoom(USER_ZOOM, noResizeEvent);
+	RAW_WIDTH = width;
+	RAW_HEIGHT = height;
+	SetZoom(USER_ZOOM, noResizeEvent);
 }
 
 
-int Screen::UserZoom() { return USER_ZOOM; }
+
+int Screen::UserZoom()
+{
+	return USER_ZOOM;
+}
 
 
-int Screen::Zoom() { return EFFECTIVE_ZOOM; }
+
+int Screen::Zoom()
+{
+	return EFFECTIVE_ZOOM;
+}
+
 
 
 void Screen::SetZoom(int percent, bool noEvent)
 {
-  if(!noEvent) CustomEvents::SendResize();
+	if(!noEvent)
+		CustomEvents::SendResize();
 
-  USER_ZOOM = std::max(100, std::min(200, percent));
+	USER_ZOOM = max(100, percent);
 
-  // Make sure the zoom factor is not set too high for the full UI to fit.
-  static const int MIN_WIDTH  = 1000; // Width of main menu
-  static const int MIN_HEIGHT = 500;  // Height of preferences panel
-  int              minZoomX   = 100 * RAW_WIDTH / MIN_WIDTH;
-  int              minZoomY   = 100 * RAW_HEIGHT / MIN_HEIGHT;
-  int              minZoom    = std::min(minZoomX, minZoomY);
-  // Never go below 100% zoom, no matter how small the window is
-  minZoom = std::max(minZoom, 100);
-  // Use increments of 10, like the user setting
-  minZoom        -= minZoom % 10;
-  EFFECTIVE_ZOOM  = std::min(minZoom, UserZoom());
+	// Make sure the zoom factor is not set too high for the full UI to fit.
+	static const int MIN_WIDTH = 1000; // Width of main menu
+	static const int MIN_HEIGHT = 500; // Height of preferences panel
+	int minZoomX = 100 * RAW_WIDTH / MIN_WIDTH;
+	int minZoomY = 100 * RAW_HEIGHT / MIN_HEIGHT;
+	int minZoom = min(minZoomX, minZoomY);
+	// Never go below 100% zoom, no matter how small the window is
+	minZoom = max(minZoom, 100);
+	// Use increments of 10, like the user setting
+	minZoom -= minZoom % 10;
+	EFFECTIVE_ZOOM = min(minZoom, UserZoom());
 
-  WIDTH  = RAW_WIDTH * 100 / EFFECTIVE_ZOOM;
-  HEIGHT = RAW_HEIGHT * 100 / EFFECTIVE_ZOOM;
+	WIDTH = RAW_WIDTH * 100 / EFFECTIVE_ZOOM;
+	HEIGHT = RAW_HEIGHT * 100 / EFFECTIVE_ZOOM;
 }
 
 
-Point Screen::Dimensions() { return Point(WIDTH, HEIGHT); }
+
+Point Screen::Dimensions()
+{
+	return Point(WIDTH, HEIGHT);
+}
 
 
-int Screen::Width() { return WIDTH; }
+
+int Screen::Width()
+{
+	return WIDTH;
+}
 
 
-int Screen::Height() { return HEIGHT; }
+
+int Screen::Height()
+{
+	return HEIGHT;
+}
 
 
-int Screen::RawWidth() { return RAW_WIDTH; }
+
+int Screen::RawWidth()
+{
+	return RAW_WIDTH;
+}
 
 
-int Screen::RawHeight() { return RAW_HEIGHT; }
+
+int Screen::RawHeight()
+{
+	return RAW_HEIGHT;
+}
 
 
-int Screen::Left() { return WIDTH / -2; }
+
+int Screen::Left()
+{
+	return WIDTH / -2;
+}
 
 
-int Screen::Top() { return HEIGHT / -2; }
+
+int Screen::Top()
+{
+	return HEIGHT / -2;
+}
 
 
-int Screen::Right() { return WIDTH / 2; }
+
+int Screen::Right()
+{
+	return WIDTH / 2;
+}
 
 
-int Screen::Bottom() { return HEIGHT / 2; }
+
+int Screen::Bottom()
+{
+	return HEIGHT / 2;
+}
 
 
-Point Screen::TopLeft() { return Point(-.5 * WIDTH, -.5 * HEIGHT); }
+
+Point Screen::TopLeft()
+{
+	return Point(-.5 * WIDTH, -.5 * HEIGHT);
+}
 
 
-Point Screen::TopRight() { return Point(.5 * WIDTH, -.5 * HEIGHT); }
+
+Point Screen::TopRight()
+{
+	return Point(.5 * WIDTH, -.5 * HEIGHT);
+}
 
 
-Point Screen::BottomLeft() { return Point(-.5 * WIDTH, .5 * HEIGHT); }
+
+Point Screen::BottomLeft()
+{
+	return Point(-.5 * WIDTH, .5 * HEIGHT);
+}
 
 
-Point Screen::BottomRight() { return Point(.5 * WIDTH, .5 * HEIGHT); }
+
+Point Screen::BottomRight()
+{
+	return Point(.5 * WIDTH, .5 * HEIGHT);
+}

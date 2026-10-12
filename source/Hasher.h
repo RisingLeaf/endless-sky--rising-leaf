@@ -19,21 +19,20 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 // A helper class for generating hashes.
-class Hasher
-{
+class Hasher {
 public:
-  template <class T>
-  /// Combine a current hash value with the hash value of the given object.
-  /// @param seed The current hash value. Will be updated by this function.
-  /// @param v The object to add to the hash. Must be compatible with std::hash.
-  static void Hash(std::size_t &seed, const T &v);
+	template <class T>
+	/// Combine a current hash value with the hash value of the given object.
+	/// @param seed The current hash value. Will be updated by this function.
+	/// @param v The object to add to the hash. Must be compatible with std::hash.
+	static void Hash(std::size_t &seed, const T &v);
 };
 
 
 template <class T>
 void Hasher::Hash(std::size_t &seed, const T &v)
 {
-  // https://stackoverflow.com/questions/6899392/generic-hash-function-for-all-stl-containers
-  std::hash<T> hasher;
-  seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+	// https://stackoverflow.com/questions/6899392/generic-hash-function-for-all-stl-containers
+	std::hash<T> hasher;
+	seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
 }

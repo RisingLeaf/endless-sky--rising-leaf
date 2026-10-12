@@ -16,7 +16,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "RouteEdge.h"
 
 
-RouteEdge::RouteEdge(const System *system) : prev(system) {}
+RouteEdge::RouteEdge(const System *system) : prev(system)
+{
+}
 
 
 // Sorting operator to prioritize the "best" edges. The priority queue
@@ -24,9 +26,11 @@ RouteEdge::RouteEdge(const System *system) : prev(system) {}
 // is lower priority than the given item.
 bool RouteEdge::operator<(const RouteEdge &other) const
 {
-  if(fuel != other.fuel) return fuel > other.fuel;
+	if(fuel != other.fuel)
+		return fuel > other.fuel;
 
-  if(days != other.days) return days > other.days;
+	if(days != other.days)
+		return days > other.days;
 
-  return danger > other.danger;
+	return danger > other.danger;
 }

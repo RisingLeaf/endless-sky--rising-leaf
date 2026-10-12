@@ -1,30 +1,47 @@
 #!/usr/bin/env python3
 #
-# This file is part of Astrolative.
+# This file is part of GameJamBase.
 #
 # Copyright (c) 2025 by Torben Hans
 #
-# Astrolative is free software: you can redistribute it and/or modify it under the
+# GameJamBase is free software: you can redistribute it and/or modify it under the
 # terms of the GNU General Public License as published by the Free Software
 # Foundation, either version 3 of the License, or (at your option) any later version.
 #
-#  Astrolative is distributed in the hope that it will be useful, but WITHOUT ANY
+#  GameJamBase is distributed in the hope that it will be useful, but WITHOUT ANY
 #  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 #  PARTICULAR PURPOSE. See the GNU General Public License for more details.
 #
-#  You should have received a copy of the GNU General Public License along with Astrolative. If not, see <https://www.gnu.org/licenses/>.
+#  You should have received a copy of the GNU General Public License along with GameJamBase. If not, see <https://www.gnu.org/licenses/>.
 #
 import os
 import struct
 import sys
 
-glslc_executable   = sys.argv[1]
-common_data_path   = sys.argv[2]
-include_path       = sys.argv[3]
-original_shader    = sys.argv[4]
-destination_shader_vs = sys.argv[5] + ".prs.vert"
-destination_shader_fs = sys.argv[5] + ".prs.frag"
-destination_shader_cs = sys.argv[5] + ".prs.comp"
+import argparse
+
+parser = argparse.ArgumentParser(description="Preprocess GLSL shaders")
+
+parser.add_argument("--glslc", required=True, help="Path to glslc executable")
+parser.add_argument("--spirv-opt", required=True, help="Path to spirv-opt executable")
+parser.add_argument("--common-data", required=True, help="Path to common uniform data GLSL")
+parser.add_argument("--include-path", required=True, help="Shader include directory")
+parser.add_argument("--shader", required=True, help="Original shader path")
+parser.add_argument("--destination", required=True, help="Destination shader path prefix")
+
+args = parser.parse_args()
+
+glslc_executable = args.glslc
+spirv_opt_exe = args.spirv_opt
+common_data_path = args.common_data
+include_path = args.include_path
+original_shader = args.shader
+
+destination_path = str(args.destination)
+destination_shader_vs = args.destination + ".prs.vert"
+destination_shader_fs = args.destination + ".prs.frag"
+destination_shader_cs = args.destination + ".prs.comp"
+
 
 with open(common_data_path, 'r') as file:
     common_data_code = file.read()
@@ -51,26 +68,38 @@ for line in shader_code.split("\n"):
     else:
         new_shader_code += line + "\n"
 
+new_shader_code = new_shader_code.replace("//!COMMON_DATA", common_data_code)
+
 has_vert_shader = new_shader_code.find("VS_BEGIN") != -1
 has_frag_shader = new_shader_code.find("FS_BEGIN") != -1
 has_comp_shader = new_shader_code.find("CS_BEGIN") != -1
+
+
 
 ubo_vars     = []
 v_in_vars    = []
 v_out_vars   = []
 c_in_objects = []
 textures     = []
+rw_buffers   = []
 
-def resolve_argument_line(to_list, identifier, in_line):
+def resolve_argument_line(to_list, identifier, in_line, optional_ids=[]):
     pos = in_line.find(identifier)
     if pos > -1:
         pos_end = in_line.find(";")
         var_line = in_line[pos:pos_end]
         ids = var_line.split()
-        if len(ids) != 3:
+        if len(ids) < 3:
             print(f"ERROR: wrong usage of {identifier}: {in_line}")
         else:
-            to_list.append((ids[1], ids[2]))
+            optionals_found = []
+            if len(ids) > 3:
+                for token in ids[1:len(ids) - 2]:
+                    if token in optional_ids:
+                        optionals_found.append(token)
+                    else:
+                        print(f"ERROR: wrong usage of {token}: {in_line}")
+            to_list.append((ids[len(ids) - 2], ids[len(ids) - 1], optionals_found))
         return True
     return False
 
@@ -112,20 +141,27 @@ def get_compute_texture_type(in_type):
 pruned_code = ""
 
 for line in new_shader_code.split("\n"):
-    if  (  resolve_argument_line(ubo_vars,         "u_in",       line)
+    if  (      resolve_argument_line(ubo_vars,     "u_in",       line)
             or resolve_argument_line(v_in_vars,    "v_in",       line)
-            or resolve_argument_line(v_out_vars,   "v_out",      line)
+            or resolve_argument_line(v_out_vars,   "v_out",      line, ["flat"])
             or resolve_argument_line(c_in_objects, "cs_in",      line)
+            or resolve_argument_line(rw_buffers,   "buffer_rw",  line)
             or resolve_texture_line( textures,     "in_texture", line) ):
         continue
     pruned_code += line + "\n"
 
 spec_struct = ""
 if len(ubo_vars) > 0:
-    spec_struct = "layout(set = 1, binding = 0, std140) uniform SpecUBO {\n"
+    spec_struct = "layout(set = 1, binding = 0) uniform SpecUBO {\n"
     for var in ubo_vars:
         spec_struct += f"  {var[0]} {var[1]};\n"
     spec_struct += "} spec;\n"
+
+rw_bindings = ""
+rw_bindings_counter = 0
+for rw_buffer in rw_buffers:
+    rw_bindings += f"layout(set = 3, binding={rw_bindings_counter}) buffer SSO{rw_bindings_counter} {{ {rw_buffer[0]} {rw_buffer[1]}[]; }} sso{rw_bindings_counter};\n"
+    rw_bindings_counter += 1
 
 v_in_num_elem = 0
 v_in_struct = ""
@@ -136,13 +172,13 @@ for var in v_in_vars:
 v_out_num_elem = 0
 v_out_struct = ""
 for var in v_out_vars:
-    v_out_struct += f"layout(location={v_out_num_elem}) out {var[0]} {var[1]};\n"
+    v_out_struct += f"layout(location={v_out_num_elem}) {'flat' if 'flat' in var[2] else ''} out {var[0]} {var[1]};\n"
     v_out_num_elem += 1
 
 f_in_num_elem = 0
 f_in_struct = ""
 for var in v_out_vars:
-    f_in_struct += f"layout(location={f_in_num_elem}) in {var[0]} {var[1]};\n"
+    f_in_struct += f"layout(location={f_in_num_elem}) {'flat' if 'flat' in var[2] else ''} in {var[0]} {var[1]};\n"
     f_in_num_elem += 1
 
 textures_input_layout = ""
@@ -155,18 +191,20 @@ for tex in textures:
 vs_begin_replacement = ""
 vs_begin_replacement += v_in_struct
 vs_begin_replacement += v_out_struct
+vs_begin_replacement += rw_bindings
 vs_begin_replacement += "void main()\n" \
                         "{\n"
 
 vs_header             = textures_input_layout
 
 ##### CREATE VS_END replacement
-vs_end_replacement = "  gl_Position.x = -gl_Position.x; gl_Position.y = -gl_Position.y;\n}\n"
+vs_end_replacement = "  gl_Position.x = gl_Position.x; gl_Position.y = -gl_Position.y;\n}\n"
 
 
 ##### CREATE FS_BEGIN replacement
 fs_begin_replacement  = ""
 fs_begin_replacement += f_in_struct
+fs_begin_replacement += rw_bindings
 fs_begin_replacement += f"layout(location = 0) out vec4 out_color;\n"
 fs_begin_replacement += "void main()\n"
 fs_begin_replacement += "{\n"
@@ -191,6 +229,8 @@ if len(c_in_objects) > 0:
 cs_end_replacement = "}"
 
 header  = f"#version 430 core\n"
+header += f"precision mediump float;\n"
+header += f"#define VULKAN_SHADER\n"
 header += f"#define USE_TEXTURES\n"
 header += f"#define PASS_TEXTURES\n"
 header += f"#define USE_UBO\n"
@@ -198,7 +238,6 @@ header += f"#define PASS_UBO\n"
 header += f"#define constant\n"
 header += f"#define fmod(x, y) mod(x, y)\n"
 header += f"#define M_PI 3.1415926535897932384626433832795\n"
-header += "\n" + common_data_code
 
 texture_counter = 0
 header += spec_struct
@@ -266,22 +305,25 @@ if has_comp_shader:
 
 shader_pre_packaged = []
 if has_vert_shader:
-    os.system(f"{glslc_executable} -g {destination_shader_vs} -o {sys.argv[5]}.vert")
-    shader_pre_packaged.append(('v', f"{sys.argv[5]}.vert"))
+    os.system(f"{glslc_executable} -g {destination_shader_vs} -o {destination_path}_preopt.vert")
+    os.system(f"{spirv_opt_exe} -O {destination_path}_preopt.vert -o {destination_path}.vert")
+    shader_pre_packaged.append(('v', f"{destination_path}.vert"))
 if has_frag_shader:
-    os.system(f"{glslc_executable} -g {destination_shader_fs} -o {sys.argv[5]}.frag")
-    shader_pre_packaged.append(('f', f"{sys.argv[5]}.frag"))
+    os.system(f"{glslc_executable} -g {destination_shader_fs} -o {destination_path}_preopt.frag")
+    os.system(f"{spirv_opt_exe} -O {destination_path}_preopt.frag -o {destination_path}.frag")
+    shader_pre_packaged.append(('f', f"{destination_path}.frag"))
 if has_comp_shader:
-    os.system(f"{glslc_executable} -g {destination_shader_cs} -o {sys.argv[5]}.comp")
-    shader_pre_packaged.append(('c', f"{sys.argv[5]}.comp"))
+    os.system(f"{glslc_executable} -g {destination_shader_cs} -o {destination_path}_preopt.comp")
+    os.system(f"{spirv_opt_exe} -O {destination_path}_preopt.comp -o {destination_path}.comp")
+    shader_pre_packaged.append(('c', f"{destination_path}.comp"))
 
 mode = ''
-if os.path.exists(f"{sys.argv[5]}.ps"):
+if os.path.exists(f"{destination_path}.ps"):
     mode = 'wb'
 else:
     mode = 'xb'
 
-with open(f"{sys.argv[5]}.ps", mode) as file:
+with open(f"{destination_path}.ps", mode) as file:
     for literal, path in shader_pre_packaged:
         with open(path, 'rb') as shader_f:
             code = shader_f.read()

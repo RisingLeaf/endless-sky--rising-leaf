@@ -24,24 +24,36 @@ extern "C" NTSTATUS NTAPI RtlGetVersion(PRTL_OSVERSIONINFOW);
 
 using namespace std;
 
-namespace
-{
-  RTL_OSVERSIONINFOW versionInfo;
+namespace {
+	RTL_OSVERSIONINFOW versionInfo;
 }
 
 
-void WinVersion::Init() { RtlGetVersion(&versionInfo); }
+
+void WinVersion::Init()
+{
+	RtlGetVersion(&versionInfo);
+}
+
 
 
 string WinVersion::ToString()
 {
-  string servicePack = Utf8::ToUTF8(versionInfo.szCSDVersion);
-  return "Windows NT " + std::to_string(versionInfo.dwMajorVersion) + '.' + std::to_string(versionInfo.dwMinorVersion) + '.' +
-         to_string(versionInfo.dwBuildNumber) + (servicePack.empty() ? string{} : ' ' + servicePack);
+	string servicePack = Utf8::ToUTF8(versionInfo.szCSDVersion);
+	return "Windows NT " + to_string(versionInfo.dwMajorVersion) + '.' + to_string(versionInfo.dwMinorVersion) + '.' +
+	       to_string(versionInfo.dwBuildNumber) + (servicePack.empty() ? string{} : ' ' + servicePack);
 }
 
 
-bool WinVersion::SupportsDarkTheme() { return versionInfo.dwBuildNumber >= 19'041; }
+
+bool WinVersion::SupportsDarkTheme()
+{
+	return versionInfo.dwBuildNumber >= 19041;
+}
 
 
-bool WinVersion::SupportsWindowRounding() { return versionInfo.dwBuildNumber >= 22'000; }
+
+bool WinVersion::SupportsWindowRounding()
+{
+	return versionInfo.dwBuildNumber >= 22000;
+}

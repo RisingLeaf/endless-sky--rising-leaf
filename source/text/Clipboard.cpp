@@ -15,56 +15,58 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Clipboard.h"
 
-#include <SDL3/SDL_clipboard.h>
+#include "../SDL.h"
+
+using namespace std;
+
 
 
 // Handle keys used for clipboard operations on inputBuffer. Return false if the keys
 // don't have any functionality assigned to them. Optionally, size limit of the input buffer
 // and a set of forbidden characters can be provided.
-bool Clipboard::KeyDown(
-    std::string       &inputBuffer,
-    SDL_Keycode        key,
-    Uint16             mod,
-    size_t             maxSize,
-    const std::string &forbidden)
+bool Clipboard::KeyDown(string &inputBuffer, SDL_Keycode key, Uint16 mod, size_t maxSize,
+                        const std::function<bool(char32_t)> &forbidden)
 {
-  if(!(mod & SDL_KMOD_CTRL)) return false;
+	if(!(mod & SDL_KMOD_CTRL))
+		return false;
 
-  if(key == 'c')
-  {
-    Set(inputBuffer);
-  }
-  else if(key == 'x')
-  {
-    Set(inputBuffer);
-    inputBuffer.clear();
-  }
-  else if(key == 'v')
-  {
-    inputBuffer += Get(maxSize - inputBuffer.size(), forbidden);
-  }
-  else {
-    return false;
-  }
+	if(key == 'c')
+		Set(inputBuffer);
+	else if(key == 'x')
+	{
+		Set(inputBuffer);
+		inputBuffer.clear();
+	}
+	else if(key == 'v')
+		inputBuffer += Get(maxSize - inputBuffer.size(), forbidden);
+	else
+		return false;
 
-  return true;
+	return true;
 }
 
 
+
 // Replace the current contents with the provided string.
-void Clipboard::Set(const std::string &text) { SDL_SetClipboardText(text.c_str()); }
+void Clipboard::Set(const string &text)
+{
+	SDL_SetClipboardText(text.c_str());
+}
+
 
 
 // Get the current clipboard contents, excluding characters we don't want.
-std::string Clipboard::Get(size_t maxSize, const std::string &forbidden)
+string Clipboard::Get(size_t maxSize, const function<bool(char32_t)> &forbidden)
 {
-  if(!SDL_HasClipboardText()) return {};
+	if(!SDL_HasClipboardText())
+		return {};
 
-  std::string clipboardString;
-  char       *clipboardBuffer = SDL_GetClipboardText();
-  size_t      i               = 0;
-  for(char *c = clipboardBuffer; *c && i < maxSize; ++c, ++i)
-    if(*c >= ' ' && *c <= '~' && forbidden.find(*c) == std::string::npos) clipboardString += *c;
-  SDL_free(clipboardBuffer);
-  return clipboardString;
+	string clipboardString;
+	char *clipboardBuffer = SDL_GetClipboardText();
+	size_t i = 0;
+	for(char *c = clipboardBuffer; *c && i < maxSize; ++c, ++i)
+		if(*c >= ' ' && *c <= '~' && (!forbidden || !forbidden(*c)))
+			clipboardString += *c;
+	SDL_free(clipboardBuffer);
+	return clipboardString;
 }

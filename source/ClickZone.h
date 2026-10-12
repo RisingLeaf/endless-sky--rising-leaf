@@ -25,25 +25,24 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 // may take action if it is clicked on. The region stores a single data object
 // that identifies it or identifies the action to take.
 template <class Type>
-class ClickZone : public Rectangle
-{
+class ClickZone : public Rectangle {
 public:
-  // Constructor. The "dimensions" are the full width and height of the zone.
-  explicit ClickZone(const Rectangle &rect, Type value = 0);
-  ClickZone(Point center, Point dimensions, Type value = 0);
+	// Constructor. The "dimensions" are the full width and height of the zone.
+	explicit ClickZone(const Rectangle &rect, Type value = 0);
+	ClickZone(Point center, Point dimensions, Type value = 0);
 
-  // Retrieve the value associated with this zone.
-  Type Value() const noexcept;
+	// Retrieve the value associated with this zone.
+	Type Value() const noexcept;
 
 
 private:
-  Type value;
+	Type value;
 };
 
 
 template <class Type>
-ClickZone<Type>::ClickZone(Point center, Point dimensions, Type value) :
-  Rectangle(center, dimensions), value(std::move(value))
+ClickZone<Type>::ClickZone(Point center, Point dimensions, Type value)
+    : Rectangle(center, dimensions), value(std::move(value))
 {
 }
 
@@ -57,5 +56,5 @@ ClickZone<Type>::ClickZone(const Rectangle &rect, Type value) : Rectangle(rect),
 template <class Type>
 Type ClickZone<Type>::Value() const noexcept
 {
-  return value;
+	return value;
 }

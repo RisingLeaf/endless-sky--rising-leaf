@@ -16,12 +16,4 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 
-enum class MouseButton
-{
-  NONE = 0,
-  LEFT,
-  MIDDLE,
-  RIGHT,
-  X1,
-  X2
-};
+enum class MouseButton { NONE = 0, LEFT, MIDDLE, RIGHT, X1, X2 };

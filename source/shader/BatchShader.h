@@ -17,18 +17,24 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <vector>
 
+
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+	class GraphicsInstance;
+} // namespace GraphicsTypes
 class Sprite;
+
 
 
 // Class for drawing sprites in a batch. The input to each draw command is a
 // sprite and the vertex data.
-class BatchShader
-{
+class BatchShader {
 public:
-  // Initialize the shaders.
-  static void Init();
-  static void Clear();
+	// Initialize the shaders.
+	static void Init(const GraphicsTypes::GraphicsInstance *graphics_instance);
 
-  static void Bind();
-  static void Add(const Sprite *sprite, const std::vector<float> &data);
+	static void Bind(GraphicsTypes::CommandBufferInstance *cb);
+	static void Add(GraphicsTypes::CommandBufferInstance *cb, const Sprite *sprite, const std::vector<float> &data);
+	static void Unbind();
+	static void Clear();
 };

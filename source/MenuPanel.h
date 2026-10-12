@@ -16,6 +16,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "Panel.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 #include <string>
 #include <vector>
@@ -25,43 +26,43 @@ class PlayerInfo;
 class UI;
 
 
+
 // Class representing the main menu, which is shown before you enter a game or
 // when you hit "escape" to return here. This includes a scrolling list of
 // credits and basic information on the currently loaded player.
-class MenuPanel : public Panel
-{
+class MenuPanel : public Panel {
 public:
-  MenuPanel(PlayerInfo &player, UI &gamePanels);
-  virtual ~MenuPanel();
+	MenuPanel(PlayerInfo &player, UI &gamePanels);
+	virtual ~MenuPanel();
 
-  virtual void Step() override;
-  virtual void Draw() override;
+	virtual void Step() override;
+	virtual void Draw(GraphicsTypes::CommandBufferInstance *cb) override;
 
 
 protected:
-  // Only override the ones you need; the default action is to return false.
-  virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
-  virtual bool Click(int x, int y, MouseButton button, int clicks) override;
+	// Only override the ones you need; the default action is to return false.
+	virtual bool KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress) override;
+	virtual bool Click(int x, int y, MouseButton button, int clicks) override;
 
 
 private:
-  void DrawCredits() const;
+	void DrawCredits(GraphicsTypes::CommandBufferInstance *cb) const;
 
 
 private:
-  PlayerInfo &player;
-  UI         &gamePanels;
+	PlayerInfo &player;
+	UI &gamePanels;
 
-  const Interface *mainMenuUi;
+	const Interface *mainMenuUi;
 
-  // When the menu panel is closed, return the starfield to this position.
-  Point  returnPos;
-  double animation  = 0.;
-  double xSpeed     = 0.;
-  double ySpeed     = 0.;
-  double yAmplitude = 0.;
+	// When the menu panel is closed, return the starfield to this position.
+	Point returnPos;
+	double animation = 0.;
+	double xSpeed = 0.;
+	double ySpeed = 0.;
+	double yAmplitude = 0.;
 
-  std::vector<std::string> credits;
-  long long int            scroll          = 0;
-  bool                     scrollingPaused = false;
+	std::vector<std::string> credits;
+	long long int scroll = 0;
+	bool scrollingPaused = false;
 };

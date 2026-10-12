@@ -1,3 +1,4 @@
+u_in vec2  scale;
 u_in vec2  position;
 u_in float radius;
 u_in float width;
@@ -6,25 +7,28 @@ u_in float startAngle;
 u_in float dash;
 u_in vec4  color;
 
-v_in  vec2 vert;
+
+v_in vec2 vert;
+
 v_out vec2 coord;
 
 VS_BEGIN
-	coord        = (spec.radius + spec.width) * vert;
-	gl_Position  = vec4((coord + spec.position) * glob.scale, 0.f, 1.f);
+	coord = (spec.radius + spec.width) * vert;
+	gl_Position = vec4((coord + spec.position) * spec.scale, 0.0, 1.0);
 VS_END
 
+#define M_PI 3.1415926535897932384626433832795
 
 FS_BEGIN
-	float arc = fmod(atan(coord.x, coord.y) + M_PI + spec.startAngle, 2.f * M_PI);
-	float arcFalloff = 1.f - min(2.f * M_PI - arc, arc - spec.angle) * spec.radius;
-	if(spec.dash != 0.f)
+	float arc        = mod(atan(coord.x, coord.y) + M_PI + spec.startAngle, 2.0 * M_PI);
+	float arcFalloff = 1.0 - min(2.0 * M_PI - arc, arc - spec.angle) * spec.radius;
+	if(spec.dash != 0.0)
 	{
-		arc = fmod(arc, spec.dash);
+		arc        = mod(arc, spec.dash);
 		arcFalloff = min(arcFalloff, min(arc, spec.dash - arc) * spec.radius);
 	}
-	float len = length(coord);
-	float lenFalloff = spec.width - abs(len - spec.radius);
-	float alpha = clamp(min(arcFalloff, lenFalloff), 0.f, 1.f);
+	const float len        = length(coord);
+	const float lenFalloff = spec.width - abs(len - spec.radius);
+	const float alpha      = clamp(min(arcFalloff, lenFalloff), 0.0, 1.0);
 	out_color = spec.color * alpha;
 FS_END

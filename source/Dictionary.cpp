@@ -17,50 +17,94 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "StringInterner.h"
 
-#include <algorithm>
+#include <cstdint>
 #include <cstring>
-#include <string>
 
+using namespace std;
 
-namespace
-{
-  std::pair<size_t, bool> Search(const char *key, const std::vector<std::pair<const char *, double>> &v)
-  {
-    const auto it = std::lower_bound(
-        v.begin(),
-        v.end(),
-        key,
-        [](const auto &pair, const char *k) { return strcmp(pair.first, k) < 0; });
+namespace {
+	// Perform a binary search on a sorted vector. Return the key's location (or
+	// proper insertion spot) in the first element of the pair, and "true" in
+	// the second element if the key is already in the vector.
+	template <class Type>
+	pair<size_t, bool> Search(const char *key, const vector<pair<const char *, Type>> &v)
+	{
+		// At each step of the search, we know the key is in [low, high).
+		size_t low = 0;
+		size_t high = v.size();
 
-    return {static_cast<size_t>(it - v.begin()), it != v.end() && strcmp(it->first, key) == 0};
-  }
+		while(low != high)
+		{
+			size_t mid = (low + high) / 2;
+			int cmp = strcmp(key, v[mid].first);
+			if(!cmp)
+				return make_pair(mid, true);
+
+			if(cmp < 0)
+				high = mid;
+			else
+				low = mid + 1;
+		}
+		return make_pair(low, false);
+	}
 } // namespace
 
 
-double &Dictionary::operator[](const char *key)
-{
-  auto [loc, found] = Search(key, *this);
-  if(found) return data()[loc].second;
 
-  return insert(begin() + loc, std::make_pair(StringInterner::Intern(key), 0.))->second;
+template <class Type>
+Type &Dictionary<Type>::operator[](const char *key)
+{
+	pair<size_t, bool> pos = Search(key, *this);
+	if(pos.second)
+		return this->data()[pos.first].second;
+
+	return this->insert(begin() + pos.first, make_pair(StringInterner::Intern(key), 0.))->second;
 }
 
 
-double &Dictionary::operator[](const std::string &key) { return (*this)[key.c_str()]; }
 
-
-double Dictionary::Get(const char *key) const
+template <class Type>
+Type &Dictionary<Type>::operator[](const string &key)
 {
-  auto [loc, found] = Search(key, *this);
-  return found ? data()[loc].second : 0.;
+	return (*this)[key.c_str()];
 }
 
 
-double Dictionary::Get(const std::string &key) const { return Get(key.c_str()); }
 
-
-void Dictionary::Erase(const char *key)
+template <class Type>
+Type Dictionary<Type>::Get(const char *key) const
 {
-  auto [pos, exists] = Search(key, *this);
-  if(exists) erase(next(this->begin(), pos));
+	pair<size_t, bool> pos = Search(key, *this);
+	return (pos.second ? this->data()[pos.first].second : 0.);
 }
+
+
+
+template <class Type>
+Type Dictionary<Type>::Get(const string &key) const
+{
+	return Get(key.c_str());
+}
+
+
+
+template <class Type>
+void Dictionary<Type>::Erase(const char *key)
+{
+	auto [pos, exists] = Search(key, *this);
+	if(exists)
+		this->erase(next(this->begin(), pos));
+}
+
+
+
+template <class Type>
+void Dictionary<Type>::Clear()
+{
+	this->clear();
+}
+
+
+
+template class Dictionary<int64_t>;
+template class Dictionary<double>;

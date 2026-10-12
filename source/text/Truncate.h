@@ -16,10 +16,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 // Ways in which text may be truncated in the UI.
-enum class Truncate : int
-{
-  NONE,
-  FRONT,
-  MIDDLE,
-  BACK,
+enum class Truncate : int {
+	NONE,
+	FRONT,
+	MIDDLE,
+	BACK,
 };

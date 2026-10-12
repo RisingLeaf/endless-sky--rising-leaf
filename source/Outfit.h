@@ -16,9 +16,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "Dictionary.h"
+#include "Drawable.h"
 #include "Paragraphs.h"
 
-#include <array>
 #include <map>
 #include <memory>
 #include <optional>
@@ -26,13 +26,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 #include <vector>
 
-class Body;
 class ConditionsStore;
 class DataNode;
+class Drawable;
 class Effect;
 class Sound;
 class Sprite;
 class Weapon;
+
 
 
 // Class representing an outfit that can be installed in a ship. A ship's
@@ -41,321 +42,196 @@ class Weapon;
 // set of attributes unique to them, and outfits can also specify additional
 // information like the sprite to use in the outfitter panel for selling them,
 // or the sprite or sound to be used for an engine flare.
-class Outfit
-{
+class Outfit {
 public:
-  // These are all the possible category strings for outfits.
-  static const std::vector<std::string> CATEGORIES;
+	// These are all the possible category strings for outfits.
+	static const std::vector<std::string> CATEGORIES;
 
-  static constexpr double DEFAULT_HYPERDRIVE_COST  = 100.;
-  static constexpr double DEFAULT_SCRAM_DRIVE_COST = 150.;
-  static constexpr double DEFAULT_JUMP_DRIVE_COST  = 200.;
-
-#define ADD_SPECIAL_DAMAGE(x)                                                                                          \
-  #x " energy", #x " fuel", #x " heat", #x " ion", #x " scramble", #x " disruption", #x " slowing", #x " discharge",   \
-      #x " corrosion", #x " leakage", #x " burn"
-
-  static constexpr std::array<std::string_view, 172> AttributeNameTable = {
-      "cargo space",
-      "outfit space",
-      "weapon capacity",
-      "engine capacity",
-
-      "automaton",
-      "required crew",
-
-      "drag",
-      "drag reduction",
-      "inertia reduction",
-
-      "atrocity",
-      "illegal",
-      "installable",
-
-      "shields",
-      "shield generation",
-      "shield energy",
-      "shield heat",
-      "shield fuel",
-      "shield delay",
-      "depleted shield delay",
-      "delayed shield generation",
-      "delayed shield energy",
-      "delayed shield heat",
-      "delayed shield fuel",
-      "high shield permeability",
-      "low shield permeability",
-      "cloaked shield permeability",
-
-      "hull",
-      "hull repair rate",
-      "hull energy",
-      "hull heat",
-      "hull fuel",
-
-      "repair delay",
-      "disabled repair delay",
-      "delayed hull repair rate",
-      "delayed hull energy",
-      "delayed hull heat",
-      "delayed hull fuel",
-
-      "absolute threshold",
-      "threshold percentage",
-      "hull threshold",
-
-      "disabled recovery time",
-      "disabled recovery energy",
-      "disabled recovery fuel",
-      "disabled recovery heat",
-      "disabled recovery ionization",
-      "disabled recovery scrambling",
-      "disabled recovery disruption",
-      "disabled recovery slowing",
-      "disabled recovery discharge",
-      "disabled recovery corrosion",
-      "disabled recovery leak",
-      "disabled recovery burning",
-
-      "shield generation multiplier",
-      "shield energy multiplier",
-      "shield heat multiplier",
-      "shield fuel multiplier",
-      "shield multiplier",
-
-      "hull repair multiplier",
-      "hull energy multiplier",
-      "hull heat multiplier",
-      "hull fuel multiplier",
-      "hull multiplier",
-
-      "cloaked regen multiplier",
-      "cloaked repair multiplier",
-
-      "turret turn multiplier",
-
-      "energy capacity",
-      "energy generation",
-      "energy consumption",
-      "heat generation",
-
-      "ramscoop",
-      "solar collection",
-      "solar heat",
-
-      "fuel capacity",
-      "fuel consumption",
-      "fuel energy",
-      "fuel heat",
-      "fuel generation",
-
-      "thrust",
-      "thrusting shields",
-      "thrusting hull",
-      ADD_SPECIAL_DAMAGE(thrusting),
-      "turn",
-      "turning shields",
-      "turning hull",
-      ADD_SPECIAL_DAMAGE(turning),
-      "reverse thrust",
-      "reverse thrusting shields",
-      "reverse thrusting hull",
-      ADD_SPECIAL_DAMAGE(reverse thrusting),
-      "afterburner thrust",
-      "afterburner shields",
-      "afterburner hull",
-      ADD_SPECIAL_DAMAGE(afterburner),
-      "acceleration multiplier",
-      "turn multiplier",
-
-      "cooling",
-      "active cooling",
-      "cooling energy",
-      "cooling inefficiency",
-
-      "heat dissipation",
-      "heat capacity",
-      "overheat damage rate",
-      "overheat damage threshold",
-
-      "cloak",
-      "cloak by mass",
-      "cloak phasing",
-      "cloak hull threshold",
-      "cloaking fuel",
-      "cloaking energy",
-      "cloaking hull",
-      "cloaking shields",
-      "cloaking heat",
-      "cloaking shield delay",
-      "cloaking repair delay",
-
-      "piercing protection",
-      "piercing resistance",
-      "shield protection",
-      "cloak shield protection",
-      "hull protection",
-      "cloak hull protection",
-      "energy protection",
-      "heat protection",
-      "fuel protection",
-
-      "discharge protection",
-      "corrosion protection",
-      "ion protection",
-      "burn protection",
-      "leak protection",
-
-      "slowing protection",
-      "scramble protection",
-      "disruption protection",
-
-      "force protection",
-  };
-
-#undef ADD_SPECIAL_DAMAGE
-
-  static consteval size_t INTERNAL_ATTR(const std::string_view name)
-  {
-    for(size_t i = 0; i < AttributeNameTable.size(); ++i)
-      if(AttributeNameTable[i] == name) return i;
-    std::unreachable();
-  }
-
-  static std::optional<size_t> InternalName(const std::string_view name)
-  {
-    for(size_t i = 0; i < AttributeNameTable.size(); ++i)
-      if(AttributeNameTable[i] == name) return i;
-    return std::nullopt;
-  }
+	static constexpr double DEFAULT_HYPERDRIVE_COST = 100.;
+	static constexpr double DEFAULT_SCRAM_DRIVE_COST = 150.;
+	static constexpr double DEFAULT_JUMP_DRIVE_COST = 200.;
 
 
 public:
-  // An "outfit" can be loaded from an "outfit" node or from a ship's
-  // "attributes" node.
-  void Load(const DataNode &node, const ConditionsStore *playerConditions);
-  bool IsDefined() const;
+	// Get the limit to how low an attribute is allowed to go on a ship when installing outfits.
+	// An empty optional means that there is no lower limit.
+	static std::optional<double> LowerLimit(const std::string &attribute);
+	static std::optional<int64_t> LowerLimitPrecise(const std::string &attribute);
 
-  [[nodiscard]] const std::string &TrueName() const;
-  void                             SetTrueName(const std::string &name);
-  [[nodiscard]] const std::string &DisplayName() const;
-  [[nodiscard]] const std::string &PluralName() const;
-  [[nodiscard]] const std::string &Category() const;
-  [[nodiscard]] const std::string &Series() const;
-  [[nodiscard]] int                Index() const;
-  [[nodiscard]] std::string        Description() const;
-  [[nodiscard]] int64_t            Cost() const;
-  [[nodiscard]] double             Mass() const;
-  // Get the licenses needed to buy or operate this ship.
-  [[nodiscard]] const std::vector<std::string> &Licenses() const;
-  // Get the image to display in the outfitter when buying this item.
-  [[nodiscard]] const Sprite *Thumbnail() const;
 
-  [[nodiscard]] constexpr const double &GetIndexed(const size_t attribute) const
-  {
-    return QuickLoadDictionary[attribute];
-  }
-  [[nodiscard]] double                                      Get(std::string_view attribute) const;
-  [[nodiscard]] std::set<std::string>                       GetPositiveAttributes() const;
-  [[nodiscard]] std::vector<std::pair<std::string, double>> Attributes() const;
+public:
+	class AttributeIterator {
+	public:
+		explicit AttributeIterator(const Outfit &outfit, Dictionary<int64_t>::const_iterator start);
+		AttributeIterator() = delete;
 
-  // Determine whether the given number of instances of the given outfit can
-  // be added to a ship with the attributes represented by this instance. If
-  // not, return the maximum number that can be added.
-  [[nodiscard]] int CanAdd(const Outfit &other, int count = 1) const;
-  // For tracking a combination of outfits in a ship: add the given number of
-  // instances of the given outfit to this outfit.
-  void Add(const Outfit &other, int count = 1);
-  // Add the licenses required by the given outfit to this outfit.
-  void AddLicenses(const Outfit &outfit);
-  // Modify this outfit's attributes. Note that this cannot be used to change
-  // special attributes, like cost and mass.
-  void Set(std::string_view attribute, double value);
+		// Iterator traits
+		using iterator_category = std::input_iterator_tag;
+		using value_type = std::pair<std::string, double>;
+		using difference_type = void;
+		using pointer = const std::pair<std::string, double> *;
+		using reference = std::pair<std::string, double> &;
 
-  [[nodiscard]] const std::shared_ptr<const Weapon> &GetWeapon() const;
-  // Get the ammo if this is an ammo storage outfit.
-  [[nodiscard]] const Outfit *AmmoStored() const;
-  // Get the ammo used if this is a weapon, or stored ammo if this is a storage.
-  [[nodiscard]] const Outfit *AmmoStoredOrUsed() const;
+		std::pair<std::string, double> operator*() const;
+		AttributeIterator &operator++();
+		bool operator==(const AttributeIterator &) const;
+		bool operator!=(const AttributeIterator &) const;
+		bool operator<(const AttributeIterator &) const;
+		bool operator>(const AttributeIterator &) const;
 
-  // Get this outfit's engine flare sprites, if any.
-  [[nodiscard]] const std::vector<std::pair<Body, int>> &FlareSprites() const;
-  [[nodiscard]] const std::vector<std::pair<Body, int>> &ReverseFlareSprites() const;
-  [[nodiscard]] const std::vector<std::pair<Body, int>> &SteeringFlareSprites() const;
-  [[nodiscard]] const std::map<const Sound *, int>      &FlareSounds() const;
-  [[nodiscard]] const std::map<const Sound *, int>      &ReverseFlareSounds() const;
-  [[nodiscard]] const std::map<const Sound *, int>      &SteeringFlareSounds() const;
-  // Get the afterburner effect, if any.
-  [[nodiscard]] const std::map<const Effect *, int> &AfterburnerEffects() const;
-  // Get this outfit's jump effects and sounds, if any.
-  [[nodiscard]] const std::map<const Effect *, int> &JumpEffects() const;
-  [[nodiscard]] const std::map<const Sound *, int>  &HyperSounds() const;
-  [[nodiscard]] const std::map<const Sound *, int>  &HyperInSounds() const;
-  [[nodiscard]] const std::map<const Sound *, int>  &HyperOutSounds() const;
-  [[nodiscard]] const std::map<const Sound *, int>  &JumpSounds() const;
-  [[nodiscard]] const std::map<const Sound *, int>  &JumpInSounds() const;
-  [[nodiscard]] const std::map<const Sound *, int>  &JumpOutSounds() const;
-  // Get this outfit's scan sounds, if any.
-  [[nodiscard]] const std::map<const Sound *, int> &CargoScanSounds() const;
-  [[nodiscard]] const std::map<const Sound *, int> &OutfitScanSounds() const;
-  // Get the sprite this outfit uses when dumped into space.
-  [[nodiscard]] const Sprite *FlotsamSprite() const;
+	private:
+		const Outfit &outfit;
+		Dictionary<int64_t>::const_iterator it;
+	};
+
+
+public:
+	// An "outfit" can be loaded from an "outfit" node or from a ship's
+	// "attributes" node.
+	void Load(const DataNode &node, const ConditionsStore *playerConditions);
+	bool IsDefined() const;
+
+	const std::string &TrueName() const;
+	void SetTrueName(const std::string &name);
+	const std::string &DisplayName() const;
+	const std::string &PluralName() const;
+	const std::string &Category() const;
+	const std::string &Series() const;
+	int Index() const;
+	std::string Description() const;
+	int64_t Cost() const;
+	double Mass() const;
+	// Get the licenses needed to buy or operate this ship.
+	const std::vector<std::string> &Licenses() const;
+	// Get the image to display in the outfitter when buying this item.
+	const Drawable &Thumbnail() const;
+
+	// Return true if this Outfit's attributes Dictionary is empty. Does not determine
+	// whether this Outfit contains any sprites, effects, sounds, or a weapon.
+	bool Empty() const;
+	// Access to the attribute values.
+	double Get(const char *attribute) const;
+	double Get(const std::string &attribute) const;
+	int64_t GetPrecise(const char *attribute) const;
+	int64_t GetPrecise(const std::string &attribute) const;
+	// Get an iterator over this Outfit's attribute names and values as doubles.
+	AttributeIterator begin() const;
+	AttributeIterator end() const;
+	// Get the underlying precise values dictionary.
+	const Dictionary<int64_t> &Precise() const;
+
+	// Determine whether the given number of instances of the given outfit can
+	// be added to a ship with the attributes represented by this instance. If
+	// not, return the maximum number that can be added.
+	int CanAdd(const Outfit &other, int count = 1) const;
+	// For tracking a combination of outfits in a ship: add the given number of
+	// instances of the given outfit to this outfit.
+	void Add(const Outfit &other, int count = 1);
+	// Add the licenses required by the given outfit to this outfit.
+	void AddLicenses(const Outfit &other);
+	// Modify this outfit's attributes. Note that this cannot be used to change
+	// special attributes, like cost and mass.
+	void Set(const char *attribute, double value);
+	void Set(const std::string &attribute, double value);
+
+	const std::shared_ptr<const Weapon> &GetWeapon() const;
+	// Get the ammo if this is an ammo storage outfit.
+	const std::set<const Outfit *> &AmmoStored() const;
+	// Get the ammo used if this is a weapon, or stored ammo if this is a storage.
+	const std::set<const Outfit *> &AmmoStoredOrUsed() const;
+	// Outfits that should be sold when this outfit is sold.
+	const std::set<const Outfit *> &LinkedOutfits() const;
+
+	// Get this outfit's engine flare sprites, if any.
+	const std::vector<std::pair<Drawable, int>> &FlareSprites() const;
+	const std::vector<std::pair<Drawable, int>> &ReverseFlareSprites() const;
+	const std::vector<std::pair<Drawable, int>> &SteeringFlareSprites() const;
+	const std::map<const Sound *, int> &FlareSounds() const;
+	const std::map<const Sound *, int> &ReverseFlareSounds() const;
+	const std::map<const Sound *, int> &SteeringFlareSounds() const;
+	// Get the afterburner effect, if any.
+	const std::map<const Effect *, int> &AfterburnerEffects() const;
+	// Get this outfit's jump effects and sounds, if any.
+	const std::map<const Effect *, double> &JumpEffects() const;
+	const std::map<const Sound *, int> &HyperSounds() const;
+	const std::map<const Sound *, int> &HyperInSounds() const;
+	const std::map<const Sound *, int> &HyperOutSounds() const;
+	const std::map<const Sound *, int> &JumpSounds() const;
+	const std::map<const Sound *, int> &JumpInSounds() const;
+	const std::map<const Sound *, int> &JumpOutSounds() const;
+	// Get this outfit's scan sounds, if any.
+	const std::map<const Sound *, int> &CargoScanSounds() const;
+	const std::map<const Sound *, int> &OutfitScanSounds() const;
+	// Get the sprite this outfit uses when dumped into space.
+	const Sprite *FlotsamSprite() const;
 
 
 private:
-  // Add the license with the given name to the licenses required by this outfit, if it is not already present.
-  void AddLicense(const std::string &name);
+	// Add the license with the given name to the licenses required by this outfit, if it is not already present.
+	void AddLicense(const std::string &name);
 
 
 private:
-  bool        isDefined = false;
-  std::string trueName;
-  std::string displayName;
-  std::string pluralName;
-  std::string category;
-  // The series that this outfit is a part of and its index within that series.
-  // Used for sorting within shops.
-  std::string   series;
-  int           index = 0;
-  Paragraphs    description;
-  const Sprite *thumbnail = nullptr;
-  int64_t       cost      = 0;
-  double        mass      = 0.;
-  // Licenses needed to purchase this item.
-  std::vector<std::string> licenses;
+	bool isDefined = false;
+	std::string trueName;
+	std::string displayName;
+	std::string pluralName;
+	std::string category;
+	// The series that this outfit is a part of and its index within that series.
+	// Used for sorting within shops.
+	std::string series;
+	int index = 0;
+	Paragraphs description;
+	Drawable thumbnail;
+	int64_t cost = 0;
+	double mass = 0.;
+	// Licenses needed to purchase this item.
+	std::vector<std::string> licenses;
 
-  std::array<double, AttributeNameTable.size()> QuickLoadDictionary{};
-  Dictionary                                    attributes;
+	Dictionary<int64_t> attributes;
 
-  std::shared_ptr<const Weapon> weapon;
-  // Non-weapon outfits can have ammo so that storage outfits
-  // properly remove excess ammo when the storage is sold, instead
-  // of blocking the sale of the outfit until the ammo is sold first.
-  const Outfit *ammoStored = nullptr;
+	std::shared_ptr<const Weapon> weapon;
+	// Non-weapon outfits can have ammo so that storage outfits
+	// properly remove excess ammo when the storage is sold, instead
+	// of blocking the sale of the outfit until the ammo is sold first.
+	std::set<const Outfit *> ammoStored;
+	// Linked outfits are also sold when this outfit is sold, but you
+	// won't be prompted to fill up on "ammo" when entering the outfitter.
+	std::set<const Outfit *> linkedOutfits;
 
-  // The integers in these pairs/maps indicate the number of
-  // sprites/effects/sounds to be placed/played.
-  std::vector<std::pair<Body, int>> flareSprites;
-  std::vector<std::pair<Body, int>> reverseFlareSprites;
-  std::vector<std::pair<Body, int>> steeringFlareSprites;
-  std::map<const Sound *, int>      flareSounds;
-  std::map<const Sound *, int>      reverseFlareSounds;
-  std::map<const Sound *, int>      steeringFlareSounds;
-  std::map<const Effect *, int>     afterburnerEffects;
-  std::map<const Effect *, int>     jumpEffects;
-  std::map<const Sound *, int>      hyperSounds;
-  std::map<const Sound *, int>      hyperInSounds;
-  std::map<const Sound *, int>      hyperOutSounds;
-  std::map<const Sound *, int>      jumpSounds;
-  std::map<const Sound *, int>      jumpInSounds;
-  std::map<const Sound *, int>      jumpOutSounds;
-  std::map<const Sound *, int>      cargoScanSounds;
-  std::map<const Sound *, int>      outfitScanSounds;
-  const Sprite                     *flotsamSprite = nullptr;
+	// The integers in these pairs/maps indicate the number of
+	// sprites/effects/sounds to be placed/played.
+	std::vector<std::pair<Drawable, int>> flareSprites;
+	std::vector<std::pair<Drawable, int>> reverseFlareSprites;
+	std::vector<std::pair<Drawable, int>> steeringFlareSprites;
+	std::map<const Sound *, int> flareSounds;
+	std::map<const Sound *, int> reverseFlareSounds;
+	std::map<const Sound *, int> steeringFlareSounds;
+	std::map<const Effect *, int> afterburnerEffects;
+	std::map<const Effect *, double> jumpEffects;
+	std::map<const Sound *, int> hyperSounds;
+	std::map<const Sound *, int> hyperInSounds;
+	std::map<const Sound *, int> hyperOutSounds;
+	std::map<const Sound *, int> jumpSounds;
+	std::map<const Sound *, int> jumpInSounds;
+	std::map<const Sound *, int> jumpOutSounds;
+	std::map<const Sound *, int> cargoScanSounds;
+	std::map<const Sound *, int> outfitScanSounds;
+	const Sprite *flotsamSprite = nullptr;
 };
 
 
+
 // These get called a lot, so inline them for speed.
-inline int64_t                              Outfit::Cost() const { return cost; }
-inline double                               Outfit::Mass() const { return mass; }
-inline const std::shared_ptr<const Weapon> &Outfit::GetWeapon() const { return weapon; }
+inline int64_t Outfit::Cost() const
+{
+	return cost;
+}
+inline double Outfit::Mass() const
+{
+	return mass;
+}
+inline const std::shared_ptr<const Weapon> &Outfit::GetWeapon() const
+{
+	return weapon;
+}

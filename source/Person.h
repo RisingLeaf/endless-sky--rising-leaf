@@ -18,6 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "LocationFilter.h"
 #include "Personality.h"
 #include "Phrase.h"
+#include "ship/ShipFactory.h"
 
 #include <list>
 #include <memory>
@@ -27,54 +28,65 @@ class DataNode;
 class FormationPattern;
 class Government;
 class Ship;
+class ShipEvent;
 class System;
 
 
+
 // A unique individual who may appear at random times in the game.
-class Person
-{
+class Person {
 public:
-  void Load(
-      const DataNode                 &node,
-      const ConditionsStore          *playerConditions,
-      const std::set<const System *> *visitedSystems,
-      const std::set<const Planet *> *visitedPlanets);
-  // Finish loading all the ships in this person specification.
-  void FinishLoading();
-  bool IsLoaded() const;
-  // Prevent this person from being spawned in any system.
-  void NeverSpawn();
+	void Load(const DataNode &node, const ConditionsStore *playerConditions,
+	          const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	bool IsValid() const;
+	// Finish loading all the ships in this person specification.
+	void FinishLoading();
+	// Prevent this person from being spawned in any system.
+	void NeverSpawn();
 
-  // Find out how often this person should appear in the given system. If this
-  // person is dead or already active, this will return zero.
-  int Frequency(const System *system) const;
+	// Find out how often this person should appear in the given system. If this
+	// person is dead or already active, this will return zero.
+	int Frequency(const System *system) const;
 
-  // Get the person's characteristics. The ship object is persistent, i.e. it
-  // will be recycled every time this person appears.
-  const std::list<std::shared_ptr<Ship>> &Ships() const;
-  const Government                       *GetGovernment() const;
-  const Personality                      &GetPersonality() const;
-  const Phrase                           &GetHail() const;
-  // Check if a person has been destroyed or captured.
-  bool IsDestroyed() const;
-  // Mark this person as destroyed.
-  void Destroy();
-  // Mark this person as no longer destroyed.
-  void Restore();
-  // Check if a person is already placed somewhere.
-  bool IsPlaced() const;
-  // Mark this person as being no longer "placed" somewhere.
-  void ClearPlacement();
+	// Get the person's characteristics. The ship object is persistent, i.e. it
+	// will be recycled every time this person appears.
+	const std::list<std::shared_ptr<Ship>> &Ships() const;
+	const Government *GetGovernment() const;
+	const Personality &GetPersonality() const;
+	const Phrase &GetHail() const;
+	// Check if a person has been destroyed or captured.
+	bool IsDestroyed() const;
+	// Mark this person as destroyed.
+	void Destroy();
+	// Mark this person as no longer destroyed.
+	void Restore();
+	// Check if a person is already placed somewhere.
+	bool IsPlaced() const;
+	// Mark this person as being no longer "placed" somewhere.
+	void ClearPlacement();
+
+	// Determine if this event is targeting a ship in this Person
+	// and handle the outcome of the event. Returns false if
+	// the event doesn't target this person.
+	bool Do(const ShipEvent &event);
 
 
 private:
-  bool           isLoaded = false;
-  LocationFilter location;
-  int            frequency = 100;
+	bool isLoaded = false;
+	std::string name;
+	LocationFilter location;
+	int frequency = 100;
 
-  std::list<std::shared_ptr<Ship>> ships;
-  const FormationPattern          *formationPattern = nullptr;
-  const Government                *government       = nullptr;
-  Personality                      personality;
-  Phrase                           hail;
+	// Whether this fleet can respawn even if the flagship is killed.
+	bool neverDies = false;
+	// If true, every ship in the fleet must be destroyed at once for
+	// the person to die.
+	bool mustDestroyAll = false;
+
+	ShipFactory shipFactory;
+	std::list<std::shared_ptr<Ship>> ships;
+	const FormationPattern *formationPattern = nullptr;
+	const Government *government = nullptr;
+	Personality personality;
+	Phrase hail;
 };

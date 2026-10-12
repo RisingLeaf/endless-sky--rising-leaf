@@ -19,29 +19,35 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 
 
+
 // A class representing a version of the game.
-class GameVersion
-{
+class GameVersion {
 public:
-  static consteval GameVersion Running();
+	static consteval GameVersion Running();
 
 
 public:
-  constexpr GameVersion(unsigned major, unsigned minor, unsigned release, unsigned patch = 0, bool fullRelease = true);
+	constexpr GameVersion(unsigned major, unsigned minor, unsigned release, unsigned patch = 0,
+	                      bool fullRelease = true);
 
-  std::string ToString() const;
+	std::string ToString() const;
 
 
 private:
-  std::array<unsigned, 4> numbers{};
-  bool                    fullRelease = true;
+	std::array<unsigned, 4> numbers{};
+	bool fullRelease = true;
 };
 
 
-consteval GameVersion GameVersion::Running() { return {0, 11, 1, 0, false}; }
+
+consteval GameVersion GameVersion::Running()
+{
+	return {0, 11, 4, 0, false};
+}
 
 
-constexpr GameVersion::GameVersion(unsigned major, unsigned minor, unsigned release, unsigned patch, bool fullRelease) :
-  numbers{major, minor, release, patch}, fullRelease{fullRelease}
+
+constexpr GameVersion::GameVersion(unsigned major, unsigned minor, unsigned release, unsigned patch, bool fullRelease)
+    : numbers{major, minor, release, patch}, fullRelease{fullRelease}
 {
 }

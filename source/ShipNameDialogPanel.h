@@ -24,14 +24,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 // Contains a text entry field and an additional button, "Random",
 // which populates the text entry field with a randomly selected name
 // from the "civilian" phrase.
-class ShipNameDialogPanel : public DialogPanel
-{
+class ShipNameDialogPanel : public DialogPanel {
 public:
-  static ShipNameDialogPanel *
-  Create(const DialogPanel::FunctionButton &buttonOne, std::string message, std::string initialValue = "");
+	static ShipNameDialogPanel *Create(const DialogPanel::FunctionButton &buttonOne, std::string message,
+	                                   std::string initialValue = "");
 
 
 private:
-  explicit ShipNameDialogPanel(DialogInit &init);
-  bool RandomName(const std::string &);
+	explicit ShipNameDialogPanel(DialogInit &init);
+	bool RandomName(const std::string &);
 };

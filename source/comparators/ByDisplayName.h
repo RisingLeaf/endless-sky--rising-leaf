@@ -17,8 +17,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 template <class T>
-class ByDisplayName
-{
+class ByDisplayName {
 public:
-  bool operator()(const T *a, const T *b) const { return a->DisplayName() < b->DisplayName(); }
+	bool operator()(const T *a, const T *b) const
+	{
+		return a->DisplayName() < b->DisplayName();
+	}
 };

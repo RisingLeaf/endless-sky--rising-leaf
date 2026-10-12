@@ -15,19 +15,25 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+	class GraphicsInstance;
+} // namespace GraphicsTypes
 class Color;
 class Point;
 class Rectangle;
 
 
+
 // Class holding a function to fill a rectangular region of the screen with a
 // given color. This can be used with translucent colors to darken or lighten a
 // part of the screen, or with additive colors (alpha = 0) as well.
-class FillShader
-{
+class FillShader {
 public:
-  static void Init();
-  static void Clear();
-  static void Fill(const Rectangle &area, const Color &color);
-  static void Fill(const Point &center, const Point &size, const Color &color);
+	static void Init(const GraphicsTypes::GraphicsInstance *graphics_instance);
+	static void Fill(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &area, const Color &color);
+	static void Fill(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &size,
+	                 const Color &color);
+
+	static void Clear();
 };

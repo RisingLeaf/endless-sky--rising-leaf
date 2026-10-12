@@ -18,24 +18,36 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 
-OptionalInputDialogPanel::OptionalInputDialogPanel(
-    DialogInit                           &init,
-    function<void(std::optional<int>)>    intFun,
-    function<void(std::optional<double>)> doubleFun) :
-  DialogPanel(init), optionalIntFun(std::move(intFun)), optionalDoubleFun(std::move(doubleFun))
+
+OptionalInputDialogPanel::OptionalInputDialogPanel(DialogInit &init, function<void(std::optional<int>)> intFun,
+                                                   function<void(std::optional<double>)> doubleFun)
+    : DialogPanel(init), optionalIntFun(std::move(intFun)), optionalDoubleFun(std::move(doubleFun))
 {
-  if(optionalIntFun) this->intFun = [this](int value) -> void { optionalIntFun(value); };
-  if(optionalDoubleFun) this->doubleFun = [this](double value) -> void { optionalDoubleFun(value); };
-  buttonThree = FunctionButton(this, "Unset", 'u', &OptionalInputDialogPanel::Unset);
-  numButtons  = 3;
-  DialogPanel::Resize();
+	if(optionalIntFun)
+	{
+		this->intFun = [this](int value) -> void {
+			optionalIntFun(value);
+		};
+	}
+	if(optionalDoubleFun)
+	{
+		this->doubleFun = [this](double value) -> void {
+			optionalDoubleFun(value);
+		};
+	}
+	buttonThree = FunctionButton(this, "Unset", 'u', &OptionalInputDialogPanel::Unset);
+	numButtons = 3;
+	DialogPanel::Resize();
 }
+
 
 
 bool OptionalInputDialogPanel::Unset(const string &)
 {
-  if(optionalIntFun) optionalIntFun(std::nullopt);
-  if(optionalDoubleFun) optionalDoubleFun(std::nullopt);
-  // True means to close the dialog box.
-  return true;
+	if(optionalIntFun)
+		optionalIntFun(std::nullopt);
+	if(optionalDoubleFun)
+		optionalDoubleFun(std::nullopt);
+	// True means to close the dialog box.
+	return true;
 }

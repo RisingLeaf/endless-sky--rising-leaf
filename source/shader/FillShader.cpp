@@ -17,68 +17,76 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "../Color.h"
 #include "../GameData.h"
-#include "../GameWindow.h"
 #include "../Rectangle.h"
-#include "Shader.h"
+#include "../Screen.h"
+#include "shared/graphics/graphics_layer.h"
+#include "shared/graphics/graphics_toplevel_defines.h"
+#include "shared/system/File.h"
 
 #include <stdexcept>
 
-#include "graphics/graphics_layer.h"
+using namespace std;
 
+namespace {
+	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
+	ShaderInfo info;
 
-namespace
-{
-  Shader shader("fill shader");
-
-  graphics_layer::ObjectHandle square;
+	graphics_layer::ObjectHandle geometry;
 } // namespace
 
 
-void FillShader::Init()
+
+void FillShader::Init(const GraphicsTypes::GraphicsInstance *graphics_instance)
 {
-  auto &info = shader.GetInfo();
+	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
+	info.SetInputSize(2 * sizeof(float));
 
-  info.SetInputSize(2 * sizeof(float));
-  info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // scale
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // center
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // size
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4); // color
 
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // u_in vec2 center;
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // u_in vec2 size;
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4); // u_in vec4 color;
+	const auto shader_code = File::ReadShader("../shaders/compilation/fill.ps");
+	graphics_instance->CreateShader(shader, info, shader_code, "fill");
 
-  shader.Create(*GameData::Shaders().Find("fill"));
+	constexpr float vertexData[] = {-.5f, -.5f, .5f, -.5f, -.5f, .5f, .5f, .5f};
+	geometry = graphics_layer::ObjectHandle(graphics_instance, 4, sizeof(float) * 2, vertexData, {}, "fill_geometry");
+}
 
-  constexpr float vertexData[] = {-.5f, -.5f, .5f, -.5f, -.5f, .5f, .5f, .5f};
 
-  square = graphics_layer::ObjectHandle(GameWindow::GetInstance(), 4, 2 * sizeof(float), vertexData, {}, "fill_quad");
+
+void FillShader::Fill(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &area, const Color &color)
+{
+	Fill(cb, area.Center(), area.Dimensions(), color);
+}
+
+
+
+void FillShader::Fill(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &size,
+                      const Color &color)
+{
+	if(!shader)
+		throw runtime_error("FillShader: Draw() called before Init().");
+
+	cb->BindShader(shader.get());
+
+	const gm::vec2 scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
+	const gm::vec2 centerV = {static_cast<float>(center.X()), static_cast<float>(center.Y())};
+	const gm::vec2 sizeV = {static_cast<float>(size.X()), static_cast<float>(size.Y())};
+
+	std::vector<unsigned char> data_cp(info.GetUniformSize());
+	int i = -1;
+	info.CopyUniformEntryToBuffer(data_cp.data(), &scale, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &centerV, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &sizeV, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
+	cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
+
+	geometry.Draw(cb, GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
 }
 
 void FillShader::Clear()
 {
-  shader.Clear();
-  square = {};
-}
-
-
-void FillShader::Fill(const Rectangle &area, const Color &color) { Fill(area.Center(), area.Dimensions(), color); }
-
-
-void FillShader::Fill(const Point &center, const Point &size, const Color &color)
-{
-  if(!shader()) throw std::runtime_error("Draw called before init!");
-  shader.Bind();
-
-  const float centerV[2] = {static_cast<float>(center.X()), static_cast<float>(center.Y())};
-  const float sizeV[2]   = {static_cast<float>(size.X()), static_cast<float>(size.Y())};
-
-  const auto                &info = shader.GetInfo();
-  std::vector<unsigned char> data_cp(info.GetUniformSize());
-
-  int i = -1;
-  info.CopyUniformEntryToBuffer(data_cp.data(), centerV, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), sizeV, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
-
-  GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
-
-  square.Draw(GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
+	geometry = graphics_layer::ObjectHandle();
+	shader.reset();
 }

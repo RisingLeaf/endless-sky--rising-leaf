@@ -20,52 +20,47 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "supplier/FlacSupplier.h"
 #include "supplier/Mp3Supplier.h"
 
-
 #include <map>
 
+using namespace std;
 
-namespace
-{
-  enum class MusicFileType
-  {
-    MP3,
-    FLAC
-  };
+namespace {
+	enum class MusicFileType { MP3, FLAC };
 
-  std::map<std::string, std::pair<std::filesystem::path, MusicFileType>> paths;
+	map<string, pair<filesystem::path, MusicFileType>> paths;
 } // namespace
 
 
-void Music::Init(const std::vector<std::filesystem::path> &sources)
+void Music::Init(const vector<filesystem::path> &sources)
 {
-  for(const auto &source : sources)
-  {
-    // Find all the sound files that this resource source provides.
-    std::filesystem::path              root  = source / "sounds";
-    std::vector<std::filesystem::path> files = Files::RecursiveList(root);
+	for(const auto &source : sources)
+	{
+		// Find all the sound files that this resource source provides.
+		filesystem::path root = source / "sounds";
+		vector<filesystem::path> files = Files::RecursiveList(root);
 
-    for(const auto &path : files)
-    {
-      std::string name      = (path.parent_path() / path.stem()).lexically_relative(root).generic_string();
-      std::string extension = Format::LowerCase(path.extension().string());
-      if(extension == ".mp3") paths[name] = {path, MusicFileType::MP3};
-      else if(extension == ".flac") paths[name] = {path, MusicFileType::FLAC};
-    }
-  }
+		for(const auto &path : files)
+		{
+			string name = (path.parent_path() / path.stem()).lexically_relative(root).generic_string();
+			string extension = Format::LowerCase(path.extension().string());
+			if(extension == ".mp3")
+				paths[name] = {path, MusicFileType::MP3};
+			else if(extension == ".flac")
+				paths[name] = {path, MusicFileType::FLAC};
+		}
+	}
 }
 
 
-std::unique_ptr<AudioSupplier> Music::CreateSupplier(const std::string &name, bool looping)
+unique_ptr<AudioSupplier> Music::CreateSupplier(const string &name, bool looping)
 {
-  if(paths.contains(name))
-  {
-    switch(paths[name].second)
-    {
-    case MusicFileType::MP3:
-      return std::unique_ptr<AudioSupplier>{new Mp3Supplier{Files::Open(paths[name].first), looping}};
-    case MusicFileType::FLAC:
-      return std::unique_ptr<AudioSupplier>{new FlacSupplier{Files::Open(paths[name].first), looping}};
-    }
-  }
-  return {};
+	if(paths.contains(name))
+		switch(paths[name].second)
+		{
+		case MusicFileType::MP3:
+			return unique_ptr<AudioSupplier>{new Mp3Supplier{Files::Open(paths[name].first), looping}};
+		case MusicFileType::FLAC:
+			return unique_ptr<AudioSupplier>{new FlacSupplier{Files::Open(paths[name].first), looping}};
+		}
+	return {};
 }

@@ -22,24 +22,30 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 
-LoadingCircle::LoadingCircle(float size, int ticks, double rotationSpeed) :
-  size(size), ticks(ticks), angleOffset(360. / ticks), rotationSpeed(rotationSpeed), rotation(0.)
+
+LoadingCircle::LoadingCircle(float size, int ticks, double rotationSpeed)
+    : size(size), ticks(ticks), angleOffset(360. / ticks), rotationSpeed(rotationSpeed), rotation(0.)
 {
 }
 
 
-void LoadingCircle::Step() { rotation += rotationSpeed; }
 
-
-void LoadingCircle::Draw(const Point &position, double progress) const
+void LoadingCircle::Step()
 {
-  // Draw the loading circle.
-  Angle a(rotation);
-  PointerShader::Bind();
-  for(int i = 0; i < static_cast<int>(progress * ticks); ++i)
-  {
-    PointerShader::Add(position, a.Unit(), 8.f, 20.f, size, Color(.5f, 0.f));
-    a += angleOffset;
-  }
-  PointerShader::Unbind();
+	rotation += rotationSpeed;
+}
+
+
+
+void LoadingCircle::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &position, double progress,
+                         double zoom) const
+{
+	// Draw the loading circle.
+	Angle a(rotation);
+	PointerShader::Bind(cb);
+	for(int i = 0; i < static_cast<int>(progress * ticks); ++i)
+	{
+		PointerShader::Add(cb, position, a.Unit(), 8.f, 20.f, size * zoom, Color(.5f, 0.f));
+		a += angleOffset;
+	}
 }

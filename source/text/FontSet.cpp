@@ -16,22 +16,31 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "FontSet.h"
 
 #include "Font.h"
+#include "GameWindow.h"
 
 #include <map>
 
+using namespace std;
 
-namespace
-{
-  std::map<int, Font> fonts;
+namespace {
+	map<int, Font> fonts;
 }
 
 
-void FontSet::Add(const std::filesystem::path &path, int size)
+
+void FontSet::Add(const filesystem::path &path, int size)
 {
-  if(!fonts.contains(size)) fonts[size].Load(path);
+	if(!fonts.contains(size))
+		fonts[size].Load(GameWindow::GraphicsInstance(), path);
 }
 
 
-const Font &FontSet::Get(int size) { return fonts[size]; }
 
-void FontSet::Clear() { fonts.clear(); }
+const Font &FontSet::Get(int size)
+{
+	return fonts[size];
+}
+void FontSet::Clear()
+{
+	fonts.clear();
+}

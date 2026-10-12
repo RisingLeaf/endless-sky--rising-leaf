@@ -15,10 +15,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include "Panel.h"
-
 #include "Information.h"
-#include "text/WrappedText.h"
+#include "Panel.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 class Interface;
 class News;
@@ -27,38 +26,40 @@ class Port;
 class TextArea;
 
 
+
 // GUI panel to be shown when you are in a spaceport. This just draws the port
 // description, but can also pop up conversation panels or dialogs offering
 // missions that are marked as originating in the spaceport.
-class SpaceportPanel : public Panel
-{
+class SpaceportPanel : public Panel {
 public:
-  explicit SpaceportPanel(PlayerInfo &player);
+	explicit SpaceportPanel(PlayerInfo &player);
 
-  void UpdateNews();
+	void UpdateNews();
 
-  virtual void Step() override;
-  virtual void Draw() override;
+	virtual void Step() override;
+	virtual void Draw(GraphicsTypes::CommandBufferInstance *cb) override;
+
+	virtual void UpdateTextDisplay() override;
 
 
 protected:
-  virtual void Resize() override;
+	virtual void Resize() override;
 
 
 private:
-  const News *PickNews() const;
+	void InitNewsTextArea();
+	void ResizeNewsTextArea() const;
+	const News *PickNews() const;
 
 
 private:
-  PlayerInfo               &player;
-  std::shared_ptr<TextArea> description;
-  const Port               &port;
+	PlayerInfo &player;
+	std::shared_ptr<TextArea> description;
+	const Port &port;
 
-  // Current news item (if any):
-  bool        hasNews     = false;
-  bool        hasPortrait = false;
-  int         portraitWidth;
-  int         normalWidth;
-  Information newsInfo;
-  WrappedText newsMessage;
+	// Current news item (if any):
+	bool hasNews = false;
+	bool hasPortrait = false;
+	Information newsInfo;
+	std::shared_ptr<TextArea> newsMessage;
 };

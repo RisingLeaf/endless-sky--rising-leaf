@@ -23,155 +23,186 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 
+
 DialogSettings::DialogSettings(const DataNode &node, const ConditionsStore *playerConditions)
 {
-  Load(node, playerConditions);
+	Load(node, playerConditions);
 }
+
 
 
 void DialogSettings::Load(const DataNode &node, const ConditionsStore *playerConditions)
 {
-  if(node.Size() >= 2)
-  {
-    const string &value = node.Token(1);
-    if(node.Size() == 3 && value == "phrase")
-      lines.emplace_back(ExclusiveItem<Phrase>(GameData::Phrases().Get(node.Token(2))));
-    else lines.emplace_back(value);
-  }
+	if(node.Size() >= 2)
+	{
+		const string &value = node.Token(1);
+		if(node.Size() == 3 && value == "phrase")
+			lines.emplace_back(ExclusiveItem<Phrase>(GameData::Phrases().Get(node.Token(2))));
+		else
+			lines.emplace_back(value);
+	}
 
-  for(const DataNode &child : node)
-    lines.emplace_back(child, playerConditions);
-
-  // If this dialog was loaded from a save file, then the dialog lines will have already been instantiated.
-  // Collapse them into the text field so that they can be properly saved again (as saving only looks at the text
-  // field). This also pre-computes the text for simple dialogs without `to display` or `phrase` nodes.
-  // One action shouldn't have multiple dialog nodes, but just in case, clear any prior text.
-  text.clear();
-  string resultText;
-  for(const DialogLine &line : lines)
-  {
-    // When checking for a pure-text dialog, reject a dialog with conditions or phrases.
-    if(!line.condition.IsEmpty() || line.text.empty()) return;
-
-    // Concatenated lines should start with a tab and be preceded by end-of-line.
-    const string &content = line.text;
-    if(!resultText.empty())
-    {
-      resultText += '\n';
-      if(!content.empty() && content[0] != '\t') resultText += '\t';
-    }
-    resultText += content;
-  }
-  text = std::move(resultText);
+	for(const DataNode &child : node)
+		lines.emplace_back(child, playerConditions);
 }
+
 
 
 void DialogSettings::Save(DataWriter &out) const
 {
-  // A Dialog being saved has already been instantiated, so all information
-  // is stored in the "text" variable.
-  out.Write("dialog");
-  out.BeginChild();
-  {
-    // Break the text up into paragraphs.
-    for(const string &line : Format::Split(text, "\n\t"))
-      out.Write(line);
-  }
-  out.EndChild();
+	// A Dialog being saved has already been instantiated, so we only
+	// need to store the text of each line, as all phrases have been
+	// converted into text.
+	out.Write("dialog");
+	out.BeginChild();
+	{
+		for(const DialogLine &line : lines)
+		{
+			out.Write(line.text);
+			if(!line.condition.IsEmpty())
+			{
+				out.BeginChild();
+				{
+					out.Write("to", "display");
+					out.BeginChild();
+					{
+						line.condition.Save(out);
+					}
+					out.EndChild();
+				}
+				out.EndChild();
+			}
+		}
+	}
+	out.EndChild();
 }
+
 
 
 bool DialogSettings::Validate() const
 {
-  for(const DialogLine &line : lines)
-    if(line.text.empty() && line.phrase.IsStock() && line.phrase->IsEmpty()) return false;
-  return true;
+	for(const DialogLine &line : lines)
+		if(line.text.empty() && line.phrase.IsStock() && line.phrase->IsEmpty())
+			return false;
+	return true;
 }
 
 
-const string &DialogSettings::Text() const { return text; }
+
+string DialogSettings::Text() const
+{
+	string resultText;
+	for(const DialogLine &line : lines)
+	{
+		// Skip text that is disabled. It's technically possible for all lines of a
+		// dialog to be disabled and for this function to return an empty string. This
+		// will result in an empty dialog being displayed to the player and be
+		// considered a content error.
+		if(!line.condition.IsEmpty() && !line.condition.Test())
+			continue;
+
+		// Concatenated lines should start with a tab and be preceded by end-of-line.
+		const string &text = line.text;
+		if(!resultText.empty())
+		{
+			resultText += '\n';
+			if(!text.empty() && text[0] != '\t')
+				resultText += '\t';
+		}
+		resultText += text;
+	}
+
+	return resultText;
+}
 
 
-bool DialogSettings::IsEmpty() const { return text.empty(); }
+
+bool DialogSettings::IsEmpty() const
+{
+	return lines.empty();
+}
+
 
 
 DialogSettings DialogSettings::Instantiate(const map<string, string> &subs) const
 {
-  string resultText;
-  if(!text.empty())
-  {
-    resultText = Format::Replace(Phrase::ExpandPhrases(text), subs);
-  }
-  else {
-    for(const DialogLine &line : lines)
-    {
-      // Skip text that is disabled.
-      if(!line.condition.IsEmpty() && !line.condition.Test()) continue;
+	DialogSettings result;
+	for(const DialogLine &line : lines)
+	{
+		// Evaluate the phrase if we have one. Otherwise, copy the text.
+		string content = !line.text.empty() ? line.text : line.phrase->Get();
 
-      // Evaluate the phrase if we have one, otherwise copy the prepared text.
-      string content;
-      if(!line.text.empty()) content = line.text;
-      else content = line.phrase->Get();
+		// Expand any ${phrases} and <substitutions>.
+		content = Format::Replace(Phrase::ExpandPhrases(content), subs);
 
-      // Expand any ${phrases} and <substitutions>.
-      content = Format::Replace(Phrase::ExpandPhrases(content), subs);
+		// Re-store this line with its expanded text and conditions.
+		// Conditions are not evaluated until the text is displayed.
+		result.lines.emplace_back(content, line.condition);
+	}
 
-      // Concatenated lines should start with a tab and be preceded by end-of-line.
-      if(!resultText.empty())
-      {
-        resultText += '\n';
-        if(!content.empty() && content[0] != '\t') resultText += '\t';
-      }
-      resultText += content;
-    }
-  }
-
-  DialogSettings result;
-  result.text = std::move(resultText);
-  return result;
+	return result;
 }
 
 
-DialogSettings::DialogLine::DialogLine(std::string text) : text(std::move(text)) {}
+
+DialogSettings::DialogLine::DialogLine(std::string text) : text(std::move(text))
+{
+}
 
 
-DialogSettings::DialogLine::DialogLine(const ExclusiveItem<Phrase> &phrase) : phrase(phrase) {}
+
+DialogSettings::DialogLine::DialogLine(const ExclusiveItem<Phrase> &phrase) : phrase(phrase)
+{
+}
+
+
+
+DialogSettings::DialogLine::DialogLine(const string &text, const ConditionSet &condition)
+    : text(text), condition(condition)
+{
+}
+
 
 
 DialogSettings::DialogLine::DialogLine(const DataNode &node, const ConditionsStore *playerConditions)
 {
-  const string &key      = node.Token(0);
-  bool          hasValue = node.Size() >= 2;
-  if(key == "phrase")
-  {
-    // Handle named phrases
-    //    phrase "A Phrase Name"
-    if(hasValue)
-    {
-      phrase = ExclusiveItem<Phrase>(GameData::Phrases().Get(node.Token(1)));
-    }
-    else {
-      // Handle anonymous phrases
-      //    phrase
-      //       ...
-      phrase = ExclusiveItem<Phrase>(Phrase(node));
-      // Anonymous phrases do not support "to display"
-      return;
-    }
-  }
-  // Handle regular dialog text
-  //    "Some thrilling dialog that truly moves the player."
-  else {
-    if(hasValue) node.PrintTrace("Ignoring extra tokens.");
-    text = key;
+	const string &key = node.Token(0);
+	bool hasValue = node.Size() >= 2;
+	if(key == "phrase")
+	{
+		// Handle named phrases
+		//    phrase "A Phrase Name"
+		if(hasValue)
+			phrase = ExclusiveItem<Phrase>(GameData::Phrases().Get(node.Token(1)));
+		else
+		{
+			// Handle anonymous phrases
+			//    phrase
+			//       ...
+			phrase = ExclusiveItem<Phrase>(Phrase(node));
+			// Anonymous phrases do not support "to display"
+			return;
+		}
+	}
+	// Handle regular dialog text
+	//    "Some thrilling dialog that truly moves the player."
+	else
+	{
+		if(hasValue)
+			node.PrintTrace("Ignoring extra tokens.");
+		text = key;
 
-    // Prevent a corner case that breaks assumptions. Dialog text cannot be empty (that indicates a phrase).
-    if(text.empty()) text = '\t';
-  }
+		// Prevent a corner case that breaks assumptions. Dialog text cannot be empty (that indicates a phrase).
+		if(text.empty())
+			text = '\t';
+	}
 
-  // Search for "to display" lines.
-  for(const DataNode &child : node)
-    if(child.Size() != 2 || child.Token(0) != "to" || child.Token(1) != "display" || !child.HasChildren())
-      child.PrintTrace("Ignoring unrecognized dialog token");
-    else condition.Load(child, playerConditions);
+	// Search for "to display" lines.
+	for(const DataNode &child : node)
+	{
+		if(child.Size() != 2 || child.Token(0) != "to" || child.Token(1) != "display" || !child.HasChildren())
+			child.PrintTrace("Ignoring unrecognized dialog token");
+		else
+			condition.Load(child, playerConditions);
+	}
 }

@@ -18,8 +18,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 
+
 string GameVersion::ToString() const
 {
-  return std::to_string(numbers[0]) + '.' + std::to_string(numbers[1]) + '.' + std::to_string(numbers[2]) + '.' +
-         to_string(numbers[3]) + (fullRelease ? "" : "-alpha");
+	return to_string(numbers[0]) + '.' + to_string(numbers[1]) + '.' + to_string(numbers[2]) + '.' +
+	       to_string(numbers[3]) + (fullRelease ? "" : "-alpha");
 }

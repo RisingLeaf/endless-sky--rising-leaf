@@ -19,87 +19,162 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cmath>
 #include <vector>
 
+using namespace std;
 
-namespace
-{
-  template <typename T>
-  void SubsetAssign(std::vector<T> &lhs, const std::vector<T> &rhs) noexcept
-  {
-    const auto size = lhs.size() < rhs.size() ? lhs.size() : rhs.size();
-    for(size_t i = 0; i < size; ++i)
-      lhs[i] = rhs[i];
-  }
+namespace {
+	template <typename T>
+	void SubsetAssign(vector<T> &lhs, const vector<T> &rhs) noexcept
+	{
+		const auto size = lhs.size() < rhs.size() ? lhs.size() : rhs.size();
+		for(size_t i = 0; i < size; ++i)
+			lhs[i] = rhs[i];
+	}
 } // namespace
 
 
-// Sets the specified amount of hardpoints desired.
-void FireCommand::SetHardpoints(size_t count)
-{
-  Clear();
-  weapon.Resize(count);
-  aim.resize(count);
 
-  assert(aim.size() == count && "aim size must match the requested count");
-  assert(weapon.Size() >= aim.size() && "weapon bits must be at least as big as the aim bits");
+// Sets the specified amount of hardpoints desired.
+void FireCommand::SetHardpoints(size_t weaponCount, size_t decorCount)
+{
+	Clear();
+	weapon.Resize(weaponCount);
+	onTarget.Resize(weaponCount);
+	aim.resize(weaponCount);
+	aimDecor.resize(decorCount);
+
+	assert(aim.size() == weaponCount && "aim size must match the requested count");
+	assert(aimDecor.size() == decorCount && "aimDecor size must match the requested count");
+	assert(weapon.Size() >= aim.size() && "weapon bits must be at least as big as the aim bits");
+	assert(onTarget.Size() >= aim.size() && "onTarget bits must be at least as big as the aim bits");
 }
+
 
 
 // Assigns the subset of other to this class that is no larger than
 // this command's hardpoint size.
 void FireCommand::UpdateWith(const FireCommand &other) noexcept
 {
-  weapon.UpdateWith(other.weapon);
-  SubsetAssign(aim, other.aim);
+	weapon.UpdateWith(other.weapon);
+	onTarget.UpdateWith(other.onTarget);
+	SubsetAssign(aim, other.aim);
+	SubsetAssign(aimDecor, other.aimDecor);
 }
+
 
 
 // Reset this to an empty command.
 void FireCommand::Clear()
 {
-  weapon.Reset();
-  for(auto &it : aim)
-    it = '\0';
+	weapon.Reset();
+	onTarget.Reset();
+	for(auto &it : aim)
+		it = '\0';
+	for(auto &it : aimDecor)
+		it = '\0';
 }
+
 
 
 // Check if this command includes a command to fire the given weapon.
 bool FireCommand::HasFire(int index) const noexcept
 {
-  if(!IsIndexValid(index)) return false;
-  return weapon.Test(index);
+	if(!IsIndexValid(index))
+		return false;
+	return weapon.Test(index);
 }
+
 
 
 // Add to this set of commands a command to fire the given weapon.
 void FireCommand::SetFire(int index) noexcept
 {
-  if(!IsIndexValid(index)) return;
-  weapon.Set(index);
+	if(!IsIndexValid(index))
+		return;
+	weapon.Set(index);
 }
 
 
+
 // Check if any weapons are firing.
-bool FireCommand::IsFiring() const noexcept { return weapon.Any(); }
+bool FireCommand::IsFiring() const noexcept
+{
+	return weapon.Any();
+}
+
+
+
+bool FireCommand::HasTarget(int index) const noexcept
+{
+	if(!IsIndexValid(index))
+		return false;
+	return onTarget.Test(index);
+}
+
+
+
+void FireCommand::SetOnTarget(int index) noexcept
+{
+	if(!IsIndexValid(index))
+		return;
+	onTarget.Set(index);
+}
+
+
+
+bool FireCommand::IsOnTarget() const noexcept
+{
+	return onTarget.Any();
+}
+
 
 
 // Gets the current turn rate of the turret at the given weapon index.
 double FireCommand::Aim(int index) const noexcept
 {
-  if(!IsIndexValid(index)) return 0;
-  return aim[index] / 127.;
+	if(!IsIndexValid(index))
+		return 0;
+	return aim[index] / 127.;
 }
+
+
+
+double FireCommand::AimDecor(int index) const noexcept
+{
+	if(!IsDecorIndexValid(index))
+		return 0;
+	return aimDecor[index] / 127.;
+}
+
 
 
 // Set the turn rate of the turret with the given weapon index. A value of
 // -1 or 1 means to turn at the full speed the turret is capable of.
 void FireCommand::SetAim(int index, double amount) noexcept
 {
-  if(!IsIndexValid(index)) return;
-  aim[index] = round(127. * std::max(-1., std::min(1., amount)));
+	if(!IsIndexValid(index))
+		return;
+	aim[index] = round(127. * max(-1., min(1., amount)));
 }
+
+
+
+void FireCommand::SetAimDecor(int index, double amount) noexcept
+{
+	if(!IsDecorIndexValid(index))
+		return;
+	aimDecor[index] = round(127. * max(-1., min(1., amount)));
+}
+
 
 
 bool FireCommand::IsIndexValid(int index) const noexcept
 {
-  return index >= 0 && static_cast<size_t>(index) < aim.size();
+	return index >= 0 && static_cast<size_t>(index) < aim.size();
+}
+
+
+
+bool FireCommand::IsDecorIndexValid(int index) const noexcept
+{
+	return index >= 0 && static_cast<size_t>(index) < aimDecor.size();
 }

@@ -19,45 +19,66 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "ConditionsStore.h"
 #include "DataNode.h"
 
+using namespace std;
+
+
 
 void Paragraphs::Load(const DataNode &node, const ConditionsStore *playerConditions)
 {
-  for(const DataNode &child : node)
-  {
-    if(child.Size() == 2 && child.Token(0) == "to" && child.Token(1) == "display")
-    {
-      text.emplace_back(ConditionSet(child, playerConditions), node.Token(node.Size() - 1) + "\n");
-      return;
-    }
-  }
-  text.emplace_back(ConditionSet(), node.Token(node.Size() - 1) + "\n");
+	for(const DataNode &child : node)
+		if(child.Size() == 2 && child.Token(0) == "to" && child.Token(1) == "display")
+		{
+			text.emplace_back(ConditionSet(child, playerConditions), node.Token(node.Size() - 1) + "\n");
+			return;
+		}
+	text.emplace_back(ConditionSet(), node.Token(node.Size() - 1) + "\n");
 }
 
 
-void Paragraphs::Clear() { text.clear(); }
+
+void Paragraphs::Clear()
+{
+	text.clear();
+}
 
 
-bool Paragraphs::IsEmpty() const { return text.empty(); }
+
+bool Paragraphs::IsEmpty() const
+{
+	return text.empty();
+}
+
 
 
 bool Paragraphs::IsEmptyFor() const
 {
-  for(const auto &varsText : text)
-    if(!varsText.second.empty() && varsText.first.Test()) return false;
-  return true;
+	for(const auto &varsText : text)
+		if(!varsText.second.empty() && varsText.first.Test())
+			return false;
+	return true;
 }
 
 
-std::string Paragraphs::ToString() const
+
+string Paragraphs::ToString() const
 {
-  std::string result;
-  for(const auto &varsText : text)
-    if(!varsText.second.empty() && varsText.first.Test()) result += varsText.second;
-  return result;
+	string result;
+	for(const auto &varsText : text)
+		if(!varsText.second.empty() && varsText.first.Test())
+			result += varsText.second;
+	return result;
 }
 
 
-Paragraphs::ConstIterator Paragraphs::begin() const { return text.begin(); }
+
+Paragraphs::ConstIterator Paragraphs::begin() const
+{
+	return text.begin();
+}
 
 
-Paragraphs::ConstIterator Paragraphs::end() const { return text.end(); }
+
+Paragraphs::ConstIterator Paragraphs::end() const
+{
+	return text.end();
+}

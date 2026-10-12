@@ -17,114 +17,115 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "../Color.h"
 #include "../GameData.h"
-#include "../GameWindow.h"
 #include "../Point.h"
+#include "../Screen.h"
 #include "../pi.h"
-#include "Shader.h"
+#include "shared/graphics/graphics_layer.h"
+#include "shared/graphics/graphics_toplevel_defines.h"
+#include "shared/system/File.h"
 
-#include "graphics/graphics_layer.h"
+#include <stdexcept>
 
+using namespace std;
 
-namespace
-{
-  Shader                       shader("ring shader");
-  graphics_layer::ObjectHandle square;
+namespace {
+	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
+	ShaderInfo info;
+
+	graphics_layer::ObjectHandle geometry;
 } // namespace
 
 
-void RingShader::Init()
+
+void RingShader::Init(const GraphicsTypes::GraphicsInstance *graphics_instance)
 {
-  auto &info = shader.GetInfo();
+	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
+	info.SetInputSize(2 * sizeof(float));
 
-  info.SetInputSize(2 * sizeof(float));
-  info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // scale
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // position
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // radius
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // width
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // angle
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // startAngle
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // dash
+	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4); // color
 
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // u_in vec2  position;
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // u_in float radius;
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // u_in float width;
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // u_in float angle;
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // u_in float startAngle;
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // u_in float dash;
-  info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4); // u_in vec4  color;
+	const auto shader_code = File::ReadShader("../shaders/compilation/ring.ps");
+	graphics_instance->CreateShader(shader, info, shader_code, "ring");
 
-  shader.Create(*GameData::Shaders().Find("ring"));
+	constexpr float vertexData[] = {-1.f, -1.f, -1.f, 1.f, 1.f, -1.f, 1.f, 1.f};
 
-  constexpr float vertexData[] = {-1.f, -1.f, -1.f, 1.f, 1.f, -1.f, 1.f, 1.f};
-  square =
-      graphics_layer::ObjectHandle(GameWindow::GetInstance(), 4, 2 * sizeof(float), vertexData, {}, "ring_shader_quad");
+	geometry = graphics_layer::ObjectHandle(graphics_instance, 4, 2 * sizeof(float), vertexData, {}, "ring");
 }
+
+
+
+void RingShader::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, const float out, const float in,
+                      const Color &color)
+{
+	const float width = .5f * (1.f + out - in);
+	Draw(cb, pos, out - width, width, 1.f, color);
+}
+
+
+
+void RingShader::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, const float radius, const float width,
+                      const float fraction, const Color &color, const float dash, const float startAngle)
+{
+	Bind(cb);
+	Add(cb, pos, radius, width, fraction, color, dash, startAngle);
+}
+
+
+
+void RingShader::Bind(GraphicsTypes::CommandBufferInstance *cb)
+{
+	if(!shader)
+		throw runtime_error("RingShader: Bind() called before Init().");
+
+	cb->BindShader(shader.get());
+}
+
+
+
+void RingShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, const float out, const float in,
+                     const Color &color)
+{
+	const float width = .5f * (1.f + out - in);
+	Add(cb, pos, out - width, width, 1.f, color);
+}
+
+
+
+void RingShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, const float radius, const float width,
+                     const float fraction, const Color &color, const float dash, const float startAngle)
+{
+	const gm::vec2 position = {static_cast<float>(pos.X()), static_cast<float>(pos.Y())};
+	const gm::vec2 scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
+	const float angle = fraction * 2. * PI;
+	const float startAngleV = startAngle * TO_RAD;
+	const float dashV = dash ? 2. * PI / dash : 0.;
+
+	std::vector<unsigned char> data_cp(info.GetUniformSize());
+	int i = -1;
+	info.CopyUniformEntryToBuffer(data_cp.data(), &scale, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &position, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &radius, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &width, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &angle, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &startAngleV, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &dashV, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
+	cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
+
+	geometry.Draw(cb, GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
+}
+
+
 
 void RingShader::Clear()
 {
-  shader.Clear();
-  square = {};
+	geometry = graphics_layer::ObjectHandle();
+	shader.reset();
 }
-
-
-void RingShader::Draw(const Point &pos, float out, float in, const Color &color)
-{
-  float width = .5f * (1.f + out - in);
-  Draw(pos, out - width, width, 1.f, color);
-}
-
-
-void RingShader::Draw(
-    const Point &pos,
-    float        radius,
-    float        width,
-    float        fraction,
-    const Color &color,
-    float        dash,
-    float        startAngle)
-{
-  Bind();
-
-  Add(pos, radius, width, fraction, color, dash, startAngle);
-
-  Unbind();
-}
-
-
-void RingShader::Bind() { shader.Bind(); }
-
-
-void RingShader::Add(const Point &pos, float out, float in, const Color &color)
-{
-  float width = .5f * (1.f + out - in);
-  Add(pos, out - width, width, 1.f, color);
-}
-
-
-void RingShader::Add(
-    const Point &pos,
-    const float  radius,
-    const float  width,
-    const float  fraction,
-    const Color &color,
-    const float  dash,
-    const float  startAngle)
-{
-  const float position[2] = {static_cast<float>(pos.X()), static_cast<float>(pos.Y())};
-
-  const auto angle       = static_cast<float>(fraction * 2.f * PI);
-  const auto start_angle = static_cast<float>(startAngle * TO_RAD);
-  const auto dash_angle  = static_cast<float>(dash > 0.f ? 2.f * PI / dash : 0.);
-
-  const auto                &info = shader.GetInfo();
-  std::vector<unsigned char> data_cp(info.GetUniformSize());
-  int                        i = -1;
-  info.CopyUniformEntryToBuffer(data_cp.data(), position, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), &radius, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), &width, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), &angle, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), &start_angle, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), &dash_angle, ++i);
-  info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
-
-  GameWindow::GetInstance()->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
-
-  square.Draw(GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
-}
-
-
-void RingShader::Unbind() {}

@@ -18,6 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Color.h"
 #include "Point.h"
 #include "Rectangle.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 #include <string>
 #include <vector>
@@ -26,44 +27,43 @@ class StellarObject;
 class System;
 
 
-class PlanetLabel
-{
+
+class PlanetLabel {
 public:
-  PlanetLabel(const std::vector<PlanetLabel> &labels, const System &system, const StellarObject &object);
+	PlanetLabel(const std::vector<PlanetLabel> &labels, const System &system, const StellarObject &object);
 
-  void Update(const Point &center, double zoom, const std::vector<PlanetLabel> &labels, const System &system);
+	void Update(const Point &center, double zoom, const std::vector<PlanetLabel> &labels, const System &system);
 
-  void Draw() const;
-
-
-private:
-  void UpdateData(const std::vector<PlanetLabel> &labels, const System &system);
-  // Overlap detection.
-  void      SetBoundingBox(const Point &labelDimensions, double angle);
-  Rectangle GetBoundingBox(double zoom) const;
-  bool
-  HasOverlaps(const std::vector<PlanetLabel> &labels, const System &system, const StellarObject &object, double zoom)
-      const;
+	void Draw(GraphicsTypes::CommandBufferInstance *cb) const;
 
 
 private:
-  const StellarObject *object;
+	void UpdateData(const std::vector<PlanetLabel> &labels, const System &system);
+	// Overlap detection.
+	void SetBoundingBox(const Point &labelDimensions, double angle);
+	Rectangle GetBoundingBox(double zoom) const;
+	bool HasOverlaps(const std::vector<PlanetLabel> &labels, const System &system, const StellarObject &object,
+	                 double zoom) const;
 
-  Point drawCenter;
 
-  // Used for overlap detection during label creation.
-  Rectangle box;
-  Point     zoomOffset;
+private:
+	const StellarObject *object;
 
-  // Position and radius for drawing label.
-  Point  position;
-  double radius = 0.;
+	Point drawCenter;
 
-  std::string name;
-  std::string government;
-  Point       nameOffset;
-  Point       governmentOffset;
-  Color       color;
-  int         hostility  = 0;
-  double      innerAngle = -1.;
+	// Used for overlap detection during label creation.
+	Rectangle box;
+	Point zoomOffset;
+
+	// Position and radius for drawing label.
+	Point position;
+	double radius = 0.;
+
+	std::string name;
+	std::string government;
+	Point nameOffset;
+	Point governmentOffset;
+	Color color;
+	int hostility = 0;
+	double innerAngle = -1.;
 };

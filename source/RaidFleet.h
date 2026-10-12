@@ -22,19 +22,18 @@ class Fleet;
 
 
 // Information about how a fleet intended for raiding behaves.
-class RaidFleet
-{
+class RaidFleet {
 public:
-  RaidFleet(const Fleet *fleet, double minAttraction, double maxAttraction);
-  // Handles the addition and removal of raid fleets from the given std::vector.
-  static void  Load(std::vector<RaidFleet> &raidFleets, const DataNode &node, bool remove, int valueIndex);
-  const Fleet *GetFleet() const;
-  double       MinAttraction() const;
-  double       MaxAttraction() const;
+	RaidFleet(const Fleet *fleet, double minAttraction, double maxAttraction);
+	// Handles the addition and removal of raid fleets from the given std::vector.
+	static void Load(std::vector<RaidFleet> &raidFleets, const DataNode &node, bool remove, int valueIndex);
+	const Fleet *GetFleet() const;
+	double MinAttraction() const;
+	double MaxAttraction() const;
 
 
 private:
-  const Fleet *fleet = nullptr;
-  double       minAttraction;
-  double       maxAttraction;
+	const Fleet *fleet = nullptr;
+	double minAttraction;
+	double maxAttraction;
 };

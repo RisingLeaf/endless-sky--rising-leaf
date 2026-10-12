@@ -17,108 +17,214 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "DataNode.h"
 #include "DataWriter.h"
+#include "GameData.h"
+#include "System.h"
 #include "image/Sprite.h"
 #include "image/SpriteSet.h"
 #include "shader/SpriteShader.h"
 #include "text/Format.h"
 #include "text/WrappedText.h"
 
+using namespace std;
+
+
 
 bool BookEntry::IsEmpty() const
 {
-  return all_of(items.begin(), items.end(), [](const Item &item) { return holds_alternative<std::monostate>(item); });
+	return all_of(items.begin(), items.end(), [](const Item &item) {
+		return holds_alternative<std::monostate>(item);
+	});
 }
 
 
-void BookEntry::Load(const DataNode &node, int startAt)
+
+void BookEntry::Load(const DataNode &node, optional<int> startAt)
 {
-  if(startAt < node.Size()) LoadSingle(node, startAt);
-
-  for(const DataNode &child : node)
-    LoadSingle(child);
+	if(startAt.has_value() && startAt < node.Size())
+		LoadContents(node, *startAt);
+	for(const DataNode &child : node)
+	{
+		const string &key = child.Token(0);
+		if(key == "source" && child.Size() >= 2)
+			source = GameData::Systems().Get(child.Token(1));
+		else if(key == "mark")
+		{
+			for(int i = 1; i < child.Size(); ++i)
+				markSystems.insert(GameData::Systems().Get(child.Token(i)));
+			for(const DataNode &grand : child)
+				markSystems.insert(GameData::Systems().Get(grand.Token(0)));
+		}
+		else if(key == "circle")
+		{
+			for(int i = 1; i < child.Size(); ++i)
+				circleSystems.insert(GameData::Systems().Get(child.Token(i)));
+			for(const DataNode &grand : child)
+				circleSystems.insert(GameData::Systems().Get(grand.Token(0)));
+		}
+		else
+			LoadContents(child);
+	}
 }
+
 
 
 void BookEntry::Add(const BookEntry &other)
 {
-  items.insert(items.end(), other.items.begin(), other.items.end());
-  for(const Item &item : other.items)
-    if(holds_alternative<const Sprite *>(item)) scenes.insert(std::get<const Sprite *>(item));
+	items.insert(items.end(), other.items.begin(), other.items.end());
+	for(const Item &item : other.items)
+		if(holds_alternative<const Sprite *>(item))
+			scenes.insert(std::get<const Sprite *>(item));
+
+	markSystems.insert(other.markSystems.begin(), other.markSystems.end());
+	circleSystems.insert(other.circleSystems.begin(), other.circleSystems.end());
 }
 
 
-BookEntry BookEntry::Instantiate(const std::map<std::string, std::string> &subs) const
+
+BookEntry BookEntry::Instantiate(const map<string, string> &subs) const
 {
-  BookEntry newEntry;
-  for(const Item &item : items)
-  {
-    // Perform requested substitutions on the text of this node and return a new variant.
-    if(holds_alternative<std::string>(item))
-      newEntry.items.emplace_back(Format::Replace(std::get<std::string>(item), subs));
-    else newEntry.items.emplace_back(item);
-  }
-  newEntry.scenes = scenes;
-  return newEntry;
+	BookEntry newEntry;
+	for(const Item &item : items)
+	{
+		// Perform requested substitutions on the text of this node and return a new variant.
+		if(holds_alternative<string>(item))
+			newEntry.items.emplace_back(Format::Replace(std::get<string>(item), subs));
+		else
+			newEntry.items.emplace_back(item);
+	}
+	newEntry.scenes = scenes;
+	newEntry.markSystems = markSystems;
+	newEntry.circleSystems = circleSystems;
+	return newEntry;
 }
+
 
 
 void BookEntry::Save(DataWriter &out) const
 {
-  out.BeginChild();
-  {
-    for(const Item &item : items)
-    {
-      // Break the text up into paragraphs.
-      if(holds_alternative<std::string>(item))
-        for(const std::string &line : Format::Split(std::get<std::string>(item), "\n\t"))
-          out.Write(line);
-      else out.Write("scene", std::get<const Sprite *>(item)->Name());
-    }
-  }
-  out.EndChild();
+	out.BeginChild();
+	{
+		for(const Item &item : items)
+		{
+			// Break the text up into paragraphs.
+			if(holds_alternative<string>(item))
+				for(const string &line : Format::Split(std::get<string>(item), "\n\t"))
+					out.Write(line);
+			else
+				out.Write("scene", std::get<const Sprite *>(item)->Name());
+		}
+		if(source)
+			out.Write("source", source->TrueName());
+		if(!markSystems.empty())
+		{
+			out.Write("mark");
+			out.BeginChild();
+			{
+				for(const System *system : markSystems)
+					out.Write(system->TrueName());
+			}
+			out.EndChild();
+		}
+		if(!circleSystems.empty())
+		{
+			out.Write("circle");
+			out.BeginChild();
+			{
+				for(const System *system : circleSystems)
+					out.Write(system->TrueName());
+			}
+			out.EndChild();
+		}
+	}
+	out.EndChild();
 }
 
 
-const std::set<const Sprite *> &BookEntry::GetScenes() const { return scenes; }
 
-
-int BookEntry::Draw(const Point &topLeft, WrappedText &wrap, const Color &color) const
+const set<const Sprite *> &BookEntry::GetScenes() const
 {
-  Point drawPoint = topLeft;
-  for(const Item &item : items)
-  {
-    if(holds_alternative<std::string>(item))
-    {
-      wrap.Wrap(std::get<std::string>(item));
-      wrap.Draw(drawPoint, color);
-      drawPoint.Y() += wrap.Height();
-    }
-    else {
-      const Sprite *scene = std::get<const Sprite *>(item);
-      const Point   sceneOffset(scene->Width() / 2, scene->Height() / 2);
-      SpriteShader::Draw(scene, drawPoint + sceneOffset);
-      drawPoint.Y() += scene->Height();
-    }
-  }
-  return drawPoint.Y() - topLeft.Y();
+	return scenes;
 }
 
 
-void BookEntry::LoadSingle(const DataNode &node, int startAt)
+
+int BookEntry::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft, WrappedText &wrap,
+                    const Color &color) const
 {
-  if(node.Size() - startAt == 2 && node.Token(startAt) == "scene")
-  {
-    const Sprite *scene = SpriteSet::Get(node.Token(startAt + 1));
-    items.emplace_back(scene);
-    scenes.insert(scene);
-  }
-  else {
-    std::string text;
-    for(int i = startAt; i < node.Size(); ++i)
-    {
-      if(!text.empty()) text += "\n\t";
-      text += node.Token(i);
-    }
-    items.emplace_back(text);
-  }
+	Point drawPoint = topLeft;
+	for(const Item &item : items)
+	{
+		if(holds_alternative<string>(item))
+		{
+			wrap.Wrap(std::get<string>(item));
+			wrap.Draw(cb, drawPoint, color);
+			drawPoint.Y() += wrap.Height();
+		}
+		else
+		{
+			const Sprite *scene = std::get<const Sprite *>(item);
+			const Point sceneOffset(scene->Width() / 2, scene->Height() / 2);
+			SpriteShader::Draw(cb, scene, drawPoint + sceneOffset);
+			drawPoint.Y() += scene->Height();
+		}
+	}
+	return drawPoint.Y() - topLeft.Y();
+}
+
+
+
+const System *BookEntry::SourceSystem() const
+{
+	return source;
+}
+
+
+
+void BookEntry::SetSourceSystem(const System *system)
+{
+	source = system;
+}
+
+
+
+const set<const System *> &BookEntry::MarkSystems() const
+{
+	return markSystems;
+}
+
+
+
+const set<const System *> &BookEntry::CircleSystems() const
+{
+	return circleSystems;
+}
+
+
+
+bool BookEntry::HasSystems() const
+{
+	return source || !markSystems.empty() || !circleSystems.empty();
+}
+
+
+
+void BookEntry::LoadContents(const DataNode &node, int startAt)
+{
+	if(node.Size() - startAt == 2 && node.Token(startAt) == "scene")
+	{
+		const Sprite *scene = SpriteSet::Get(node.Token(startAt + 1));
+		items.emplace_back(scene);
+		scenes.insert(scene);
+	}
+	else
+	{
+		string text;
+		for(int i = startAt; i < node.Size(); ++i)
+		{
+			if(!text.empty())
+				text += "\n\t";
+			text += node.Token(i);
+		}
+		items.emplace_back(text);
+	}
 }

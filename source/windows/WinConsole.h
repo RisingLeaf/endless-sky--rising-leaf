@@ -16,8 +16,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 
-class WinConsole
-{
+
+class WinConsole {
 public:
-  static void Init();
+	static void Init();
 };

@@ -1,6 +1,10 @@
 add_library(EndlessSkyLib OBJECT)
-
-add_subdirectory(risingleaf_shared/)
+set_target_properties(EndlessSkyLib PROPERTIES
+        CXX_STANDARD 26
+        CXX_STANDARD_REQUIRED YES
+        CXX_EXTENSIONS NO
+)
+target_compile_options(EndlessSkyLib PRIVATE -freflection)
 
 # Set the appropriate compiler flags.
 target_include_directories(EndlessSkyLib PUBLIC "${LIBMAD_INCLUDE_DIR}")
@@ -12,6 +16,8 @@ else ()
     target_compile_options(EndlessSkyLib PUBLIC
             "-Wall" "-pedantic-errors" "-Wold-style-cast" "$<$<CONFIG:Release>:-fno-rtti>")
 endif ()
+
+target_include_directories(EndlessSkyLib PRIVATE ../)
 
 # Every source file (and header file) should be listed here, except main.cpp.
 # If you add a new file, add it to this list.
@@ -43,6 +49,8 @@ target_sources(EndlessSkyLib PRIVATE
         Camera.h
         CaptureOdds.cpp
         CaptureOdds.h
+        Caret.cpp
+        Caret.h
         CargoHold.cpp
         CargoHold.h
         CategoryList.cpp
@@ -66,6 +74,8 @@ target_sources(EndlessSkyLib PRIVATE
         ConditionSet.h
         ConditionsStore.cpp
         ConditionsStore.h
+        Confusion.cpp
+        Confusion.h
         Conversation.cpp
         Conversation.h
         ConversationPanel.cpp
@@ -101,6 +111,10 @@ target_sources(EndlessSkyLib PRIVATE
         Distribution.h
         Drawable.cpp
         Drawable.h
+        Dropdown.cpp
+        Dropdown.h
+        Edit.cpp
+        Edit.h
         Endpoint.cpp
         Endpoint.h
         Effect.cpp
@@ -207,7 +221,6 @@ target_sources(EndlessSkyLib PRIVATE
         Messages.h
         Minable.cpp
         Minable.h
-        MinableDamageDealt.h
         MiniMap.cpp
         MiniMap.h
         Mission.cpp
@@ -229,6 +242,7 @@ target_sources(EndlessSkyLib PRIVATE
         News.h
         OptionalInputDialogPanel.cpp
         OptionalInputDialogPanel.h
+        OrderedMap.h
         Outfit.cpp
         Outfit.h
         OutfitInfoDisplay.cpp
@@ -245,6 +259,8 @@ target_sources(EndlessSkyLib PRIVATE
         Personality.h
         Phrase.cpp
         Phrase.h
+        PilotProfile.cpp
+        PilotProfile.h
         Planet.cpp
         Planet.h
         PlanetLabel.cpp
@@ -255,8 +271,10 @@ target_sources(EndlessSkyLib PRIVATE
         PlayerInfo.h
         PlayerInfoPanel.cpp
         PlayerInfoPanel.h
-        Plugins.cpp
-        Plugins.h
+        Plugin.cpp
+        Plugin.h
+        PluginManager.cpp
+        PluginManager.h
         Point.cpp
         Point.h
         Politics.cpp
@@ -289,11 +307,15 @@ target_sources(EndlessSkyLib PRIVATE
         Sale.h
         SavedGame.cpp
         SavedGame.h
+        ScanType.h
         Screen.cpp
         Screen.h
         ScrollBar.cpp
         ScrollBar.h
+        ScrollArea.cpp
+        ScrollArea.h
         ScrollVar.h
+        SDL.h
         Set.h
         Ship.cpp
         Ship.h
@@ -322,6 +344,8 @@ target_sources(EndlessSkyLib PRIVATE
         StartConditionsPanel.h
         StellarObject.cpp
         StellarObject.h
+        StellarObjectSpriteData.cpp
+        StellarObjectSpriteData.h
         StringInterner.cpp
         StringInterner.h
         Swizzle.cpp
@@ -329,6 +353,8 @@ target_sources(EndlessSkyLib PRIVATE
         System.cpp
         System.h
         SystemEntry.h
+        TableArea.cpp
+        TableArea.h
         TaskQueue.cpp
         TaskQueue.h
         TextArea.cpp
@@ -430,14 +456,18 @@ target_sources(EndlessSkyLib PRIVATE
         shader/PointerShader.h
         shader/RingShader.cpp
         shader/RingShader.h
-        shader/Shader.cpp
-        shader/Shader.h
         shader/SpriteShader.cpp
         shader/SpriteShader.h
         shader/StarField.cpp
         shader/StarField.h
+        ship/ResourceLevels.cpp
+        ship/ResourceLevels.h
         ship/ShipAICache.cpp
         ship/ShipAICache.h
+        ship/ShipAttributeCache.cpp
+        ship/ShipAttributeCache.h
+        ship/ShipFactory.cpp
+        ship/ShipFactory.h
         test/Test.cpp
         test/Test.h
         test/TestContext.cpp
@@ -464,9 +494,6 @@ target_sources(EndlessSkyLib PRIVATE
         text/WrappedText.cpp
         text/WrappedText.h
 )
-
-target_include_directories(EndlessSkyLib PRIVATE ./)
-target_link_libraries(EndlessSkyLib PUBLIC risingleaf_shared)
 
 if (WIN32)
     target_sources(EndlessSkyLib PRIVATE

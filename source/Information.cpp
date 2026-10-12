@@ -17,115 +17,150 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "image/Sprite.h"
 
+using namespace std;
+
+
 
 void Information::SetRegion(const Rectangle &rect)
 {
-  region          = rect;
-  hasCustomRegion = true;
+	region = rect;
+	hasCustomRegion = true;
 }
 
 
-const Rectangle &Information::GetCustomRegion() const { return region; }
 
-
-bool Information::HasCustomRegion() const { return hasCustomRegion; }
-
-
-void Information::SetSprite(
-    const std::string &name,
-    const Sprite      *sprite,
-    const Point       &unit,
-    float              frame,
-    const Swizzle     *swizzle)
+const Rectangle &Information::GetCustomRegion() const
 {
-  sprites[name]        = sprite;
-  spriteUnits[name]    = unit;
-  spriteFrames[name]   = frame;
-  spriteSwizzles[name] = swizzle;
+	return region;
 }
 
 
-const Sprite *Information::GetSprite(const std::string &name) const
+
+bool Information::HasCustomRegion() const
 {
-  static const Sprite empty;
-
-  auto it = sprites.find(name);
-  return (it == sprites.end()) ? &empty : it->second;
+	return hasCustomRegion;
 }
 
 
-const Point &Information::GetSpriteUnit(const std::string &name) const
+
+void Information::SetSprite(const string &name, const Sprite *sprite, const Point &unit, float frame,
+                            const Swizzle *swizzle)
 {
-  static const Point up(0., -1.);
-
-  auto it = spriteUnits.find(name);
-  return (it == spriteUnits.end()) ? up : it->second;
+	sprites[name] = sprite;
+	spriteUnits[name] = unit;
+	spriteFrames[name] = frame;
+	spriteSwizzles[name] = swizzle;
 }
 
 
-float Information::GetSpriteFrame(const std::string &name) const
+
+const Sprite *Information::GetSprite(const string &name) const
 {
-  auto it = spriteFrames.find(name);
-  return (it == spriteFrames.end()) ? 0.f : it->second;
+	static const Sprite empty;
+
+	auto it = sprites.find(name);
+	return (it == sprites.end()) ? &empty : it->second;
 }
 
 
-const Swizzle *Information::GetSwizzle(const std::string &name) const
+
+const Point &Information::GetSpriteUnit(const string &name) const
 {
-  auto it = spriteSwizzles.find(name);
-  return it == spriteSwizzles.end() ? 0 : it->second;
+	static const Point up(0., -1.);
+
+	auto it = spriteUnits.find(name);
+	return (it == spriteUnits.end()) ? up : it->second;
 }
 
 
-void Information::SetString(const std::string &name, const std::string &value) { strings[name] = value; }
 
-
-const std::string &Information::GetString(const std::string &name) const
+float Information::GetSpriteFrame(const string &name) const
 {
-  static const std::string empty;
-
-  auto it = strings.find(name);
-  return (it == strings.end()) ? empty : it->second;
+	auto it = spriteFrames.find(name);
+	return (it == spriteFrames.end()) ? 0.f : it->second;
 }
 
 
-void Information::SetBar(const std::string &name, double value, double segments)
+
+const Swizzle *Information::GetSwizzle(const string &name) const
 {
-  bars[name]        = value;
-  barSegments[name] = segments;
+	auto it = spriteSwizzles.find(name);
+	return it == spriteSwizzles.end() ? 0 : it->second;
 }
 
 
-double Information::BarValue(const std::string &name) const
+
+void Information::SetString(const string &name, const string &value)
 {
-  auto it = bars.find(name);
-
-  return (it == bars.end()) ? 0. : it->second;
+	strings[name] = value;
 }
 
 
-double Information::BarSegments(const std::string &name) const
+
+const string &Information::GetString(const string &name) const
 {
-  auto it = barSegments.find(name);
+	static const string empty;
 
-  return (it == barSegments.end()) ? 1. : it->second;
+	auto it = strings.find(name);
+	return (it == strings.end()) ? empty : it->second;
 }
 
 
-void Information::SetCondition(const std::string &condition) { conditions.insert(condition); }
 
-
-bool Information::HasCondition(const std::string &condition) const
+void Information::SetBar(const string &name, double value, double segments)
 {
-  if(condition.empty()) return true;
-
-  if(condition.front() == '!') return !HasCondition(condition.substr(1));
-
-  return conditions.contains(condition);
+	bars[name] = value;
+	barSegments[name] = segments;
 }
 
 
-void Information::SetOutlineColor(const Color &color) { outlineColor = color; }
+
+double Information::BarValue(const string &name) const
+{
+	auto it = bars.find(name);
+
+	return (it == bars.end()) ? 0. : it->second;
+}
 
 
-const Color &Information::GetOutlineColor() const { return outlineColor; }
+
+double Information::BarSegments(const string &name) const
+{
+	auto it = barSegments.find(name);
+
+	return (it == barSegments.end()) ? 1. : it->second;
+}
+
+
+
+void Information::SetCondition(const string &condition)
+{
+	conditions.insert(condition);
+}
+
+
+
+bool Information::HasCondition(const string &condition) const
+{
+	if(condition.empty())
+		return true;
+
+	if(condition.front() == '!')
+		return !HasCondition(condition.substr(1));
+
+	return conditions.contains(condition);
+}
+
+
+
+void Information::SetOutlineColor(const Color &color)
+{
+	outlineColor = color;
+}
+
+
+
+const Color &Information::GetOutlineColor() const
+{
+	return outlineColor;
+}
