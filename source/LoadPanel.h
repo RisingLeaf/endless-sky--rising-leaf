@@ -20,10 +20,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Rectangle.h"
 #include "SavedGame.h"
 #include "Tooltip.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 #include <filesystem>
-#include <map>
 #include <memory>
 #include <optional>
 #include <string>

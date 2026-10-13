@@ -17,7 +17,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Messages.h"
 #include "Panel.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 
 

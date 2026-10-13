@@ -15,13 +15,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include "Color.h"
 #include "Edit.h"
 #include "Panel.h"
 #include "Rectangle.h"
-#include "graphics/graphics_toplevel_defines.h"
 
-#include <functional>
 #include <string>
 #include <vector>
 

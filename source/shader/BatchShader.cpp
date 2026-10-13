@@ -34,8 +34,8 @@ namespace {
 void BatchShader::Init(const GraphicsTypes::GraphicsInstance *graphics_instance)
 {
 	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
-	info.AddInput(GraphicsTypes::ShaderType::FLOAT3, 2 * sizeof(float), 0);
-	info.AddInput(GraphicsTypes::ShaderType::FLOAT, 5 * sizeof(float), 0);
+	info.AddInput(GraphicsTypes::ShaderType::FLOAT3, 2 * sizeof(float), 1);
+	info.AddInput(GraphicsTypes::ShaderType::FLOAT, 5 * sizeof(float), 2);
 	info.SetInputSize(6 * sizeof(float));
 
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // scale
@@ -72,7 +72,7 @@ void BatchShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Sprite *sp
 	info.CopyUniformEntryToBuffer(data_cp.data(), &frame_count, ++i);
 	cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
 
-	graphics_layer::QuickBindTextures(cb, {sprite->Texture().GetTexture()});
+	graphics_layer::QuickBindTextures(cb, {sprite->Texture()->GetTexture()});
 
 	cb->DrawDynamic(data.size() / 6, sizeof(float) * 6, data.data(), GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
 }

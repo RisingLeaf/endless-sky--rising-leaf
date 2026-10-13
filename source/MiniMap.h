@@ -16,10 +16,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "Point.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 #include <memory>
 
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+}
 class PlayerInfo;
 class Ship;
 class System;

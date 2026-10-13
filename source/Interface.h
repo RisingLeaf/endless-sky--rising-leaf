@@ -18,7 +18,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Color.h"
 #include "Point.h"
 #include "Rectangle.h"
-#include "graphics/graphics_toplevel_defines.h"
 #include "text/Alignment.h"
 #include "text/Truncate.h"
 #include "text/WrappedText.h"

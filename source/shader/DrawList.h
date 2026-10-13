@@ -69,7 +69,7 @@ private:
 private:
 	int step = 0;
 	double zoom = 1.;
-	std::vector<SpriteShader::Item> items;
+	mutable std::vector<SpriteShader::Item> items;
 
 	Point center;
 	Point centerVelocity;

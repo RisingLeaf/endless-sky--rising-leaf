@@ -16,11 +16,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "ClickZone.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 #include <map>
 #include <vector>
 
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+}
 class Outfit;
 class PlayerInfo;
 class Point;

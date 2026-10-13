@@ -16,7 +16,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "Panel.h"
-#include "graphics/graphics_toplevel_defines.h"
 #include "text/WrappedText.h"
 
 #include <functional>

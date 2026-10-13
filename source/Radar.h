@@ -17,12 +17,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Color.h"
 #include "Point.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 #include <vector>
 
 
 
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+}
 // Class representing all objects which should show up on radar. Each object is
 // either a ring (planets) or a dot (ships) and has a color representing its status
 // (owned by player, friendly, unfriendly, hostile, inactive, or special).

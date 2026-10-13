@@ -15,7 +15,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "GameData.h"
 
-#include "CategoryList.h"
 #include "Color.h"
 #include "Command.h"
 #include "ConditionsStore.h"
@@ -54,7 +53,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "image/ImageFileData.h"
 #include "image/ImageSet.h"
 #include "image/MaskManager.h"
-#include "image/Sprite.h"
 #include "image/SpriteLoadManager.h"
 #include "shader/BatchShader.h"
 #include "shader/FillShader.h"

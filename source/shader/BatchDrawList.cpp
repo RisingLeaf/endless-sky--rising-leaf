@@ -21,6 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../Screen.h"
 #include "../image/Sprite.h"
 #include "BatchShader.h"
+#include "Logger.h"
 
 #include <cmath>
 
@@ -94,6 +95,9 @@ bool BatchDrawList::AddVisual(const Body &visual)
 // Draw all the items in this list.
 void BatchDrawList::Draw(GraphicsTypes::CommandBufferInstance *cb) const
 {
+	if(data.empty()) [[unlikely]]
+		return;
+
 	BatchShader::Bind(cb);
 
 	for(const auto &[sprite, vertices] : data)

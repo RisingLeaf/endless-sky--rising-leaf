@@ -21,7 +21,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Shop.h"
 #include "Swizzle.h"
 #include "Trade.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 #include <filesystem>
 #include <future>
@@ -30,6 +29,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+}
 class CategoryList;
 class Color;
 class ConditionsStore;

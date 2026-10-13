@@ -39,8 +39,8 @@ class SpriteShader {
 public:
 	class Item {
 	public:
-		const graphics_layer::TextureHandle &texture;
-		const graphics_layer::TextureHandle &swizzleMask;
+		const graphics_layer::TextureHandle *texture;
+		const graphics_layer::TextureHandle *swizzleMask;
 		const Swizzle *swizzle = nullptr;
 		float frame = 0.f;
 		float frameCount = 1.f;

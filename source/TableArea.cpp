@@ -125,7 +125,7 @@ void TableArea::DrawText(GraphicsTypes::CommandBufferInstance *cb, const Point &
 {
 	table.DrawAt(topLeft);
 
-	size_t columnCount = colors.size();
+	const size_t columnCount = colors.size();
 	for(const vector<string> &row : rows)
 	{
 		for(size_t i = 0; i < row.size(); ++i)

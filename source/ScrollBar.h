@@ -18,7 +18,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Color.h"
 #include "Panel.h"
 #include "ScrollVar.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 
 

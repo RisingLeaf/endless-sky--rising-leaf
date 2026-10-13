@@ -16,7 +16,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "Point.h"
-#include "Screen.h"
 #include "graphics/graphics_layer.h"
 
 
@@ -48,13 +47,13 @@ public:
 	void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &position, const Point &clipsize,
 	          const Point &srcposition = Point());
 
-	double Top() const;
-	double Bottom() const;
-	double Left() const;
-	double Right() const;
-	Point Dimensions() const;
-	double Height() const;
-	double Width() const;
+	[[nodiscard]] double Top() const;
+	[[nodiscard]] double Bottom() const;
+	[[nodiscard]] double Left() const;
+	[[nodiscard]] double Right() const;
+	[[nodiscard]] Point Dimensions() const;
+	[[nodiscard]] double Height() const;
+	[[nodiscard]] double Width() const;
 
 	void SetFadePadding(float top, float bottom, float right = 0, float left = 0);
 

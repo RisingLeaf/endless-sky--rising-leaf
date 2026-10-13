@@ -43,8 +43,7 @@ ScrollArea::ScrollArea(const Rectangle &r) : ScrollArea()
 
 // Stub destructor, so that unique_ptrs are destructed in the correct scope.
 ScrollArea::~ScrollArea()
-{
-}
+= default;
 
 
 
@@ -54,20 +53,20 @@ void ScrollArea::SetRect(const Rectangle &r)
 	size = r.Dimensions();
 	buffer.reset();
 	scroll.SetDisplaySize(r.Height());
-	scrollBar.displaySizeFraction = scroll.DisplaySize() / scroll.MaxValue();
+	scrollBar.displaySizeFraction = static_cast<float>(scroll.DisplaySize() / scroll.MaxValue());
 	Invalidate();
 }
 
 
 
-void ScrollArea::SetScrollbarOffset(int offset)
+void ScrollArea::SetScrollbarOffset(const int offset)
 {
 	scrollbarOffset = offset;
 }
 
 
 
-void ScrollArea::SetPointerOffset(int offset)
+void ScrollArea::SetPointerOffset(const int offset)
 {
 	pointerOffset = offset;
 }
@@ -106,8 +105,8 @@ void ScrollArea::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	{
 		scroll.Step();
 
-		auto target = buffer->SetTarget();
-		Point topLeft(buffer->Left(), buffer->Top() - scroll.AnimatedValue());
+		const auto target = buffer->SetTarget();
+		const Point topLeft(buffer->Left(), buffer->Top() - scroll.AnimatedValue());
 		DrawText(target, topLeft);
 		buffer->Deactivate();
 
@@ -143,7 +142,7 @@ bool ScrollArea::Click(int x, int y, MouseButton button, int clicks)
 
 	if(!buffer)
 		return false;
-	Rectangle bounds(position, {buffer->Width(), buffer->Height()});
+	const Rectangle bounds(position, {buffer->Width(), buffer->Height()});
 	dragging = bounds.Contains(Point(x, y));
 	return dragging;
 }
@@ -173,7 +172,7 @@ bool ScrollArea::Release(int x, int y, MouseButton button)
 	if(button != MouseButton::LEFT)
 		return false;
 
-	bool ret = dragging;
+	const bool ret = dragging;
 	dragging = false;
 	return ret;
 }
@@ -186,7 +185,7 @@ bool ScrollArea::Hover(int x, int y)
 
 	if(!buffer)
 		return false;
-	Rectangle bounds(position, {buffer->Width(), buffer->Height()});
+	const Rectangle bounds(position, {buffer->Width(), buffer->Height()});
 	hovering = bounds.Contains(Point(x, y));
 	return hovering;
 }

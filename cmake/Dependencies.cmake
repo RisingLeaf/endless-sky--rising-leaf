@@ -5,6 +5,7 @@ include(ExternalProject)
 # SDL3
 #
 function(fetch_sdl3)
+    set(SDL_X11_XTEST OFF CACHE STRING "" FORCE)
     FetchContent_Declare(
             SDL3
             GIT_REPOSITORY https://github.com/libsdl-org/SDL.git

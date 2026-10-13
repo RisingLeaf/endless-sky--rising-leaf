@@ -38,7 +38,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	string TriggerToText(NPC::Trigger trigger)
+	string TriggerToText(const NPC::Trigger trigger)
 	{
 		switch(trigger)
 		{

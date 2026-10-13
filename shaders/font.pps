@@ -1,21 +1,22 @@
 u_in vec2  scale;
-u_in vec2  position;
-u_in int   glyph;
-u_in float aspect;
 u_in vec2  glyphSize;
 u_in vec4  color;
-
 
 v_in vec2 vert;
 v_in vec2 corner;
 
+// instanced
+v_in vec2  position;
+v_in int   glyph;
+v_in float aspect;
+
 v_out vec2 texCoord;
 
 VS_BEGIN
-	texCoord = vec2((float(spec.glyph) + corner.x) / 98.0, corner.y);
+	texCoord = vec2((float(glyph) + corner.x) / 98.0, corner.y);
 	const vec2 pos = vert * spec.glyphSize;
     gl_Position = vec4(
-        vec2(spec.aspect * pos.x + spec.position.x, pos.y + spec.position.y) * spec.scale,
+        vec2(aspect * pos.x + position.x, pos.y + position.y) * spec.scale,
         0.0, 1.0);
 VS_END
 

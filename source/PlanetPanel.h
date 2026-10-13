@@ -17,7 +17,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Panel.h"
 #include "Sale.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 #include <functional>
 #include <map>

@@ -15,8 +15,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include "graphics/graphics_toplevel_defines.h"
-
 #include <map>
 #include <optional>
 #include <set>
@@ -24,6 +22,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <variant>
 #include <vector>
 
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+}
 class Color;
 class DataNode;
 class DataWriter;

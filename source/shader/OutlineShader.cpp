@@ -85,7 +85,7 @@ void OutlineShader::Draw(GraphicsTypes::CommandBufferInstance *cb, const Sprite 
 	info.CopyUniformEntryToBuffer(data_cp.data(), &off, ++i);
 	cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
 
-	graphics_layer::QuickBindTextures(cb, {sprite->Texture().GetTexture()});
+	graphics_layer::QuickBindTextures(cb, {sprite->Texture()->GetTexture()});
 
 	geometry.Draw(cb, GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
 }

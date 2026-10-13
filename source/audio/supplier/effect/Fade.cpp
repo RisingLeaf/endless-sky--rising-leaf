@@ -66,53 +66,54 @@ vector<AudioSupplier::sample_t> Fade::NextDataChunk()
 	{
 		// With no input sources, output silence.
 		result = vector<sample_t>(OUTPUT_CHUNK);
-		else if(primarySource && fadeProgress.empty())
-		{
-			// With only primary input (nothing to blend with), output primary.
-			result = primarySource->NextDataChunk();
-		}
-		else // fade sources
-		{
-			// Generate the faded background.
-			vector<sample_t> faded = std::get<0>(fadeProgress[0])->NextDataChunk();
-			for(size_t i = 1; i < fadeProgress.size(); ++i)
-			{
-				vector<sample_t> other = std::get<0>(fadeProgress[i])->NextDataChunk();
-				auto &[source, fade, fadePerFrame] = fadeProgress[i - 1];
-				CrossFade(faded, other, fade, fadePerFrame);
-				faded = std::move(other);
-			}
-
-			// Get the foreground data.
-			if(primarySource)
-				result = primarySource->NextDataChunk();
-			else
-				result.resize(OUTPUT_CHUNK); // silence
-
-			// The final blend.
-			auto &[source, fade, fadePerFrame] = fadeProgress.back();
-			CrossFade(faded, result, fade, fadePerFrame);
-		}
-
-		// Clean up the finished sources.
-		if(primarySource && !primarySource->MaxChunks())
-			primarySource.reset();
-		erase_if(fadeProgress, [](const auto &faded) {
-			return !std::get<1>(faded) || !std::get<0>(faded)->MaxChunks();
-		});
-
-		return result;
 	}
-
-
-	void Fade::CrossFade(const vector<sample_t> &fadeOut, vector<sample_t> &fadeIn, size_t &fade, size_t fadePerFrame)
+	else if(primarySource && fadeProgress.empty())
 	{
-		for(size_t i = 0; i < fadeIn.size() && fade; ++i)
-		{
-			fadeIn[i] = (fadeOut[i] * fade + (fadeIn[i] * (MAX_FADE - fade))) / MAX_FADE;
-			if(fade > fadePerFrame)
-				fade -= fadePerFrame;
-			else
-				fade = 0;
-		}
+		// With only primary input (nothing to blend with), output primary.
+		result = primarySource->NextDataChunk();
 	}
+	else // fade sources
+	{
+		// Generate the faded background.
+		vector<sample_t> faded = std::get<0>(fadeProgress[0])->NextDataChunk();
+		for(size_t i = 1; i < fadeProgress.size(); ++i)
+		{
+			vector<sample_t> other = std::get<0>(fadeProgress[i])->NextDataChunk();
+			auto &[source, fade, fadePerFrame] = fadeProgress[i - 1];
+			CrossFade(faded, other, fade, fadePerFrame);
+			faded = std::move(other);
+		}
+
+		// Get the foreground data.
+		if(primarySource)
+			result = primarySource->NextDataChunk();
+		else
+			result.resize(OUTPUT_CHUNK); // silence
+
+		// The final blend.
+		auto &[source, fade, fadePerFrame] = fadeProgress.back();
+		CrossFade(faded, result, fade, fadePerFrame);
+	}
+
+	// Clean up the finished sources.
+	if(primarySource && !primarySource->MaxChunks())
+		primarySource.reset();
+	erase_if(fadeProgress, [](const auto &faded) {
+		return !std::get<1>(faded) || !std::get<0>(faded)->MaxChunks();
+	});
+
+	return result;
+}
+
+
+void Fade::CrossFade(const vector<sample_t> &fadeOut, vector<sample_t> &fadeIn, size_t &fade, size_t fadePerFrame)
+{
+	for(size_t i = 0; i < fadeIn.size() && fade; ++i)
+	{
+		fadeIn[i] = (fadeOut[i] * fade + (fadeIn[i] * (MAX_FADE - fade))) / MAX_FADE;
+		if(fade > fadePerFrame)
+			fade -= fadePerFrame;
+		else
+			fade = 0;
+	}
+}

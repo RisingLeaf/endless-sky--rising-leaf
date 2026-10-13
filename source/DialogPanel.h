@@ -17,7 +17,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Panel.h"
 #include "Point.h"
-#include "graphics/graphics_toplevel_defines.h"
 #include "text/Format.h"
 #include "text/Truncate.h"
 

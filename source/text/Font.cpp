@@ -24,6 +24,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../image/ImageFileData.h"
 #include "Alignment.h"
 #include "DisplayText.h"
+#include "GameWindow.h"
 #include "Truncate.h"
 #include "shared/system/File.h"
 
@@ -38,6 +39,12 @@ namespace {
 	bool showUnderlines = false;
 	const int KERN = 2;
 	const float UNDERLINE_OFFSET = 2.f;
+
+	struct FontInstanceData {
+		gm::vec2 position;
+		int glyph;
+		float aspect;
+	};
 } // namespace
 
 
@@ -101,9 +108,8 @@ void Font::Draw(GraphicsTypes::CommandBufferInstance *cb, const string &str, con
 void Font::DrawAliased(GraphicsTypes::CommandBufferInstance *cb, const string &str, double x, double y,
                        const Color &color) const
 {
-	cb->BindShader(shader.get());
-
-	graphics_layer::QuickBindTextures(cb, {texture.GetTexture()});
+	if(str.empty())
+		return;
 
 	// Update the scale, only if the screen size has changed.
 	if(Screen::Width() != screenWidth || Screen::Height() != screenHeight)
@@ -120,7 +126,9 @@ void Font::DrawAliased(GraphicsTypes::CommandBufferInstance *cb, const string &s
 	bool isAfterSpace = true;
 	bool underlineChar = false;
 	bool doubleUnderlineChar = false;
-	const int underscoreGlyph = max(0, min(GLYPHS - 1, '_' - 32));
+	constexpr int underscoreGlyph = max(0, min(GLYPHS - 1, '_' - 32));
+
+	std::vector<FontInstanceData> letters;
 
 	for(char c : str)
 	{
@@ -144,36 +152,18 @@ void Font::DrawAliased(GraphicsTypes::CommandBufferInstance *cb, const string &s
 		constexpr float default_aspect = 1.0f;
 		textPos[0] += advance[previous * GLYPHS + glyph] + KERN;
 
-		std::vector<unsigned char> data_cp(info.GetUniformSize());
-		int i = -1;
-		info.CopyUniformEntryToBuffer(data_cp.data(), scale, ++i);
-		info.CopyUniformEntryToBuffer(data_cp.data(), &textPos, ++i);
-		info.CopyUniformEntryToBuffer(data_cp.data(), &glyph, ++i);
-		info.CopyUniformEntryToBuffer(data_cp.data(), &default_aspect, ++i);
-		info.CopyUniformEntryToBuffer(data_cp.data(), &glyphSize, ++i);
-		info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
-		cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
-
-		geometry.Draw(cb, GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
+		letters.emplace_back(textPos, glyph, default_aspect);
 
 		if(underlineChar)
 		{
 			const float aspect =
 			    static_cast<float>(advance[glyph * GLYPHS] + KERN) / (advance[underscoreGlyph * GLYPHS] + KERN);
-			info.CopyUniformEntryToBuffer(data_cp.data(), &underscoreGlyph, 2);
-			info.CopyUniformEntryToBuffer(data_cp.data(), &aspect, 3);
-			cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
-
-			geometry.Draw(cb, GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
+			letters.emplace_back(textPos, underscoreGlyph, aspect);
 
 			if(doubleUnderlineChar)
 			{
 				const gm::vec2 underlinePos = {textPos[0], textPos[1] + UNDERLINE_OFFSET};
-
-				info.CopyUniformEntryToBuffer(data_cp.data(), &underlinePos, 1);
-				cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
-
-				geometry.Draw(cb, GraphicsTypes::PrimitiveType::TRIANGLE_STRIP);
+				letters.emplace_back(underlinePos, underscoreGlyph, aspect);
 				doubleUnderlineChar = false;
 			}
 
@@ -182,6 +172,26 @@ void Font::DrawAliased(GraphicsTypes::CommandBufferInstance *cb, const string &s
 
 		previous = glyph;
 	}
+
+	if(letters.empty())
+		return;
+
+	std::unique_ptr<GraphicsTypes::BufferInstance> instance_buffer;
+	GameWindow::GraphicsInstance()->CreateBuffer(instance_buffer, GraphicsTypes::BufferType::VERTEX,
+	                                             letters.size() * sizeof(FontInstanceData), letters.data(), str + "_instance_buffer");
+
+	cb->BindShader(shader.get());
+
+	graphics_layer::QuickBindTextures(cb, {texture.GetTexture()});
+
+	std::vector<unsigned char> data_cp(info.GetUniformSize());
+	int i = -1;
+	info.CopyUniformEntryToBuffer(data_cp.data(), scale, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), &glyphSize, ++i);
+	info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
+	cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);
+
+	geometry.DrawInstanced(cb, GraphicsTypes::PrimitiveType::TRIANGLE_STRIP, instance_buffer.get(), letters.size());
 }
 
 
@@ -251,9 +261,9 @@ void Font::CalculateAdvances(ImageBuffer &image)
 	// Get the format and size of the surface.
 	int width = image.Width() / GLYPHS;
 	height = image.Height();
-	unsigned mask = 0xFF000000;
-	unsigned half = 0xC0000000;
-	int pitch = image.Width();
+	constexpr unsigned mask = 0xFF000000;
+	constexpr unsigned half = 0xC0000000;
+	const int pitch = image.Width();
 
 	// advance[previous * GLYPHS + next] is the x advance for each glyph pair.
 	// There is no advance if the previous value is 0, i.e. we are at the very
@@ -321,10 +331,12 @@ void Font::SetUpShader(const GraphicsTypes::GraphicsInstance *graphics_instance,
 	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 2 * sizeof(float), 1);
 	info.SetInputSize(4 * sizeof(float));
 
+	info.AddInstanceInput(GraphicsTypes::ShaderType::FLOAT2, offsetof(FontInstanceData, position), 2); // position
+	info.AddInstanceInput(GraphicsTypes::ShaderType::INT, offsetof(FontInstanceData, glyph), 3);       // glyph
+	info.AddInstanceInput(GraphicsTypes::ShaderType::FLOAT, offsetof(FontInstanceData, aspect), 4);    // aspect
+	info.SetInstanceInputSize(sizeof(FontInstanceData));
+
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // scale
-	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // position
-	info.AddUniformVariable(GraphicsTypes::ShaderType::INT);    // glyph
-	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT);  // aspect
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT2); // glyphSize
 	info.AddUniformVariable(GraphicsTypes::ShaderType::FLOAT4); // color
 

@@ -17,9 +17,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Angle.h"
 #include "Panel.h"
-#include "graphics/graphics_toplevel_defines.h"
 
-#include <cstdint>
 #include <memory>
 #include <string>
 

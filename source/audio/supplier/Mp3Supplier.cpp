@@ -19,7 +19,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <array>
 #include <cmath>
 #include <cstring>
-#include <miniaudio.h>
+#include "miniaudio.h"
 #include <utility>
 
 using namespace std;

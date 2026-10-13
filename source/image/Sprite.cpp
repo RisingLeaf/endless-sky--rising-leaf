@@ -221,15 +221,15 @@ Point Sprite::Center() const
 
 
 // Get the texture index.
-const graphics_layer::TextureHandle &Sprite::Texture() const
+const graphics_layer::TextureHandle *Sprite::Texture() const
 {
-	return texture;
+	return &texture;
 }
 
 
 
 // Get the texture index.
-const graphics_layer::TextureHandle &Sprite::SwizzleMask() const
+const graphics_layer::TextureHandle *Sprite::SwizzleMask() const
 {
-	return swizzleMask;
+	return &swizzleMask;
 }

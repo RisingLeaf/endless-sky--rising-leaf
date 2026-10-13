@@ -16,7 +16,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #pragma once
 
 #include "Rectangle.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 #include <cstdint>
 #include <list>
@@ -24,6 +23,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+}
 class Interface;
 class Ship;
 class Sprite;

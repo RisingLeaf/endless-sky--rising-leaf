@@ -120,14 +120,14 @@ void SpriteShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Item &ite
 {
 	const gm::vec2 scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
 	const int useSwizzleMask = (item.swizzle && item.swizzle->OverrideMask()) ? 0
-	                           : item.swizzleMask.GetTexture()                ? 1
+	                           : item.swizzleMask->GetTexture()                ? 1
 	                                                                          : 0;
 	const int useSwizzle = item.swizzle && !item.swizzle->IsIdentity();
 
-	if(useSwizzleMask && item.swizzleMask.GetTexture())
-		graphics_layer::QuickBindTextures(cb, {item.texture.GetTexture(), item.swizzleMask.GetTexture()});
+	if(useSwizzleMask && item.swizzleMask->GetTexture())
+		graphics_layer::QuickBindTextures(cb, {item.texture->GetTexture(), item.swizzleMask->GetTexture()});
 	else
-		graphics_layer::QuickBindTextures(cb, {item.texture.GetTexture(), dummySwizzleMask.GetTexture()});
+		graphics_layer::QuickBindTextures(cb, {item.texture->GetTexture(), dummySwizzleMask.GetTexture()});
 
 	static constexpr gm::vec2 UNBLURRED = {0.f, 0.f};
 	const gm::vec2 blur = withBlur ? gm::vec2{item.blur[0], item.blur[1]} : UNBLURRED;

@@ -31,7 +31,7 @@ class TableArea : public ScrollArea {
 public:
 	TableArea();
 	explicit TableArea(const Rectangle &r);
-	virtual ~TableArea() override;
+	~TableArea() override;
 
 	void AddColumn(int offset, Layout layout, const Color &color);
 	void AddRow(const std::vector<std::string> &row);
@@ -42,11 +42,11 @@ public:
 
 	void SetFontSize(int size);
 
-	virtual void Validate(bool trailingBreak) override;
+	void Validate(bool trailingBreak) override;
 
 
 protected:
-	virtual void DrawText(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft) override;
+	void DrawText(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft) override;
 
 
 private:

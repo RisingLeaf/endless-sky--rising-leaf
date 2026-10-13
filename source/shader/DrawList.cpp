@@ -21,9 +21,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../Preferences.h"
 #include "../Screen.h"
 #include "../image/Sprite.h"
+#include "Logger.h"
 #include "SpriteShader.h"
 
 #include <cmath>
+#include <unordered_set>
 
 using namespace std;
 
@@ -137,9 +139,13 @@ bool DrawList::AddSwizzled(const Drawable &drawable, Point position, const Angle
 // Draw all the items in this list.
 void DrawList::Draw(GraphicsTypes::CommandBufferInstance *cb) const
 {
-	SpriteShader::Bind(cb);
+	if(items.empty()) [[unlikely]]
+		return;
 
-	bool withBlur = Preferences::Has("Render motion blur");
+	const bool withBlur = Preferences::Has("Render motion blur");
+
+
+	SpriteShader::Bind(cb);
 	for(const SpriteShader::Item &item : items)
 		SpriteShader::Add(cb, item, withBlur);
 }

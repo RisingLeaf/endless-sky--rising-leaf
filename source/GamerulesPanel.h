@@ -20,7 +20,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Point.h"
 #include "ScrollVar.h"
 #include "Tooltip.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 #include <functional>
 #include <memory>

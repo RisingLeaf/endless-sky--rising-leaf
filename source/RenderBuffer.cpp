@@ -68,7 +68,7 @@ void RenderBuffer::Clear()
 // Create a texture of the given size that can be used as a render target.
 RenderBuffer::RenderBuffer(const gm::ivec2 &dimensions)
     : framebuffer(GameWindow::GraphicsInstance(), dimensions[0], dimensions[1],
-	              GraphicsTypes::RenderBufferType::COLOR32, 1, "render_buffer"),
+	              GraphicsTypes::RenderBufferType::COLOR, 1, "render_buffer"),
       size(dimensions)
 {
 	GameWindow::GraphicsInstance()->CreateCommandBuffer(RenderCmd);
@@ -89,7 +89,8 @@ GraphicsTypes::CommandBufferInstance *RenderBuffer::SetTarget()
 {
 	RenderCmd->Begin();
 	framebuffer.Bind(RenderCmd.get());
-	const auto render_state = graphics_bootstrap::RenderStateSimpleBlending(size[0], size[1]);
+	auto render_state = graphics_bootstrap::RenderStateSimpleBlending(size[0], size[1]);
+	render_state.ClearColor.a = 0.f;
 	RenderCmd->SetState(render_state);
 	last_dimensions = {Screen::RawWidth(), Screen::RawHeight()};
 	Screen::SetRaw(size[0], size[1], true);

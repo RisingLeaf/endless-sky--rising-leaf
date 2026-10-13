@@ -1,0 +1,73 @@
+u_in vec2  scale;
+
+
+v_in vec2 vert;
+
+v_in vec2  position;
+v_in mat2  transform;
+v_in vec2  blur;
+v_in float clip;
+v_in int   useSwizzleMask;
+v_in float frame;
+v_in float frameCount;
+v_in int   uniqueSwizzleMaskFrames;
+v_in mat4  swizzleMatrix;
+v_in int   useSwizzle;
+v_in float alpha;
+
+v_out vec2 fragTexCoord;
+
+VS_BEGIN
+	const vec2 blurOff = 2.0 * vec2(vert.x * abs(spec.blur.x), vert.y * abs(spec.blur.y));
+	gl_Position = vec4((spec.transform * (vert + blurOff) + spec.position) * spec.scale, 0, 1);
+	const vec2 texCoord = vert + vec2(0.5);
+	fragTexCoord = vec2(texCoord.x, min(spec.clip, texCoord.y)) + blurOff;
+VS_END
+
+in_texture 2darray tex;
+in_texture 2darray swizzleMask;
+
+FS_BEGIN
+    const int range = 5;
+	const float first  = floor(spec.frame);
+	const float second = mod(ceil(spec.frame), spec.frameCount);
+	const float fade   = spec.frame - first;
+	vec4 color = vec4(0.0);
+	if(spec.blur.x == 0.0 && spec.blur.y == 0.0)
+	{
+		if(fade != 0.0)
+			color = mix(
+				texture(tex, vec3(fragTexCoord, first)),
+				texture(tex, vec3(fragTexCoord, second)), fade);
+		else
+			color = texture(tex, vec3(fragTexCoord, first));
+	}
+	else
+	{
+		const float divisor = float(range * (range + 2) + 1);
+		for(int i = -range; i <= range; ++i)
+		{
+			const float scale = float(range + 1 - abs(i)) / divisor;
+			const vec2 coord = fragTexCoord + (spec.blur * float(i)) / float(range);
+			if(fade != 0.0)
+				color += scale * mix(
+					texture(tex, vec3(coord, first)),
+					texture(tex, vec3(coord, second)), fade);
+			else
+				color += scale * texture(tex, vec3(coord, first));
+		}
+	}
+	if(spec.useSwizzle > 0)
+	{
+		vec4 swizzleColor = color * spec.swizzleMatrix;
+		if(spec.useSwizzleMask > 0)
+		{
+			const float swizzleMaskFrame = spec.uniqueSwizzleMaskFrames > 0 ? first : 0.0;
+			const float factor           = texture(swizzleMask, vec3(fragTexCoord, swizzleMaskFrame)).r;
+			color = mix(swizzleColor, color, factor);
+		}
+		else
+			color = swizzleColor;
+	}
+	out_color = color * spec.alpha;
+FS_END

@@ -75,6 +75,11 @@ namespace graphics_layer
     [[nodiscard]] const GraphicsTypes::TextureInstance *GetTexture() const;
   };
 
+  //class RotatingVertexBuffer
+  //{
+  //
+  //};
+
   class ObjectHandle
   {
     const GraphicsTypes::GraphicsInstance *Instance = nullptr;

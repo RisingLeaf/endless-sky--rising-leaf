@@ -18,11 +18,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../Color.h"
 #include "../Point.h"
 #include "Layout.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 #include <string>
 #include <vector>
 
+namespace GraphicsTypes {
+	struct CommandBufferInstance;
+}
 class DisplayText;
 class Font;
 class Rectangle;

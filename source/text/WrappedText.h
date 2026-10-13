@@ -18,11 +18,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "../Point.h"
 #include "Alignment.h"
 #include "Truncate.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 #include <string>
 #include <vector>
 
+namespace GraphicsTypes {
+	class CommandBufferInstance;
+}
 class Color;
 class Font;
 

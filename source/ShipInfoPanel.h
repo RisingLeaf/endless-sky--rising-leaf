@@ -20,11 +20,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Panel.h"
 #include "Point.h"
 #include "ShipInfoDisplay.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 #include <map>
 #include <memory>
-#include <set>
 #include <string>
 #include <vector>
 

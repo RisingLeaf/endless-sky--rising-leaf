@@ -432,7 +432,7 @@ bool Panel::DoTextInput(const string &text)
 void Panel::DoDraw(GraphicsTypes::CommandBufferInstance *cb)
 {
 	Draw(cb);
-	for(auto &child : children)
+	for(const auto &child : children)
 		child->DoDraw(cb);
 }
 

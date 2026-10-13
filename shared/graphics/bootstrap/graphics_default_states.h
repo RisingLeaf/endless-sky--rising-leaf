@@ -17,7 +17,7 @@
 
 #ifndef ASTROLATIVE_GRAPHICS_DEFAULT_STATES_H
 #define ASTROLATIVE_GRAPHICS_DEFAULT_STATES_H
-#include "graphics/graphics_layer.h"
+
 #include "graphics/graphics_toplevel_defines.h"
 
 namespace graphics_bootstrap
@@ -36,8 +36,8 @@ namespace graphics_bootstrap
     render_state.DepthCompare = GraphicsTypes::DepthCompareMode::NONE;
     render_state.WireFrame    = false;
     render_state.ColorMask    = 1 + 2 + 4 + 8;
-    render_state.DrawViewport = GraphicsTypes::Viewport{ 0, 0, width, height };
-    render_state.ClearColor   = GraphicsTypes::Color(0.f, 0.f, 0.f, 0.f);
+    render_state.DrawViewport = GraphicsTypes::Viewport{ .OffsetX = 0, .OffsetY = 0, .ExtentX = width, .ExtentY = height };
+    render_state.ClearColor   = GraphicsTypes::Color(0.f, 0.f, 0.f, 1.f);
     render_state.ClearDepth   = 0.f;
     return render_state;
   }

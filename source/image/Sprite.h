@@ -73,8 +73,8 @@ public:
 	Point Center() const;
 
 	// Get the texture index.
-	const graphics_layer::TextureHandle &Texture() const;
-	const graphics_layer::TextureHandle &SwizzleMask() const;
+	const graphics_layer::TextureHandle *Texture() const;
+	const graphics_layer::TextureHandle *SwizzleMask() const;
 
 
 private:

@@ -17,7 +17,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Information.h"
 #include "Panel.h"
-#include "graphics/graphics_toplevel_defines.h"
 
 class Interface;
 class News;

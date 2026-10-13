@@ -85,9 +85,9 @@ public:
 	// Check if any player's information is loaded.
 	bool IsLoaded() const;
 	// Make a new player.
-	void New(const StartConditions &start, const std::shared_ptr<PilotProfile> &pilot);
+	void New(const StartConditions &start, const std::shared_ptr<PilotProfile> &_pilot);
 	// Load an existing player.
-	void Load(const std::filesystem::path &path, const std::shared_ptr<PilotProfile> &pilot);
+	void Load(const std::filesystem::path &path, const std::shared_ptr<PilotProfile> &_pilot);
 	// Reload from the same file from which the current pilot was loaded.
 	void Reload();
 	// Load the most recently saved player. If no save could be loaded, returns false.
@@ -113,7 +113,7 @@ public:
 	// Apply the given changes and store them in the player's saved game file.
 	void AddChanges(std::list<DataNode> &changes, bool instantChanges = false);
 	// Add an event that will happen at the given date.
-	void AddEvent(GameEvent event, const Date &date);
+	void AddEvent(GameEvent event, const Date &event_date);
 
 	// Mark the player as dead, or check if they have died.
 	void Die(int response = 0, const std::shared_ptr<Ship> &capturer = nullptr);
@@ -137,11 +137,11 @@ public:
 	// Set the system the player is in. This must be stored here so that even if
 	// the player sells all their ships, we still know where the player is.
 	// This also marks the given system as visited.
-	void SetSystem(const System &system);
+	void SetSystem(const System &new_system);
 	const System *GetSystem() const;
 	const System *GetPreviousSystem() const;
 	// Set what planet the player is on (or nullptr, if taking off).
-	void SetPlanet(const Planet *planet);
+	void SetPlanet(const Planet *new_planet);
 	const Planet *GetPlanet() const;
 	const Planet *GetPreviousPlanet() const;
 	// If the player is landed, return the stellar object they are on.
@@ -151,7 +151,7 @@ public:
 	bool ShouldLaunch() const;
 	// Check whether the player has given the command for their fleet to cloak.
 	bool IsCloaking() const;
-	void SetCloaking(bool isCloaking);
+	void SetCloaking(bool cloakingState);
 
 	// Access the player's accounting information.
 	const Account &Accounts() const;
@@ -196,7 +196,7 @@ public:
 	void SetShipOrder(const std::vector<std::shared_ptr<Ship>> &newOrder);
 	// Get the attraction factors of the player's fleet to raid fleets.
 	std::pair<double, double> RaidFleetFactors() const;
-	double RaidFleetAttraction(const RaidFleet &raidFleet, const System *system) const;
+	double RaidFleetAttraction(const RaidFleet &raidFleet, const System *raid_system) const;
 	// Get the player's fleet capacity and the current cost of their fleet.
 	int FleetCapacity() const;
 	int FleetCost() const;

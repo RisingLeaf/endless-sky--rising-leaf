@@ -194,7 +194,7 @@ PlayerInfo::ScheduledEvent::ScheduledEvent(const DataNode &node, const Condition
 	// and we should refer to the definition of the event with the matching name.
 	if(!nodeEvent.TrueName().empty())
 	{
-		event = ExclusiveItem<GameEvent>(GameData::Events().Get(nodeEvent.TrueName()));
+		event = ExclusiveItem(GameData::Events().Get(nodeEvent.TrueName()));
 		return;
 	}
 
@@ -215,15 +215,15 @@ PlayerInfo::ScheduledEvent::ScheduledEvent(const DataNode &node, const Condition
 	// Otherwise, continue to store the entire event node in the old format.
 	const GameEvent *eventDef = !eventName.empty() ? GameData::Events().Find(eventName) : nullptr;
 	if(eventDef)
-		event = ExclusiveItem<GameEvent>(eventDef);
+		event = ExclusiveItem(eventDef);
 	else
-		event = ExclusiveItem<GameEvent>(std::move(nodeEvent));
+		event = ExclusiveItem(std::move(nodeEvent));
 }
 
 
 
 PlayerInfo::ScheduledEvent::ScheduledEvent(GameEvent event, Date date)
-    : event(ExclusiveItem<GameEvent>(std::move(event))), date(std::move(date))
+    : event(ExclusiveItem(std::move(event))), date(std::move(date))
 {
 }
 
@@ -258,11 +258,11 @@ bool PlayerInfo::IsLoaded() const
 
 
 // Make a new player.
-void PlayerInfo::New(const StartConditions &start, const shared_ptr<PilotProfile> &pilot)
+void PlayerInfo::New(const StartConditions &start, const shared_ptr<PilotProfile> &_pilot)
 {
 	// Clear any previously loaded data.
 	Clear();
-	this->pilot = pilot;
+	this->pilot = _pilot;
 
 	// Copy the core information from the full starting scenario.
 	startData = start;
@@ -279,9 +279,9 @@ void PlayerInfo::New(const StartConditions &start, const shared_ptr<PilotProfile
 	accounts = start.GetAccounts();
 	RegisterDerivedConditions();
 	start.GetConditions().Apply();
-	maxEscortCount = pilot->GetGamerules().GetDefaultMaxEscortCount();
-	maxEscortCrew = pilot->GetGamerules().GetDefaultMaxEscortCrew();
-	adminCap = pilot->GetGamerules().GetDefaultAdminCap();
+	maxEscortCount = _pilot->GetGamerules().GetDefaultMaxEscortCount();
+	maxEscortCrew = _pilot->GetGamerules().GetDefaultMaxEscortCrew();
+	adminCap = _pilot->GetGamerules().GetDefaultAdminCap();
 
 	// Generate missions that will be available on the first day.
 	CreateMissions();
@@ -300,11 +300,11 @@ void PlayerInfo::New(const StartConditions &start, const shared_ptr<PilotProfile
 
 
 // Load player information from a saved game file.
-void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfile> &pilot)
+void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfile> &_pilot)
 {
 	// Make sure any previously loaded data is cleared.
 	Clear();
-	this->pilot = pilot;
+	this->pilot = _pilot;
 	this->pilot->Load();
 
 	// A listing of missions and the ships where their cargo or passengers were when the game was saved.
@@ -346,7 +346,8 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 			originalLastName = child.Token(2);
 		}
 		else if(key == "date" && child.Size() >= 4)
-			date = Date(child.Value(1), child.Value(2), child.Value(3));
+			date = Date(static_cast<int>(child.Value(1)), static_cast<int>(child.Value(2)),
+			            static_cast<int>(child.Value(3)));
 		else if(key == "marked event changes today")
 			markedChangesToday = true;
 		else if(key == "system entry method" && hasValue)
@@ -372,9 +373,9 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 		else if(key == "travel destination" && hasValue)
 			travelDestination = GameData::Planets().Get(child.Token(1));
 		else if(key == "map coloring" && hasValue)
-			mapColoring = child.Value(1);
+			mapColoring = static_cast<int>(child.Value(1));
 		else if(key == "map zoom" && hasValue)
-			mapZoom = child.Value(1);
+			mapZoom = static_cast<int>(child.Value(1));
 		else if(key == "collapsed" && hasValue)
 		{
 			for(const DataNode &grand : child)
@@ -390,14 +391,14 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 		{
 			for(const DataNode &grand : child)
 				if(grand.Size() >= 2)
-					tributeReceived[GameData::Planets().Get(grand.Token(0))] = grand.Value(1);
+					tributeReceived[GameData::Planets().Get(grand.Token(0))] = static_cast<long>(grand.Value(1));
 		}
 		else if(key == "max escort count" && hasValue)
-			maxEscortCount = max<int>(0, child.Value(1));
+			maxEscortCount = max<int>(0, static_cast<int>(child.Value(1)));
 		else if(key == "max escort crew" && hasValue)
-			maxEscortCrew = max<int>(0, child.Value(1));
+			maxEscortCrew = max<int>(0, static_cast<int>(child.Value(1)));
 		else if(key == "admin cap" && hasValue)
-			adminCap = max<int>(0, child.Value(1));
+			adminCap = max<int>(0, static_cast<int>(child.Value(1)));
 		// Records of things you own:
 		else if(key == "ship")
 		{
@@ -408,18 +409,18 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 			// Defer finalizing this ship until we have processed all changes to game state.
 		}
 		else if(key == "groups" && hasValue && !ships.empty())
-			groups[ships.back().get()] = child.Value(1);
+			groups[ships.back().get()] = static_cast<int>(child.Value(1));
 		else if(key == "storage")
 		{
 			for(const DataNode &grand : child)
 				if(grand.Token(0) == "planet" && grand.Size() >= 2)
 				{
-					const Planet *planet = GameData::Planets().Get(grand.Token(1));
+					const Planet *storage_planet = GameData::Planets().Get(grand.Token(1));
 					for(const DataNode &great : grand)
 					{
 						if(great.Token(0) == "cargo")
 						{
-							CargoHold &storage = planetaryStorage[planet];
+							CargoHold &storage = planetaryStorage[storage_planet];
 							storage.Load(great);
 						}
 					}
@@ -438,13 +439,13 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 		{
 			for(const DataNode &grand : child)
 				if(grand.Size() >= 2)
-					costBasis[grand.Token(0)] += grand.Value(1);
+					costBasis[grand.Token(0)] += static_cast<int>(grand.Value(1));
 		}
 		else if(key == "stock")
 		{
 			for(const DataNode &grand : child)
 				if(grand.Size() >= 2)
-					stock[GameData::Outfits().Get(grand.Token(0))] += grand.Value(1);
+					stock[GameData::Outfits().Get(grand.Token(0))] += static_cast<int>(grand.Value(1));
 		}
 		else if(key == "fleet depreciation")
 			depreciation.Load(child);
@@ -467,7 +468,7 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 					{
 						if(great.Size() != 3)
 							continue;
-						toDistribute[great.Token(0)][great.Token(1)] = great.Value(2);
+						toDistribute[great.Token(0)][great.Token(1)] = static_cast<int>(great.Value(2));
 					}
 		}
 		else if(key == "available job")
@@ -518,8 +519,8 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 			{
 				if(grand.Size() >= 3)
 				{
-					Date date(grand.Value(0), grand.Value(1), grand.Value(2));
-					logbook[date].Load(grand);
+					Date log_book_date(static_cast<int>(grand.Value(0)), static_cast<int>(grand.Value(1)), static_cast<int>(grand.Value(2)));
+					logbook[log_book_date].Load(grand);
 				}
 				else if(grand.Size() >= 2)
 					specialLogs[grand.Token(0)][grand.Token(1)].Load(grand);
@@ -595,11 +596,11 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 		originalLastName = lastName;
 	// If no fleet capacity attributes were loaded, then use the default from the active gamerules.
 	if(!maxEscortCrew.has_value())
-		maxEscortCount = pilot->GetGamerules().GetDefaultMaxEscortCount();
+		maxEscortCount = _pilot->GetGamerules().GetDefaultMaxEscortCount();
 	if(!maxEscortCrew.has_value())
-		maxEscortCrew = pilot->GetGamerules().GetDefaultMaxEscortCrew();
+		maxEscortCrew = _pilot->GetGamerules().GetDefaultMaxEscortCrew();
 	if(!adminCap.has_value())
-		adminCap = pilot->GetGamerules().GetDefaultAdminCap();
+		adminCap = _pilot->GetGamerules().GetDefaultAdminCap();
 }
 
 
@@ -769,11 +770,11 @@ void PlayerInfo::AddChanges(list<DataNode> &changes, bool instantChanges)
 		// Recalculate what systems have been seen.
 		GameData::UpdateSystems();
 		seen.clear();
-		for(const System *system : visitedSystems)
+		for(const System *visited_system : visitedSystems)
 		{
-			seen.insert(system);
-			for(const System *neighbor : system->VisibleNeighbors())
-				if(!neighbor->Hidden() || system->Links().contains(neighbor))
+			seen.insert(visited_system);
+			for(const System *neighbor : visited_system->VisibleNeighbors())
+				if(!neighbor->Hidden() || visited_system->Links().contains(neighbor))
 					seen.insert(neighbor);
 		}
 		// Update the deadline calculations for missions in case the system
@@ -790,10 +791,10 @@ void PlayerInfo::AddChanges(list<DataNode> &changes, bool instantChanges)
 
 
 // Add an event that will happen at the given date.
-void PlayerInfo::AddEvent(GameEvent event, const Date &date)
+void PlayerInfo::AddEvent(GameEvent event, const Date &event_date)
 {
 	// Check if the event should be applied right now or scheduled for later.
-	if(date <= this->date)
+	if(event_date <= this->date)
 	{
 		list<DataNode> eventChanges;
 		TriggerEvent(std::move(event), eventChanges);
@@ -802,8 +803,8 @@ void PlayerInfo::AddEvent(GameEvent event, const Date &date)
 	}
 	else
 	{
-		event.SetDate(date);
-		scheduledEvents.emplace(std::move(event), date);
+		event.SetDate(event_date);
+		scheduledEvents.emplace(std::move(event), event_date);
 	}
 }
 
@@ -965,7 +966,7 @@ const CoreStartData &PlayerInfo::StartData() const noexcept
 
 
 
-void PlayerInfo::SetSystemEntry(SystemEntry entryType)
+void PlayerInfo::SetSystemEntry(const SystemEntry entryType)
 {
 	entry = entryType;
 }
@@ -980,11 +981,11 @@ SystemEntry PlayerInfo::GetSystemEntry() const
 
 
 // Set the player's current start system, and mark that system as visited.
-void PlayerInfo::SetSystem(const System &system)
+void PlayerInfo::SetSystem(const System &new_system)
 {
 	this->previousSystem = this->system;
-	this->system = &system;
-	Visit(system);
+	this->system = &new_system;
+	Visit(new_system);
 }
 
 
@@ -1005,9 +1006,9 @@ const System *PlayerInfo::GetPreviousSystem() const
 
 
 // Set the planet the player is landed on.
-void PlayerInfo::SetPlanet(const Planet *planet)
+void PlayerInfo::SetPlanet(const Planet *new_planet)
 {
-	this->planet = planet;
+	this->planet = new_planet;
 }
 
 
@@ -1069,9 +1070,9 @@ bool PlayerInfo::IsCloaking() const
 
 
 
-void PlayerInfo::SetCloaking(bool isCloaking)
+void PlayerInfo::SetCloaking(bool cloakingState)
 {
-	this->isCloaking = isCloaking;
+	this->isCloaking = cloakingState;
 }
 
 
@@ -1222,7 +1223,7 @@ const shared_ptr<Ship> &PlayerInfo::FlagshipPtr()
 	}
 
 	static const shared_ptr<Ship> empty;
-	return (flagship && flagship->IsYours()) ? flagship : empty;
+	return flagship && flagship->IsYours() ? flagship : empty;
 }
 
 
@@ -1392,13 +1393,13 @@ void PlayerInfo::SellShip(const Ship *selected, bool storeOutfits)
 			if(storeOutfits)
 			{
 				CargoHold &storage = Storage();
-				for(const auto &it : selected->Outfits())
-					storage.Add(it.first, it.second);
+				for(const auto &outfit : selected->Outfits())
+					storage.Add(outfit.first, outfit.second);
 			}
 			else
 			{
-				for(const auto &it : selected->Outfits())
-					stock[it.first] += it.second;
+				for(const auto &outfit : selected->Outfits())
+					stock[outfit.first] += outfit.second;
 			}
 
 			accounts.AddCredits(cost);
@@ -1421,18 +1422,18 @@ void PlayerInfo::TakeShip(const Ship *shipToTake, const Ship *model, bool takeOu
 			// Record the transfer of this ship in the depreciation and stock info.
 			stockDepreciation.Buy(*shipToTake, date.DaysSinceEpoch(), &depreciation);
 			if(takeOutfits)
-				for(const auto &it : shipToTake->Outfits())
+				for(const auto &outfit : shipToTake->Outfits())
 				{
 					// We only take all of the outfits specified in the model without putting them in the stock.
 					// The extra outfits of this ship are transferred into the stock.
 					int amountToTake = 0;
 					if(model)
 					{
-						auto outfit = model->Outfits().find(it.first);
-						if(outfit != model->Outfits().end())
-							amountToTake = max(it.second, outfit->second);
+						auto outfit_selected = model->Outfits().find(outfit.first);
+						if(outfit_selected != model->Outfits().end())
+							amountToTake = max(outfit.second, outfit_selected->second);
 					}
-					stock[it.first] += it.second - amountToTake;
+					stock[outfit.first] += outfit.second - amountToTake;
 				}
 			ForgetGiftedShip(*it->get(), false);
 			ships.erase(it);
@@ -1551,7 +1552,7 @@ pair<double, double> PlayerInfo::RaidFleetFactors() const
 
 
 
-double PlayerInfo::RaidFleetAttraction(const RaidFleet &raid, const System *system) const
+double PlayerInfo::RaidFleetAttraction(const RaidFleet &raid, const System *raid_system) const
 {
 	double attraction = 0.;
 	const Fleet *raidFleet = raid.GetFleet();
@@ -1568,8 +1569,8 @@ double PlayerInfo::RaidFleetAttraction(const RaidFleet &raid, const System *syst
 		attraction = .005 * (factors.first - factors.second - raid.MinAttraction());
 		// Then we consider the strength of other fleets in the system.
 		int64_t raidStrength = raidFleet->Strength();
-		if(system && raidStrength)
-			for(const auto &fleet : system->Fleets())
+		if(raid_system && raidStrength)
+			for(const auto &fleet : raid_system->Fleets())
 			{
 				const Government *gov = fleet.Get()->GetGovernment();
 				if(gov)

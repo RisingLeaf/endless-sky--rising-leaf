@@ -26,6 +26,8 @@ VulkanObjects::VulkanBufferInstance::VulkanBufferInstance(const VulkanDeviceInst
                                                           const std::string_view          name) :
   BufferInstance(), Size(size), Device(device)
 {
+  if(!size) return;
+
   VkMemoryPropertyFlags properties{};
   switch(type)
   {

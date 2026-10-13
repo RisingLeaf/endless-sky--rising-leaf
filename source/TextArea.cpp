@@ -40,8 +40,7 @@ TextArea::TextArea(const Rectangle &r) : TextArea()
 
 // Stub destructor, so that unique_ptrs are destructed in the correct scope.
 TextArea::~TextArea()
-{
-}
+= default;
 
 
 
@@ -52,7 +51,7 @@ void TextArea::SetRect(const Rectangle &r)
 	//       allowing the user to scroll left or right instead of up or
 	//       down. This might be useful for overly long single lined text,
 	//       or for vertical text layout.
-	wrappedText.SetWrapWidth(r.Width());
+	wrappedText.SetWrapWidth(static_cast<int>(r.Width()));
 	ScrollArea::SetRect(r);
 }
 
@@ -74,7 +73,7 @@ void TextArea::SetFont(const Font &f)
 
 
 
-void TextArea::SetParagraphBreak(int height)
+void TextArea::SetParagraphBreak(const int height)
 {
 	wrappedText.SetParagraphBreak(height);
 	Invalidate();
@@ -90,7 +89,7 @@ void TextArea::SetColor(const Color &c)
 
 
 
-void TextArea::SetAlignment(Alignment a)
+void TextArea::SetAlignment(const Alignment a)
 {
 	wrappedText.SetAlignment(a);
 	Invalidate();
@@ -98,7 +97,7 @@ void TextArea::SetAlignment(Alignment a)
 
 
 
-void TextArea::SetTruncate(Truncate t)
+void TextArea::SetTruncate(const Truncate t)
 {
 	wrappedText.SetTruncate(t);
 	Invalidate();
@@ -106,7 +105,7 @@ void TextArea::SetTruncate(Truncate t)
 
 
 
-int TextArea::GetTextHeight(bool trailingBreak)
+int TextArea::GetTextHeight(const bool trailingBreak)
 {
 	Validate(trailingBreak);
 	return wrappedText.Height(trailingBreak);
@@ -122,7 +121,7 @@ int TextArea::GetLongestLineWidth()
 
 
 
-void TextArea::Validate(bool trailingBreak)
+void TextArea::Validate(const bool trailingBreak)
 {
 	if(!contentsIsValid || trailingBreak != scrollHeightIncludesTrailingBreak)
 	{

@@ -30,7 +30,7 @@ class TextArea : public ScrollArea {
 public:
 	TextArea();
 	explicit TextArea(const Rectangle &r);
-	virtual ~TextArea() override;
+	~TextArea() override;
 
 	void SetRect(const Rectangle &r) override;
 
@@ -44,11 +44,11 @@ public:
 	int GetTextHeight(bool trailingBreak = true);
 	int GetLongestLineWidth();
 
-	virtual void Validate(bool trailingBreak) override;
+	void Validate(bool trailingBreak) override;
 
 
 protected:
-	virtual void DrawText(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft) override;
+	void DrawText(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft) override;
 
 
 private:
