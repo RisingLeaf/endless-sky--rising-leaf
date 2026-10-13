@@ -165,44 +165,6 @@ namespace asl
     return result;
   }
 
-  template <typename E>
-  consteval auto make_enum_name_table()
-  {
-    constexpr auto info = ^^E;
-
-    std::array<std::pair<E, std::string_view>, std::meta::enumerators_of(info).size()> table{};
-
-    int i = 0;
-    template for(constexpr auto I : std::define_static_array(std::meta::enumerators_of(info)))
-    {
-      table[i] = {[:I:], std::meta::identifier_of(I)};
-      i++;
-    }
-
-    return table;
-  }
-
-  template <typename E>
-  constexpr std::string_view enum_name(E value)
-  {
-    static constexpr auto table = make_enum_name_table<E>();
-
-    for(auto const &[v, name] : table)
-    {
-      if(v == value)
-        return name;
-    }
-
-    return "<unknown>";
-  }
-
-  template<typename E>
-  constexpr size_t enum_count()
-  {
-    static_assert(std::meta::is_enum_type(^^E));
-    return std::meta::enumerators_of(^^E).size();
-  }
-
   template <typename T, typename U>
   T checked_cast(U *ptr)
   {

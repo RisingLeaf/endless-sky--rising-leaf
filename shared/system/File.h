@@ -20,8 +20,8 @@
 #include <string>
 #include <vector>
 
-#include "shared/base/ASLList.h"
-#include "shared/graphics/graphics_toplevel_defines.h"
+#include "base/ASLList.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 
 namespace File

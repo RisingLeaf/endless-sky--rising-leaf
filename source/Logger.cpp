@@ -45,7 +45,7 @@ Logger::Session::Session(bool quiet) : quiet{quiet}
 #ifdef _WIN32
 	message += WinVersion::ToString() + '.';
 #else
-	utsname uName;
+	utsname uName{};
 	uname(&uName);
 	message += string(uName.sysname) + ' ' + uName.release + ' ' + uName.version + '.';
 #endif
@@ -68,11 +68,11 @@ void Logger::SetLogCallback(function<void(const string &message, Level)> callbac
 }
 
 
-void Logger::Log(const string &message, Level level)
+void Logger::Log(const string_view message, Level level)
 {
 	lock_guard<mutex> lock(logMutex);
-	string formatted =
-	    Format::TimestampString(chrono::system_clock::now(), true) + " | " + static_cast<char>(level) + " | " + message;
+	const string formatted = Format::TimestampString(chrono::system_clock::now(), true) + " | " +
+	                         static_cast<char>(level) + " | " + string(message);
 	(level == Level::INFO ? cout : cerr) << formatted << endl;
 	// Perform additional logging through callback if any is registered.
 	if(logCallback)

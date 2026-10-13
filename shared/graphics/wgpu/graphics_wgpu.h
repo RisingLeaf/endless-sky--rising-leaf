@@ -21,7 +21,7 @@
 #include <memory>
 #include <vector>
 
-#include "shared/graphics/graphics_toplevel_defines.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 namespace File
 {

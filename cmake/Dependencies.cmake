@@ -40,6 +40,7 @@ function(fetch_libjpeg_turbo)
             GIT_REPOSITORY https://github.com/libjpeg-turbo/libjpeg-turbo.git
             GIT_TAG        3.1.0
             GIT_SHALLOW    TRUE
+
             CMAKE_ARGS
                 -DCMAKE_INSTALL_PREFIX=${LIBJPEG_TURBO_INSTALL_DIR}
                 -DENABLE_SHARED=OFF
@@ -174,4 +175,18 @@ function(fetch_minizip)
             ${zlib_SOURCE_DIR}/contrib/
     )
     target_link_libraries(minizip PUBLIC zlibstatic)
+endfunction()
+
+#
+# enet
+#
+function(fetch_enet)
+    FetchContent_Declare(
+            enet
+            GIT_REPOSITORY https://github.com/lsalzman/enet.git
+            GIT_TAG        v1.3.18
+            GIT_SHALLOW    TRUE
+    )
+    FetchContent_MakeAvailable(enet)
+    target_include_directories(enet PUBLIC "${enet_SOURCE_DIR}/include")
 endfunction()

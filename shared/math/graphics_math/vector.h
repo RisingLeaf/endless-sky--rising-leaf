@@ -22,8 +22,8 @@
 #include <string>
 #include <typeinfo>
 
-#include "shared/base/ASLTypes.h"
-#include "shared/base/concepts.h"
+#include "base/ASLTypes.h"
+#include "base/concepts.h"
 
 namespace gm
 {

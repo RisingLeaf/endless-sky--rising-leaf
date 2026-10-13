@@ -44,6 +44,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "audio/Audio.h"
 #include "graphics/bootstrap/graphics_default_states.h"
 #include "image/SpriteSet.h"
+#include "network/Network.h"
 #include "shader/SpriteShader.h"
 #include "test/Test.h"
 #include "test/TestContext.h"
@@ -259,6 +260,14 @@ int main(int argc, char *argv[])
 
 		if(isTesting && !noTestMute)
 			Audio::SetVolume(0, SoundCategory::MASTER);
+
+		Network::Init();
+
+		auto server_request = Network::Server::CreateServer();
+		if(!server_request)
+			Logger::Log(server_request.error(), Logger::Level::ERROR);
+		else
+			Logger::Log("Server created!", Logger::Level::INFO);
 
 		CustomEvents::Init();
 		// This is the main loop where all the action begins.

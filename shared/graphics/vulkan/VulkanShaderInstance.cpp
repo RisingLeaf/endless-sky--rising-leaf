@@ -22,8 +22,8 @@
 #include "VulkanPipelineState.h"
 #include "VulkanRenderPassInstance.h"
 #include "VulkanTranslate.h"
-#include "shared/system/File.h"
-#include "shared/system/Log.h"
+#include "system/File.h"
+#include "system/Log.h"
 
 
 VulkanObjects::VulkanShaderInstance::VulkanShaderInstance(

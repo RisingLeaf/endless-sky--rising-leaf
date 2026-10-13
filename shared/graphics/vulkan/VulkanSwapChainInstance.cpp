@@ -20,7 +20,7 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanFrameBufferInstance.h"
 #include "VulkanHelpers.h"
-#include "shared/base/ASLTypes.h"
+#include "base/ASLTypes.h"
 
 
 void VulkanObjects::VulkanSwapChainInstance::Create(const VulkanCommandPool *command_pool, const uint32_t width, const uint32_t height)

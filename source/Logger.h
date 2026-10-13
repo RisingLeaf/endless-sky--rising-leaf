@@ -49,5 +49,5 @@ public:
 
 public:
 	static void SetLogCallback(std::function<void(const std::string &message, Level)> callback);
-	static void Log(const std::string &message, Level level);
+	static void Log(std::string_view message, Level level);
 };

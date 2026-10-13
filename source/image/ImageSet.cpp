@@ -173,11 +173,11 @@ void ImageSet::ValidateFrames() noexcept(false)
 		else if(!isMask && size < normalFrames)
 			{
 			Logger::Log(prefix + "sprite has " + to_string(normalFrames - size) +
-			                " more normal resolution "
-			                "frame(s) than " +
-			                specifier + " frames. All " + specifier +
-			                " frames will be dropped to prevent "
-			                "sprite loading issues.",
+				                " more normal resolution "
+				                "frame(s) than " +
+				                specifier + " frames. All " + specifier +
+				                " frames will be dropped to prevent "
+				                "sprite loading issues.",
 				            Logger::Level::WARNING);
 			toResize.clear();
 			}

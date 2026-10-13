@@ -21,7 +21,7 @@
 #include <vulkan/vulkan_core.h>
 
 #include "VulkanRenderPassInstance.h"
-#include "shared/graphics/graphics_toplevel_defines.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 
 namespace VulkanObjects

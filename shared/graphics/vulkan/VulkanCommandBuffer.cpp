@@ -28,7 +28,7 @@
 #include "VulkanShaderInstance.h"
 #include "VulkanSwapChainInstance.h"
 #include "VulkanTexture.h"
-#include "shared/system/Log.h"
+#include "system/Log.h"
 
 #include <cstring>
 

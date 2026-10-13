@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.19...4.0)
 
+project("Endless Sky" VERSION 0.11.4.1
+		DESCRIPTION "Space exploration, trading, and combat game."
+		HOMEPAGE_URL https://endless-sky.github.io/
+		LANGUAGES C CXX)
+
 include(CMakeDependentOption)
 cmake_dependent_option(ES_STEAM "Build the game for the Steam Linux runtime" OFF UNIX OFF)
 cmake_dependent_option(ES_USE_SYSTEM_LIBRARIES "Use system libraries instead of the vcpkg ones." ON "APPLE OR ES_STEAM" OFF)
@@ -9,37 +14,29 @@ option(BUILD_TESTING "" ON)
 
 set(CMAKE_CONFIGURATION_TYPES "Debug" "Release" CACHE STRING "" FORCE)
 
-set(CXX_STANDARD 26)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE)
-set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+set(ES_CXX_OPTIONS
+		CXX_STANDARD 23
+		CXX_STANDARD_REQUIRED YES
+		CXX_EXTENSIONS NO
+		CMAKE_CXX_EXTENSIONS OFF
+		CMAKE_CXX_SCAN_FOR_MODULES OFF
+		CMAKE_INTERPROCEDURAL_OPTIMIZATION_DEBUG FALSE
+		CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE
+)
 
 execute_process(
 		COMMAND "${CMAKE_CXX_COMPILER}" -print-file-name=libstdc++.so
 		OUTPUT_VARIABLE GCC_LIBSTDCXX
 		OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-
 get_filename_component(GCC_LIB_DIR "${GCC_LIBSTDCXX}" DIRECTORY)
 
 set(CMAKE_BUILD_RPATH_USE_ORIGIN ON)
 list(APPEND CMAKE_BUILD_RPATH "${GCC_LIB_DIR}")
 
-# Various helpful options for IDEs.
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT EndlessSky)
-set(CMAKE_VS_JUST_MY_CODE_DEBUGGING ON)
-
-project("Endless Sky" VERSION 0.11.4.1
-	DESCRIPTION "Space exploration, trading, and combat game."
-	HOMEPAGE_URL https://endless-sky.github.io/
-	LANGUAGES C CXX)
-
 include(cmake/Dependencies.cmake)
 
-# Replaced vcpkg with easier fetchcontent
+# Replaced vcpkg with fetchContent
 fetch_sdl3()
 fetch_libpng()
 fetch_libjpeg_turbo()
@@ -49,14 +46,16 @@ fetch_libmad()
 fetch_flac()
 fetch_zlib()
 fetch_minizip()
+fetch_enet()
 
-add_subdirectory(source)
+
 add_subdirectory(shared)
+add_subdirectory(source)
 add_subdirectory(shaders)
 
 # Create an interface library that contains common libraries for the game and unit tests.
 add_library(ExternalLibraries INTERFACE)
-target_link_libraries(EndlessSkyLib PUBLIC ExternalLibraries astrolative_shared)
+target_link_libraries(EndlessSkyLib PUBLIC ExternalLibraries)
 
 target_compile_options( EndlessSkyLib PUBLIC $<$<CONFIG:Debug>:${SANITIZER_OPTS}>)
 target_link_options(    EndlessSkyLib PUBLIC $<$<CONFIG:Debug>:${SANITIZER_OPTS}>)
@@ -68,6 +67,7 @@ if(MINGW)
 endif()
 
 target_link_libraries(ExternalLibraries INTERFACE
+		astrolative_shared
 		SDL3::SDL3
 		png_static
 		JPEG::JPEG
@@ -75,7 +75,9 @@ target_link_libraries(ExternalLibraries INTERFACE
 		OpenAL::OpenAL
 		minizip
 		FLAC++
-		mad)
+		mad
+		enet)
+target_include_directories(ExternalLibraries INTERFACE {E)
 
 # OS specific
 if(WIN32)
@@ -169,12 +171,7 @@ endif()
 target_link_libraries(EndlessSky PRIVATE ExternalLibraries EndlessSkyLib)
 add_dependencies(EndlessSky Shaders)
 
-set_target_properties(EndlessSky PROPERTIES
-		CXX_STANDARD 26
-		CXX_STANDARD_REQUIRED YES
-		CXX_EXTENSIONS NO
-)
-target_compile_options(EndlessSky PRIVATE -freflection)
+set_target_properties(EndlessSky PROPERTIES ${ES_CXX_OPTIONS})
 
 if(MINGW AND WIN32)
 	foreach(FILE_PATH ${MINGW_RUNTIME})

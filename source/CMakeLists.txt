@@ -1,10 +1,5 @@
 add_library(EndlessSkyLib OBJECT)
-set_target_properties(EndlessSkyLib PROPERTIES
-        CXX_STANDARD 26
-        CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO
-)
-target_compile_options(EndlessSkyLib PRIVATE -freflection)
+set_target_properties(EndlessSkyLib PROPERTIES ${ES_CXX_OPTIONS})
 
 # Set the appropriate compiler flags.
 target_include_directories(EndlessSkyLib PUBLIC "${LIBMAD_INCLUDE_DIR}")
@@ -493,6 +488,8 @@ target_sources(EndlessSkyLib PRIVATE
         text/Utf8.h
         text/WrappedText.cpp
         text/WrappedText.h
+        network/Network.cpp
+        network/Network.h
 )
 
 if (WIN32)

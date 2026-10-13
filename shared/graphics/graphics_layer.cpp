@@ -26,9 +26,9 @@
 #include "vulkan/graphics_vulkan.h"
 #endif
 
-#include "shared/graphics/graphics_toplevel_defines.h"
-#include "shared/system/File.h"
-#include "shared/system/Log.h"
+#include "graphics/graphics_toplevel_defines.h"
+#include "system/File.h"
+#include "system/Log.h"
 
 #include <cstring>
 

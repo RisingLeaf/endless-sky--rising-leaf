@@ -25,10 +25,10 @@
 #include <Metal/Metal.hpp>
 #include <MetalKit/MetalKit.hpp>
 
-#include "shared/graphics/ShaderInfo.h"
-#include "shared/system/File.h"
-#include "shared/system/Log.h"
-#include "shared/system/Window.h"
+#include "graphics/ShaderInfo.h"
+#include "system/File.h"
+#include "system/Log.h"
+#include "system/Window.h"
 
 #include <memory>
 #include <mutex>

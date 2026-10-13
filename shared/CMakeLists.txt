@@ -1,8 +1,56 @@
 cmake_minimum_required(VERSION 3.18)
 
-set(LIB_NAME astrolative_shared)
+set(ASL_LIB_NAME astrolative_shared)
 
-list(APPEND SHARED_SOURCES
+set(ASL_CXX_OPTIONS
+      CXX_STANDARD 26
+      CXX_STANDARD_REQUIRED YES
+      CXX_EXTENSIONS NO
+      CMAKE_CXX_EXTENSIONS OFF
+      CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
+set(ASL_BUILD_SYSTEM "invalid")
+if (ASL_USE_WASM)
+  set(ASL_BUILD_SYSTEM "wasm")
+  set(CMAKE_SYSTEM_NAME Emscripten)
+
+  list(APPEND USE_FLAGS_LIST
+          -s MODULARIZE=1
+          -s EXPORT_ES6=1
+          -s USE_GLFW=3
+          -s ASYNCIFY=1
+          -s USE_WEBGL2=1
+          -s MIN_WEBGL_VERSION=2
+          -s MAX_WEBGL_VERSION=2
+          -s NO_EXIT_RUNTIME=1
+          -s ENVIRONMENT='web'
+          -s ERROR_ON_UNDEFINED_SYMBOLS=0
+          -s USE_SDL=2
+          -s USE_FREETYPE=1
+          -s ALLOW_MEMORY_GROWTH=1
+          -s INITIAL_MEMORY=64MB
+          -s MAXIMUM_MEMORY=512MB
+          -s STACK_SIZE=5MB
+          --preload-file ./resources/shaders
+          --preload-file ../resources/)
+  list(JOIN USE_FLAGS_LIST " " USE_FLAGS)
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_FLAGS}")
+  set(CMAKE_EXECUTABLE_SUFFIX .html)
+elseif (APPLE)
+  enable_language(Swift)
+  set(ASL_BUILD_SYSTEM "apple")
+elseif (UNIX)
+  set(ASL_BUILD_SYSTEM "unix")
+elseif (WIN32)
+  set(ASL_BUILD_SYSTEM "windows")
+else ()
+  message(FATAL_ERROR "No valid build system found")
+endif ()
+
+
+list(APPEND ASL_SHARED_SOURCES
   base/ASLList.h
   base/ASLListAllocator.h
   base/ASLTypes.h
@@ -41,12 +89,12 @@ list(APPEND GRAPHICS_SOURCES
   graphics/ShaderInfo.h)
 
 # Platform specific source files
-if (ASTROLATIVE_BUILD_SYSTEM STREQUAL "apple")
+if (ASL_BUILD_SYSTEM STREQUAL "apple")
   list(APPEND GRAPHICS_SOURCES
     graphics/metal/graphics_metal.cpp
     graphics/metal/graphics_metal.h
   )
-elseif (ASTROLATIVE_BUILD_SYSTEM STREQUAL "wasm")
+elseif (ASL_BUILD_SYSTEM STREQUAL "wasm")
   list(APPEND GRAPHICS_SOURCES
     graphics/wgpu/graphics_wgpu.cpp
     graphics/wgpu/graphics_wgpu.h
@@ -87,58 +135,49 @@ else ()
 endif ()
 
 # Project Includes
-add_library(${LIB_NAME} STATIC ${SHARED_SOURCES} ${GRAPHICS_SOURCES})
-target_include_directories(${LIB_NAME} PUBLIC
-  ../
-  ./
-  external/
-)
+add_library(${ASL_LIB_NAME} STATIC ${ASL_SHARED_SOURCES} ${GRAPHICS_SOURCES})
+target_include_directories(${ASL_LIB_NAME} PUBLIC ./ external/)
 
 # Add stb implementation
 add_subdirectory(external/stb)
 
 # Includes and CompTime Definitions
-if (ASTROLATIVE_BUILD_SYSTEM STREQUAL "apple")
-  target_include_directories(${LIB_NAME} PRIVATE external/metal-cpp/)
-  target_include_directories(${LIB_NAME} PRIVATE external/metal-cpp-extensions/)
-  target_compile_definitions(${LIB_NAME} PUBLIC ASL_BUILD_APPLE)
-elseif (ASTROLATIVE_BUILD_SYSTEM STREQUAL "wasm")
-  target_compile_definitions(${LIB_NAME} PUBLIC ASL_BUILD_WASM)
+if (ASL_BUILD_SYSTEM STREQUAL "apple")
+  target_include_directories(${ASL_LIB_NAME} PRIVATE external/metal-cpp/)
+  target_include_directories(${ASL_LIB_NAME} PRIVATE external/metal-cpp-extensions/)
+  target_compile_definitions(${ASL_LIB_NAME} PUBLIC ASL_BUILD_APPLE)
+elseif (ASL_BUILD_SYSTEM STREQUAL "wasm")
+  target_compile_definitions(${ASL_LIB_NAME} PUBLIC ASL_BUILD_WASM)
 else ()
   find_package(Vulkan REQUIRED)
 endif ()
 
 # Include parts that are by default in wasm
-if (NOT ASTROLATIVE_BUILD_SYSTEM STREQUAL "wasm")
-  if (NOT ASTROLATIVE_BUILD_SYSTEM STREQUAL "apple")
+if (NOT ASL_BUILD_SYSTEM STREQUAL "wasm")
+  if (NOT ASL_BUILD_SYSTEM STREQUAL "apple")
     find_package(Vulkan REQUIRED)
   endif ()
 
-  target_include_directories(${LIB_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
-  target_link_libraries(${LIB_NAME} PUBLIC ${Vulkan_LIBRARY_DIRS})
+  target_include_directories(${ASL_LIB_NAME} PUBLIC ${Vulkan_INCLUDE_DIRS})
+  target_link_libraries(${ASL_LIB_NAME} PUBLIC ${Vulkan_LIBRARY_DIRS})
 endif ()
 
 # Graphics frameworks
-if (ASTROLATIVE_BUILD_SYSTEM STREQUAL "apple")
-  target_link_libraries(${LIB_NAME} PRIVATE
+if (ASL_BUILD_SYSTEM STREQUAL "apple")
+  target_link_libraries(${ASL_LIB_NAME} PRIVATE
     "-framework Foundation"
     "-framework Metal"
     "-framework QuartzCore"
     "-framework MetalKit"
   )
-elseif (ASTROLATIVE_BUILD_SYSTEM STREQUAL "wasm")
+elseif (ASL_BUILD_SYSTEM STREQUAL "wasm")
 else ()
-  target_link_libraries(${LIB_NAME} PRIVATE Vulkan::Vulkan SDL3::SDL3)
+  target_link_libraries(${ASL_LIB_NAME} PRIVATE Vulkan::Vulkan SDL3::SDL3)
 endif ()
 
 find_package(TBB REQUIRED)
 
 # Base Libs
-target_link_libraries(${LIB_NAME} PRIVATE ${CMAKE_DL_LIBS} TBB::tbb stblib)
+target_link_libraries(${ASL_LIB_NAME} PRIVATE ${CMAKE_DL_LIBS} TBB::tbb stblib)
 
-set_target_properties(${LIB_NAME} PROPERTIES
-  CXX_STANDARD 26
-  CXX_STANDARD_REQUIRED YES
-  CXX_EXTENSIONS NO
-)
-target_compile_options(${LIB_NAME} PRIVATE -freflection)
+set_target_properties(${ASL_LIB_NAME} PROPERTIES ${ASL_CXX_OPTIONS})

@@ -23,8 +23,8 @@
 #include "VulkanCommandBuffer.h"
 #include "VulkanDeviceInstance.h"
 #include "VulkanPipelineState.h"
-#include "shared/graphics/ShaderInfo.h"
-#include "shared/graphics/graphics_toplevel_defines.h"
+#include "graphics/ShaderInfo.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 
 namespace VulkanObjects

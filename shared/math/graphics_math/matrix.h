@@ -22,8 +22,8 @@
 #include <initializer_list>
 #include <string>
 
-#include "shared/base/ASLTypes.h"
-#include "shared/base/concepts.h"
+#include "base/ASLTypes.h"
+#include "base/concepts.h"
 
 #include "vector.h"
 

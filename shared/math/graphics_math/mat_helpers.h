@@ -19,7 +19,7 @@
 #define MAT_HELPERS_H
 
 #include "matrix.h"
-#include "shared/base/ASLUtility.h"
+#include "base/ASLUtility.h"
 
 #include <cmath>
 

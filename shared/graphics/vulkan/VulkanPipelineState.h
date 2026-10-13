@@ -16,7 +16,7 @@
 //
 #ifndef VULKANPIPELINESTATE_H
 #define VULKANPIPELINESTATE_H
-#include "shared/graphics/graphics_toplevel_defines.h"
+#include "graphics/graphics_toplevel_defines.h"
 
 
 namespace VulkanObjects
