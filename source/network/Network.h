@@ -18,7 +18,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include <enet/enet.h>
 #include <expected>
+#include <future>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <queue>
 #include <string_view>
+#include <thread>
 #include <utility>
 
 
@@ -27,10 +33,13 @@ namespace Network {
 	bool NetworkingAvailable();
 
 	class Server {
+		Server();
+
 	public:
 		~Server();
 
-		static std::expected<Server, std::string_view> CreateServer();
+		static std::expected<std::unique_ptr<Server>, std::string_view> CreateServer();
+		void RunEventLoop();
 
 		Server(const Server &other) = delete;
 		Server(Server &&other) noexcept : address(other.address), server(std::exchange(other.server, nullptr))
@@ -50,10 +59,59 @@ namespace Network {
 		}
 
 	private:
-		Server();
-
 		ENetAddress address{};
 		ENetHost *server = nullptr;
+
+		std::thread EventLoop;
+		std::atomic<bool> Running;
+	};
+
+
+	class Client {
+		Client();
+
+	public:
+		~Client();
+
+		static std::expected<std::unique_ptr<Client>, std::string_view> CreateClient();
+
+		Client(const Client &other) = delete;
+		Client(Client &&other) noexcept : client(std::exchange(other.client, nullptr))
+		{
+		}
+		Client &operator=(const Client &other) = delete;
+		Client &operator=(Client &&other) noexcept
+		{
+			if(this == &other)
+				return *this;
+			if(client)
+				enet_host_destroy(client);
+			client = other.client;
+			other.client = nullptr;
+			return *this;
+		}
+
+		std::optional<std::string_view> Connect(std::string_view address);
+
+	private:
+		struct ConnectCommand
+		{
+			std::string address;
+			std::promise<std::optional<std::string_view>> result;
+		};
+
+		void RunEventLoop();
+
+		ENetHost* client = nullptr;
+
+		// Accessed only by the event-loop thread.
+		ENetPeer* peer = nullptr;
+
+		std::atomic<bool> Running{false};
+		std::thread EventLoop;
+
+		std::mutex CommandMutex;
+		std::queue<std::unique_ptr<ConnectCommand>> Commands;
 	};
 } // namespace Network
 

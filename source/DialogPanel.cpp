@@ -143,6 +143,19 @@ DialogPanel *DialogPanel::MissionOfferDialog(std::string message, PlayerInfo &pl
 }
 
 
+DialogPanel *DialogPanel::RequestString(std::function<void(const std::string &)> callback, std::string message,
+                                        std::string initialValue, Truncate truncate, bool allowsFastForward)
+{
+	DialogInit init;
+	init.message = std::move(message);
+	init.initialValue = std::move(initialValue);
+	init.stringFun = std::move(callback);
+	init.truncate = truncate;
+	init.allowsFastForward = allowsFastForward;
+	return new DialogPanel(init);
+}
+
+
 
 // Draw this panel.
 void DialogPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)

@@ -94,6 +94,10 @@ public:
 	static DialogPanel *RequestString(T *t, void (T::*fun)(const std::string &), std::string message,
 	                                  std::string initialValue = "", Truncate truncate = Truncate::NONE,
 	                                  bool allowsFastForward = false);
+
+	static DialogPanel *RequestString(std::function<void(const std::string &)>, std::string message,
+									  std::string initialValue = "", Truncate truncate = Truncate::NONE,
+									  bool allowsFastForward = false);
 	template <class T>
 	static DialogPanel *RequestInteger(T *t, void (T::*fun)(int), std::string message,
 	                                   std::optional<int> initialValue = std::nullopt,

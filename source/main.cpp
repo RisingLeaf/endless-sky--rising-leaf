@@ -20,6 +20,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "CustomEvents.h"
 #include "DataFile.h"
 #include "DataNode.h"
+#include "DialogPanel.h"
 #include "Engine.h"
 #include "Files.h"
 #include "FrameTimer.h"
@@ -263,12 +264,6 @@ int main(int argc, char *argv[])
 
 		Network::Init();
 
-		auto server_request = Network::Server::CreateServer();
-		if(!server_request)
-			Logger::Log(server_request.error(), Logger::Level::ERROR);
-		else
-			Logger::Log("Server created!", Logger::Level::INFO);
-
 		CustomEvents::Init();
 		// This is the main loop where all the action begins.
 		GameLoop(player, queue, conversation, testToRunName, debugMode);
@@ -323,6 +318,9 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 	bool isDebugPaused = false;
 	bool isFastForward = false;
 
+	std::unique_ptr<Network::Server> server;
+	std::unique_ptr<Network::Client> client;
+
 	// Limit how quickly full-screen mode can be toggled.
 	int toggleTimeout = 0;
 
@@ -334,7 +332,7 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 	const bool isHeadless = (testContext.CurrentTest() && !debugMode);
 
 	auto ProcessEvents = [&menuPanels, &gamePanels, &player, &cursorTime, &toggleTimeout, &debugMode, &isDebugPaused,
-	                      &isFastForward] {
+	                      &isFastForward, &server, &client] {
 		const Preferences::FastForwardCapsLockSync fastforwardCapsLockSync = Preferences::GetFastForwardCapsLockSync();
 		const bool fastForwardSyncToCapsLock =
 		    fastforwardCapsLockSync == Preferences::FastForwardCapsLockSync::ALWAYS ||
@@ -400,6 +398,45 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 			}
 			else if(event.type == SDL_EVENT_KEY_DOWN && Command(eventKeyCode).Has(Command::PERFORMANCE_DISPLAY))
 				Preferences::Set("Show CPU / GPU load", !Preferences::Has("Show CPU / GPU load"));
+			else if(event.type == SDL_EVENT_KEY_DOWN && menuPanels.IsEmpty() && eventKeyCode == SDLK_H)
+			{
+				if(client)
+					gamePanels.Push(DialogPanel::Info("Already connected to another game."));
+				else
+				{
+					auto server_request = Network::Server::CreateServer();
+					if(!server_request)
+						gamePanels.Push(DialogPanel::Info(std::string(server_request.error())));
+					else
+					{
+						server = std::move(server_request.value());
+						gamePanels.Push(DialogPanel::Info("Hosting a server."));
+					}
+				}
+			}
+			else if(event.type == SDL_EVENT_KEY_DOWN && menuPanels.IsEmpty() && eventKeyCode == SDLK_C)
+			{
+				if(server)
+					gamePanels.Push(DialogPanel::Info("Already hosting a server."));
+				else
+				{
+					auto client_request = Network::Client::CreateClient();
+					if(!client_request)
+						gamePanels.Push(DialogPanel::Info(std::string(client_request.error())));
+					else
+					{
+						client = std::move(client_request.value());
+						gamePanels.Push(DialogPanel::RequestString(
+						    [&client, &gamePanels](const std::string &ip) {
+							    if(const auto res = client->Connect(ip); res)
+								    gamePanels.Push(DialogPanel::Info(std::string(res.value())));
+							    else
+								    gamePanels.Push(DialogPanel::Info("Connection established."));
+						    },
+						    "Enter Server IP:"));
+					}
+				}
+			}
 			else if(activeUI.Handle(event))
 			{
 				// The UI handled the event.
