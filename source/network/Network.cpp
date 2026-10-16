@@ -36,6 +36,48 @@ namespace {
 
 		Logger::Log(text, Logger::Level::INFO);
 	}
+
+	std::vector<unsigned char> EncodeEvent(const Network::Event &e)
+	{
+		std::vector<unsigned char> encoded;
+		encoded.emplace_back(static_cast<unsigned char>(e.Type));
+		encoded.append_range(e.Data);
+		return encoded;
+	}
+
+	Network::Event DecodeEvent(const std::vector<unsigned char> &e)
+	{
+		Network::Event result{};
+		if(e.empty())
+			return result;
+		result.Type = static_cast<Network::EventType>(e[0]);
+		result.Data.append_range(e | std::views::drop(1));
+		return result;
+	}
+
+	bool SendPacket(ENetPeer *peer, const Network::Event &event, bool reliable)
+	{
+		if(!peer)
+			return false;
+
+		const auto encoded = EncodeEvent(event);
+		if(encoded.empty())
+			return false;
+
+		const enet_uint32 flags = reliable ? ENET_PACKET_FLAG_RELIABLE : 0;
+
+		ENetPacket *packet = enet_packet_create(encoded.data(), encoded.size(), flags);
+		if(!packet)
+			return false;
+
+		if(enet_peer_send(peer, 0, packet) < 0)
+		{
+			enet_packet_destroy(packet);
+			return false;
+		}
+
+		return true;
+	}
 } // namespace
 
 
@@ -116,6 +158,31 @@ void Network::Server::RunEventLoop()
 {
 	while(Running.load())
 	{
+		std::queue<OutgoingEvent> outgoing;
+
+		{
+			std::lock_guard lock(EventMutex);
+			std::swap(outgoing, OutgoingEvents);
+		}
+
+		while(!outgoing.empty())
+		{
+			auto item = std::move(outgoing.front());
+			outgoing.pop();
+
+			for(size_t i = 0; i < server->peerCount; ++i)
+			{
+				ENetPeer *clientPeer = &server->peers[i];
+
+				if(clientPeer->state != ENET_PEER_STATE_CONNECTED)
+					continue;
+
+				if(!SendPacket(clientPeer, item.event, item.reliable))
+				{
+					Logger::Log("Failed to queue event for a client.", Logger::Level::ERROR);
+				}
+			}
+		}
 		ENetEvent event{};
 
 		const int result = enet_host_service(server, &event, EVENT_TIMEOUT_MS);
@@ -138,10 +205,23 @@ void Network::Server::RunEventLoop()
 			break;
 		}
 		case ENET_EVENT_TYPE_RECEIVE: {
-			const std::string message(reinterpret_cast<const char *>(event.packet->data), event.packet->dataLength);
+			const auto *begin = event.packet->data;
+			const auto *end = begin + event.packet->dataLength;
 
-			Logger::Log(std::format("Received {} bytes from a client.", event.packet->dataLength), Logger::Level::INFO);
+			std::vector bytes(begin, end);
 			enet_packet_destroy(event.packet);
+
+			if(bytes.empty())
+			{
+				Logger::Log("Received an empty event packet.", Logger::Level::WARNING);
+				break;
+			}
+
+			Event received = DecodeEvent(bytes);
+			{
+				std::lock_guard lock(EventMutex);
+				IncomingEvents.push(std::move(received));
+			}
 			break;
 		}
 		case ENET_EVENT_TYPE_DISCONNECT:
@@ -154,6 +234,32 @@ void Network::Server::RunEventLoop()
 	}
 
 	Running.store(false);
+}
+
+bool Network::Server::SendEvent(const Event &event, bool reliable)
+{
+	if(!Running.load())
+		return false;
+
+	std::lock_guard lock(EventMutex);
+
+	if(!Running.load())
+		return false;
+
+	OutgoingEvents.push(OutgoingEvent{event, reliable});
+	return true;
+}
+
+std::optional<Network::Event> Network::Server::PollEvent()
+{
+	std::lock_guard lock(EventMutex);
+
+	if(IncomingEvents.empty())
+		return std::nullopt;
+
+	Event event = std::move(IncomingEvents.front());
+	IncomingEvents.pop();
+	return event;
 }
 
 
@@ -248,6 +354,26 @@ void Network::Client::RunEventLoop()
 {
 	while(Running.load())
 	{
+		std::queue<OutgoingEvent> outgoing;
+		{
+			std::lock_guard lock(EventMutex);
+			std::swap(outgoing, OutgoingEvents);
+		}
+		while(!outgoing.empty())
+		{
+			auto [event, reliable] = std::move(outgoing.front());
+			outgoing.pop();
+
+			if(!peer || peer->state != ENET_PEER_STATE_CONNECTED)
+			{
+				Logger::Log("Cannot send event: client is not connected.", Logger::Level::WARNING);
+				continue;
+			}
+
+			if(!SendPacket(peer, event, reliable))
+				Logger::Log("Failed to queue event for the server.", Logger::Level::ERROR);
+		}
+
 		std::queue<std::unique_ptr<ConnectCommand>> pending;
 		{
 			std::lock_guard lock(CommandMutex);
@@ -300,14 +426,24 @@ void Network::Client::RunEventLoop()
 			Logger::Log("Connected to the server.", Logger::Level::INFO);
 			break;
 		case ENET_EVENT_TYPE_RECEIVE: {
-			const std::string message(reinterpret_cast<const char *>(event.packet->data), event.packet->dataLength);
+			const auto *begin = event.packet->data;
+			const auto *end = begin + event.packet->dataLength;
 
-			Logger::Log(std::format("Received {} bytes from the server.", event.packet->dataLength),
-			            Logger::Level::INFO);
-
-			// TODO
-
+			std::vector bytes(begin, end);
 			enet_packet_destroy(event.packet);
+
+			if(bytes.empty())
+			{
+				Logger::Log("Received an empty event packet.", Logger::Level::WARNING);
+				break;
+			}
+
+			Event received = DecodeEvent(bytes);
+			{
+				std::lock_guard lock(EventMutex);
+				IncomingEvents.push(std::move(received));
+			}
+
 			break;
 		}
 		case ENET_EVENT_TYPE_DISCONNECT: {
@@ -328,4 +464,30 @@ void Network::Client::RunEventLoop()
 		Commands.front()->result.set_value("Client event loop stopped.");
 		Commands.pop();
 	}
+}
+
+bool Network::Client::SendEvent(const Event &event, bool reliable)
+{
+	if(!Running.load())
+		return false;
+
+	std::lock_guard lock(EventMutex);
+
+	if(!Running.load())
+		return false;
+
+	OutgoingEvents.push(OutgoingEvent{.event = event, .reliable = reliable});
+	return true;
+}
+
+std::optional<Network::Event> Network::Client::PollEvent()
+{
+	std::lock_guard lock(EventMutex);
+
+	if(IncomingEvents.empty())
+		return std::nullopt;
+
+	Event event = std::move(IncomingEvents.front());
+	IncomingEvents.pop();
+	return event;
 }

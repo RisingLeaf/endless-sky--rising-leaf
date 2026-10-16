@@ -32,14 +32,22 @@ namespace Network {
 	void Init();
 	bool NetworkingAvailable();
 
+	enum class EventType : std::uint8_t { TEXT = 0x00, INVALID = 0xff };
+
+	struct Event {
+		EventType Type = EventType::INVALID;
+		std::vector<unsigned char> Data;
+	};
+	struct OutgoingEvent {
+		Event event;
+		bool reliable = true;
+	};
+
 	class Server {
 		Server();
 
 	public:
 		~Server();
-
-		static std::expected<std::unique_ptr<Server>, std::string_view> CreateServer();
-		void RunEventLoop();
 
 		Server(const Server &other) = delete;
 		Server(Server &&other) noexcept : address(other.address), server(std::exchange(other.server, nullptr))
@@ -58,12 +66,22 @@ namespace Network {
 			return *this;
 		}
 
+		static std::expected<std::unique_ptr<Server>, std::string_view> CreateServer();
+		void RunEventLoop();
+
+		bool SendEvent(const Event &event, bool reliable = true);
+		std::optional<Event> PollEvent();
+
 	private:
 		ENetAddress address{};
 		ENetHost *server = nullptr;
 
 		std::thread EventLoop;
 		std::atomic<bool> Running;
+
+		std::mutex EventMutex;
+		std::queue<OutgoingEvent> OutgoingEvents;
+		std::queue<Event> IncomingEvents;
 	};
 
 
@@ -72,8 +90,6 @@ namespace Network {
 
 	public:
 		~Client();
-
-		static std::expected<std::unique_ptr<Client>, std::string_view> CreateClient();
 
 		Client(const Client &other) = delete;
 		Client(Client &&other) noexcept : client(std::exchange(other.client, nullptr))
@@ -91,27 +107,34 @@ namespace Network {
 			return *this;
 		}
 
+		static std::expected<std::unique_ptr<Client>, std::string_view> CreateClient();
 		std::optional<std::string_view> Connect(std::string_view address);
 
+		bool SendEvent(const Event &event, bool reliable = true);
+		std::optional<Event> PollEvent();
+
 	private:
-		struct ConnectCommand
-		{
+		struct ConnectCommand {
 			std::string address;
 			std::promise<std::optional<std::string_view>> result;
 		};
 
 		void RunEventLoop();
 
-		ENetHost* client = nullptr;
+		ENetHost *client = nullptr;
 
 		// Accessed only by the event-loop thread.
-		ENetPeer* peer = nullptr;
+		ENetPeer *peer = nullptr;
 
 		std::atomic<bool> Running{false};
 		std::thread EventLoop;
 
 		std::mutex CommandMutex;
 		std::queue<std::unique_ptr<ConnectCommand>> Commands;
+
+		std::mutex EventMutex;
+		std::queue<OutgoingEvent> OutgoingEvents;
+		std::queue<Event> IncomingEvents;
 	};
 } // namespace Network
 

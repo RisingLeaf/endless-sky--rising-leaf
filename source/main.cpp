@@ -628,6 +628,28 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 			GameWindow::GraphicsInstance()->EndDraw(MainCommandBuffer.get(), GameWindow::DrawWidth(),
 			                                        GameWindow::DrawHeight());
 
+			if(server)
+			{
+				while(auto e = server->PollEvent())
+				{
+					if(e->Type == Network::EventType::TEXT)
+						Logger::Log(std::format("Received message length {}", e->Data.size()), Logger::Level::INFO);
+				}
+
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+			}
+
+
+			if(client)
+			{
+				while(auto e = client->PollEvent())
+				{
+					if(e->Type == Network::EventType::TEXT)
+						Logger::Log(std::format("Received message length {}", e->Data.size()), Logger::Level::INFO);
+				}
+				client->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b', 'c'}});
+			}
+
 			GameWindow::Step();
 
 			// Lock the game loop to 60 FPS.
