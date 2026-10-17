@@ -32,6 +32,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Logger.h"
 #include "MainPanel.h"
 #include "MenuPanel.h"
+#include "Messages.h"
 #include "Panel.h"
 #include "PilotProfile.h"
 #include "PlayerInfo.h"
@@ -321,6 +322,8 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 	std::unique_ptr<Network::Server> server;
 	std::unique_ptr<Network::Client> client;
 
+	std::queue<SDL_Event> client_events;
+
 	// Limit how quickly full-screen mode can be toggled.
 	int toggleTimeout = 0;
 
@@ -332,14 +335,27 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 	const bool isHeadless = (testContext.CurrentTest() && !debugMode);
 
 	auto ProcessEvents = [&menuPanels, &gamePanels, &player, &cursorTime, &toggleTimeout, &debugMode, &isDebugPaused,
-	                      &isFastForward, &server, &client] {
+	                      &isFastForward, &server, &client, &client_events] {
 		const Preferences::FastForwardCapsLockSync fastforwardCapsLockSync = Preferences::GetFastForwardCapsLockSync();
 		const bool fastForwardSyncToCapsLock =
 		    fastforwardCapsLockSync == Preferences::FastForwardCapsLockSync::ALWAYS ||
 		    (fastforwardCapsLockSync == Preferences::FastForwardCapsLockSync::DEFAULT &&
 			 Command(SDLK_CAPSLOCK).Has(Command::FASTFORWARD));
 		SDL_Event event;
-		while(SDL_PollEvent(&event))
+
+		const auto GetEvent = [&]() -> bool {
+			if(SDL_PollEvent(&event))
+				return true;
+			if(!client_events.empty())
+			{
+				event = std::move(client_events.front());
+				client_events.pop();
+				return true;
+			}
+			return false;
+		};
+
+		while(GetEvent())
 		{
 			UI &activeUI = (menuPanels.IsEmpty() ? gamePanels : menuPanels);
 
@@ -347,13 +363,8 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 			if(event.type == SDL_EVENT_MOUSE_MOTION)
 				cursorTime = 0;
 
-#ifdef ES_USE_SDL3
-			SDL_Keycode eventKeyCode = event.key.key;
-			SDL_Keymod eventKeyMod = event.key.mod;
-#else
-			SDL_Keycode eventKeyCode = event.key.keysym.sym;
-			Uint16 eventKeyMod = event.key.keysym.mod;
-#endif
+			const SDL_Keycode eventKeyCode = event.key.key;
+			const SDL_Keymod eventKeyMod = event.key.mod;
 			if(debugMode && event.type == SDL_EVENT_KEY_DOWN && eventKeyCode == SDLK_GRAVE)
 			{
 				isDebugPaused = !isDebugPaused;
@@ -372,11 +383,7 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 			}
 			else if(event.type == SDL_EVENT_QUIT)
 				menuPanels.Quit();
-#ifdef ES_USE_SDL3
 			else if(event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
-#else
-			else if(event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
-#endif
 				// The window has been resized. Adjust the raw screen size and the OpenGL viewport to match.
 				GameWindow::AdjustViewport();
 			else if(event.type == CustomEvents::GetResize())
@@ -429,7 +436,10 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 						gamePanels.Push(DialogPanel::RequestString(
 						    [&client, &gamePanels](const std::string &ip) {
 							    if(const auto res = client->Connect(ip); res)
+							    {
 								    gamePanels.Push(DialogPanel::Info(std::string(res.value())));
+								    client.reset();
+							    }
 							    else
 								    gamePanels.Push(DialogPanel::Info("Connection established."));
 						    },
@@ -445,6 +455,11 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 			        (Command(eventKeyCode).Has(Command::FASTFORWARD)) && !fastForwardSyncToCapsLock)
 			{
 				isFastForward = !isFastForward;
+			}
+
+			if(client)
+			{
+				client->SendEvent(Network::SerializeInputEvent(event));
 			}
 		}
 
@@ -633,23 +648,28 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 				while(auto e = server->PollEvent())
 				{
 					if(e->Type == Network::EventType::TEXT)
-						Logger::Log(std::format("Received message length {}", e->Data.size()), Logger::Level::INFO);
+						Messages::Add({std::format("Received message length {}", e->Data.size()),
+						               GameData::MessageCategories().Get("normal")});
+					else if(e->Type == Network::EventType::INPUT)
+					{
+						auto event = Network::DeserializeInputEvent(*e);
+						client_events.push(event);
+						switch(event.type)
+						{
+						case SDL_EVENT_KEY_DOWN:
+							Messages::Add({std::format("Keydown Event Received {}", SDL_GetKeyName(event.key.key)),
+							               GameData::MessageCategories().Get("normal")});
+							break;
+						case SDL_EVENT_KEY_UP:
+							Messages::Add({std::format("Keyup Event Received {}", SDL_GetKeyName(event.key.key)),
+										   GameData::MessageCategories().Get("normal")});
+							break;
+						default:
+							Messages::Add({"Unknown Event Received", GameData::MessageCategories().Get("normal")});
+							break;
+						}
+					}
 				}
-
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
-				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
 			}
 
 
@@ -658,9 +678,9 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 				while(auto e = client->PollEvent())
 				{
 					if(e->Type == Network::EventType::TEXT)
-						Logger::Log(std::format("Received message length {}", e->Data.size()), Logger::Level::INFO);
+						Messages::Add({std::format("Received message length {}", e->Data.size()),
+						               GameData::MessageCategories().Get("normal")});
 				}
-				client->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b', 'c'}});
 			}
 
 			GameWindow::Step();

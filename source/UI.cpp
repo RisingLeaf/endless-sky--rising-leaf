@@ -69,13 +69,8 @@ bool UI::Handle(const SDL_Event &event)
 			handled = (*it)->DoScroll(event.wheel.x, event.wheel.y);
 		else if(event.type == SDL_EVENT_KEY_DOWN)
 		{
-#ifdef ES_USE_SDL3
 			Command command(event.key.key);
 			handled = (*it)->DoKeyDown(event.key.key, event.key.mod, command, !event.key.repeat);
-#else
-			Command command(event.key.keysym.sym);
-			handled = (*it)->DoKeyDown(event.key.keysym.sym, event.key.keysym.mod, command, !event.key.repeat);
-#endif
 		}
 		else if(event.type == SDL_EVENT_TEXT_INPUT)
 			handled = (*it)->DoTextInput(event.text.text);

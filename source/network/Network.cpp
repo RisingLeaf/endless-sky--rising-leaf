@@ -78,6 +78,37 @@ namespace {
 
 		return true;
 	}
+
+	template <typename Type>
+	void WriteSerialized(std::vector<unsigned char> &out, Type value)
+	{
+		static_assert(std::is_integral_v<Type>);
+		using U = std::make_unsigned_t<Type>;
+
+		U bits = static_cast<U>(value);
+
+		for(size_t i = 0; i < sizeof(Type); ++i)
+			out.emplace_back(static_cast<unsigned char>(bits >> (i * 8)));
+	}
+
+	template <typename Type>
+	bool ReadSerialized(const std::vector<unsigned char> &data, size_t &offset, Type &value)
+	{
+		static_assert(std::is_integral_v<Type>);
+		using U = std::make_unsigned_t<Type>;
+
+		if(offset > data.size() || sizeof(Type) > data.size() - offset)
+			return false;
+
+		U bits = 0;
+
+		for(size_t i = 0; i < sizeof(Type); ++i)
+			bits |= U(data[offset + i]) << (i * 8);
+
+		value = static_cast<Type>(bits);
+		offset += sizeof(Type);
+		return true;
+	}
 } // namespace
 
 
@@ -101,6 +132,69 @@ bool Network::NetworkingAvailable()
 	return NETWORKING_AVAILABLE.load();
 }
 
+Network::Event Network::SerializeInputEvent(const SDL_Event &event)
+{
+	Event result;
+	result.Type = EventType::INPUT;
+
+	// Input event type
+	switch(event.type)
+	{
+	case SDL_EVENT_KEY_DOWN:
+		WriteSerialized(result.Data, static_cast<std::uint8_t>(InputEventType::KEY_DOWN));
+		WriteSerialized(result.Data, event.key.key);
+		WriteSerialized(result.Data, event.key.mod);
+		WriteSerialized(result.Data, static_cast<std::uint8_t>(event.key.repeat));
+		break;
+	case SDL_EVENT_KEY_UP:
+		WriteSerialized(result.Data, static_cast<std::uint8_t>(InputEventType::KEY_UP));
+		WriteSerialized(result.Data, event.key.key);
+		WriteSerialized(result.Data, event.key.mod);
+		WriteSerialized(result.Data, static_cast<std::uint8_t>(event.key.repeat));
+		break;
+	default:
+		return Event{.Type = EventType::INVALID};
+	}
+
+	return result;
+}
+
+SDL_Event Network::DeserializeInputEvent(const Event &event)
+{
+	SDL_Event result{};
+
+	std::uint8_t type;
+	std::uint8_t repeat;
+
+	size_t offset = 0;
+	if(!ReadSerialized(event.Data, offset, type))
+		return SDL_Event{};
+	if(!ReadSerialized(event.Data, offset, result.key.key))
+		return SDL_Event{};
+	if(!ReadSerialized(event.Data, offset, result.key.mod))
+		return SDL_Event{};
+	if(!ReadSerialized(event.Data, offset, repeat))
+		return SDL_Event{};
+
+	if(type >= static_cast<std::uint8_t>(InputEventType::MAX_ENUM))
+		return SDL_Event{};
+
+	result.key.repeat = repeat;
+
+	const auto internal_type = static_cast<InputEventType>(type);
+	switch(internal_type)
+	{
+	case InputEventType::KEY_DOWN:
+		result.type = SDL_EVENT_KEY_DOWN;
+		break;
+	case InputEventType::KEY_UP:
+		result.type = SDL_EVENT_KEY_UP;
+		break;
+	}
+
+	return result;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// Server
@@ -108,7 +202,6 @@ bool Network::NetworkingAvailable()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Network::Server::Server() = default;
-
 
 Network::Server::~Server()
 {
@@ -118,7 +211,6 @@ Network::Server::~Server()
 	if(server)
 		enet_host_destroy(server);
 }
-
 
 std::expected<std::unique_ptr<Network::Server>, std::string_view> Network::Server::CreateServer()
 {
@@ -152,7 +244,6 @@ std::expected<std::unique_ptr<Network::Server>, std::string_view> Network::Serve
 
 	return instance;
 }
-
 
 void Network::Server::RunEventLoop()
 {
@@ -262,7 +353,6 @@ std::optional<Network::Event> Network::Server::PollEvent()
 	return event;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
 /// Client
@@ -270,7 +360,6 @@ std::optional<Network::Event> Network::Server::PollEvent()
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Network::Client::Client() = default;
-
 
 Network::Client::~Client()
 {

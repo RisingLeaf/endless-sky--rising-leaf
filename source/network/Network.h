@@ -16,6 +16,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #ifndef ENDLESS_SKY_NETWORK_H
 #define ENDLESS_SKY_NETWORK_H
 
+#include "SDL3/SDL_events.h"
+
 #include <enet/enet.h>
 #include <expected>
 #include <future>
@@ -32,7 +34,7 @@ namespace Network {
 	void Init();
 	bool NetworkingAvailable();
 
-	enum class EventType : std::uint8_t { TEXT = 0x00, INVALID = 0xff };
+	enum class EventType : std::uint8_t { TEXT = 0x00, INPUT = 0x01, INVALID = 0xff };
 
 	struct Event {
 		EventType Type = EventType::INVALID;
@@ -42,6 +44,14 @@ namespace Network {
 		Event event;
 		bool reliable = true;
 	};
+
+	enum class InputEventType : std::uint8_t {
+		KEY_DOWN,
+		KEY_UP,
+		MAX_ENUM
+	};
+	Event SerializeInputEvent(const SDL_Event &event);
+	SDL_Event DeserializeInputEvent(const Event &event);
 
 	class Server {
 		Server();
