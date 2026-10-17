@@ -87,13 +87,14 @@ RenderBuffer::~RenderBuffer()
 // the Activation object goes out of scope.
 GraphicsTypes::CommandBufferInstance *RenderBuffer::SetTarget()
 {
+	last_dimensions = {Screen::RawWidth(), Screen::RawHeight()};
+	Screen::SetRaw(size[0], size[1], true);
+
 	RenderCmd->Begin();
-	framebuffer.Bind(RenderCmd.get());
 	auto render_state = graphics_bootstrap::RenderStateSimpleBlending(size[0], size[1]);
 	render_state.ClearColor.a = 0.f;
 	RenderCmd->SetState(render_state);
-	last_dimensions = {Screen::RawWidth(), Screen::RawHeight()};
-	Screen::SetRaw(size[0], size[1], true);
+	framebuffer.Bind(RenderCmd.get());
 	return RenderCmd.get();
 }
 
