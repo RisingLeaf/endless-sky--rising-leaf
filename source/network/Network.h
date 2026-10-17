@@ -30,11 +30,13 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <utility>
 
 
+
+class Command;
 namespace Network {
 	void Init();
 	bool NetworkingAvailable();
 
-	enum class EventType : std::uint8_t { TEXT = 0x00, INPUT = 0x01, INVALID = 0xff };
+	enum class EventType : std::uint8_t { TEXT = 0x00, COMMAND = 0x01, INVALID = 0xff };
 
 	struct Event {
 		EventType Type = EventType::INVALID;
@@ -50,8 +52,8 @@ namespace Network {
 		KEY_UP,
 		MAX_ENUM
 	};
-	Event SerializeInputEvent(const SDL_Event &event);
-	SDL_Event DeserializeInputEvent(const Event &event);
+	Event SerializeCommand(const Command &command);
+	std::optional<Command> DeserializeCommand(const Event &event);
 
 	class Server {
 		Server();

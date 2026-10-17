@@ -1570,18 +1570,18 @@ void Engine::CalculateStep()
 	// If there is a pending zoom update then use it
 	// because the zoom will get updated in the main thread
 	// as soon as the calculation thread is finished.
-	const double zoom = nextZoom ? nextZoom : this->zoom;
+	const double current_zoom = nextZoom ? nextZoom : this->zoom;
 
 	// Clear the list of objects to draw.
-	draw[currentCalcBuffer].Clear(step, zoom);
-	batchDraw[currentCalcBuffer].Clear(step, zoom);
+	draw[currentCalcBuffer].Clear(step, current_zoom);
+	batchDraw[currentCalcBuffer].Clear(step, current_zoom);
 	radar[currentCalcBuffer].Clear();
 
 	if(!player.GetSystem())
 		return;
 
 	// Handle the mouse input of the mouse navigation
-	HandleMouseInput(activeCommands);
+	HandleMouseInput();
 
 	const Ship *flagship = player.Flagship();
 	const System *playerSystem = player.GetSystem();
@@ -1624,7 +1624,7 @@ void Engine::CalculateStep()
 				draw[currentCalcBuffer].Add(object);
 		}
 	// Draw the asteroids and minables.
-	asteroids.Draw(draw[currentCalcBuffer], newCamera.Center(), zoom);
+	asteroids.Draw(draw[currentCalcBuffer], newCamera.Center(), current_zoom);
 	// Draw the flotsam.
 	for(const shared_ptr<Flotsam> &it : flotsam)
 		draw[currentCalcBuffer].Add(*it);
@@ -2345,7 +2345,7 @@ void Engine::HandleMouseClicks()
 
 
 // Determines alternate mouse turning, setting player mouse angle, and right-click firing weapons.
-void Engine::HandleMouseInput(Command &activeCommands)
+void Engine::HandleMouseInput()
 {
 	bool rightMouseButtonHeld = false;
 	mouse_pos_t mousePosX, mousePosY;

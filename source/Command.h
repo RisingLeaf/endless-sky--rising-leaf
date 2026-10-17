@@ -15,6 +15,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
+#include "network/Network.h"
+
 #include <cstdint>
 #include <filesystem>
 #include <string>
@@ -98,11 +100,7 @@ public:
 	Command() = default;
 	// Create a command representing whatever command is mapped to the given
 	// keycode (if any).
-#ifdef ES_USE_SDL3
 	explicit Command(uint32_t keycode);
-#else
-	explicit Command(int keycode);
-#endif
 
 	// Read the current keyboard state and set this object to reflect it.
 	void ReadKeyboard();
@@ -114,10 +112,10 @@ public:
 
 	// Get the description or keycode name for this command. If this command is
 	// a combination of more than one command, an empty string is returned.
-	const std::string &Description() const;
-	const std::string &KeyName() const;
-	bool HasBinding() const;
-	bool HasConflict() const;
+	[[nodiscard]] const std::string &Description() const;
+	[[nodiscard]] const std::string &KeyName() const;
+	[[nodiscard]] bool HasBinding() const;
+	[[nodiscard]] bool HasConflict() const;
 
 	// Load this command from an input file (for testing or scripted missions).
 	void Load(const DataNode &node);
@@ -127,16 +125,16 @@ public:
 	// Clear, set, or check the given bits. This ignores the turn field.
 	void Clear(Command command);
 	void Set(Command command);
-	bool Has(Command command) const;
+	[[nodiscard]] bool Has(Command command) const;
 	// Get the commands that are set in this and in the given command.
-	Command And(Command command) const;
+	[[nodiscard]] Command And(Command command) const;
 	// Get the commands that are set in this and not in the given command.
-	Command AndNot(Command command) const;
+	[[nodiscard]] Command AndNot(Command command) const;
 
 	// Get or set the turn amount. The amount must be between -1 and 1, but it
 	// can be a fractional value to allow finer control.
 	void SetTurn(double amount);
-	double Turn() const;
+	[[nodiscard]] double Turn() const;
 
 	// Check if any bits are set in this command (including a nonzero turn).
 	explicit operator bool() const;
@@ -148,10 +146,14 @@ public:
 	Command operator|(const Command &command) const;
 	Command &operator|=(const Command &command);
 
+	[[nodiscard]] uint64_t State() const { return state; }
 
 private:
 	explicit Command(uint64_t state);
 	Command(uint64_t state, const std::string &text);
+	explicit Command(uint64_t state, double turn);
+
+	friend std::optional<Command> Network::DeserializeCommand(const Network::Event &event);
 
 
 private:

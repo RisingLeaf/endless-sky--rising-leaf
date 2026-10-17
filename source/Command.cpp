@@ -22,7 +22,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "text/Format.h"
 
 #include <algorithm>
-#include <cmath>
 #include <map>
 
 using namespace std;
@@ -32,13 +31,13 @@ namespace {
 	// the name of the key it is mapped to, or the SDL keycode it is mapped to.
 	map<Command, string> description;
 	map<Command, string> keyName;
-	map<int, Command> commandForKeycode;
-	map<Command, int> keycodeForCommand;
+	map<SDL_Keycode, Command> commandForKeycode;
+	map<Command, SDL_Keycode> keycodeForCommand;
 	// Keep track of any keycodes that are mapped to multiple commands, in order
 	// to display a warning to the player.
-	map<int, int> keycodeCount;
+	map<SDL_Keycode, int> keycodeCount;
 	// Need a uint64_t 1 to generate Commands.
-	const uint64_t ONE = 1;
+	constexpr uint64_t ONE = 1;
 } // namespace
 
 
@@ -109,7 +108,7 @@ string Command::ReplaceNamesWithKeys(const string &text)
 
 
 // Create a command representing whatever is mapped to the given key code.
-Command::Command(SDL_Keycode keycode)
+Command::Command(const SDL_Keycode keycode)
 {
 	auto it = commandForKeycode.find(keycode);
 	if(it != commandForKeycode.end())
@@ -122,22 +121,14 @@ Command::Command(SDL_Keycode keycode)
 void Command::ReadKeyboard()
 {
 	Clear();
-#ifdef ES_USE_SDL3
 	const bool *keyDown = SDL_GetKeyboardState(nullptr);
-#else
-	const Uint8 *keyDown = SDL_GetKeyboardState(nullptr);
-#endif
 
 	// Each command can only have one keycode, but misconfigured settings can
 	// temporarily cause one keycode to be used for two commands. Also, more
 	// than one key can be held down at once.
 	for(const auto &it : keycodeForCommand)
-#ifdef ES_USE_SDL3
 		// Use no modifiers for the scancode.
-		if(keyDown[SDL_GetScancodeFromKey(it.second, 0)])
-#else
-		if(keyDown[SDL_GetScancodeFromKey(it.second)])
-#endif
+		if(keyDown[SDL_GetScancodeFromKey(it.second, nullptr)])
 			*this |= it.first;
 
 	// Check whether the `Shift` modifier key was pressed for this step.
@@ -150,7 +141,7 @@ void Command::ReadKeyboard()
 // Load the keyboard preferences.
 void Command::LoadSettings(const filesystem::path &path)
 {
-	DataFile file(path);
+	const DataFile file(path);
 
 	// Create a map of command names to Command objects in the enumeration above.
 	map<string, Command> commands;
@@ -165,7 +156,7 @@ void Command::LoadSettings(const filesystem::path &path)
 		if(it != commands.end() && node.Size() >= 2)
 		{
 			Command command = it->second;
-			int keycode = node.Value(1);
+			const int keycode = static_cast<int>(node.Value(1));
 			keycodeForCommand[command] = keycode;
 			keyName[command] = SDL_GetKeyName(keycode);
 		}
@@ -199,7 +190,7 @@ void Command::SaveSettings(const filesystem::path &path)
 
 
 // Set the key that is mapped to the given command.
-void Command::SetKey(Command command, int keycode)
+void Command::SetKey(const Command command, const int keycode)
 {
 	// Always reset *all* the mappings when one is set. That way, if two commands
 	// are mapped to the same key and you change one of them, the other stays mapped.
@@ -222,9 +213,9 @@ void Command::SetKey(Command command, int keycode)
 // than one command, an empty string is returned.
 const string &Command::Description() const
 {
-	static const string empty;
+	static constexpr string empty;
 	auto it = description.find(*this);
-	return (it == description.end() ? empty : it->second);
+	return it == description.end() ? empty : it->second;
 }
 
 
@@ -233,10 +224,10 @@ const string &Command::Description() const
 // a combination of more than one command, an empty string is returned.
 const string &Command::KeyName() const
 {
-	static const string empty = "(none)";
+	static constexpr string empty = "(none)";
 	auto it = keyName.find(*this);
 
-	return (!HasBinding() ? empty : it->second);
+	return !HasBinding() ? empty : it->second;
 }
 
 
@@ -263,7 +254,7 @@ bool Command::HasConflict() const
 		return false;
 
 	auto cit = keycodeCount.find(it->second);
-	return (cit != keycodeCount.end() && cit->second > 1);
+	return cit != keycodeCount.end() && cit->second > 1;
 }
 
 
@@ -273,42 +264,42 @@ void Command::Load(const DataNode &node)
 {
 	for(int i = 1; i < node.Size(); ++i)
 	{
-		static const map<string, Command> lookup = {{"none", Command::NONE},
-		                                            {"menu", Command::MENU},
-		                                            {"forward", Command::FORWARD},
-		                                            {"left", Command::LEFT},
-		                                            {"right", Command::RIGHT},
-		                                            {"back", Command::BACK},
-		                                            {"primary", Command::PRIMARY},
-		                                            {"secondary", Command::SECONDARY},
-		                                            {"select", Command::SELECT},
-		                                            {"land", Command::LAND},
-		                                            {"board", Command::BOARD},
-		                                            {"hail", Command::HAIL},
-		                                            {"scan", Command::SCAN},
-		                                            {"jump", Command::JUMP},
-		                                            {"mouse turning hold", Command::MOUSE_TURNING_HOLD},
-		                                            {"aim turret hold", Command::AIM_TURRET_HOLD},
-		                                            {"fleet jump", Command::FLEET_JUMP},
-		                                            {"target", Command::TARGET},
-		                                            {"nearest", Command::NEAREST},
-		                                            {"deploy", Command::DEPLOY},
-		                                            {"afterburner", Command::AFTERBURNER},
-		                                            {"cloak", Command::CLOAK},
-		                                            {"map", Command::MAP},
-		                                            {"info", Command::INFO},
-		                                            {"fullscreen", Command::FULLSCREEN},
-		                                            {"fastforward", Command::FASTFORWARD},
-		                                            {"fight", Command::FIGHT},
-		                                            {"hold fire", Command::HOLD_FIRE},
-		                                            {"gather", Command::GATHER},
-		                                            {"hold", Command::HOLD_POSITION},
-		                                            {"scan order", Command::SCAN_ORDER},
-		                                            {"ammo", Command::AMMO},
-		                                            {"nearest asteroid", Command::NEAREST_ASTEROID},
-		                                            {"wait", Command::WAIT},
-		                                            {"stop", Command::STOP},
-		                                            {"shift", Command::SHIFT}};
+		static const map<string, Command> lookup = {{"none", NONE},
+		                                            {"menu", MENU},
+		                                            {"forward", FORWARD},
+		                                            {"left", LEFT},
+		                                            {"right", RIGHT},
+		                                            {"back", BACK},
+		                                            {"primary", PRIMARY},
+		                                            {"secondary", SECONDARY},
+		                                            {"select", SELECT},
+		                                            {"land", LAND},
+		                                            {"board", BOARD},
+		                                            {"hail", HAIL},
+		                                            {"scan", SCAN},
+		                                            {"jump", JUMP},
+		                                            {"mouse turning hold", MOUSE_TURNING_HOLD},
+		                                            {"aim turret hold", AIM_TURRET_HOLD},
+		                                            {"fleet jump", FLEET_JUMP},
+		                                            {"target", TARGET},
+		                                            {"nearest", NEAREST},
+		                                            {"deploy", DEPLOY},
+		                                            {"afterburner", AFTERBURNER},
+		                                            {"cloak", CLOAK},
+		                                            {"map", MAP},
+		                                            {"info", INFO},
+		                                            {"fullscreen", FULLSCREEN},
+		                                            {"fastforward", FASTFORWARD},
+		                                            {"fight", FIGHT},
+		                                            {"hold fire", HOLD_FIRE},
+		                                            {"gather", GATHER},
+		                                            {"hold", HOLD_POSITION},
+		                                            {"scan order", SCAN_ORDER},
+		                                            {"ammo", AMMO},
+		                                            {"nearest asteroid", NEAREST_ASTEROID},
+		                                            {"wait", WAIT},
+		                                            {"stop", STOP},
+		                                            {"shift", SHIFT}};
 
 		auto it = lookup.find(node.Token(i));
 		if(it != lookup.end())
@@ -329,7 +320,7 @@ void Command::Clear()
 
 
 // Clear any commands that are set in the given command.
-void Command::Clear(Command command)
+void Command::Clear(const Command command)
 {
 	state &= ~command.state;
 }
@@ -337,7 +328,7 @@ void Command::Clear(Command command)
 
 
 // Set any commands that are set in the given command.
-void Command::Set(Command command)
+void Command::Set(const Command command)
 {
 	state |= command.state;
 }
@@ -345,15 +336,15 @@ void Command::Set(Command command)
 
 
 // Check if any of the given command's bits that are set, are also set here.
-bool Command::Has(Command command) const
+bool Command::Has(const Command command) const
 {
-	return (state & command.state);
+	return state & command.state;
 }
 
 
 
 // Get the commands that are set in this and in the given command.
-Command Command::And(Command command) const
+Command Command::And(const Command command) const
 {
 	return Command(state & command.state);
 }
@@ -361,7 +352,7 @@ Command Command::And(Command command) const
 
 
 // Get the commands that are set in this and not in the given command.
-Command Command::AndNot(Command command) const
+Command Command::AndNot(const Command command) const
 {
 	return Command(state & ~command.state);
 }
@@ -369,9 +360,9 @@ Command Command::AndNot(Command command) const
 
 
 // Set the turn direction and amount to a value between -1 and 1.
-void Command::SetTurn(double amount)
+void Command::SetTurn(const double amount)
 {
-	turn = max(-1., min(1., amount));
+	turn = clamp(amount, -1., 1.);
 }
 
 
@@ -395,7 +386,7 @@ Command::operator bool() const
 // Check whether this command is entirely empty.
 bool Command::operator!() const
 {
-	return !state && !turn;
+	return !state && turn == 0.;
 }
 
 
@@ -403,7 +394,7 @@ bool Command::operator!() const
 // For sorting commands (e.g. so a command can be the key in a map):
 bool Command::operator<(const Command &command) const
 {
-	return (state < command.state);
+	return state < command.state;
 }
 
 
@@ -423,7 +414,7 @@ Command Command::operator|(const Command &command) const
 Command &Command::operator|=(const Command &command)
 {
 	state |= command.state;
-	if(command.turn)
+	if(command.turn == 0.)
 		turn = command.turn;
 	return *this;
 }
@@ -431,7 +422,7 @@ Command &Command::operator|=(const Command &command)
 
 
 // Private constructor.
-Command::Command(uint64_t state) : state(state)
+Command::Command(const uint64_t state) : state(state)
 {
 }
 
@@ -439,8 +430,14 @@ Command::Command(uint64_t state) : state(state)
 
 // Private constructor that also stores the given description in the lookup
 // table. (This is used for the enumeration at the top of this file.)
-Command::Command(uint64_t state, const string &text) : state(state)
+Command::Command(const uint64_t state, const string &text) : state(state)
 {
 	if(!text.empty())
 		description[*this] = text;
+}
+
+
+
+Command::Command(const uint64_t state, const double turn) : state(state), turn(turn)
+{
 }

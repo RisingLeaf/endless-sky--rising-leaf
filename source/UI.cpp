@@ -33,12 +33,12 @@ bool UI::Handle(const SDL_Event &event)
 {
 	bool handled = false;
 
-	vector<shared_ptr<Panel>>::iterator it = stack.end();
+	auto it = stack.end();
 	while(it != stack.begin() && !handled)
 	{
 		--it;
 		// Panels that are about to be popped cannot handle any other events.
-		if(count(toPop.begin(), toPop.end(), it->get()))
+		if(ranges::count(toPop, it->get()))
 			continue;
 
 		if(event.type == SDL_EVENT_MOUSE_MOTION)

@@ -48,6 +48,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "image/SpriteSet.h"
 #include "network/Network.h"
 #include "shader/SpriteShader.h"
+#include "system/Log.h"
 #include "test/Test.h"
 #include "test/TestContext.h"
 #include "text/Font.h"
@@ -322,7 +323,7 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 	std::unique_ptr<Network::Server> server;
 	std::unique_ptr<Network::Client> client;
 
-	std::queue<SDL_Event> client_events;
+	std::queue<Command> client_commands;
 
 	// Limit how quickly full-screen mode can be toggled.
 	int toggleTimeout = 0;
@@ -335,27 +336,15 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 	const bool isHeadless = (testContext.CurrentTest() && !debugMode);
 
 	auto ProcessEvents = [&menuPanels, &gamePanels, &player, &cursorTime, &toggleTimeout, &debugMode, &isDebugPaused,
-	                      &isFastForward, &server, &client, &client_events] {
+	                      &isFastForward, &server, &client] {
 		const Preferences::FastForwardCapsLockSync fastforwardCapsLockSync = Preferences::GetFastForwardCapsLockSync();
 		const bool fastForwardSyncToCapsLock =
 		    fastforwardCapsLockSync == Preferences::FastForwardCapsLockSync::ALWAYS ||
 		    (fastforwardCapsLockSync == Preferences::FastForwardCapsLockSync::DEFAULT &&
 			 Command(SDLK_CAPSLOCK).Has(Command::FASTFORWARD));
+
 		SDL_Event event;
-
-		const auto GetEvent = [&]() -> bool {
-			if(SDL_PollEvent(&event))
-				return true;
-			if(!client_events.empty())
-			{
-				event = std::move(client_events.front());
-				client_events.pop();
-				return true;
-			}
-			return false;
-		};
-
-		while(GetEvent())
+		while(SDL_PollEvent(&event))
 		{
 			UI &activeUI = (menuPanels.IsEmpty() ? gamePanels : menuPanels);
 
@@ -449,17 +438,20 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 			}
 			else if(activeUI.Handle(event))
 			{
-				// The UI handled the event.
 			}
 			else if(event.type == SDL_EVENT_KEY_DOWN && !event.key.repeat &&
 			        (Command(eventKeyCode).Has(Command::FASTFORWARD)) && !fastForwardSyncToCapsLock)
 			{
 				isFastForward = !isFastForward;
 			}
-
-			if(client)
+			else if(client && event.type == SDL_EVENT_KEY_DOWN)
 			{
-				client->SendEvent(Network::SerializeInputEvent(event));
+				const auto cmd = Command(eventKeyCode);
+				if(cmd.HasBinding())
+				{
+					Messages::Add({"Sending a Command: " + std::to_string(cmd.State()), GameData::MessageCategories().Get("normal")});
+					client->SendEvent(Network::SerializeCommand(cmd));
+				}
 			}
 		}
 
@@ -645,33 +637,22 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 
 			if(server)
 			{
-				while(auto e = server->PollEvent())
+				while(auto event = server->PollEvent())
 				{
-					if(e->Type == Network::EventType::TEXT)
-						Messages::Add({std::format("Received message length {}", e->Data.size()),
+					if(event->Type == Network::EventType::TEXT)
+						Messages::Add({std::format("Received message length {}", event->Data.size()),
 						               GameData::MessageCategories().Get("normal")});
-					else if(e->Type == Network::EventType::INPUT)
+					else if(event->Type == Network::EventType::COMMAND)
 					{
-						auto event = Network::DeserializeInputEvent(*e);
-						client_events.push(event);
-						switch(event.type)
+						auto cmd = Network::DeserializeCommand(*event);
+						if(menuPanels.IsEmpty())
 						{
-						case SDL_EVENT_KEY_DOWN:
-							Messages::Add({std::format("Keydown Event Received {}", SDL_GetKeyName(event.key.key)),
-							               GameData::MessageCategories().Get("normal")});
-							break;
-						case SDL_EVENT_KEY_UP:
-							Messages::Add({std::format("Keyup Event Received {}", SDL_GetKeyName(event.key.key)),
-										   GameData::MessageCategories().Get("normal")});
-							break;
-						default:
-							Messages::Add({"Unknown Event Received", GameData::MessageCategories().Get("normal")});
-							break;
+							Messages::Add({"Received a Command: " + std::to_string(cmd->State()), GameData::MessageCategories().Get("normal")});
+							mainPanel->GetEngine().GiveCommand(*cmd);
 						}
 					}
 				}
 			}
-
 
 			if(client)
 			{

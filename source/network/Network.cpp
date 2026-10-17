@@ -15,6 +15,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Network.h"
 
+#include "Command.h"
 #include "GameData.h"
 #include "Logger.h"
 #include "Messages.h"
@@ -79,13 +80,19 @@ namespace {
 		return true;
 	}
 
+	template <size_t N>
+	using uint_of_size = std::conditional_t<
+	    N == 1, std::uint8_t,
+	    std::conditional_t<N == 2, std::uint16_t, std::conditional_t<N == 4, std::uint32_t, std::uint64_t>>>;
+
 	template <typename Type>
 	void WriteSerialized(std::vector<unsigned char> &out, Type value)
 	{
-		static_assert(std::is_integral_v<Type>);
-		using U = std::make_unsigned_t<Type>;
+		static_assert(sizeof(Type) == 1 || sizeof(Type) == 2 || sizeof(Type) == 4 || sizeof(Type) == 8);
+		static_assert(std::is_integral_v<Type> || std::is_floating_point_v<Type>);
 
-		U bits = static_cast<U>(value);
+		using U = uint_of_size<sizeof(Type)>;
+		U bits = std::bit_cast<U>(value);
 
 		for(size_t i = 0; i < sizeof(Type); ++i)
 			out.emplace_back(static_cast<unsigned char>(bits >> (i * 8)));
@@ -94,18 +101,20 @@ namespace {
 	template <typename Type>
 	bool ReadSerialized(const std::vector<unsigned char> &data, size_t &offset, Type &value)
 	{
-		static_assert(std::is_integral_v<Type>);
-		using U = std::make_unsigned_t<Type>;
+		static_assert(sizeof(Type) == 1 || sizeof(Type) == 2 || sizeof(Type) == 4 || sizeof(Type) == 8);
+		static_assert(std::is_integral_v<Type> || std::is_floating_point_v<Type>);
 
 		if(offset > data.size() || sizeof(Type) > data.size() - offset)
 			return false;
 
-		U bits = 0;
+		using U = uint_of_size<sizeof(Type)>;
+
+		std::uint64_t bits = 0;
 
 		for(size_t i = 0; i < sizeof(Type); ++i)
-			bits |= U(data[offset + i]) << (i * 8);
+			bits |= static_cast<std::uint64_t>(data[offset + i]) << (i * 8);
 
-		value = static_cast<Type>(bits);
+		value = std::bit_cast<Type>(static_cast<U>(bits));
 		offset += sizeof(Type);
 		return true;
 	}
@@ -132,67 +141,32 @@ bool Network::NetworkingAvailable()
 	return NETWORKING_AVAILABLE.load();
 }
 
-Network::Event Network::SerializeInputEvent(const SDL_Event &event)
+Network::Event Network::SerializeCommand(const Command &command)
 {
 	Event result;
-	result.Type = EventType::INPUT;
-
-	// Input event type
-	switch(event.type)
-	{
-	case SDL_EVENT_KEY_DOWN:
-		WriteSerialized(result.Data, static_cast<std::uint8_t>(InputEventType::KEY_DOWN));
-		WriteSerialized(result.Data, event.key.key);
-		WriteSerialized(result.Data, event.key.mod);
-		WriteSerialized(result.Data, static_cast<std::uint8_t>(event.key.repeat));
-		break;
-	case SDL_EVENT_KEY_UP:
-		WriteSerialized(result.Data, static_cast<std::uint8_t>(InputEventType::KEY_UP));
-		WriteSerialized(result.Data, event.key.key);
-		WriteSerialized(result.Data, event.key.mod);
-		WriteSerialized(result.Data, static_cast<std::uint8_t>(event.key.repeat));
-		break;
-	default:
-		return Event{.Type = EventType::INVALID};
-	}
+	result.Type = EventType::COMMAND;
+	WriteSerialized(result.Data, command.State());
+	WriteSerialized(result.Data, command.Turn());
 
 	return result;
 }
 
-SDL_Event Network::DeserializeInputEvent(const Event &event)
+std::optional<Command> Network::DeserializeCommand(const Event &event)
 {
-	SDL_Event result{};
+	if(event.Type != EventType::COMMAND)
+		return std::nullopt;
 
-	std::uint8_t type;
-	std::uint8_t repeat;
+	std::uint64_t state;
+	double turn;
 
 	size_t offset = 0;
-	if(!ReadSerialized(event.Data, offset, type))
-		return SDL_Event{};
-	if(!ReadSerialized(event.Data, offset, result.key.key))
-		return SDL_Event{};
-	if(!ReadSerialized(event.Data, offset, result.key.mod))
-		return SDL_Event{};
-	if(!ReadSerialized(event.Data, offset, repeat))
-		return SDL_Event{};
 
-	if(type >= static_cast<std::uint8_t>(InputEventType::MAX_ENUM))
-		return SDL_Event{};
+	if(!ReadSerialized(event.Data, offset, state))
+		return std::nullopt;
+	if(!ReadSerialized(event.Data, offset, turn))
+		return std::nullopt;
 
-	result.key.repeat = repeat;
-
-	const auto internal_type = static_cast<InputEventType>(type);
-	switch(internal_type)
-	{
-	case InputEventType::KEY_DOWN:
-		result.type = SDL_EVENT_KEY_DOWN;
-		break;
-	case InputEventType::KEY_UP:
-		result.type = SDL_EVENT_KEY_UP;
-		break;
-	}
-
-	return result;
+	return Command(state, turn);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

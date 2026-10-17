@@ -214,7 +214,7 @@ private:
 	void SendHails();
 	void HandleKeyboardInputs();
 	void HandleMouseClicks();
-	void HandleMouseInput(Command &activeCommands);
+	void HandleMouseInput();
 
 	void FillCollisionSets();
 
