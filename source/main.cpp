@@ -637,6 +637,19 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 				}
 
 				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
+				server->SendEvent({.Type = Network::EventType::TEXT, .Data = {'a', 'b'}});
 			}
 
 

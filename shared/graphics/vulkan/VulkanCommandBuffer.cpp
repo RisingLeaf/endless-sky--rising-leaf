@@ -64,7 +64,7 @@ void VulkanObjects::VulkanSingleCommandBuffer::End()
 
 VulkanObjects::VulkanSingleCommandBuffer::~VulkanSingleCommandBuffer()
 {
-  assert(state % 2 == 0 && "deleting command buffer that is still in use");
+  assert(state != 1 && "deleting command buffer that is still in use");
 #ifndef NDEBUG
   if(state == 0)
     Log::Warn << "deleting command buffer that was never used!" << Log::End;

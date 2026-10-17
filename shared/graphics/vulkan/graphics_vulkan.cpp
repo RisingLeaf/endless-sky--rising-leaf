@@ -284,8 +284,8 @@ void graphics_vulkan::VulkanGraphicsInstance::CreateRenderBuffer(
     const std::string_view                                name) const
 {
   GraphicsTypes::StateInfo state;
-  state.Color   = create_info.HasColor;
-  state.Depth   = create_info.HasDepth;
+  state.Color   = create_info.ColorFormat != GraphicsTypes::ImageFormat::INVALID;
+  state.Depth   = create_info.DepthFormat != GraphicsTypes::ImageFormat::INVALID;
   state.Samples = static_cast<int>(create_info.Samples);
 
   render_buffer_instance =

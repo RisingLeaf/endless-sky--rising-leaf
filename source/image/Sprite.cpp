@@ -49,7 +49,7 @@ namespace {
 
 		target = graphics_layer::TextureHandle(
 		    graphics_instance, name, framePixels, width, height, frames, GraphicsTypes::TextureType::TYPE_2D_ARRAY,
-		    GraphicsTypes::ImageFormat::RGBA, GraphicsTypes::TextureTarget::READ,
+		    GraphicsTypes::ImageFormat::RGBA_SRGB, GraphicsTypes::TextureTarget::READ,
 		    GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
 		    Preferences::Has("Texture filtering") ? GraphicsTypes::TextureFilter::LINEAR
 			                                      : GraphicsTypes::TextureFilter::NEAREST);

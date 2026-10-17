@@ -103,15 +103,19 @@ namespace VulkanTranslate
   {
     switch(format)
     {
-      case GraphicsTypes::ImageFormat::R:       return VK_FORMAT_R8_SRGB;
-      case GraphicsTypes::ImageFormat::RG:      return VK_FORMAT_R8G8_SRGB;
-      case GraphicsTypes::ImageFormat::RGB:     return VK_FORMAT_R8G8B8_SRGB;
-      case GraphicsTypes::ImageFormat::RGBA:    return VK_FORMAT_R8G8B8A8_SRGB;
-      case GraphicsTypes::ImageFormat::RGBA16F: return VK_FORMAT_R16G16B16A16_SFLOAT;
-      case GraphicsTypes::ImageFormat::RGBA32F: return VK_FORMAT_R32G32B32A32_SFLOAT;
-      case GraphicsTypes::ImageFormat::BGRA:    return VK_FORMAT_B8G8R8A8_SRGB;
-      case GraphicsTypes::ImageFormat::DEPTH:   return VK_FORMAT_D32_SFLOAT;
-      case GraphicsTypes::ImageFormat::INVALID: break;
+      case GraphicsTypes::ImageFormat::R:         return VK_FORMAT_R8_UNORM;
+      case GraphicsTypes::ImageFormat::RG:        return VK_FORMAT_R8G8_UNORM;
+      case GraphicsTypes::ImageFormat::RGB:       return VK_FORMAT_R8G8B8_UNORM;
+      case GraphicsTypes::ImageFormat::RGBA:      return VK_FORMAT_R8G8B8A8_UNORM;
+      case GraphicsTypes::ImageFormat::R_SRGB:    return VK_FORMAT_R8_SRGB;
+      case GraphicsTypes::ImageFormat::RG_SRGB:   return VK_FORMAT_R8G8_SRGB;
+      case GraphicsTypes::ImageFormat::RGB_SRGB:  return VK_FORMAT_R8G8B8_SRGB;
+      case GraphicsTypes::ImageFormat::RGBA_SRGB: return VK_FORMAT_R8G8B8A8_SRGB;
+      case GraphicsTypes::ImageFormat::RGBA16F:   return VK_FORMAT_R16G16B16A16_SFLOAT;
+      case GraphicsTypes::ImageFormat::RGBA32F:   return VK_FORMAT_R32G32B32A32_SFLOAT;
+      case GraphicsTypes::ImageFormat::BGRA:      return VK_FORMAT_B8G8R8A8_SRGB;
+      case GraphicsTypes::ImageFormat::DEPTH:     return VK_FORMAT_D32_SFLOAT;
+      case GraphicsTypes::ImageFormat::INVALID:   break;
     }
     throw std::runtime_error("Internal format not implemented/translated in vulkan.");
   }
@@ -120,15 +124,19 @@ namespace VulkanTranslate
   {
     switch(format)
     {
-      case GraphicsTypes::ImageFormat::R:       return 1;
-      case GraphicsTypes::ImageFormat::RG:      return 2;
+      case GraphicsTypes::ImageFormat::R:         return 1;
+      case GraphicsTypes::ImageFormat::RG:        return 2;
       case GraphicsTypes::ImageFormat::RGB:
-      case GraphicsTypes::ImageFormat::RGBA:
+      case GraphicsTypes::ImageFormat::RGBA:      return 4;
+      case GraphicsTypes::ImageFormat::R_SRGB:    return 1;
+      case GraphicsTypes::ImageFormat::RG_SRGB:   return 2;
+      case GraphicsTypes::ImageFormat::RGB_SRGB:
+      case GraphicsTypes::ImageFormat::RGBA_SRGB:
       case GraphicsTypes::ImageFormat::RGBA16F:
       case GraphicsTypes::ImageFormat::RGBA32F:
-      case GraphicsTypes::ImageFormat::BGRA:    return 4;
-      case GraphicsTypes::ImageFormat::DEPTH:   return 1;
-      case GraphicsTypes::ImageFormat::INVALID: return 0;
+      case GraphicsTypes::ImageFormat::BGRA:      return 4;
+      case GraphicsTypes::ImageFormat::DEPTH:     return 1;
+      case GraphicsTypes::ImageFormat::INVALID:   return 0;
     }
     throw std::runtime_error("Missing Format case in GetComponentsOfFormat");
   }
@@ -140,12 +148,16 @@ namespace VulkanTranslate
       case GraphicsTypes::ImageFormat::R:
       case GraphicsTypes::ImageFormat::RG:
       case GraphicsTypes::ImageFormat::RGB:
-      case GraphicsTypes::ImageFormat::RGBA:    return 1;
-      case GraphicsTypes::ImageFormat::RGBA16F: return 2;
-      case GraphicsTypes::ImageFormat::RGBA32F: return 4;
-      case GraphicsTypes::ImageFormat::BGRA:    return 1;
-      case GraphicsTypes::ImageFormat::DEPTH:   return 4;
-      case GraphicsTypes::ImageFormat::INVALID: return 0;
+      case GraphicsTypes::ImageFormat::RGBA:
+      case GraphicsTypes::ImageFormat::R_SRGB:
+      case GraphicsTypes::ImageFormat::RG_SRGB:
+      case GraphicsTypes::ImageFormat::RGB_SRGB:
+      case GraphicsTypes::ImageFormat::RGBA_SRGB: return 1;
+      case GraphicsTypes::ImageFormat::RGBA16F:   return 2;
+      case GraphicsTypes::ImageFormat::RGBA32F:   return 4;
+      case GraphicsTypes::ImageFormat::BGRA:      return 1;
+      case GraphicsTypes::ImageFormat::DEPTH:     return 4;
+      case GraphicsTypes::ImageFormat::INVALID:   return 0;
     }
     throw std::runtime_error("Missing Format case in GetComponentsOfFormat");
   }
@@ -154,15 +166,15 @@ namespace VulkanTranslate
   {
     switch(layout)
     {
-      case VK_IMAGE_LAYOUT_UNDEFINED:                        return {VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0};
-      case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:             return {VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT};
-      case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:             return {VK_PIPELINE_STAGE_TRANSFER_BIT, 0};
-      case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL:         return {VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT};
-      case VK_IMAGE_LAYOUT_GENERAL:                          return {VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT};
-      case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL: return {VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VK_ACCESS_SHADER_WRITE_BIT};
-      case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL:         return {VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT};
-      case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:                  return {VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_ACCESS_NONE_KHR};
-      default:                                               break;
+      case VK_IMAGE_LAYOUT_UNDEFINED:                return { VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 0 };
+      case VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL:     return { VK_PIPELINE_STAGE_TRANSFER_BIT, VK_ACCESS_TRANSFER_WRITE_BIT };
+      case VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL:     return { VK_PIPELINE_STAGE_TRANSFER_BIT, 0 };
+      case VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL: return { VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VK_ACCESS_SHADER_READ_BIT };
+      case VK_IMAGE_LAYOUT_GENERAL: return { VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VK_ACCESS_SHADER_WRITE_BIT | VK_ACCESS_SHADER_READ_BIT };
+      case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL: return { VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VK_ACCESS_SHADER_WRITE_BIT };
+      case VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL: return { VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT, VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT };
+      case VK_IMAGE_LAYOUT_PRESENT_SRC_KHR:          return { VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VK_ACCESS_NONE_KHR };
+      default:                                       break;
     }
     throw std::runtime_error("Layout has no associated information regarding stage and access!");
   }

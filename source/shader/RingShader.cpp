@@ -23,6 +23,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "shared/graphics/graphics_layer.h"
 #include "shared/graphics/graphics_toplevel_defines.h"
 #include "shared/system/File.h"
+#include "system/Log.h"
 
 #include <stdexcept>
 

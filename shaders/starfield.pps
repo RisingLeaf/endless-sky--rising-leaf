@@ -21,8 +21,13 @@ VS_BEGIN
 	gl_Position = vec4((spec.rotate * elongated + spec.translate + offset) * spec.scale, 0, 1);
 VS_END
 
+float SRGBToLinear(float c)
+{
+    return c <= 0.04045 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4);
+}
+
 FS_BEGIN
 	const float alpha = fragmentAlpha * (1. - abs(coord.x) - abs(coord.y));
 
-	out_color = vec4(alpha);
+	out_color = vec4(vec3(SRGBToLinear(alpha)), alpha);
 FS_END

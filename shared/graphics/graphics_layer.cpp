@@ -101,28 +101,22 @@ std::unique_ptr<GraphicsTypes::GraphicsInstance> graphics_layer::Init(SDL_Window
 namespace graphics_layer
 {
   FrameBufferHandle::FrameBufferHandle(
-      GraphicsTypes::GraphicsInstance      *instance,
-      const uint32_t                        width,
-      const uint32_t                        height,
-      const GraphicsTypes::RenderBufferType type,
-      const uint32_t                        samples,
-      const std::string_view                name) :
-    Instance(instance), Width(width), Height(height), Type(type), Samples(samples), Name(name)
+      GraphicsTypes::GraphicsInstance *instance,
+      const uint32_t                   width,
+      const uint32_t                   height,
+      const GraphicsTypes::ImageFormat color_format,
+      const GraphicsTypes::ImageFormat depth_format,
+      const uint32_t                   samples,
+      const std::string_view           name) :
+    Instance(instance), Width(width), Height(height), ColorFormat(color_format), DepthFormat(depth_format), Samples(samples), Name(name)
   {
     GraphicsTypes::FrameBufferInfo create_info;
-    create_info.Width      = width;
-    create_info.Height     = height;
-    create_info.Samples    = Samples;
-    create_info.HasColor   = Type != GraphicsTypes::RenderBufferType::DEPTH;
-    create_info.HasDepth   = Type != GraphicsTypes::RenderBufferType::COLOR && Type != GraphicsTypes::RenderBufferType::COLOR32;
-    create_info.Presenter  = false;
-    create_info.TargetType = Type;
-    if(Type == GraphicsTypes::RenderBufferType::DEPTH)
-      create_info.Format = GraphicsTypes::ImageFormat::DEPTH;
-    else if(Type == GraphicsTypes::RenderBufferType::COLOR32 || Type == GraphicsTypes::RenderBufferType::BOTH32)
-      create_info.Format = GraphicsTypes::ImageFormat::RGBA32F;
-    else
-      create_info.Format = GraphicsTypes::ImageFormat::RGBA;
+    create_info.Width       = Width;
+    create_info.Height      = Height;
+    create_info.Samples     = Samples;
+    create_info.ColorFormat = ColorFormat;
+    create_info.DepthFormat = DepthFormat;
+    create_info.Presenter   = false;
     Instance->CreateRenderBuffer(FrameBuffer, create_info, Name);
   }
 
@@ -130,7 +124,7 @@ namespace graphics_layer
 
   void FrameBufferHandle::Bind(GraphicsTypes::CommandBufferInstance *cb) const
   {
-    cb->SetColorState(Type != GraphicsTypes::RenderBufferType::DEPTH);
+    cb->SetColorState(ColorFormat != GraphicsTypes::ImageFormat::INVALID);
     cb->BindRenderBuffer(FrameBuffer.get());
   }
 
@@ -146,19 +140,13 @@ namespace graphics_layer
     Height = height;
 
     GraphicsTypes::FrameBufferInfo create_info;
-    create_info.Width      = width;
-    create_info.Height     = height;
-    create_info.Samples    = Samples;
-    create_info.HasColor   = Type != GraphicsTypes::RenderBufferType::DEPTH;
-    create_info.HasDepth   = Type != GraphicsTypes::RenderBufferType::COLOR && Type != GraphicsTypes::RenderBufferType::COLOR32;
-    create_info.Presenter  = false;
-    create_info.TargetType = Type;
-    if(Type == GraphicsTypes::RenderBufferType::DEPTH)
-      create_info.Format = GraphicsTypes::ImageFormat::DEPTH;
-    else if(Type == GraphicsTypes::RenderBufferType::COLOR32 || Type == GraphicsTypes::RenderBufferType::BOTH32)
-      create_info.Format = GraphicsTypes::ImageFormat::RGBA32F;
-    else
-      create_info.Format = GraphicsTypes::ImageFormat::RGBA;
+    create_info.Width       = Width;
+    create_info.Height      = Height;
+    create_info.Samples     = Samples;
+    create_info.ColorFormat = ColorFormat;
+    create_info.DepthFormat = DepthFormat;
+    create_info.Presenter   = false;
+
     Instance->CreateRenderBuffer(FrameBuffer, create_info, Name);
   }
 
@@ -538,7 +526,7 @@ namespace graphics_layer
 
   void TextureHandle::Reset()
   {
-	  Texture.reset();
+    Texture.reset();
   }
 
   void TextureHandle::CreateMipMaps() const

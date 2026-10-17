@@ -67,8 +67,8 @@ void RenderBuffer::Clear()
 
 // Create a texture of the given size that can be used as a render target.
 RenderBuffer::RenderBuffer(const gm::ivec2 &dimensions)
-    : framebuffer(GameWindow::GraphicsInstance(), dimensions[0], dimensions[1],
-	              GraphicsTypes::RenderBufferType::COLOR, 1, "render_buffer"),
+    : framebuffer(GameWindow::GraphicsInstance(), dimensions[0], dimensions[1], GraphicsTypes::ImageFormat::RGBA_SRGB,
+	              GraphicsTypes::ImageFormat::INVALID, 1, "render_buffer"),
       size(dimensions)
 {
 	GameWindow::GraphicsInstance()->CreateCommandBuffer(RenderCmd);

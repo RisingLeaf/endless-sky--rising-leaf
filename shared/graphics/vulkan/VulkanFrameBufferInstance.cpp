@@ -27,16 +27,16 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
                                                                     const GraphicsTypes::StateInfo       &state,
                                                                     const size_t                          count,
                                                                     const std::string_view                name) :
-  RenderBufferInstance(info), RenderPass(device, info.Format, state, std::string(name) + "_render_pass"), Device(device)
+  RenderBufferInstance(info), RenderPass(device, info.ColorFormat != GraphicsTypes::ImageFormat::INVALID ? info.ColorFormat : info.DepthFormat, state, std::string(name) + "_render_pass"), Device(device)
 {
-  if(info.TargetType != GraphicsTypes::RenderBufferType::DEPTH)
+  if(info.ColorFormat != GraphicsTypes::ImageFormat::INVALID)
   {
     if(info.Samples > 1)
     {
       Images.emplace_back(std::make_unique<VulkanImageInstance>(Device,
                                                                 std::string(name) + "_resolve_image",
                                                                 GraphicsTypes::TextureType::TYPE_2D,
-                                                                info.Format,
+                                                                info.ColorFormat,
                                                                 GraphicsTypes::TextureTarget::DRAW,
                                                                 1,
                                                                 info.Width,
@@ -44,7 +44,7 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
       Views.emplace_back(std::make_unique<VulkanViewInstance>(Device,
                                                               std::string(name) + "_resolve_view",
                                                               Images.back()->Get(),
-                                                              info.Format,
+                                                              info.ColorFormat,
                                                               GraphicsTypes::TextureType::TYPE_2D,
                                                               1,
                                                               1));
@@ -52,7 +52,7 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
     Images.emplace_back(std::make_unique<VulkanImageInstance>(Device,
                                                               std::string(name) + "_color_image",
                                                               GraphicsTypes::TextureType::TYPE_2D,
-                                                              info.Format,
+                                                              info.ColorFormat,
                                                               GraphicsTypes::TextureTarget::DRAW,
                                                               info.Samples,
                                                               info.Width,
@@ -60,18 +60,17 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
     Views.emplace_back(std::make_unique<VulkanViewInstance>(Device,
                                                             std::string(name) + "_color_view",
                                                             Images.back()->Get(),
-                                                            info.Format,
+                                                            info.ColorFormat,
                                                             GraphicsTypes::TextureType::TYPE_2D,
                                                             1,
                                                             1));
   }
-  if(info.TargetType != GraphicsTypes::RenderBufferType::COLOR)
+  if(info.DepthFormat != GraphicsTypes::ImageFormat::INVALID)
   {
-    const auto depth_format = info.TargetType == GraphicsTypes::RenderBufferType::DEPTH ? info.Format : GraphicsTypes::ImageFormat::DEPTH;
     Images.emplace_back(std::make_unique<VulkanImageInstance>(Device,
                                                               std::string(name) + "_depth_image",
                                                               GraphicsTypes::TextureType::TYPE_2D,
-                                                              depth_format,
+                                                              info.DepthFormat,
                                                               GraphicsTypes::TextureTarget::DRAW,
                                                               info.Samples,
                                                               info.Width,
@@ -79,7 +78,7 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
     Views.emplace_back(std::make_unique<VulkanViewInstance>(Device,
                                                             std::string(name) + "_depth_view",
                                                             Images.back()->Get(),
-                                                            depth_format,
+                                                            info.DepthFormat,
                                                             GraphicsTypes::TextureType::TYPE_2D,
                                                             1,
                                                             1));
@@ -117,14 +116,14 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
                                                                     const GraphicsTypes::StateInfo       &state,
                                                                     VkImage                               image,
                                                                     const std::string_view                name) :
-  RenderBufferInstance(info), RenderPass(device, info.Format, state, std::string(name) + "_render_pass", true), Device(device)
+  RenderBufferInstance(info), RenderPass(device, info.ColorFormat != GraphicsTypes::ImageFormat::INVALID ? info.ColorFormat : info.DepthFormat, state, std::string(name) + "_render_pass", true), Device(device)
 {
   if(info.Samples > 1)
   {
     Images.emplace_back(std::make_unique<VulkanImageInstance>(Device,
                                                               std::string(name) + "_resolve_image",
                                                               GraphicsTypes::TextureType::TYPE_2D,
-                                                              info.Format,
+                                                              info.ColorFormat,
                                                               GraphicsTypes::TextureTarget::DRAW,
                                                               1,
                                                               info.Width,
@@ -137,7 +136,7 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
     Views.emplace_back(std::make_unique<VulkanViewInstance>(Device,
                                                             std::string(name) + "_resolve_view",
                                                             Images.back()->Get(),
-                                                            info.Format,
+                                                            info.ColorFormat,
                                                             GraphicsTypes::TextureType::TYPE_2D,
                                                             1,
                                                             1));
@@ -145,7 +144,7 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
     Images.emplace_back(std::make_unique<VulkanImageInstance>(Device,
                                                               std::string(name) + "_color_image",
                                                               GraphicsTypes::TextureType::TYPE_2D,
-                                                              info.Format,
+                                                              info.ColorFormat,
                                                               GraphicsTypes::TextureTarget::DRAW,
                                                               info.Samples,
                                                               info.Width,
@@ -153,7 +152,7 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
     Views.emplace_back(std::make_unique<VulkanViewInstance>(Device,
                                                             std::string(name) + "_color_view",
                                                             Images.back()->Get(),
-                                                            info.Format,
+                                                            info.ColorFormat,
                                                             GraphicsTypes::TextureType::TYPE_2D,
                                                             1,
                                                             1));
@@ -163,7 +162,7 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
     Images.emplace_back(std::make_unique<VulkanImageInstance>(Device,
                                                               std::string(name) + "_color_image",
                                                               GraphicsTypes::TextureType::TYPE_2D,
-                                                              info.Format,
+                                                              info.ColorFormat,
                                                               GraphicsTypes::TextureTarget::DRAW,
                                                               1,
                                                               info.Width,
@@ -176,17 +175,16 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
     Views.emplace_back(std::make_unique<VulkanViewInstance>(Device,
                                                             std::string(name) + "_color_view",
                                                             Images.back()->Get(),
-                                                            info.Format,
+                                                            info.ColorFormat,
                                                             GraphicsTypes::TextureType::TYPE_2D,
                                                             1,
                                                             1));
   }
 
-  constexpr auto depth_format = GraphicsTypes::ImageFormat::DEPTH;
   Images.emplace_back(std::make_unique<VulkanImageInstance>(Device,
                                                             std::string(name) + "_depth_image",
                                                             GraphicsTypes::TextureType::TYPE_2D,
-                                                            depth_format,
+                                                            info.DepthFormat,
                                                             GraphicsTypes::TextureTarget::DRAW,
                                                             info.Samples,
                                                             info.Width,
@@ -194,7 +192,7 @@ VulkanObjects::VulkanFrameBufferInstance::VulkanFrameBufferInstance(const Vulkan
   Views.emplace_back(std::make_unique<VulkanViewInstance>(Device,
                                                           std::string(name) + "_depth_view",
                                                           Images.back()->Get(),
-                                                          depth_format,
+                                                          info.DepthFormat,
                                                           GraphicsTypes::TextureType::TYPE_2D,
                                                           1,
                                                           1));

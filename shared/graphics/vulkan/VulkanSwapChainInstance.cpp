@@ -41,16 +41,16 @@ void VulkanObjects::VulkanSwapChainInstance::Create(const VulkanCommandPool *com
     image_count = swap_chain_support.Capabilities.maxImageCount;
 
   VulkanHelpers::QueueFamilyIndices indices = VulkanHelpers::FindQueueFamilies(Device->GetPhysicalDevice(), Device->GetSurface());
-  uint32_t                          queueFamilyIndices[] = {indices.GraphicsFamily.value(), indices.PresentFamily.value()};
+  uint32_t                          queueFamilyIndices[] = { indices.GraphicsFamily.value(), indices.PresentFamily.value() };
 
-  const auto create_info =
-      VulkanBootstrap::GetSwapChainCreate(Device->GetSurface(),
-                                          image_count,
-                                          surface_format,
-                                          extent_2d,
-                                          indices.GraphicsFamily != indices.PresentFamily ? queueFamilyIndices : nullptr,
-                                          swap_chain_support.Capabilities.currentTransform,
-                                          present_mode);
+  const auto create_info = VulkanBootstrap::GetSwapChainCreate(
+      Device->GetSurface(),
+      image_count,
+      surface_format,
+      extent_2d,
+      indices.GraphicsFamily != indices.PresentFamily ? queueFamilyIndices : nullptr,
+      swap_chain_support.Capabilities.currentTransform,
+      present_mode);
 
   VulkanHelpers::VK_CHECK_RESULT(vkCreateSwapchainKHR(Device->GetDevice(), &create_info, nullptr, &SwapChain), __LINE__, __FILE__);
 
@@ -60,13 +60,12 @@ void VulkanObjects::VulkanSwapChainInstance::Create(const VulkanCommandPool *com
   vkGetSwapchainImagesKHR(Device->GetDevice(), SwapChain, &image_count, images.data());
 
   GraphicsTypes::FrameBufferInfo info{};
-  info.Format    = GraphicsTypes::ImageFormat::BGRA;
-  info.Width     = extent_2d.width;
-  info.Height    = extent_2d.height;
-  info.Presenter = true;
-  info.Samples   = 4;
-  info.HasColor  = true;
-  info.HasDepth  = true;
+  info.Width       = extent_2d.width;
+  info.Height      = extent_2d.height;
+  info.Presenter   = true;
+  info.Samples     = 4;
+  info.ColorFormat = GraphicsTypes::ImageFormat::BGRA;
+  info.DepthFormat = GraphicsTypes::ImageFormat::DEPTH;
   GraphicsTypes::StateInfo state{};
   state.Color      = true;
   state.Depth      = true;
@@ -83,17 +82,19 @@ void VulkanObjects::VulkanSwapChainInstance::Create(const VulkanCommandPool *com
   semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
   for(asl::uint32 i = 0; i < image_count; i++)
   {
-    VulkanHelpers::VK_CHECK_RESULT(vkCreateSemaphore(Device->GetDevice(), &semaphore_create_info, nullptr, &RenderFinishedSemaphores[i]),
-                                   __LINE__,
-                                   __FILE__);
+    VulkanHelpers::VK_CHECK_RESULT(
+        vkCreateSemaphore(Device->GetDevice(), &semaphore_create_info, nullptr, &RenderFinishedSemaphores[i]),
+        __LINE__,
+        __FILE__);
     Device->NameObject(VK_OBJECT_TYPE_SEMAPHORE, reinterpret_cast<uint64_t>(RenderFinishedSemaphores[i]), "swap_chain_semaphore");
   }
 }
 
-VulkanObjects::VulkanSwapChainInstance::VulkanSwapChainInstance(const VulkanDeviceInstance *device,
-                                                                const VulkanCommandPool    *command_pool,
-                                                                const uint32_t              width,
-                                                                const uint32_t              height) :
+VulkanObjects::VulkanSwapChainInstance::VulkanSwapChainInstance(
+    const VulkanDeviceInstance *device,
+    const VulkanCommandPool    *command_pool,
+    const uint32_t              width,
+    const uint32_t              height) :
   Device(device)
 {
   Create(command_pool, width, height);
@@ -137,13 +138,13 @@ bool VulkanObjects::VulkanSwapChainInstance::BeginFrame(const VulkanCommandPool 
 
 void VulkanObjects::VulkanSwapChainInstance::EndFrame(const VulkanCommandPool *command_pool, const uint32_t width, const uint32_t height)
 {
-  const VkSemaphore wait_semaphores[] = {RenderFinishedSemaphores[ImageIndex]};
+  const VkSemaphore wait_semaphores[] = { RenderFinishedSemaphores[ImageIndex] };
   VkPresentInfoKHR  present_info{};
   present_info.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
   present_info.waitSemaphoreCount = 1;
   present_info.pWaitSemaphores    = wait_semaphores;
 
-  const VkSwapchainKHR swap_chain_khrs[] = {SwapChain};
+  const VkSwapchainKHR swap_chain_khrs[] = { SwapChain };
   present_info.swapchainCount            = 1;
   present_info.pSwapchains               = swap_chain_khrs;
   present_info.pImageIndices             = &ImageIndex;

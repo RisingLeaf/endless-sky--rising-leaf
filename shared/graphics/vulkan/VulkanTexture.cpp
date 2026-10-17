@@ -212,7 +212,7 @@ VulkanObjects::VulkanViewInstance::VulkanViewInstance(
     const uint32_t                   mip_levels) :
   Device(device)
 {
-  const auto create_info = VulkanBootstrap::GetimageViewCreate(
+  const auto create_info = VulkanBootstrap::GetImageViewCreate(
       image,
       format == GraphicsTypes::ImageFormat::DEPTH ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT,
       type,

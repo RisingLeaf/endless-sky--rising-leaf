@@ -15,13 +15,26 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "Color.h"
 
+#include <cmath>
+
 using namespace std;
+
+namespace {
+	float SRGBToLinear(const double c)
+	{
+		return static_cast<float>(c <= 0.04045 ? c / 12.92 : std::pow((c + 0.055) / 1.055, 2.4));
+	}
+} // namespace
 
 
 
 // Greyscale color constructor.
 Color::Color(float i, float a) : color{i, i, i, a}
 {
+	color[0] = SRGBToLinear(i);
+	color[1] = SRGBToLinear(i);
+	color[2] = SRGBToLinear(i);
+	color[3] = a;
 }
 
 
@@ -29,6 +42,10 @@ Color::Color(float i, float a) : color{i, i, i, a}
 // Full color constructor.
 Color::Color(float r, float g, float b, float a) : color{r, g, b, a}, isLoaded(true)
 {
+	color[0] = SRGBToLinear(r);
+	color[1] = SRGBToLinear(g);
+	color[2] = SRGBToLinear(b);
+	color[3] = a;
 }
 
 
@@ -51,11 +68,11 @@ bool Color::operator!=(const Color &other) const
 
 
 // Set all four color components to the given values.
-void Color::Load(double r, double g, double b, double a)
+void Color::Load(const double r, const double g, const double b, const double a)
 {
-	color[0] = static_cast<float>(r);
-	color[1] = static_cast<float>(g);
-	color[2] = static_cast<float>(b);
+	color[0] = static_cast<float>(r);// SRGBToLinear(r, a);
+	color[1] = static_cast<float>(g);// SRGBToLinear(g, a);
+	color[2] = static_cast<float>(b);// SRGBToLinear(b, a);
 	color[3] = static_cast<float>(a);
 
 	isLoaded = true;

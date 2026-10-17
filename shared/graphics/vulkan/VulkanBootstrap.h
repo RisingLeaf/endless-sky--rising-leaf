@@ -102,7 +102,7 @@ namespace VulkanBootstrap
                                    uint32_t                     layers     = 1,
                                    uint32_t                     mip_levels = 1);
 
-  VkImageViewCreateInfo GetimageViewCreate(VkImage                    image,
+  VkImageViewCreateInfo GetImageViewCreate(VkImage                    image,
                                            VkImageAspectFlags         aspect_flags,
                                            GraphicsTypes::TextureType type,
                                            GraphicsTypes::ImageFormat format,

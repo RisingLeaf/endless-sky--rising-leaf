@@ -78,6 +78,10 @@ namespace GraphicsTypes
     RG,
     RGB,
     RGBA,
+    R_SRGB,
+    RG_SRGB,
+    RGB_SRGB,
+    RGBA_SRGB,
     RGBA16F,
     RGBA32F,
     BGRA,
@@ -89,15 +93,19 @@ namespace GraphicsTypes
   {
     switch(format)
     {
-      case ImageFormat::R:       return 1;
-      case ImageFormat::RG:      return 2;
+      case ImageFormat::R:         return 1;
+      case ImageFormat::RG:        return 2;
       case ImageFormat::RGB:
-      case ImageFormat::RGBA:
+      case ImageFormat::RGBA:      return 4;
+      case ImageFormat::R_SRGB:    return 1;
+      case ImageFormat::RG_SRGB:   return 2;
+      case ImageFormat::RGB_SRGB:
+      case ImageFormat::RGBA_SRGB:
       case ImageFormat::RGBA16F:
       case ImageFormat::RGBA32F:
-      case ImageFormat::BGRA:    return 4;
-      case ImageFormat::DEPTH:   return 1;
-      case ImageFormat::INVALID: return 0;
+      case ImageFormat::BGRA:      return 4;
+      case ImageFormat::DEPTH:     return 1;
+      case ImageFormat::INVALID:   return 0;
     }
     throw std::runtime_error("Missing Format case in GetComponentsOfFormat");
   }
@@ -301,19 +309,16 @@ namespace GraphicsTypes
 
   struct FrameBufferInfo
   {
-    uint32_t         Width      = 1;
-    uint32_t         Height     = 1;
-    uint32_t         Samples    = 1;
-    bool             HasColor   = false;
-    bool             HasDepth   = false;
-    bool             Presenter  = false;
-    RenderBufferType TargetType = RenderBufferType::COLOR;
-    ImageFormat      Format     = ImageFormat::RGBA;
-    bool             operator==(const FrameBufferInfo &other) const
+    uint32_t    Width   = 1;
+    uint32_t    Height  = 1;
+    uint32_t    Samples = 1;
+    ImageFormat ColorFormat;
+    ImageFormat DepthFormat;
+    bool        Presenter = false;
+    bool        operator==(const FrameBufferInfo &other) const
     {
       return this->Width == other.Width && this->Height == other.Height && this->Samples == other.Samples &&
-             this->HasColor == other.HasColor && this->HasDepth == other.HasDepth && this->Presenter == other.Presenter &&
-             this->TargetType == other.TargetType && this->Format == other.Format;
+             this->ColorFormat == other.ColorFormat && this->DepthFormat == other.DepthFormat && this->Presenter == other.Presenter;
     }
   };
 
@@ -495,11 +500,11 @@ namespace GraphicsTypes
     virtual void CreateMipMaps(const TextureInstance *texture_instance) const = 0;
 
 
-    virtual void Resize(int width, int height) = 0;
-    virtual bool StartDraw(int width, int height) = 0;
-    [[nodiscard]] virtual int AcquireFrameIndex() const = 0;
-    virtual void StartMainRenderPass(CommandBufferInstance *cb) = 0;
-    virtual void EndDraw(CommandBufferInstance *cb, int width, int height) = 0;
+    virtual void              Resize(int width, int height)                             = 0;
+    virtual bool              StartDraw(int width, int height)                          = 0;
+    [[nodiscard]] virtual int AcquireFrameIndex() const                                 = 0;
+    virtual void              StartMainRenderPass(CommandBufferInstance *cb)            = 0;
+    virtual void              EndDraw(CommandBufferInstance *cb, int width, int height) = 0;
 
 
     virtual void Wait() = 0;

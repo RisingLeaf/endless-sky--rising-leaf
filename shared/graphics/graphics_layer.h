@@ -42,10 +42,11 @@ namespace graphics_layer
   {
     GraphicsTypes::GraphicsInstance *Instance;
 
-    uint32_t                        Width;
-    uint32_t                        Height;
-    GraphicsTypes::RenderBufferType Type;
-    uint32_t                        Samples;
+    uint32_t                   Width;
+    uint32_t                   Height;
+    GraphicsTypes::ImageFormat ColorFormat;
+    GraphicsTypes::ImageFormat DepthFormat;
+    uint32_t                   Samples;
 
     std::unique_ptr<GraphicsTypes::RenderBufferInstance> FrameBuffer;
 
@@ -56,7 +57,8 @@ namespace graphics_layer
         GraphicsTypes::GraphicsInstance *instance,
         uint32_t                         width,
         uint32_t                         height,
-        GraphicsTypes::RenderBufferType  type,
+        GraphicsTypes::ImageFormat       color_format,
+        GraphicsTypes::ImageFormat       depth_format,
         uint32_t                         samples,
         std::string_view                 name);
     ~FrameBufferHandle();
@@ -75,10 +77,10 @@ namespace graphics_layer
     [[nodiscard]] const GraphicsTypes::TextureInstance *GetTexture() const;
   };
 
-  //class RotatingVertexBuffer
+  // class RotatingVertexBuffer
   //{
   //
-  //};
+  // };
 
   class ObjectHandle
   {
@@ -179,7 +181,7 @@ namespace graphics_layer
         GraphicsTypes::TextureFilter           filter       = GraphicsTypes::TextureFilter::LINEAR);
     ~TextureHandle();
 
-  	void Reset();
+    void Reset();
 
     TextureHandle(const TextureHandle &other) = delete;
     TextureHandle(TextureHandle &&other) noexcept : Instance(other.Instance)

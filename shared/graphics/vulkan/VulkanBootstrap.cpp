@@ -358,7 +358,7 @@ VkImageCreateInfo VulkanBootstrap::GetImageCreate(const GraphicsTypes::TextureTy
   return image_info;
 }
 
-VkImageViewCreateInfo VulkanBootstrap::GetimageViewCreate(VkImage                          image,
+VkImageViewCreateInfo VulkanBootstrap::GetImageViewCreate(VkImage                          image,
                                                           const VkImageAspectFlags         aspect_flags,
                                                           const GraphicsTypes::TextureType type,
                                                           const GraphicsTypes::ImageFormat format,
