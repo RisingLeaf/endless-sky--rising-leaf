@@ -20,16 +20,20 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "Logger.h"
 #include "Messages.h"
 
+#include <cmath>
+
 
 namespace {
-	std::atomic NETWORKING_AVAILABLE = false;
+	std::atomic NETWORKING_AVAILABLE{false};
 
-	constexpr int MAX_CLIENTS = 4;
-	constexpr int MAX_CHANNELS = 2;
+	constexpr std::size_t MAX_CLIENTS = 4;
+	constexpr std::size_t MAX_CHANNELS = 2;
 
 	constexpr enet_uint32 EVENT_TIMEOUT_MS = 50;
+	constexpr enet_uint16 DEFAULT_PORT = 55542;
 
-	constexpr int DEFAULT_PORT = 55542;
+	constexpr std::size_t MAX_PACKET_SIZE = 4096;
+	constexpr std::size_t MAX_QUEUED_EVENTS = 4096;
 
 	void LogMessage(const std::string_view text)
 	{
@@ -38,36 +42,58 @@ namespace {
 		Logger::Log(text, Logger::Level::INFO);
 	}
 
-	std::vector<unsigned char> EncodeEvent(const Network::Event &e)
+	bool IsValidEventType(unsigned char value)
 	{
+		switch(static_cast<Network::EventType>(value))
+		{
+		case Network::EventType::TEXT:
+		case Network::EventType::COMMAND:
+			return true;
+		case Network::EventType::INVALID:
+			return false;
+		}
+
+		return false;
+	}
+
+	std::optional<std::vector<unsigned char>> EncodeEvent(const Network::Event &event)
+	{
+		if(event.Data.size() >= MAX_PACKET_SIZE)
+			return std::nullopt;
+
 		std::vector<unsigned char> encoded;
-		encoded.emplace_back(static_cast<unsigned char>(e.Type));
-		encoded.append_range(e.Data);
+		encoded.emplace_back(static_cast<unsigned char>(event.Type));
+		encoded.append_range(event.Data);
 		return encoded;
 	}
 
-	Network::Event DecodeEvent(const std::vector<unsigned char> &e)
+	std::optional<Network::Event> DecodeEvent(const unsigned char *data, const std::size_t size)
 	{
-		Network::Event result{};
-		if(e.empty())
-			return result;
-		result.Type = static_cast<Network::EventType>(e[0]);
-		result.Data.append_range(e | std::views::drop(1));
+		if(data == nullptr || size == 0 || size > MAX_PACKET_SIZE)
+			return std::nullopt;
+
+		if(!IsValidEventType(data[0]))
+			return std::nullopt;
+
+		Network::Event result;
+		result.Type = static_cast<Network::EventType>(data[0]);
+		result.Data.assign(data + 1, data + size);
+
 		return result;
 	}
 
-	bool SendPacket(ENetPeer *peer, const Network::Event &event, bool reliable)
+	bool SendPacket(ENetPeer *peer, const Network::Event &event, const bool reliable)
 	{
-		if(!peer)
+		if(peer == nullptr || peer->state != ENET_PEER_STATE_CONNECTED)
 			return false;
 
 		const auto encoded = EncodeEvent(event);
-		if(encoded.empty())
+		if(!encoded)
 			return false;
 
 		const enet_uint32 flags = reliable ? ENET_PACKET_FLAG_RELIABLE : 0;
 
-		ENetPacket *packet = enet_packet_create(encoded.data(), encoded.size(), flags);
+		ENetPacket *packet = enet_packet_create(encoded->data(), encoded->size(), flags);
 		if(!packet)
 			return false;
 
@@ -80,42 +106,44 @@ namespace {
 		return true;
 	}
 
-	template <size_t N>
+	template <std::size_t N>
 	using uint_of_size = std::conditional_t<
 	    N == 1, std::uint8_t,
 	    std::conditional_t<N == 2, std::uint16_t, std::conditional_t<N == 4, std::uint32_t, std::uint64_t>>>;
 
+	template <typename T>
+	constexpr bool IsSupportedSerializedType =
+	    (std::is_integral_v<T> && !std::is_same_v<T, bool> &&
+		 (sizeof(T) == 1 || sizeof(T) == 2 || sizeof(T) == 4 || sizeof(T) == 8)) ||
+	    (std::is_floating_point_v<T> && (sizeof(T) == 4 || sizeof(T) == 8));
+
 	template <typename Type>
+	    requires IsSupportedSerializedType<Type>
 	void WriteSerialized(std::vector<unsigned char> &out, Type value)
 	{
-		static_assert(sizeof(Type) == 1 || sizeof(Type) == 2 || sizeof(Type) == 4 || sizeof(Type) == 8);
-		static_assert(std::is_integral_v<Type> || std::is_floating_point_v<Type>);
-
 		using U = uint_of_size<sizeof(Type)>;
-		U bits = std::bit_cast<U>(value);
+		const U bits = std::bit_cast<U>(value);
 
-		for(size_t i = 0; i < sizeof(Type); ++i)
-			out.emplace_back(static_cast<unsigned char>(bits >> (i * 8)));
+		for(std::size_t i = 0; i < sizeof(Type); ++i)
+			out.emplace_back(static_cast<unsigned char>((bits >> (i * 8)) & U{0xff}));
 	}
 
 	template <typename Type>
-	bool ReadSerialized(const std::vector<unsigned char> &data, size_t &offset, Type &value)
+	    requires IsSupportedSerializedType<Type>
+	bool ReadSerialized(const std::vector<unsigned char> &data, std::size_t &offset, Type &value)
 	{
-		static_assert(sizeof(Type) == 1 || sizeof(Type) == 2 || sizeof(Type) == 4 || sizeof(Type) == 8);
-		static_assert(std::is_integral_v<Type> || std::is_floating_point_v<Type>);
+		using U = uint_of_size<sizeof(Type)>;
 
 		if(offset > data.size() || sizeof(Type) > data.size() - offset)
 			return false;
 
-		using U = uint_of_size<sizeof(Type)>;
+		U bits = 0;
+		for(std::size_t i = 0; i < sizeof(Type); ++i)
+			bits |= static_cast<U>(static_cast<U>(data[offset + i]) << (i * 8));
 
-		std::uint64_t bits = 0;
-
-		for(size_t i = 0; i < sizeof(Type); ++i)
-			bits |= static_cast<std::uint64_t>(data[offset + i]) << (i * 8);
-
-		value = std::bit_cast<Type>(static_cast<U>(bits));
+		value = std::bit_cast<Type>(bits);
 		offset += sizeof(Type);
+
 		return true;
 	}
 } // namespace
@@ -153,17 +181,23 @@ Network::Event Network::SerializeCommand(const Command &command)
 
 std::optional<Command> Network::DeserializeCommand(const Event &event)
 {
+	constexpr static std::size_t EXPECTED_SIZE = sizeof(std::uint64_t) + sizeof(double);
+
 	if(event.Type != EventType::COMMAND)
 		return std::nullopt;
+	if(event.Data.size() != EXPECTED_SIZE)
+		return std::nullopt;
 
-	std::uint64_t state;
-	double turn;
 
-	size_t offset = 0;
+	std::uint64_t state{};
+	double turn{};
 
+	std::size_t offset = 0;
 	if(!ReadSerialized(event.Data, offset, state))
 		return std::nullopt;
 	if(!ReadSerialized(event.Data, offset, turn))
+		return std::nullopt;
+	if(offset != event.Data.size() || !std::isfinite(turn))
 		return std::nullopt;
 
 	return Command(state, turn);
@@ -177,21 +211,37 @@ std::optional<Command> Network::DeserializeCommand(const Event &event)
 
 Network::NetworkInterface::~NetworkInterface()
 {
-	Running.store(false);
-	if(EventLoop.joinable())
-		EventLoop.join();
+	Stop();
 	network_interface.reset();
 }
 
+void Network::NetworkInterface::Stop()
+{
+	Running.store(false);
 
-bool Network::NetworkInterface::SendEvent(const Event &event, bool reliable)
+	if(EventLoop.joinable())
+	{
+		if(EventLoop.get_id() == std::this_thread::get_id())
+			std::terminate();
+
+		EventLoop.join();
+	}
+}
+
+bool Network::NetworkInterface::SendEvent(const Event &event, const bool reliable)
 {
 	if(!Running.load())
 		return false;
 
+	if(event.Type != EventType::TEXT && event.Type != EventType::COMMAND)
+		return false;
+
+	if(event.Data.size() + 1 > MAX_PACKET_SIZE)
+		return false;
+
 	std::lock_guard lock(EventMutex);
 
-	if(!Running.load())
+	if(!Running.load() || OutgoingEvents.size() >= MAX_QUEUED_EVENTS)
 		return false;
 
 	OutgoingEvents.push(OutgoingEvent{event, reliable});
@@ -207,11 +257,34 @@ std::optional<Network::Event> Network::NetworkInterface::PollEvent()
 
 	Event event = std::move(IncomingEvents.front());
 	IncomingEvents.pop();
+
 	return event;
+}
+
+void Network::NetworkInterface::OnPeerConnected(ENetPeer *peer)
+{
+	char ip[64]{};
+
+	if(enet_address_get_host_ip(&peer->address, ip, sizeof(ip)) < 0)
+	{
+		LogMessage("A client connected.");
+		return;
+	}
+
+	LogMessage(std::format("Client connected from {}:{}", ip, peer->address.port));
+}
+
+void Network::NetworkInterface::OnPeerDisconnected(ENetPeer *peer)
+{
+	(void)peer;
+	LogMessage("A peer disconnected.");
 }
 
 bool Network::NetworkInterface::ProcessEvents()
 {
+	if(!network_interface)
+		return false;
+
 	std::queue<OutgoingEvent> outgoing;
 	{
 		std::lock_guard lock(EventMutex);
@@ -223,23 +296,26 @@ bool Network::NetworkInterface::ProcessEvents()
 		auto [event, reliable] = std::move(outgoing.front());
 		outgoing.pop();
 
-		for(size_t i = 0; i < network_interface->peerCount; ++i)
+		for(std::size_t i = 0; i < network_interface->peerCount; ++i)
 		{
-			ENetPeer *clientPeer = &network_interface->peers[i];
+			ENetPeer *target = &network_interface->peers[i];
 
-			if(clientPeer->state != ENET_PEER_STATE_CONNECTED)
+			if(target->state != ENET_PEER_STATE_CONNECTED)
 				continue;
 
-			if(!SendPacket(clientPeer, event, reliable))
-				Logger::Log("Failed to queue event for a client.", Logger::Level::ERROR);
+			if(!SendPacket(target, event, reliable))
+				Logger::Log("Failed to queue event for a peer.", Logger::Level::WARNING);
 		}
 	}
+
+	enet_host_flush(network_interface.get());
+
 	ENetEvent event{};
 
 	const int result = enet_host_service(network_interface.get(), &event, EVENT_TIMEOUT_MS);
 	if(result < 0)
 	{
-		Logger::Log("ENet server service failed.", Logger::Level::ERROR);
+		Logger::Log("ENet host service failed.", Logger::Level::ERROR);
 		return false;
 	}
 	if(result == 0)
@@ -247,38 +323,42 @@ bool Network::NetworkInterface::ProcessEvents()
 
 	switch(event.type)
 	{
-	case ENET_EVENT_TYPE_CONNECT: {
-		char ip[64];
-		enet_address_get_host_ip(&event.peer->address, ip, sizeof(ip));
-		const std::string message = std::format("Client connected from {}:{}", ip, event.peer->address.port);
-
-		LogMessage(message);
+	case ENET_EVENT_TYPE_CONNECT:
+		OnPeerConnected(event.peer);
 		break;
-	}
+
 	case ENET_EVENT_TYPE_RECEIVE: {
-		const auto *begin = event.packet->data;
-		const auto *end = begin + event.packet->dataLength;
+		const std::unique_ptr<ENetPacket, decltype(&enet_packet_destroy)> packet(event.packet, &enet_packet_destroy);
 
-		std::vector bytes(begin, end);
-		enet_packet_destroy(event.packet);
-
-		if(bytes.empty())
+		if(packet->dataLength == 0 || packet->dataLength > MAX_PACKET_SIZE)
 		{
-			Logger::Log("Received an empty event packet.", Logger::Level::WARNING);
+			Logger::Log("Received an empty or oversized packet.", Logger::Level::WARNING);
 			break;
 		}
 
-		Event received = DecodeEvent(bytes);
+		auto decoded = DecodeEvent(packet->data, packet->dataLength);
+		if(!decoded)
 		{
-			std::lock_guard lock(EventMutex);
-			IncomingEvents.push(std::move(received));
+			Logger::Log("Received an invalid event packet.", Logger::Level::WARNING);
+			break;
 		}
+
+		std::lock_guard lock(EventMutex);
+		if(IncomingEvents.size() >= MAX_QUEUED_EVENTS)
+		{
+			Logger::Log("Incoming event queue is full; dropping packet.", Logger::Level::WARNING);
+			break;
+		}
+
+		IncomingEvents.push(std::move(*decoded));
 		break;
 	}
+
 	case ENET_EVENT_TYPE_DISCONNECT:
-		LogMessage("A client disconnected.");
+		OnPeerDisconnected(event.peer);
 		event.peer->data = nullptr;
 		break;
+
 	case ENET_EVENT_TYPE_NONE:
 		break;
 	}
@@ -292,11 +372,14 @@ bool Network::NetworkInterface::ProcessEvents()
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Network::Server::~Server() = default;
+Network::Server::~Server()
+{
+	Stop();
+}
 
 std::expected<std::unique_ptr<Network::Server>, std::string_view> Network::Server::CreateServer()
 {
-	if(!NETWORKING_AVAILABLE.load())
+	if(!NetworkingAvailable())
 		return std::unexpected{"Networking has not been initialized."};
 
 	auto instance = std::unique_ptr<Server>(new Server);
@@ -319,9 +402,8 @@ std::expected<std::unique_ptr<Network::Server>, std::string_view> Network::Serve
 	} catch(...)
 	{
 		instance->Running.store(false);
-		instance->network_interface.reset();
-		instance->network_interface = nullptr;
-		throw;
+
+		return std::unexpected{"Failed to start server event loop."};
 	}
 
 	return instance;
@@ -329,10 +411,17 @@ std::expected<std::unique_ptr<Network::Server>, std::string_view> Network::Serve
 
 void Network::Server::RunEventLoop()
 {
-	while(Running.load())
+	try
 	{
-		if(!ProcessEvents())
-			break;
+		while(Running.load())
+			if(!ProcessEvents())
+				break;
+	} catch(const std::exception &e)
+	{
+		Logger::Log(std::format("Server event loop failed: {}", e.what()), Logger::Level::ERROR);
+	} catch(...)
+	{
+		Logger::Log("Server event loop failed unexpectedly.", Logger::Level::ERROR);
 	}
 
 	Running.store(false);
@@ -344,26 +433,23 @@ void Network::Server::RunEventLoop()
 /// Client
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 Network::Client::Client() = default;
 
 Network::Client::~Client()
 {
-	Running.store(false);
-	{
-		std::lock_guard lock(CommandMutex);
+	Stop();
 
-		while(!Commands.empty())
-		{
-			Commands.front()->result.set_value("Client is shutting down.");
-			Commands.pop();
-		}
+	std::lock_guard lock(CommandMutex);
+	while(!Commands.empty())
+	{
+		Commands.front()->result.set_value("Client is shutting down.");
+		Commands.pop();
 	}
 }
 
 std::expected<std::unique_ptr<Network::Client>, std::string_view> Network::Client::CreateClient()
 {
-	if(!NETWORKING_AVAILABLE.load())
+	if(!NetworkingAvailable())
 		return std::unexpected{"Networking has not been initialized."};
 
 	auto instance = std::unique_ptr<Client>(new Client);
@@ -383,20 +469,23 @@ std::expected<std::unique_ptr<Network::Client>, std::string_view> Network::Clien
 	} catch(...)
 	{
 		instance->Running.store(false);
-		instance->network_interface.reset();
-		throw;
+
+		return std::unexpected{"Failed to start client event loop."};
 	}
 
 	return instance;
 }
 
-std::optional<std::string_view> Network::Client::Connect(const std::string_view address)
+std::optional<std::string_view> Network::Client::Connect(std::string_view address)
 {
 	if(!Running.load())
 		return "Client is not running.";
 
 	if(address.empty())
 		return "Address cannot be empty.";
+
+	if(address.size() > 253)
+		return "Address is too long.";
 
 	auto command = std::make_unique<ConnectCommand>();
 	command->address = std::string(address);
@@ -408,61 +497,104 @@ std::optional<std::string_view> Network::Client::Connect(const std::string_view 
 		if(!Running.load())
 			return "Client is not running.";
 
+		static constexpr std::size_t MAX_PENDING_CONNECTS = 16;
+
+		if(Commands.size() >= MAX_PENDING_CONNECTS)
+			return "Too many pending connection requests.";
+
 		Commands.push(std::move(command));
 	}
 
 	return future.get();
 }
 
+void Network::Client::OnPeerConnected(ENetPeer *connectedPeer)
+{
+	if(peer == connectedPeer)
+	{
+		NetworkInterface::OnPeerConnected(connectedPeer);
+		return;
+	}
+
+	peer = connectedPeer;
+	NetworkInterface::OnPeerConnected(connectedPeer);
+}
+
+void Network::Client::OnPeerDisconnected(ENetPeer *disconnectedPeer)
+{
+	if(peer == disconnectedPeer)
+		peer = nullptr;
+
+	LogMessage("Server disconnected.");
+}
+
 void Network::Client::RunEventLoop()
 {
-	while(Running.load())
+	std::queue<std::unique_ptr<ConnectCommand>> pending;
+
+	constexpr auto FailQueue = [](auto &commands, const std::string_view reason) {
+		while(!commands.empty())
+		{
+			commands.front()->result.set_value(reason);
+			commands.pop();
+		}
+	};
+
+	try
 	{
-		std::queue<std::unique_ptr<ConnectCommand>> pending;
+		while(Running.load())
 		{
-			std::lock_guard lock(CommandMutex);
-			std::swap(pending, Commands);
+			{
+				std::lock_guard lock(CommandMutex);
+				std::swap(pending, Commands);
+			}
+
+			while(!pending.empty())
+			{
+				const auto command = std::move(pending.front());
+				pending.pop();
+
+				if(peer != nullptr)
+				{
+					command->result.set_value("Client is already connecting or connected.");
+					continue;
+				}
+
+				ENetAddress target{};
+				target.port = DEFAULT_PORT;
+
+				if(enet_address_set_host(&target, command->address.c_str()) < 0)
+				{
+					command->result.set_value("Failed to resolve server address.");
+					continue;
+				}
+
+				peer = enet_host_connect(network_interface.get(), &target, MAX_CHANNELS, 0);
+				if(peer == nullptr)
+				{
+					command->result.set_value("Failed to initiate connection.");
+					continue;
+				}
+
+				command->result.set_value(std::nullopt);
+			}
+
+			if(!ProcessEvents())
+				break;
 		}
-
-		while(!pending.empty())
-		{
-			const auto command = std::move(pending.front());
-			pending.pop();
-			if(peer != nullptr)
-			{
-				command->result.set_value("Client is already connecting or connected.");
-				continue;
-			}
-
-			ENetAddress address{};
-			address.port = DEFAULT_PORT;
-
-			if(enet_address_set_host(&address, command->address.c_str()) < 0)
-			{
-				command->result.set_value("Malformed address to connect to.");
-				continue;
-			}
-
-			peer = enet_host_connect(network_interface.get(), &address, MAX_CHANNELS, 0);
-			if(!peer)
-			{
-				command->result.set_value("No available peers for initiating connection.");
-				continue;
-			}
-
-			command->result.set_value(std::nullopt);
-		}
-
-		if(!ProcessEvents())
-			break;
+	} catch(const std::exception &e)
+	{
+		Logger::Log(std::format("Client event loop failed: {}", e.what()), Logger::Level::ERROR);
+	} catch(...)
+	{
+		Logger::Log("Client event loop failed unexpectedly.", Logger::Level::ERROR);
 	}
 
 	Running.store(false);
 
-	std::lock_guard lock(CommandMutex);
-	while(!Commands.empty())
+	FailQueue(pending, "Client event loop stopped.");
 	{
-		Commands.front()->result.set_value("Client event loop stopped.");
-		Commands.pop();
+		std::lock_guard lock(CommandMutex);
+		FailQueue(Commands, "Client event loop stopped.");
 	}
 }

@@ -16,8 +16,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #ifndef ENDLESS_SKY_NETWORK_H
 #define ENDLESS_SKY_NETWORK_H
 
-#include "SDL3/SDL_events.h"
-
 #include <enet/enet.h>
 #include <expected>
 #include <future>
@@ -27,11 +25,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <queue>
 #include <string_view>
 #include <thread>
-#include <utility>
 
 
 
 class Command;
+
 namespace Network {
 	void Init();
 	bool NetworkingAvailable();
@@ -47,11 +45,8 @@ namespace Network {
 		bool reliable = true;
 	};
 
-	enum class InputEventType : std::uint8_t {
-		KEY_DOWN,
-		KEY_UP,
-		MAX_ENUM
-	};
+	enum class InputEventType : std::uint8_t { KEY_DOWN, KEY_UP, MAX_ENUM };
+
 	Event SerializeCommand(const Command &command);
 	std::optional<Command> DeserializeCommand(const Event &event);
 
@@ -62,22 +57,32 @@ namespace Network {
 	public:
 		virtual ~NetworkInterface();
 
+		NetworkInterface(const NetworkInterface &) = delete;
+		NetworkInterface &operator=(const NetworkInterface &) = delete;
+
 		bool SendEvent(const Event &event, bool reliable = true);
 		std::optional<Event> PollEvent();
 
 	protected:
+		void Stop();
 		bool ProcessEvents();
 
+		virtual void OnPeerConnected(ENetPeer *peer);
+		virtual void OnPeerDisconnected(ENetPeer *peer);
+
 		struct ENetHostDeleter {
-			void operator()(ENetHost* host) const
-			{ enet_host_destroy(host); }
+			void operator()(ENetHost *host) const noexcept
+			{
+				if(host)
+					enet_host_destroy(host);
+			}
 		};
 
 		ENetAddress address{};
-	 	std::unique_ptr<ENetHost, ENetHostDeleter> network_interface = nullptr;
+		std::unique_ptr<ENetHost, ENetHostDeleter> network_interface = nullptr;
 
 		std::thread EventLoop;
-		std::atomic<bool> Running;
+		std::atomic<bool> Running{false};
 
 		std::mutex EventMutex;
 		std::queue<OutgoingEvent> OutgoingEvents;
@@ -96,7 +101,6 @@ namespace Network {
 		void RunEventLoop();
 	};
 
-
 	class Client final : public NetworkInterface {
 		Client();
 
@@ -106,13 +110,16 @@ namespace Network {
 		static std::expected<std::unique_ptr<Client>, std::string_view> CreateClient();
 		std::optional<std::string_view> Connect(std::string_view address);
 
-	private:
+	protected:
 		struct ConnectCommand {
 			std::string address;
 			std::promise<std::optional<std::string_view>> result;
 		};
 
 		void RunEventLoop();
+
+		void OnPeerConnected(ENetPeer *connectedPeer) override;
+		void OnPeerDisconnected(ENetPeer *disconnectedPeer) override;
 
 		// Accessed only by the event-loop thread.
 		ENetPeer *peer = nullptr;
