@@ -55,38 +55,26 @@ namespace Network {
 	Event SerializeCommand(const Command &command);
 	std::optional<Command> DeserializeCommand(const Event &event);
 
-	class Server {
-		Server();
+	class NetworkInterface {
+	protected:
+		NetworkInterface() = default;
 
 	public:
-		~Server();
-
-		Server(const Server &other) = delete;
-		Server(Server &&other) noexcept : address(other.address), server(std::exchange(other.server, nullptr))
-		{
-		}
-		Server &operator=(const Server &other) = delete;
-		Server &operator=(Server &&other) noexcept
-		{
-			if(this == &other)
-				return *this;
-			if(server)
-				enet_host_destroy(server);
-			address = other.address;
-			server = other.server;
-			other.server = nullptr;
-			return *this;
-		}
-
-		static std::expected<std::unique_ptr<Server>, std::string_view> CreateServer();
-		void RunEventLoop();
+		virtual ~NetworkInterface();
 
 		bool SendEvent(const Event &event, bool reliable = true);
 		std::optional<Event> PollEvent();
 
-	private:
+	protected:
+		bool ProcessEvents();
+
+		struct ENetHostDeleter {
+			void operator()(ENetHost* host) const
+			{ enet_host_destroy(host); }
+		};
+
 		ENetAddress address{};
-		ENetHost *server = nullptr;
+	 	std::unique_ptr<ENetHost, ENetHostDeleter> network_interface = nullptr;
 
 		std::thread EventLoop;
 		std::atomic<bool> Running;
@@ -96,34 +84,27 @@ namespace Network {
 		std::queue<Event> IncomingEvents;
 	};
 
+	class Server final : public NetworkInterface {
+		Server() = default;
 
-	class Client {
+	public:
+		~Server() override;
+
+		static std::expected<std::unique_ptr<Server>, std::string_view> CreateServer();
+
+	private:
+		void RunEventLoop();
+	};
+
+
+	class Client final : public NetworkInterface {
 		Client();
 
 	public:
-		~Client();
-
-		Client(const Client &other) = delete;
-		Client(Client &&other) noexcept : client(std::exchange(other.client, nullptr))
-		{
-		}
-		Client &operator=(const Client &other) = delete;
-		Client &operator=(Client &&other) noexcept
-		{
-			if(this == &other)
-				return *this;
-			if(client)
-				enet_host_destroy(client);
-			client = other.client;
-			other.client = nullptr;
-			return *this;
-		}
+		~Client() override;
 
 		static std::expected<std::unique_ptr<Client>, std::string_view> CreateClient();
 		std::optional<std::string_view> Connect(std::string_view address);
-
-		bool SendEvent(const Event &event, bool reliable = true);
-		std::optional<Event> PollEvent();
 
 	private:
 		struct ConnectCommand {
@@ -133,20 +114,11 @@ namespace Network {
 
 		void RunEventLoop();
 
-		ENetHost *client = nullptr;
-
 		// Accessed only by the event-loop thread.
 		ENetPeer *peer = nullptr;
 
-		std::atomic<bool> Running{false};
-		std::thread EventLoop;
-
 		std::mutex CommandMutex;
 		std::queue<std::unique_ptr<ConnectCommand>> Commands;
-
-		std::mutex EventMutex;
-		std::queue<OutgoingEvent> OutgoingEvents;
-		std::queue<Event> IncomingEvents;
 	};
 } // namespace Network
 
