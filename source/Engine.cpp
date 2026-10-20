@@ -2197,6 +2197,8 @@ void Engine::HandleKeyboardInputs()
 			Audio::Resume();
 		UI::PlaySound(UI::UISound::NORMAL);
 	}
+
+	keyHeld = activeCommands;
 }
 
 

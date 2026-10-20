@@ -47,7 +47,7 @@ namespace {
 		switch(static_cast<Network::EventType>(value))
 		{
 		case Network::EventType::TEXT:
-		case Network::EventType::COMMAND:
+		case Network::EventType::UPDATE_INPUT_STATE:
 			return true;
 		case Network::EventType::INVALID:
 			return false;
@@ -172,7 +172,7 @@ bool Network::NetworkingAvailable()
 Network::Event Network::SerializeCommand(const Command &command)
 {
 	Event result;
-	result.Type = EventType::COMMAND;
+	result.Type = EventType::UPDATE_INPUT_STATE;
 	WriteSerialized(result.Data, command.State());
 	WriteSerialized(result.Data, command.Turn());
 
@@ -183,7 +183,7 @@ std::optional<Command> Network::DeserializeCommand(const Event &event)
 {
 	constexpr static std::size_t EXPECTED_SIZE = sizeof(std::uint64_t) + sizeof(double);
 
-	if(event.Type != EventType::COMMAND)
+	if(event.Type != EventType::UPDATE_INPUT_STATE)
 		return std::nullopt;
 	if(event.Data.size() != EXPECTED_SIZE)
 		return std::nullopt;
@@ -233,7 +233,7 @@ bool Network::NetworkInterface::SendEvent(const Event &event, const bool reliabl
 	if(!Running.load())
 		return false;
 
-	if(event.Type != EventType::TEXT && event.Type != EventType::COMMAND)
+	if(event.Type != EventType::TEXT && event.Type != EventType::UPDATE_INPUT_STATE)
 		return false;
 
 	if(event.Data.size() + 1 > MAX_PACKET_SIZE)
@@ -266,17 +266,13 @@ void Network::NetworkInterface::OnPeerConnected(ENetPeer *peer)
 	char ip[64]{};
 
 	if(enet_address_get_host_ip(&peer->address, ip, sizeof(ip)) < 0)
-	{
 		LogMessage("A client connected.");
-		return;
-	}
-
-	LogMessage(std::format("Client connected from {}:{}", ip, peer->address.port));
+	else
+		LogMessage(std::format("Client connected from {}:{}", ip, peer->address.port));
 }
 
 void Network::NetworkInterface::OnPeerDisconnected(ENetPeer *peer)
 {
-	(void)peer;
 	LogMessage("A peer disconnected.");
 }
 
@@ -342,6 +338,9 @@ bool Network::NetworkInterface::ProcessEvents()
 			Logger::Log("Received an invalid event packet.", Logger::Level::WARNING);
 			break;
 		}
+
+		if(InterceptEvent(event.peer, *decoded))
+			break;
 
 		std::lock_guard lock(EventMutex);
 		if(IncomingEvents.size() >= MAX_QUEUED_EVENTS)
@@ -409,13 +408,73 @@ std::expected<std::unique_ptr<Network::Server>, std::string_view> Network::Serve
 	return instance;
 }
 
+std::vector<Network::Server::PeerState> Network::Server::GetPeerStates() const
+{
+	std::vector<PeerState> states;
+
+	std::lock_guard guard(PeersMutex);
+
+	states.reserve(Peers.size());
+
+	for(const auto &state : Peers | std::views::values)
+		states.emplace_back(state);
+
+	return states;
+}
+
+void Network::Server::OnPeerConnected(ENetPeer *connectedPeer)
+{
+	char ip[64]{};
+
+	if(enet_address_get_host_ip(&connectedPeer->address, ip, sizeof(ip)) < 0)
+		LogMessage("A client connected.");
+	else
+		LogMessage(std::format("Client connected from {}:{}", ip, connectedPeer->address.port));
+
+	{
+		std::lock_guard guard(PeersMutex);
+		Peers[connectedPeer] = PeerState{.Identifier = static_cast<int>(Peers.size())};
+	}
+}
+void Network::Server::OnPeerDisconnected(ENetPeer *disconnectedPeer)
+{
+	{
+		std::lock_guard guard(PeersMutex);
+		Peers.erase(disconnectedPeer);
+	}
+	NetworkInterface::OnPeerDisconnected(disconnectedPeer);
+}
+
+bool Network::Server::InterceptEvent(ENetPeer *peer, const Event &event)
+{
+	if(event.Type == EventType::UPDATE_INPUT_STATE)
+	{
+		std::lock_guard guard(PeersMutex);
+		if(const auto it = Peers.find(peer); it != Peers.end())
+		{
+			if(const auto deserialized = DeserializeCommand(event); deserialized)
+			{
+				it->second.CurrentInput = *deserialized;
+				LogMessage("Received State.");
+			}
+		}
+		else
+			LogMessage("Peer not found.");
+
+		return true;
+	}
+	return false;
+}
+
 void Network::Server::RunEventLoop()
 {
 	try
 	{
 		while(Running.load())
+		{
 			if(!ProcessEvents())
 				break;
+		}
 	} catch(const std::exception &e)
 	{
 		Logger::Log(std::format("Server event loop failed: {}", e.what()), Logger::Level::ERROR);
@@ -476,7 +535,7 @@ std::expected<std::unique_ptr<Network::Client>, std::string_view> Network::Clien
 	return instance;
 }
 
-std::optional<std::string_view> Network::Client::Connect(std::string_view address)
+std::optional<std::string_view> Network::Client::Connect(const std::string_view address)
 {
 	if(!Running.load())
 		return "Client is not running.";

@@ -15,8 +15,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
 
-#include "network/Network.h"
-
 #include <cstdint>
 #include <filesystem>
 #include <string>
@@ -151,9 +149,9 @@ public:
 private:
 	explicit Command(uint64_t state);
 	Command(uint64_t state, const std::string &text);
-	explicit Command(uint64_t state, double turn);
 
-	friend std::optional<Command> Network::DeserializeCommand(const Network::Event &event);
+public:
+	explicit Command(uint64_t state, double turn);
 
 
 private:

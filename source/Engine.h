@@ -88,6 +88,8 @@ public:
 	// Give a command on behalf of the player, used for integration tests.
 	void GiveCommand(const Command &command);
 
+	Command ActiveCommands() const { return keyHeld; }
+
 	// Get any special events that happened in this step.
 	// MainPanel::Step will clear this list.
 	std::list<ShipEvent> &Events();

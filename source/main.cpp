@@ -444,15 +444,6 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 			{
 				isFastForward = !isFastForward;
 			}
-			else if(client && event.type == SDL_EVENT_KEY_DOWN)
-			{
-				const auto cmd = Command(eventKeyCode);
-				if(cmd.HasBinding())
-				{
-					Messages::Add({"Sending a Command: " + std::to_string(cmd.State()), GameData::MessageCategories().Get("normal")});
-					client->SendEvent(Network::SerializeCommand(cmd));
-				}
-			}
 		}
 
 		// Special case: If fastforward is on capslock, update on mod state and not
@@ -642,15 +633,11 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 					if(event->Type == Network::EventType::TEXT)
 						Messages::Add({std::format("Received message length {}", event->Data.size()),
 						               GameData::MessageCategories().Get("normal")});
-					else if(event->Type == Network::EventType::COMMAND)
-					{
-						auto cmd = Network::DeserializeCommand(*event);
-						if(menuPanels.IsEmpty())
-						{
-							Messages::Add({"Received a Command: " + std::to_string(cmd->State()), GameData::MessageCategories().Get("normal")});
-							mainPanel->GetEngine().GiveCommand(*cmd);
-						}
-					}
+				}
+
+				for(const auto &[Identifier, CurrentInput] : server->GetPeerStates())
+				{
+					mainPanel->GetEngine().GiveCommand(CurrentInput);
 				}
 			}
 
@@ -662,6 +649,7 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 						Messages::Add({std::format("Received message length {}", e->Data.size()),
 						               GameData::MessageCategories().Get("normal")});
 				}
+				client->SendEvent(Network::SerializeCommand(mainPanel->GetEngine().ActiveCommands()), false);
 			}
 
 			GameWindow::Step();
