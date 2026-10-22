@@ -453,13 +453,8 @@ bool Network::Server::InterceptEvent(ENetPeer *peer, const Event &event)
 		if(const auto it = Peers.find(peer); it != Peers.end())
 		{
 			if(const auto deserialized = DeserializeCommand(event); deserialized)
-			{
 				it->second.CurrentInput = *deserialized;
-				LogMessage("Received State.");
-			}
 		}
-		else
-			LogMessage("Peer not found.");
 
 		return true;
 	}

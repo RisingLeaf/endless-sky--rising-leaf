@@ -88,7 +88,10 @@ public:
 	// Give a command on behalf of the player, used for integration tests.
 	void GiveCommand(const Command &command);
 
-	Command ActiveCommands() const { return keyHeld; }
+	Command ActiveCommands() const
+	{
+		return lastActiveCommands;
+	}
 
 	// Get any special events that happened in this step.
 	// MainPanel::Step will clear this list.
@@ -326,6 +329,7 @@ private:
 	// Commands that are currently active (and not yet handled). This is a combination
 	// of keyboard and mouse commands (and any other available input device).
 	Command activeCommands;
+	Command lastActiveCommands;
 	// Keyboard commands that were active in the previous step.
 	Command keyHeld;
 	// Pressing "land" or "board" rapidly toggles targets; pressing it once re-engages landing or boarding.

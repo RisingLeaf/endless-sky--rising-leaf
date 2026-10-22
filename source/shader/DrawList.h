@@ -57,6 +57,11 @@ public:
 	// Draw all the items in this list.
 	void Draw(GraphicsTypes::CommandBufferInstance *cb) const;
 
+	std::size_t Size() const
+	{
+		return items.size();
+	}
+
 
 private:
 	// Determine if the given object should be drawn at all.

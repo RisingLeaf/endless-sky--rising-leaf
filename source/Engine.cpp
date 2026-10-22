@@ -1164,6 +1164,7 @@ void Engine::Draw(GraphicsTypes::CommandBufferInstance *cb) const
 			label.Draw(cb);
 
 	draw[currentDrawBuffer].Draw(cb);
+	Logger::Log(std::to_string(draw[currentDrawBuffer].Size()), Logger::Level::INFO);
 	batchDraw[currentDrawBuffer].Draw(cb);
 
 	for(const auto &it : statuses)
@@ -2198,7 +2199,7 @@ void Engine::HandleKeyboardInputs()
 		UI::PlaySound(UI::UISound::NORMAL);
 	}
 
-	keyHeld = activeCommands;
+	lastActiveCommands = activeCommands;
 }
 
 

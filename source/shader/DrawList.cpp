@@ -160,10 +160,10 @@ bool DrawList::Cull(const Drawable &drawable, const Point &position, const Angle
 	Point unit = facing.Unit();
 	// Cull sprites that are completely off screen, to reduce the number of draw
 	// calls that we issue (which may be the bottleneck on some systems).
-	Point size(.5 * (fabs(unit.X() * drawable.Height()) + fabs(unit.Y() * drawable.Width()) + fabs(blur.X())),
-	           .5 * (fabs(unit.X() * drawable.Width()) + fabs(unit.Y() * drawable.Height()) + fabs(blur.Y())));
-	Point topLeft = (position - size) * zoom;
-	Point bottomRight = (position + size) * zoom;
+	const Point size(0.5 * (fabs(unit.X() * drawable.Height()) + fabs(unit.Y() * drawable.Width()) + fabs(blur.X())),
+	           0.5 * (fabs(unit.X() * drawable.Width()) + fabs(unit.Y() * drawable.Height()) + fabs(blur.Y())));
+	const Point topLeft     = (position - size) * zoom;
+	const Point bottomRight = (position + size) * zoom;
 	if(bottomRight.X() < Screen::Left() || bottomRight.Y() < Screen::Top())
 		return true;
 	if(topLeft.X() > Screen::Right() || topLeft.Y() > Screen::Bottom())

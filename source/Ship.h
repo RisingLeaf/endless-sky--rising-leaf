@@ -614,8 +614,8 @@ public:
 
 
 protected:
-	virtual void CacheAttributes() override;
-	virtual int DoTakeDamage(const DamageDealt &damage, const Government *hitBy, bool wasDisabled,
+	void CacheAttributes() override;
+	int DoTakeDamage(const DamageDealt &damage, const Government *hitBy, bool wasDisabled,
 	                         bool wasDestroyed) override;
 
 
