@@ -31,11 +31,11 @@ namespace {
 	// the name of the key it is mapped to, or the SDL keycode it is mapped to.
 	map<Command, string> description;
 	map<Command, string> keyName;
-	map<SDL_Keycode, Command> commandForKeycode;
-	map<Command, SDL_Keycode> keycodeForCommand;
+	map<int, Command> commandForKeycode;
+	map<Command, int> keycodeForCommand;
 	// Keep track of any keycodes that are mapped to multiple commands, in order
 	// to display a warning to the player.
-	map<SDL_Keycode, int> keycodeCount;
+	map<int, int> keycodeCount;
 	// Need a uint64_t 1 to generate Commands.
 	constexpr uint64_t ONE = 1;
 } // namespace
@@ -128,7 +128,7 @@ void Command::ReadKeyboard()
 	// than one key can be held down at once.
 	for(const auto &it : keycodeForCommand)
 		// Use no modifiers for the scancode.
-		if(keyDown[SDL_GetScancodeFromKey(it.second, nullptr)])
+		if(keyDown[SDL_GetScancodeFromKey(it.second, 0)])
 			*this |= it.first;
 
 	// Check whether the `Shift` modifier key was pressed for this step.
@@ -386,7 +386,7 @@ Command::operator bool() const
 // Check whether this command is entirely empty.
 bool Command::operator!() const
 {
-	return !state && turn == 0.;
+	return !state && !turn;
 }
 
 
@@ -414,7 +414,7 @@ Command Command::operator|(const Command &command) const
 Command &Command::operator|=(const Command &command)
 {
 	state |= command.state;
-	if(command.turn == 0.)
+	if(command.turn != 0.)
 		turn = command.turn;
 	return *this;
 }
@@ -438,6 +438,9 @@ Command::Command(const uint64_t state, const string &text) : state(state)
 
 
 
-Command::Command(const uint64_t state, const double turn) : state(state), turn(turn)
+Command Command::CreateSubstituteCommand(const uint64_t state, const double turn)
 {
+	Command result(state);
+	result.turn = turn;
+	return result;
 }

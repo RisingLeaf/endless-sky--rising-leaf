@@ -1582,7 +1582,7 @@ void Engine::CalculateStep()
 		return;
 
 	// Handle the mouse input of the mouse navigation
-	HandleMouseInput();
+	HandleMouseInput(activeCommands);
 
 	const Ship *flagship = player.Flagship();
 	const System *playerSystem = player.GetSystem();
@@ -2348,7 +2348,7 @@ void Engine::HandleMouseClicks()
 
 
 // Determines alternate mouse turning, setting player mouse angle, and right-click firing weapons.
-void Engine::HandleMouseInput()
+void Engine::HandleMouseInput(Command &inputCommands)
 {
 	bool rightMouseButtonHeld = false;
 	mouse_pos_t mousePosX, mousePosY;
@@ -2358,8 +2358,8 @@ void Engine::HandleMouseInput()
 	Point relPos = Point(mousePosX, mousePosY) - Point(Screen::RawWidth(), Screen::RawHeight()) / 2;
 	ai.SetMousePosition(relPos / zoom);
 
-	isMouseHoldEnabled = activeCommands.Has(Command::MOUSE_TURNING_HOLD);
-	activeCommands.Clear(Command::MOUSE_TURNING_HOLD);
+	isMouseHoldEnabled = inputCommands.Has(Command::MOUSE_TURNING_HOLD);
+	inputCommands.Clear(Command::MOUSE_TURNING_HOLD);
 
 	// XOR mouse hold and mouse toggle. If mouse toggle is OFF, then mouse hold
 	// will temporarily turn ON mouse control. If mouse toggle is ON, then mouse
@@ -2367,11 +2367,11 @@ void Engine::HandleMouseInput()
 	isMouseTurningEnabled = isMouseHoldEnabled ^ Preferences::Has("Control ship with mouse");
 	if(!isMouseTurningEnabled)
 		return;
-	activeCommands.Set(Command::MOUSE_TURNING_HOLD);
+	inputCommands.Set(Command::MOUSE_TURNING_HOLD);
 
 	// Activate firing command.
 	if(isMouseTurningEnabled && rightMouseButtonHeld)
-		activeCommands.Set(Command::PRIMARY);
+		inputCommands.Set(Command::PRIMARY);
 }
 
 

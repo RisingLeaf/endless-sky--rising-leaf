@@ -200,7 +200,7 @@ std::optional<Command> Network::DeserializeCommand(const Event &event)
 	if(offset != event.Data.size() || !std::isfinite(turn))
 		return std::nullopt;
 
-	return Command(state, turn);
+	return Command::CreateSubstituteCommand(state, turn);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

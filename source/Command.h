@@ -151,7 +151,7 @@ private:
 	Command(uint64_t state, const std::string &text);
 
 public:
-	explicit Command(uint64_t state, double turn);
+	static Command CreateSubstituteCommand(uint64_t state, double turn);
 
 
 private:

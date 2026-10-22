@@ -219,7 +219,7 @@ private:
 	void SendHails();
 	void HandleKeyboardInputs();
 	void HandleMouseClicks();
-	void HandleMouseInput();
+	void HandleMouseInput(Command &inputCommands);
 
 	void FillCollisionSets();
 
