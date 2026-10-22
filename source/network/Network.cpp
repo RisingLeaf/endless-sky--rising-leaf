@@ -19,6 +19,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "GameData.h"
 #include "Logger.h"
 #include "Messages.h"
+#include "image/Sprite.h"
+#include "image/SpriteSet.h"
 
 #include <cmath>
 
@@ -48,6 +50,9 @@ namespace {
 		{
 		case Network::EventType::TEXT:
 		case Network::EventType::UPDATE_INPUT_STATE:
+		case Network::EventType::PUSH_SPRITE:
+		case Network::EventType::SET_DRAWABLE:
+		case Network::EventType::FREE_DRAWABLE:
 			return true;
 		case Network::EventType::INVALID:
 			return false;
@@ -233,7 +238,7 @@ bool Network::NetworkInterface::SendEvent(const Event &event, const bool reliabl
 	if(!Running.load())
 		return false;
 
-	if(event.Type != EventType::TEXT && event.Type != EventType::UPDATE_INPUT_STATE)
+	if(event.Type == EventType::INVALID)
 		return false;
 
 	if(event.Data.size() + 1 > MAX_PACKET_SIZE)
@@ -422,6 +427,44 @@ std::vector<Network::Server::PeerState> Network::Server::GetPeerStates() const
 	return states;
 }
 
+void Network::Server::SendSprite(const Sprite *const sprite)
+{
+	Event pushSpriteEvent;
+	pushSpriteEvent.Type = EventType::PUSH_SPRITE;
+	pushSpriteEvent.Data.reserve(sprite->Name().size());
+	for(const char c : sprite->Name())
+		WriteSerialized(pushSpriteEvent.Data, c);
+
+	SendEvent(pushSpriteEvent);
+}
+
+asl::uint64 Network::Server::PushSprite(const Sprite *const sprite)
+{
+	const asl::uint64 spriteID = SpriteIDs.size();
+	SpriteIDs[sprite] = spriteID;
+
+	SpriteByID.emplace_back(sprite);
+
+	SendSprite(sprite);
+
+	LogMessage(std::format("Pushing new sprite: {}, total: {}", sprite->Name(), spriteID));
+
+	return spriteID;
+}
+
+void Network::Server::PushBody(const Body &body, Point position, double cloak)
+{
+	const auto sprite = body.GetSprite();
+	if(!sprite)
+		return;
+
+	asl::uint64 spriteID = 0;
+	if(const auto it = SpriteIDs.find(sprite); it == SpriteIDs.end())
+		spriteID = PushSprite(sprite);
+	else
+		spriteID = it->second;
+}
+
 void Network::Server::OnPeerConnected(ENetPeer *connectedPeer)
 {
 	char ip[64]{};
@@ -435,7 +478,11 @@ void Network::Server::OnPeerConnected(ENetPeer *connectedPeer)
 		std::lock_guard guard(PeersMutex);
 		Peers[connectedPeer] = PeerState{.Identifier = static_cast<int>(Peers.size())};
 	}
+
+	for(const auto sprite : SpriteByID)
+		SendSprite(sprite);
 }
+
 void Network::Server::OnPeerDisconnected(ENetPeer *disconnectedPeer)
 {
 	{
@@ -487,6 +534,7 @@ void Network::Server::RunEventLoop()
 /// Client
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 Network::Client::Client() = default;
 
 Network::Client::~Client()
@@ -564,13 +612,9 @@ std::optional<std::string_view> Network::Client::Connect(const std::string_view 
 
 void Network::Client::OnPeerConnected(ENetPeer *connectedPeer)
 {
-	if(peer == connectedPeer)
-	{
-		NetworkInterface::OnPeerConnected(connectedPeer);
-		return;
-	}
+	if(peer != connectedPeer)
+		peer = connectedPeer;
 
-	peer = connectedPeer;
 	NetworkInterface::OnPeerConnected(connectedPeer);
 }
 
@@ -580,6 +624,26 @@ void Network::Client::OnPeerDisconnected(ENetPeer *disconnectedPeer)
 		peer = nullptr;
 
 	LogMessage("Server disconnected.");
+}
+
+bool Network::Client::InterceptEvent(ENetPeer *peer, const Event &event)
+{
+	if(event.Type == EventType::PUSH_SPRITE)
+	{
+		std::string name;
+		std::size_t offset = 0;
+		char c;
+		while(ReadSerialized(event.Data, offset, c))
+			name += c;
+
+		SpriteByID.emplace_back(SpriteSet::Get(name));
+
+		LogMessage(std::format("Received new sprite: {}, total: {}", name, SpriteByID.size() - 1));
+
+		return true;
+	}
+
+	return false;
 }
 
 void Network::Client::RunEventLoop()

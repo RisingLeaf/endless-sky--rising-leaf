@@ -635,6 +635,9 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 						               GameData::MessageCategories().Get("normal")});
 				}
 
+				for (const auto &ship : mainPanel->GetEngine().Ships())
+					server->PushBody(*ship.get(), ship->Position(), ship->Cloaking());
+
 				for(const auto &[Identifier, CurrentInput] : server->GetPeerStates())
 				{
 					mainPanel->GetEngine().GiveCommand(CurrentInput);

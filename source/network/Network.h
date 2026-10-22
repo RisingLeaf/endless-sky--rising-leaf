@@ -17,6 +17,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #define ENDLESS_SKY_NETWORK_H
 
 #include "../Command.h"
+#include "Body.h"
+#include "base/ASLTypes.h"
 
 #include <enet/enet.h>
 #include <expected>
@@ -30,11 +32,20 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <unordered_map>
 
 
+
+class Sprite;
 namespace Network {
 	void Init();
 	bool NetworkingAvailable();
 
-	enum class EventType : std::uint8_t { TEXT = 0x00, UPDATE_INPUT_STATE = 0x01, INVALID = 0xff };
+	enum class EventType : std::uint8_t {
+		TEXT = 0x00,
+		UPDATE_INPUT_STATE = 0x01,
+		PUSH_SPRITE = 0x02,
+		SET_DRAWABLE = 0x03,
+		FREE_DRAWABLE = 0x04,
+		INVALID = 0xff
+	};
 
 	struct Event {
 		EventType Type = EventType::INVALID;
@@ -69,7 +80,10 @@ namespace Network {
 		virtual void OnPeerConnected(ENetPeer *peer);
 		virtual void OnPeerDisconnected(ENetPeer *peer);
 
-		virtual bool InterceptEvent(ENetPeer *peer, const Event &) { return false; }
+		virtual bool InterceptEvent(ENetPeer *peer, const Event &)
+		{
+			return false;
+		}
 
 		struct ENetHostDeleter {
 			void operator()(ENetHost *host) const noexcept
@@ -104,6 +118,10 @@ namespace Network {
 		static std::expected<std::unique_ptr<Server>, std::string_view> CreateServer();
 
 		std::vector<PeerState> GetPeerStates() const;
+		void SendSprite(const Sprite *sprite);
+
+		asl::uint64 PushSprite(const Sprite *sprite);
+		void PushBody(const Body &body, Point position, double cloak);
 
 	protected:
 		void OnPeerConnected(ENetPeer *connectedPeer) override;
@@ -116,6 +134,9 @@ namespace Network {
 
 		mutable std::mutex PeersMutex;
 		std::unordered_map<ENetPeer *, PeerState> Peers;
+
+		std::unordered_map<const Sprite *, asl::uint64> SpriteIDs;
+		std::vector<const Sprite *> SpriteByID;
 	};
 
 	class Client final : public NetworkInterface {
@@ -138,11 +159,16 @@ namespace Network {
 		void OnPeerConnected(ENetPeer *connectedPeer) override;
 		void OnPeerDisconnected(ENetPeer *disconnectedPeer) override;
 
+		bool InterceptEvent(ENetPeer *peer, const Event &event) override;
+
+	private:
 		// Accessed only by the event-loop thread.
 		ENetPeer *peer = nullptr;
 
 		std::mutex CommandMutex;
 		std::queue<std::unique_ptr<ConnectCommand>> Commands;
+
+		std::vector<const Sprite *> SpriteByID;
 	};
 } // namespace Network
 

@@ -38,7 +38,6 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "shader/BatchDrawList.h"
 #include "shader/DrawList.h"
 
-#include <condition_variable>
 #include <list>
 #include <map>
 #include <memory>
@@ -88,11 +87,6 @@ public:
 	// Give a command on behalf of the player, used for integration tests.
 	void GiveCommand(const Command &command);
 
-	Command ActiveCommands() const
-	{
-		return lastActiveCommands;
-	}
-
 	// Get any special events that happened in this step.
 	// MainPanel::Step will clear this list.
 	std::list<ShipEvent> &Events();
@@ -109,6 +103,14 @@ public:
 	// government; gov projectiles stop targeting the player and player's
 	// projectiles stop targeting gov.
 	void BreakTargeting(const Government *gov);
+
+
+	// Networking Helpers
+	Command ActiveCommands() const
+	{
+		return lastActiveCommands;
+	}
+	const std::list<std::shared_ptr<Ship>> &Ships() const { return ships; }
 
 
 private:
