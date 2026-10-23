@@ -510,9 +510,41 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 			// Tell all the panels to step forward, then draw them.
 			((!isDebugPaused && menuPanels.IsEmpty()) ? gamePanels : menuPanels).StepAll();
 
+			MainPanel *mainPanel = static_cast<MainPanel *>(gamePanels.Root().get());
+			if(server)
+			{
+				while(auto event = server->PollEvent())
+				{
+					if(event->Type == Network::EventType::TEXT)
+						Messages::Add({std::format("Received message length {}", event->Data.size()),
+									   GameData::MessageCategories().Get("normal")});
+				}
+
+				for (const auto &ship : mainPanel->GetEngine().Ships())
+					server->PushBody(*ship.get(), ship->Position(), ship->Cloaking(), mainPanel->GetEngine().GetStep());
+
+				for(const auto &[Identifier, CurrentInput] : server->GetPeerStates())
+				{
+					mainPanel->GetEngine().GiveCommand(CurrentInput);
+				}
+			}
+
+			if(client)
+			{
+				while(auto e = client->PollEvent())
+				{
+					if(e->Type == Network::EventType::TEXT)
+						Messages::Add({std::format("Received message length {}", e->Data.size()),
+									   GameData::MessageCategories().Get("normal")});
+				}
+				client->SendEvent(Network::SerializeCommand(mainPanel->GetEngine().ActiveCommands()), false);
+
+				client->AddGhosts(mainPanel->GetEngine().GetDrawList());
+			}
+
 			// Caps lock slows the frame rate in debug mode.
 			// Slowing eases in and out over a couple of frames.
-			if((mod & SDL_KMOD_CAPS) && inFlight && debugMode)
+			if(mod & SDL_KMOD_CAPS && inFlight && debugMode)
 			{
 				if(frameRate > 10)
 				{
@@ -554,7 +586,6 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 
 			(menuPanels.IsEmpty() ? gamePanels : menuPanels).DrawAll(MainCommandBuffer.get());
 
-			MainPanel *mainPanel = static_cast<MainPanel *>(gamePanels.Root().get());
 			if(mainPanel && mainPanel->GetEngine().IsPaused())
 				SpriteShader::Draw(MainCommandBuffer.get(), SpriteSet::Get("ui/paused"),
 				                   Screen::TopLeft() + Point(10., 10.));
@@ -625,35 +656,6 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 			MainCommandBuffer->End();
 			GameWindow::GraphicsInstance()->EndDraw(MainCommandBuffer.get(), GameWindow::DrawWidth(),
 			                                        GameWindow::DrawHeight());
-
-			if(server)
-			{
-				while(auto event = server->PollEvent())
-				{
-					if(event->Type == Network::EventType::TEXT)
-						Messages::Add({std::format("Received message length {}", event->Data.size()),
-						               GameData::MessageCategories().Get("normal")});
-				}
-
-				for (const auto &ship : mainPanel->GetEngine().Ships())
-					server->PushBody(*ship.get(), ship->Position(), ship->Cloaking());
-
-				for(const auto &[Identifier, CurrentInput] : server->GetPeerStates())
-				{
-					mainPanel->GetEngine().GiveCommand(CurrentInput);
-				}
-			}
-
-			if(client)
-			{
-				while(auto e = client->PollEvent())
-				{
-					if(e->Type == Network::EventType::TEXT)
-						Messages::Add({std::format("Received message length {}", e->Data.size()),
-						               GameData::MessageCategories().Get("normal")});
-				}
-				client->SendEvent(Network::SerializeCommand(mainPanel->GetEngine().ActiveCommands()), false);
-			}
 
 			GameWindow::Step();
 

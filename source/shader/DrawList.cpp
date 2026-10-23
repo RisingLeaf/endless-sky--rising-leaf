@@ -161,8 +161,8 @@ bool DrawList::Cull(const Drawable &drawable, const Point &position, const Angle
 	// Cull sprites that are completely off screen, to reduce the number of draw
 	// calls that we issue (which may be the bottleneck on some systems).
 	const Point size(0.5 * (fabs(unit.X() * drawable.Height()) + fabs(unit.Y() * drawable.Width()) + fabs(blur.X())),
-	           0.5 * (fabs(unit.X() * drawable.Width()) + fabs(unit.Y() * drawable.Height()) + fabs(blur.Y())));
-	const Point topLeft     = (position - size) * zoom;
+	                 0.5 * (fabs(unit.X() * drawable.Width()) + fabs(unit.Y() * drawable.Height()) + fabs(blur.Y())));
+	const Point topLeft = (position - size) * zoom;
 	const Point bottomRight = (position + size) * zoom;
 	if(bottomRight.X() < Screen::Left() || bottomRight.Y() < Screen::Top())
 		return true;
@@ -209,6 +209,45 @@ void DrawList::Push(const Drawable &drawable, const Point &pos, const Angle &fac
 
 	item.alpha = (1. - cloak) * alpha;
 	item.swizzle = swizzle;
+	item.clip = 1.;
+
+	items.push_back(item);
+}
+
+void DrawList::PushRaw(const Sprite *sprite, const float frame, const float xpos, const float ypos, const Angle facing,
+                       const float alpha, const Point &scale)
+{
+	if(!sprite)
+		return;
+	SpriteShader::Item item{.texture = sprite->Texture(), .swizzleMask = sprite->SwizzleMask()};
+
+	item.frame = frame;
+	item.frameCount = sprite->Frames();
+	item.uniqueSwizzleMaskFrames = sprite->SwizzleMaskFrames() > 1;
+
+	item.position[0] = static_cast<float>((xpos - center.X()) * zoom);
+	item.position[1] = static_cast<float>((ypos - center.Y()) * zoom);
+
+	// Get unit vectors in the direction of the object's width and height.
+	const double width  = scale.X() * sprite->Width();
+	const double height = scale.Y() * sprite->Height();
+	const Point unit = facing.Unit();
+	Point uw = unit * width;
+	Point uh = unit * height;
+
+	// (0, -1) means a zero-degree rotation (since negative Y is up).
+	uw *= zoom;
+	uh *= zoom;
+	item.transform[0, 0] = -uw.Y();
+	item.transform[0, 1] = uw.X();
+	item.transform[1, 0] = -uh.X();
+	item.transform[1, 1] = -uh.Y();
+
+	item.blur[0] = 0.0f;
+	item.blur[1] = 0.0f;
+
+	item.alpha = alpha;
+	item.swizzle = nullptr;
 	item.clip = 1.;
 
 	items.push_back(item);

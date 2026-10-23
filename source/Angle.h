@@ -51,19 +51,22 @@ public:
 	bool operator!=(const Angle &other) const;
 
 	// Get a unit std::vector in the direction of this angle.
-	Point Unit() const;
+	[[nodiscard]] Point Unit() const;
 	// Convert an Angle object to degrees, in the range -180 to 180.
-	double Degrees() const;
+	[[nodiscard]] double Degrees() const;
 	// Convert an Angle object to degrees, in the range 0 to 360.
-	double AbsDegrees() const;
+	[[nodiscard]] double AbsDegrees() const;
 
 	// Return a point rotated by this angle around (0, 0).
-	Point Rotate(const Point &point) const;
+	[[nodiscard]] Point Rotate(const Point &point) const;
 
 	// Judge whether this is inside from "base" to "limit."
 	// The range from "base" to "limit" is expressed by "clock" orientation.
-	bool IsInRange(const Angle &base, const Angle &limit) const;
+	[[nodiscard]] bool IsInRange(const Angle &base, const Angle &limit) const;
 
+	[[nodiscard]] int32_t Raw() const { return angle; }
+
+	static Angle FromRaw(const int32_t raw) { return Angle(raw); }
 
 private:
 	explicit Angle(int32_t angle);

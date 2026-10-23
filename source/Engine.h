@@ -111,6 +111,9 @@ public:
 		return lastActiveCommands;
 	}
 	const std::list<std::shared_ptr<Ship>> &Ships() const { return ships; }
+	int GetStep() const { return step; }
+
+	DrawList &GetDrawList() { return draw[currentDrawBuffer]; }
 
 
 private:

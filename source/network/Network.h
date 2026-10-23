@@ -18,6 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 #include "../Command.h"
 #include "Body.h"
+#include "MainPanel.h"
 #include "base/ASLTypes.h"
 
 #include <enet/enet.h>
@@ -27,6 +28,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <mutex>
 #include <optional>
 #include <queue>
+#include <set>
 #include <string_view>
 #include <thread>
 #include <unordered_map>
@@ -104,6 +106,25 @@ namespace Network {
 		std::queue<Event> IncomingEvents;
 	};
 
+	constexpr asl::uint8 FIELD_SPRITE = 1 << 0;
+	constexpr asl::uint8 FIELD_FRAME = 1 << 1;
+	constexpr asl::uint8 FIELD_POSITION = 1 << 2;
+	constexpr asl::uint8 FIELD_ANGLE = 1 << 3;
+	constexpr asl::uint8 FIELD_ALPHA = 1 << 4;
+	constexpr asl::uint8 FIELD_SWIZZLE = 1 << 5;
+	constexpr asl::uint8 FIELD_SCALE = 1 << 6;
+	struct BodyInfo {
+		std::size_t Index = 0;
+		const Sprite *sprite = nullptr;
+		asl::float32 frame = 0;
+		asl::float32 xpos = 0, ypos = 0;
+		asl::int32 angle = 0;
+		asl::float32 alpha = 0;
+		std::array<bool, 16> swizzle{}; // We assume a simple swizzle matrix for sake of bandwidth
+		asl::float32 xscale = 0;
+		asl::float32 yscale = 0;
+	};
+
 	class Server final : public NetworkInterface {
 		Server() = default;
 
@@ -120,8 +141,11 @@ namespace Network {
 		std::vector<PeerState> GetPeerStates() const;
 		void SendSprite(const Sprite *sprite);
 
+		static asl::uint16 PackSwizzle(const BodyInfo &info);
+		static Event GenerateBodyEvent(asl::uint64 spriteID, const BodyInfo &info, asl::uint8 mask);
+
 		asl::uint64 PushSprite(const Sprite *sprite);
-		void PushBody(const Body &body, Point position, double cloak);
+		void PushBody(const Body &body, Point position, double cloak, int step);
 
 	protected:
 		void OnPeerConnected(ENetPeer *connectedPeer) override;
@@ -137,6 +161,10 @@ namespace Network {
 
 		std::unordered_map<const Sprite *, asl::uint64> SpriteIDs;
 		std::vector<const Sprite *> SpriteByID;
+
+		std::unordered_map<const Body *, BodyInfo> Bodies;
+		std::set<std::size_t> FreeIndices;
+		std::size_t NextIndex = 0;
 	};
 
 	class Client final : public NetworkInterface {
@@ -147,6 +175,8 @@ namespace Network {
 
 		static std::expected<std::unique_ptr<Client>, std::string_view> CreateClient();
 		std::optional<std::string_view> Connect(std::string_view address);
+
+		void AddGhosts(DrawList & draws);
 
 	protected:
 		struct ConnectCommand {
@@ -168,7 +198,9 @@ namespace Network {
 		std::mutex CommandMutex;
 		std::queue<std::unique_ptr<ConnectCommand>> Commands;
 
+		std::mutex BodyMutex;
 		std::vector<const Sprite *> SpriteByID;
+		std::vector<std::pair<bool, BodyInfo>> Bodies;
 	};
 } // namespace Network
 

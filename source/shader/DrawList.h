@@ -54,6 +54,9 @@ public:
 	bool AddSwizzled(const Drawable &drawable, Point position, const Angle &facing, const Swizzle *swizzle,
 	                 double cloak = 0.);
 
+	void PushRaw(const Sprite *sprite, float frame, float xpos, float ypos, Angle facing, float alpha,
+	             const Point &scale);
+
 	// Draw all the items in this list.
 	void Draw(GraphicsTypes::CommandBufferInstance *cb) const;
 
