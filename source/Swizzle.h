@@ -47,7 +47,7 @@ private:
 
 
 private:
-	static constexpr inline std::array<float, 16> IDENTITY_MATRIX = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
+	static constexpr std::array<float, 16> IDENTITY_MATRIX = {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1};
 
 	std::string name;
 	// Special case for when a swizzle does not actually need to be calculated.

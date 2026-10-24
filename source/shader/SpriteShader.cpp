@@ -119,9 +119,9 @@ void SpriteShader::Bind(GraphicsTypes::CommandBufferInstance *cb)
 void SpriteShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Item &item, const bool withBlur)
 {
 	const gm::vec2 scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
-	const int useSwizzleMask = (item.swizzle && item.swizzle->OverrideMask()) ? 0
-	                           : item.swizzleMask->GetTexture()                ? 1
-	                                                                          : 0;
+	const int useSwizzleMask = item.swizzle && item.swizzle->OverrideMask() ? 0
+	                           : item.swizzleMask->GetTexture()             ? 1
+	                                                                        : 0;
 	const int useSwizzle = item.swizzle && !item.swizzle->IsIdentity();
 
 	if(useSwizzleMask && item.swizzleMask->GetTexture())
