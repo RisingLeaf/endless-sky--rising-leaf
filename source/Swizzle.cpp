@@ -29,6 +29,12 @@ namespace {
 
 
 
+Swizzle::Swizzle(const std::array<bool, 16> &booMatrix)
+{
+	for(int i = 0; i < 16; i++)
+		matrix[i] = booMatrix[i] ? 1 : 0;
+}
+
 void Swizzle::Load(const DataNode &node)
 {
 	name = node.Token(1);

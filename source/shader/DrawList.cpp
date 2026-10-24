@@ -215,7 +215,7 @@ void DrawList::Push(const Drawable &drawable, const Point &pos, const Angle &fac
 }
 
 void DrawList::PushRaw(const Sprite *sprite, const float frame, const float xpos, const float ypos, const Angle facing,
-                       const float alpha, const Point &scale)
+                       const float alpha, const Point &scale, const Swizzle *swizzle)
 {
 	if(!sprite)
 		return;
@@ -247,7 +247,7 @@ void DrawList::PushRaw(const Sprite *sprite, const float frame, const float xpos
 	item.blur[1] = 0.0f;
 
 	item.alpha = alpha;
-	item.swizzle = nullptr;
+	item.swizzle = swizzle;
 	item.clip = 1.;
 
 	items.push_back(item);

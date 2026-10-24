@@ -57,7 +57,7 @@ namespace {
 		case Network::EventType::UPDATE_INPUT_STATE:
 		case Network::EventType::PUSH_SPRITE:
 		case Network::EventType::SET_DRAWABLE:
-		case Network::EventType::FREE_DRAWABLE:
+		case Network::EventType::FREE_DRAWABLES:
 			return true;
 		case Network::EventType::INVALID:
 			return false;
@@ -457,6 +457,12 @@ asl::uint64 Network::Server::PushSprite(const Sprite *const sprite)
 	return spriteID;
 }
 
+void Network::Server::MarkUnused()
+{
+	for(auto &info : Bodies | std::views::values)
+		info.Active = false;
+}
+
 asl::uint16 Network::Server::PackSwizzle(const BodyInfo &info)
 {
 	asl::uint16 swizzlePacked = 0;
@@ -497,6 +503,7 @@ Network::Event Network::Server::GenerateBodyEvent(const asl::uint64 spriteID, co
 	}
 	return updateBodyEvent;
 }
+
 void Network::Server::PushBody(const Body &body, Point position, double cloak, const int step)
 {
 	const auto sprite = body.GetSprite();
@@ -509,7 +516,8 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 	else
 		spriteID = it->second;
 
-	BodyInfo info{.sprite = body.GetSprite(),
+	BodyInfo info{.Active = true,
+	              .sprite = body.GetSprite(),
 	              .frame = body.GetFrame(step),
 	              .xpos = static_cast<asl::float32>(position.X()),
 	              .ypos = static_cast<asl::float32>(position.Y()),
@@ -550,7 +558,7 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 		updateBodyEvent = GenerateBodyEvent(spriteID, info, mask);
 
 		// TODO: Accumulate events instead
-		if(mask != 0 && SendEvent(updateBodyEvent, false))
+		if(mask == 0 || SendEvent(updateBodyEvent, false))
 			it->second = info;
 	}
 	else
@@ -566,6 +574,29 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 
 		SendEvent(updateBodyEvent, true);
 	}
+}
+
+void Network::Server::FreeUnused()
+{
+	Event freeUnusedBodies;
+	freeUnusedBodies.Type = EventType::FREE_DRAWABLES;
+
+	std::vector<std::size_t> indices;
+	std::erase_if(Bodies, [&](const auto &body) -> bool {
+		if(!body.second.Active)
+		{
+			FreeIndices.insert(body.second.Index);
+			indices.emplace_back(body.second.Index);
+			return true;
+		}
+		return false;
+	});
+
+	WriteSerialized(freeUnusedBodies.Data, indices.size());
+	for(const std::size_t index : indices)
+		WriteSerialized(freeUnusedBodies.Data, index);
+
+	SendEvent(freeUnusedBodies, true);
 }
 
 void Network::Server::OnPeerConnected(ENetPeer *connectedPeer)
@@ -725,13 +756,13 @@ void Network::Client::AddGhosts(DrawList &draws)
 {
 	std::lock_guard guard(BodyMutex);
 
-	for(const auto &[active, body] : Bodies)
+	for(const auto &body : Bodies)
 	{
-		if(!active)
+		if(!body.Active)
 			continue;
 
 		draws.PushRaw(body.sprite, body.frame, body.xpos, body.ypos, Angle::FromRaw(body.angle), body.alpha * 0.1f,
-		              Point(body.xscale, body.yscale));
+		              Point(body.xscale, body.yscale), &Swizzles[body.Index]);
 	}
 }
 
@@ -790,9 +821,9 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 		}
 
 		// Decode the fields before acquiring the mutex.
-		BodyInfo info;
+		BodyInfo info{.Active = true};
 
-		asl::uint64 spriteID;
+		asl::uint64 spriteID = 0;
 		asl::uint16 swizzlePacked;
 
 		if(mask & FIELD_SPRITE)
@@ -850,15 +881,19 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 
 			if(index >= Bodies.size())
 			{
-				Bodies.resize(index, {false, {}});
+				Bodies.resize(index, {.Active = false});
+				Swizzles.resize(index);
 			}
 
 			if(index == Bodies.size())
-				Bodies.emplace_back(false, BodyInfo{});
+			{
+				Bodies.emplace_back(BodyInfo{.Active = false});
+				Swizzles.emplace_back();
+			}
 
-			auto &[active, body] = Bodies[index];
+			auto &body = Bodies[index];
 
-			if(!active)
+			if(!body.Active)
 			{
 				if((mask & ALL_FIELD_MASK) != ALL_FIELD_MASK)
 				{
@@ -874,7 +909,9 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 
 				body = info;
 
-				active = true;
+				Swizzles[index] = Swizzle(body.swizzle);
+
+				body.Active = true;
 				return true;
 			}
 
@@ -893,12 +930,35 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 			if(mask & FIELD_ALPHA)
 				body.alpha = info.alpha;
 			if(mask & FIELD_SWIZZLE)
+			{
 				body.swizzle = info.swizzle;
+				Swizzles[index] = Swizzle(body.swizzle);
+			}
 			if(mask & FIELD_SCALE)
 			{
 				body.xscale = info.xscale;
 				body.yscale = info.yscale;
 			}
+		}
+
+		return true;
+	}
+	if(event.Type == EventType::FREE_DRAWABLES)
+	{
+		std::size_t offset = 0;
+		std::size_t count;
+
+		if(!ReadSerialized(event.Data, offset, count))
+			return true;
+
+		for(std::size_t i = 0; i < count; i++)
+		{
+			std::size_t indexToFree = 0;
+			if(!ReadSerialized(event.Data, offset, indexToFree))
+				return true;
+			if(indexToFree >= Bodies.size())
+				continue;
+			Bodies[indexToFree].Active = false;
 		}
 
 		return true;

@@ -55,7 +55,7 @@ public:
 	                 double cloak = 0.);
 
 	void PushRaw(const Sprite *sprite, float frame, float xpos, float ypos, Angle facing, float alpha,
-	             const Point &scale);
+	             const Point &scale, const Swizzle *swizzle);
 
 	// Draw all the items in this list.
 	void Draw(GraphicsTypes::CommandBufferInstance *cb) const;

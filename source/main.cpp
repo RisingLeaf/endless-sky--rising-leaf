@@ -520,8 +520,10 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 									   GameData::MessageCategories().Get("normal")});
 				}
 
+				server->MarkUnused();
 				for (const auto &ship : mainPanel->GetEngine().Ships())
 					server->PushBody(*ship.get(), ship->Position(), ship->Cloaking(), mainPanel->GetEngine().GetStep());
+				server->FreeUnused();
 
 				for(const auto &[Identifier, CurrentInput] : server->GetPeerStates())
 				{

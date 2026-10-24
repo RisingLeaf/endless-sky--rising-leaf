@@ -26,6 +26,7 @@ class DataNode;
 class Swizzle {
 public:
 	Swizzle() = default;
+	explicit Swizzle(const std::array<bool, 16> &booMatrix);
 
 	void Load(const DataNode &node);
 	bool IsLoaded() const;

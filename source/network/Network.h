@@ -45,7 +45,7 @@ namespace Network {
 		UPDATE_INPUT_STATE = 0x01,
 		PUSH_SPRITE = 0x02,
 		SET_DRAWABLE = 0x03,
-		FREE_DRAWABLE = 0x04,
+		FREE_DRAWABLES = 0x04,
 		INVALID = 0xff
 	};
 
@@ -114,6 +114,7 @@ namespace Network {
 	constexpr asl::uint8 FIELD_SWIZZLE = 1 << 5;
 	constexpr asl::uint8 FIELD_SCALE = 1 << 6;
 	struct BodyInfo {
+		bool Active = false;
 		std::size_t Index = 0;
 		const Sprite *sprite = nullptr;
 		asl::float32 frame = 0;
@@ -145,7 +146,9 @@ namespace Network {
 		static Event GenerateBodyEvent(asl::uint64 spriteID, const BodyInfo &info, asl::uint8 mask);
 
 		asl::uint64 PushSprite(const Sprite *sprite);
+		void MarkUnused();
 		void PushBody(const Body &body, Point position, double cloak, int step);
+		void FreeUnused();
 
 	protected:
 		void OnPeerConnected(ENetPeer *connectedPeer) override;
@@ -200,7 +203,8 @@ namespace Network {
 
 		std::mutex BodyMutex;
 		std::vector<const Sprite *> SpriteByID;
-		std::vector<std::pair<bool, BodyInfo>> Bodies;
+		std::vector<BodyInfo> Bodies;
+		std::vector<Swizzle> Swizzles;
 	};
 } // namespace Network
 
