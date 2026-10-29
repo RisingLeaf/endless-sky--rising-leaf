@@ -89,18 +89,18 @@ vector<const Ship *> ShipFactory::GetShips() const
 
 
 
-void ShipFactory::Instantiate(list<shared_ptr<Ship>> &container,
+void ShipFactory::Instantiate(list<shared_ptr<Ship>>                           &container,
                               const function<string(const shared_ptr<Ship> &)> &nameFunc,
-                              const map<string, string> *subs) const
+                              const map<string, string>                        *subs) const
 {
 	InstantiateContainer(container, nameFunc, subs);
 }
 
 
 
-void ShipFactory::Instantiate(vector<shared_ptr<Ship>> &container,
+void ShipFactory::Instantiate(vector<shared_ptr<Ship>>                         &container,
                               const function<string(const shared_ptr<Ship> &)> &nameFunc,
-                              const map<string, string> *subs) const
+                              const map<string, string>                        *subs) const
 {
 	InstantiateContainer(container, nameFunc, subs);
 }

@@ -62,16 +62,16 @@ public:
 	const std::vector<std::vector<Point>> &Outlines() const;
 
 	// Scale all the points in the mask.
-	Mask operator*(Point scale) const;
+	Mask        operator*(Point scale) const;
 	friend Mask operator*(Point scale, const Mask &mask);
 
 
 private:
 	double Intersection(Point sA, Point vA) const;
-	bool Contains(Point point) const;
+	bool   Contains(Point point) const;
 
 
 private:
 	std::vector<std::vector<Point>> outlines;
-	double radius = 0.;
+	double                          radius = 0.;
 };

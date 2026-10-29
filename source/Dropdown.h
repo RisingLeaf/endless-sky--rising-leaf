@@ -33,7 +33,7 @@ public:
 	void SetOptions(const std::vector<std::string> &options);
 	void SetText(const std::string &s) override;
 	void SetSelectedIndex(int idx);
-	int GetSelectedIndex() const
+	int  GetSelectedIndex() const
 	{
 		return selectedIndex;
 	}
@@ -43,7 +43,7 @@ public:
 	void ShowDropIcon(bool s);
 	void SetPadding(int p) override;
 	void SetRightPadding(int p) override;
-	int RightPadding() const override
+	int  RightPadding() const override
 	{
 		return rightPaddingWithoutDrop;
 	}
@@ -82,7 +82,7 @@ private:
 		Dropdown *dd = nullptr;
 
 		uint32_t clickStamp = 0;
-		Point mousePos;
+		Point    mousePos;
 
 		int highlightIndex = -1;
 	};
@@ -94,9 +94,9 @@ private:
 
 private:
 	std::vector<std::string> options;
-	int selectedIndex = -1;
+	int                      selectedIndex = -1;
 
-	int rightPaddingWithoutDrop = 5;
-	bool showDropIcon = true;
-	bool enabled = true;
+	int  rightPaddingWithoutDrop = 5;
+	bool showDropIcon            = true;
+	bool enabled                 = true;
 };

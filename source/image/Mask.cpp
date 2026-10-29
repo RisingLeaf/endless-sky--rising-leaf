@@ -28,22 +28,22 @@ namespace {
 	// Trace out outlines from an image frame.
 	void Trace(const ImageBuffer &image, int frame, vector<vector<Point>> &raw, const string &fileName)
 	{
-		const uint32_t on = 0xFF000000;
-		const int width = image.Width();
-		const int height = image.Height();
-		const int numPixels = width * height;
-		const uint32_t *begin = image.Pixels() + frame * numPixels;
-		auto LogError = [width, height, fileName](string reason) {
+		const uint32_t  on        = 0xFF000000;
+		const int       width     = image.Width();
+		const int       height    = image.Height();
+		const int       numPixels = width * height;
+		const uint32_t *begin     = image.Pixels() + frame * numPixels;
+		auto            LogError  = [width, height, fileName](string reason) {
 			Logger::Log("Unable to create mask for " + to_string(width) + "x" + to_string(height) + " px image " +
 			                fileName + ": " + std::move(reason),
 			            Logger::Level::WARNING);
 		};
 		raw.clear();
 
-		auto hasOutline = vector<bool>(numPixels, false);
-		vector<int> directions;
+		auto          hasOutline = vector<bool>(numPixels, false);
+		vector<int>   directions;
 		vector<Point> points;
-		int start = 0;
+		int           start = 0;
 		while(start < numPixels)
 		{
 			directions.clear();
@@ -74,11 +74,25 @@ namespace {
 			// Direction kernel for obtaining the 8 nearest neighbors, beginning with "N" and
 			// moving clockwise (since the frame data starts in the top-left and moves L->R).
 			static const int step[][2] = {
-			    {0, -1}, {1, -1}, {1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1},
+			    { 0, -1},
+			    { 1, -1},
+			    { 1,  0},
+			    { 1,  1},
+			    { 0,  1},
+			    {-1,  1},
+			    {-1,  0},
+			    {-1, -1},
 			};
 			// Convert from a direction index to the desired pixel.
 			const int off[] = {
-			    -width, -width + 1, 1, width + 1, width, width - 1, -1, -width - 1,
+			    -width,
+			    -width + 1,
+			    1,
+			    width + 1,
+			    width,
+			    width - 1,
+			    -1,
+			    -width - 1,
 			};
 
 			// Loop until we come back to the start, recording the directions
@@ -91,9 +105,9 @@ namespace {
 			do
 			{
 				hasOutline[pos] = true;
-				int firstD = d;
+				int firstD      = d;
 				// The image pixel being inspected, in XY coords.
-				int next[] = {p[0], p[1]};
+				int  next[]  = {p[0], p[1]};
 				bool isAlone = false;
 				while(true)
 				{
@@ -138,9 +152,9 @@ namespace {
 
 			// Interpolate outline points from directions and alpha values, rather than just the pixel's XY.
 			points.reserve(directions.size());
-			pos = start;
-			p[0] = pos % width;
-			p[1] = pos / width;
+			pos      = start;
+			p[0]     = pos % width;
+			p[1]     = pos / width;
 			int prev = directions.back();
 			for(int next : directions)
 			{
@@ -151,9 +165,9 @@ namespace {
 				// Determine the subpixel shift, where higher alphas will shift the estimate outward.
 				// (MAYBE: use an actual alpha gradient for dir & magnitude, or remove altogether.)
 				static const double scale[] = {1., 1. / sqrt(2.)};
-				Point shift = Point(step[out0][0] * scale[out0 & 1] + step[out1][0] * scale[out1 & 1],
-				                    step[out0][1] * scale[out0 & 1] + step[out1][1] * scale[out1 & 1])
-				                  .Unit();
+				Point               shift   = Point(step[out0][0] * scale[out0 & 1] + step[out1][0] * scale[out1 & 1],
+				                                    step[out0][1] * scale[out0 & 1] + step[out1][1] * scale[out1 & 1])
+				                                  .Unit();
 				shift *= ((begin[pos] & on) >> 24) * (1. / 255.) - .5;
 				points.push_back(shift + Point(p[0], p[1]));
 
@@ -205,7 +219,7 @@ namespace {
 	{
 		// Find the most divergent point.
 		double dmax = 0.;
-		int imax = 0;
+		int    imax = 0;
 
 		for(int i = first + 1; true; ++i)
 		{
@@ -242,12 +256,12 @@ namespace {
 	{
 		// Out of all the top-most and bottom-most pixels, find the ones that
 		// are closest to the center of the image.
-		int top = -1;
+		int top    = -1;
 		int bottom = -1;
 		for(int i = 0; static_cast<unsigned>(i) < raw.size(); ++i)
 		{
 			double ax = fabs(raw[i].X());
-			double y = raw[i].Y();
+			double y  = raw[i].Y();
 			if(top == -1)
 				top = bottom = i;
 			else if(y > raw[bottom].Y() || (y == raw[bottom].Y() && ax < fabs(raw[bottom].X())))
@@ -436,7 +450,7 @@ const vector<vector<Point>> &Mask::Outlines() const
 
 Mask Mask::operator*(Point scale) const
 {
-	Mask newMask = *this;
+	Mask newMask   = *this;
 	newMask.radius = 0.;
 	for(auto &outline : newMask.outlines)
 	{
@@ -471,11 +485,11 @@ double Mask::Intersection(Point sA, Point vA) const
 			// Check if there is an intersection. (If not, the cross would be 0.) If
 			// there is, handle it only if it is a point where the segment is
 			// entering the polygon rather than exiting it (i.e. cross > 0).
-			Point vB = next - prev;
+			Point  vB    = next - prev;
 			double cross = vB.Cross(vA);
 			if(cross > 0.)
 			{
-				Point vS = prev - sA;
+				Point  vS = prev - sA;
 				double uB = vA.Cross(vS);
 				double uA = vB.Cross(vS);
 				// If the intersection occurs somewhere within this segment of the

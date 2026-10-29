@@ -42,10 +42,12 @@ public:
 private:
 	void UpdateData(const std::vector<PlanetLabel> &labels, const System &system);
 	// Overlap detection.
-	void SetBoundingBox(const Point &labelDimensions, double angle);
+	void      SetBoundingBox(const Point &labelDimensions, double angle);
 	Rectangle GetBoundingBox(double zoom) const;
-	bool HasOverlaps(const std::vector<PlanetLabel> &labels, const System &system, const StellarObject &object,
-	                 double zoom) const;
+	bool      HasOverlaps(const std::vector<PlanetLabel> &labels,
+	                      const System                   &system,
+	                      const StellarObject            &object,
+	                      double                          zoom) const;
 
 
 private:
@@ -55,17 +57,17 @@ private:
 
 	// Used for overlap detection during label creation.
 	Rectangle box;
-	Point zoomOffset;
+	Point     zoomOffset;
 
 	// Position and radius for drawing label.
-	Point position;
+	Point  position;
 	double radius = 0.;
 
 	std::string name;
 	std::string government;
-	Point nameOffset;
-	Point governmentOffset;
-	Color color;
-	int hostility = 0;
-	double innerAngle = -1.;
+	Point       nameOffset;
+	Point       governmentOffset;
+	Color       color;
+	int         hostility  = 0;
+	double      innerAngle = -1.;
 };

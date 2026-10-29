@@ -58,7 +58,7 @@ public:
 	private:
 		friend class CategoryList;
 		std::string name;
-		int precedence = 0;
+		int         precedence = 0;
 	};
 
 public:
@@ -96,5 +96,5 @@ public:
 
 private:
 	std::vector<Category> list;
-	int currentPrecedence = 0;
+	int                   currentPrecedence = 0;
 };

@@ -97,7 +97,7 @@ const Type *Set<Type>::Find(const std::string &name) const
 template <class Type>
 void Set<Type>::Revert(const Set<Type> &other)
 {
-	auto it = data.begin();
+	auto it  = data.begin();
 	auto oit = other.data.begin();
 
 	while(it != data.end())

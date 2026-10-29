@@ -21,7 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 namespace Utf8 {
 #if defined(_WIN32)
 	std::wstring ToUTF16(const std::string &str, bool isPath = true);
-	std::string ToUTF8(const wchar_t *str);
+	std::string  ToUTF8(const wchar_t *str);
 #endif
 
 	// Check if this character is the byte order mark (BOM) sequence.

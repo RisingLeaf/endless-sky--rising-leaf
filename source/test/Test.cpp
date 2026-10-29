@@ -37,18 +37,22 @@ using namespace std;
 
 namespace {
 	const auto STATUS_TO_TEXT = map<Test::Status, const string>{
-	    {Test::Status::ACTIVE, "active"},
-	    {Test::Status::BROKEN, "broken"},
-	    {Test::Status::KNOWN_FAILURE, "known failure"},
+	    {         Test::Status::ACTIVE,          "active"},
+	    {         Test::Status::BROKEN,          "broken"},
+	    {  Test::Status::KNOWN_FAILURE,   "known failure"},
 	    {Test::Status::MISSING_FEATURE, "missing feature"},
-	    {Test::Status::PARTIAL, "partial"},
+	    {        Test::Status::PARTIAL,         "partial"},
 	};
 
 	const auto STEPTYPE_TO_TEXT = map<Test::TestStep::Type, const string>{
-	    {Test::TestStep::Type::APPLY, "apply"},       {Test::TestStep::Type::ASSERT, "assert"},
-	    {Test::TestStep::Type::BRANCH, "branch"},     {Test::TestStep::Type::CALL, "call"},
-	    {Test::TestStep::Type::DEBUG, "debug"},       {Test::TestStep::Type::INJECT, "inject"},
-	    {Test::TestStep::Type::INPUT, "input"},       {Test::TestStep::Type::LABEL, "label"},
+	    {   Test::TestStep::Type::APPLY,    "apply"},
+	    {  Test::TestStep::Type::ASSERT,   "assert"},
+	    {  Test::TestStep::Type::BRANCH,   "branch"},
+	    {    Test::TestStep::Type::CALL,     "call"},
+	    {   Test::TestStep::Type::DEBUG,    "debug"},
+	    {  Test::TestStep::Type::INJECT,   "inject"},
+	    {   Test::TestStep::Type::INPUT,    "input"},
+	    {   Test::TestStep::Type::LABEL,    "label"},
 	    {Test::TestStep::Type::NAVIGATE, "navigate"},
 	};
 
@@ -58,13 +62,15 @@ namespace {
 		if(m.empty())
 			return "no options supported";
 
-		string beginning = "expected \"" + m.begin()->second;
-		auto lastValidIt = prev(m.end());
+		string beginning   = "expected \"" + m.begin()->second;
+		auto   lastValidIt = prev(m.end());
 		// Handle maps with just 1 element.
 		if(lastValidIt == m.begin())
 			return beginning + "\"";
 
-		return accumulate(next(m.begin()), lastValidIt, beginning,
+		return accumulate(next(m.begin()),
+		                  lastValidIt,
+		                  beginning,
 		                  [](string a, const pair<K, const string> &b) -> string {
 			                  return std::move(a) + "\", \"" + b.second;
 		                  }) +
@@ -78,15 +84,15 @@ namespace {
 		SDL_Event event;
 		event.type = SDL_EVENT_KEY_DOWN;
 #ifdef ES_USE_SDL3
-		event.key.down = true;
+		event.key.down   = true;
 		event.key.repeat = false;
-		event.key.key = SDL_GetKeyFromName(keyName);
+		event.key.key    = SDL_GetKeyFromName(keyName);
 		if(event.key.key == SDLK_UNKNOWN)
 			return false;
 		event.key.mod = modKeys;
 #else
-		event.key.state = SDL_PRESSED;
-		event.key.repeat = 0;
+		event.key.state      = SDL_PRESSED;
+		event.key.repeat     = 0;
 		event.key.keysym.sym = SDL_GetKeyFromName(keyName);
 		if(event.key.keysym.sym == SDLK_UNKNOWN)
 			return false;
@@ -104,9 +110,9 @@ namespace {
 
 	string ShipToString(const Ship &ship)
 	{
-		string description = "name: " + ship.GivenName();
-		const System *system = ship.GetSystem();
-		const Planet *planet = ship.GetPlanet();
+		string        description = "name: " + ship.GivenName();
+		const System *system      = ship.GetSystem();
+		const Planet *planet      = ship.GetPlanet();
 		description += ", system: " + (system ? system->TrueName() : "<not set>");
 		description += ", planet: " + (planet ? planet->TrueName() : "<not set>");
 		description += ", hull: " + Format::Number(ship.HullFraction());
@@ -153,7 +159,7 @@ void Test::TestStep::LoadInput(const DataNode &node)
 		{
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
+				const string       &grandKey       = grand.Token(0);
 				static const string BAD_AXIS_INPUT = "Pointer axis input without coordinate:";
 				if(grandKey == "X")
 				{
@@ -206,10 +212,10 @@ void Test::LoadSequence(const DataNode &node, const ConditionsStore *playerCondi
 	for(const DataNode &child : node)
 	{
 		const string &typeName = child.Token(0);
-		auto it = find_if(STEPTYPE_TO_TEXT.begin(), STEPTYPE_TO_TEXT.end(),
-		                  [&typeName](const pair<TestStep::Type, const string> &e) {
-			                  return e.second == typeName;
-		                  });
+		auto          it       = find_if(
+		    STEPTYPE_TO_TEXT.begin(), STEPTYPE_TO_TEXT.end(), [&typeName](const pair<TestStep::Type, const string> &e) {
+			    return e.second == typeName;
+		    });
 		if(it == STEPTYPE_TO_TEXT.end())
 		{
 			status = Status::BROKEN;
@@ -222,12 +228,8 @@ void Test::LoadSequence(const DataNode &node, const ConditionsStore *playerCondi
 		TestStep &step = steps.back();
 		switch(step.stepType)
 		{
-		case TestStep::Type::APPLY:
-			step.assignConditions.Load(child, playerConditions);
-			break;
-		case TestStep::Type::ASSERT:
-			step.checkConditions.Load(child, playerConditions);
-			break;
+		case TestStep::Type::APPLY:  step.assignConditions.Load(child, playerConditions); break;
+		case TestStep::Type::ASSERT: step.checkConditions.Load(child, playerConditions); break;
 		case TestStep::Type::BRANCH:
 			if(child.Size() < 2)
 			{
@@ -270,9 +272,7 @@ void Test::LoadSequence(const DataNode &node, const ConditionsStore *playerCondi
 			else
 				step.nameOrLabel = child.Token(1);
 			break;
-		case TestStep::Type::INPUT:
-			step.LoadInput(child);
-			break;
+		case TestStep::Type::INPUT: step.LoadInput(child); break;
 		case TestStep::Type::LABEL:
 			if(child.Size() < 2)
 				child.PrintTrace("Ignoring empty label");
@@ -292,8 +292,8 @@ void Test::LoadSequence(const DataNode &node, const ConditionsStore *playerCondi
 		case TestStep::Type::NAVIGATE:
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
-				bool grandHasValue = grand.Size() >= 2;
+				const string &grandKey      = grand.Token(0);
+				bool          grandHasValue = grand.Size() >= 2;
 				if(grandKey == "travel" && grandHasValue)
 					step.travelPlan.push_back(GameData::Systems().Get(grand.Token(1)));
 				else if(grandKey == "travel destination" && grandHasValue)
@@ -362,10 +362,10 @@ void Test::Load(const DataNode &node, const ConditionsStore *playerConditions)
 		if(key == "status" && child.Size() >= 2)
 		{
 			const string &statusText = child.Token(1);
-			auto it = find_if(STATUS_TO_TEXT.begin(), STATUS_TO_TEXT.end(),
-			                  [&statusText](const pair<Status, const string> &e) {
-				                  return e.second == statusText;
-			                  });
+			auto          it         = find_if(
+			    STATUS_TO_TEXT.begin(), STATUS_TO_TEXT.end(), [&statusText](const pair<Status, const string> &e) {
+				    return e.second == statusText;
+			    });
 			if(it != STATUS_TO_TEXT.end())
 			{
 				// If the test already has a broken status (due to anything
@@ -448,9 +448,9 @@ void Test::Step(TestContext &context, PlayerInfo &player, Command &commandToGive
 	// All processing was done just before this step started.
 	context.branchesSinceGameStep.clear();
 
-	const ConditionsStore *playerConditions = &player.Conditions();
-	const set<const System *> *visitedSystems = &player.VisitedSystems();
-	const set<const Planet *> *visitedPlanets = &player.VisitedPlanets();
+	const ConditionsStore     *playerConditions = &player.Conditions();
+	const set<const System *> *visitedSystems   = &player.VisitedSystems();
+	const set<const Planet *> *visitedPlanets   = &player.VisitedPlanets();
 	while(context.callstack.back().step < steps.size() && !continueGameLoop)
 	{
 		const TestStep &stepToRun = steps[context.callstack.back().step];
@@ -522,18 +522,14 @@ void Test::Step(TestContext &context, PlayerInfo &player, Command &commandToGive
 			continueGameLoop = true;
 			++(context.callstack.back().step);
 			break;
-		case TestStep::Type::LABEL:
-			++(context.callstack.back().step);
-			break;
+		case TestStep::Type::LABEL: ++(context.callstack.back().step); break;
 		case TestStep::Type::NAVIGATE:
 			player.TravelPlan().clear();
 			player.TravelPlan() = stepToRun.travelPlan;
 			player.SetTravelDestination(stepToRun.travelDestination);
 			++(context.callstack.back().step);
 			break;
-		default:
-			Fail(context, player, "Unknown step type");
-			break;
+		default: Fail(context, player, "Unknown step type"); break;
 		}
 	}
 }
@@ -574,8 +570,7 @@ set<string> Test::RelevantConditions() const
 				conditionNames.emplace(name);
 		}
 		break;
-		default:
-			continue;
+		default: continue;
 		}
 	}
 	return conditionNames;
@@ -613,9 +608,9 @@ void Test::Fail(const TestContext &context, const PlayerInfo &player, const stri
 		Logger::Log("No flagship at the moment of failure.", Logger::Level::INFO);
 	else
 	{
-		string shipsOverview = "flagship " + ShipToString(*flagship) + "\n";
-		int escorts = 0;
-		int escortsNotPrinted = 0;
+		string shipsOverview     = "flagship " + ShipToString(*flagship) + "\n";
+		int    escorts           = 0;
+		int    escortsNotPrinted = 0;
 		for(auto &&ptr : flagship->GetEscorts())
 		{
 			auto escort = ptr.lock();

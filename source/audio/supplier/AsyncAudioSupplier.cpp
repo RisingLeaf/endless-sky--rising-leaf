@@ -68,7 +68,7 @@ vector<AudioSupplier::sample_t> AsyncAudioSupplier::NextDataChunk()
 	}
 	else
 		return vector<sample_t>(OUTPUT_CHUNK);
-	}
+}
 
 
 

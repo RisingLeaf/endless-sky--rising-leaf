@@ -36,9 +36,9 @@ public:
 	// Initialize with a shared pointer.
 	explicit ExclusiveItem(const std::shared_ptr<Type> &item) noexcept;
 
-	ExclusiveItem(ExclusiveItem &&) = default;
-	ExclusiveItem &operator=(ExclusiveItem &&) = default;
-	ExclusiveItem(const ExclusiveItem &) = default;
+	ExclusiveItem(ExclusiveItem &&)                 = default;
+	ExclusiveItem &operator=(ExclusiveItem &&)      = default;
+	ExclusiveItem(const ExclusiveItem &)            = default;
 	ExclusiveItem &operator=(const ExclusiveItem &) = default;
 
 	// Whether this ExclusiveItem contains a raw pointer to a "stock" object,

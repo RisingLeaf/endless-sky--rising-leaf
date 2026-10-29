@@ -111,7 +111,7 @@ void FormationPositioner::CalculatePositions()
 	{
 		// If the ship is no longer valid or not or no longer part of this
 		// formation, then we need to remove it.
-		auto ship = shipsInFormation[shipIndex].lock();
+		auto ship       = shipsInFormation[shipIndex].lock();
 		bool removeShip = !ship || !IsActiveInFormation(ship.get());
 
 		// Lookup the ship in the positions map.
@@ -136,7 +136,7 @@ void FormationPositioner::CalculatePositions()
 		{
 			// Calculate the new coordinate for the current ship.
 			Point &shipRelPos = itCoor->second.first;
-			shipRelPos = *itPos;
+			shipRelPos        = *itPos;
 			if(flippedY)
 				shipRelPos.Set(-shipRelPos.X(), shipRelPos.Y());
 			if(flippedX)
@@ -160,7 +160,7 @@ void FormationPositioner::CalculateDirection()
 
 	// Calculate new direction. If the formationLead is moving, then we use the movement vector,
 	// otherwise use the facing vector.
-	Point velocity = formationLead->Velocity();
+	Point velocity   = formationLead->Velocity();
 	Angle desiredDir = velocity.Length() > .1 ? Angle(velocity) : formationLead->Facing();
 
 	Angle deltaDir = desiredDir - direction;
@@ -186,15 +186,15 @@ void FormationPositioner::CalculateDirection()
 	if(fabs(deltaDir.Degrees()) >= MIN_FLIP_TRIGGER && (pattern->FlippableY() || pattern->FlippableX()))
 	{
 		direction = desiredDir;
-		deltaDir = Angle(0.);
+		deltaDir  = Angle(0.);
 		if(pattern->FlippableY())
 		{
-			flippedY = !flippedY;
+			flippedY       = !flippedY;
 			positionsTimer = 0;
 		}
 		if(pattern->FlippableX())
 		{
-			flippedX = !flippedX;
+			flippedX       = !flippedX;
 			positionsTimer = 0;
 		}
 	}

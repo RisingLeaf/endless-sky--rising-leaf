@@ -34,7 +34,7 @@ Swizzle::Swizzle(const std::array<bool, 16> &booMatrix)
 	for(int i = 0; i < 16; i++)
 		matrix[i] = booMatrix[i] ? 1 : 0;
 	identity = false;
-	loaded = true;
+	loaded   = true;
 }
 
 void Swizzle::Load(const DataNode &node)
@@ -46,7 +46,9 @@ void Swizzle::Load(const DataNode &node)
 		const string &key = child.Token(0);
 
 		// The corresponding row of the matrix for each channel name.
-		static const array<pair<string, int>, 4> channels = {{{"red", 0}, {"green", 1}, {"blue", 2}, {"alpha", 3}}};
+		static const array<pair<string, int>, 4> channels = {
+		    {{"red", 0}, {"green", 1}, {"blue", 2}, {"alpha", 3}}
+        };
 		auto channel = find_if(channels.cbegin(), channels.cend(), [key](const auto &kv) {
 			return kv.first == key;
 		});
@@ -55,7 +57,7 @@ void Swizzle::Load(const DataNode &node)
 			// Fill in the row of the matrix for the channel.
 			// We subtract one to account for the name being in the node.
 			int channelStartIndex = channel->second * STRIDE;
-			int elementNum = min(child.Size() - 1, 4);
+			int elementNum        = min(child.Size() - 1, 4);
 			for(int i = 0; i < elementNum; i++)
 				matrix[channelStartIndex + i] = child.Value(i + 1);
 		}
@@ -67,7 +69,7 @@ void Swizzle::Load(const DataNode &node)
 
 	// Special-case flag for when applying a swizzle would do nothing at all.
 	identity = matrix == IDENTITY_MATRIX;
-	loaded = true;
+	loaded   = true;
 }
 
 
@@ -109,7 +111,7 @@ const float *Swizzle::MatrixPtr() const
 
 Color Swizzle::Apply(const Color &to) const
 {
-	const float *colorPtr = to.Get();
+	const float    *colorPtr = to.Get();
 	array<float, 4> newColor = {0, 0, 0, 0};
 
 	// Manual matrix multiply into newColor.

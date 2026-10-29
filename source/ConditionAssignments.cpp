@@ -28,10 +28,13 @@ using namespace std;
 
 namespace {
 	const auto ASSIGN_OP_TO_TEXT = map<ConditionAssignments::AssignOp, const string>{
-	    {ConditionAssignments::AssignOp::ASSIGN, "="}, {ConditionAssignments::AssignOp::ADD, "+="},
-	    {ConditionAssignments::AssignOp::SUB, "-="},   {ConditionAssignments::AssignOp::MUL, "*="},
-	    {ConditionAssignments::AssignOp::DIV, "/="},   {ConditionAssignments::AssignOp::LT, "<?="},
-	    {ConditionAssignments::AssignOp::GT, ">?="},
+	    {ConditionAssignments::AssignOp::ASSIGN,   "="},
+	    {   ConditionAssignments::AssignOp::ADD,  "+="},
+	    {   ConditionAssignments::AssignOp::SUB,  "-="},
+	    {   ConditionAssignments::AssignOp::MUL,  "*="},
+	    {   ConditionAssignments::AssignOp::DIV,  "/="},
+	    {    ConditionAssignments::AssignOp::LT, "<?="},
+	    {    ConditionAssignments::AssignOp::GT, ">?="},
 	};
 }
 
@@ -96,31 +99,17 @@ void ConditionAssignments::Apply() const
 	ConditionsStore &conditionsStore = *const_cast<ConditionsStore *>(conditions);
 	for(const Assignment &assignment : assignments)
 	{
-		auto &ce = conditionsStore[assignment.conditionToAssignTo];
+		auto   &ce       = conditionsStore[assignment.conditionToAssignTo];
 		int64_t newValue = assignment.expressionToEvaluate.Evaluate();
 		switch(assignment.assignOperator)
 		{
-		case AssignOp::ASSIGN:
-			ce = newValue;
-			break;
-		case AssignOp::ADD:
-			ce += newValue;
-			break;
-		case AssignOp::SUB:
-			ce -= newValue;
-			break;
-		case AssignOp::MUL:
-			ce = static_cast<int64_t>(ce) * newValue;
-			break;
-		case AssignOp::DIV:
-			ce = newValue ? static_cast<int64_t>(ce) / newValue : numeric_limits<int64_t>::max();
-			break;
-		case AssignOp::LT:
-			ce = min(static_cast<int64_t>(ce), newValue);
-			break;
-		case AssignOp::GT:
-			ce = max(static_cast<int64_t>(ce), newValue);
-			break;
+		case AssignOp::ASSIGN: ce = newValue; break;
+		case AssignOp::ADD:    ce += newValue; break;
+		case AssignOp::SUB:    ce -= newValue; break;
+		case AssignOp::MUL:    ce = static_cast<int64_t>(ce) * newValue; break;
+		case AssignOp::DIV: ce = newValue ? static_cast<int64_t>(ce) / newValue : numeric_limits<int64_t>::max(); break;
+		case AssignOp::LT:  ce = min(static_cast<int64_t>(ce), newValue); break;
+		case AssignOp::GT:  ce = max(static_cast<int64_t>(ce), newValue); break;
 		}
 	}
 }
@@ -151,7 +140,7 @@ void ConditionAssignments::AddSetCondition(const string &name, const ConditionsS
 
 void ConditionAssignments::Add(const DataNode &node, const ConditionsStore *conditions)
 {
-	this->conditions = conditions;
+	this->conditions  = conditions;
 	const string &key = node.Token(0);
 	if(key == "set" || key == "clear")
 	{
@@ -169,18 +158,19 @@ void ConditionAssignments::Add(const DataNode &node, const ConditionsStore *cond
 			node.PrintTrace("Parse error; " + node.Token(1) + " operator requires a single valid condition:");
 			return;
 		}
-		assignments.emplace_back(key, node.Token(1) == "++" ? AssignOp::ADD : AssignOp::SUB,
-		                         ConditionSet(1, conditions));
+		assignments.emplace_back(
+		    key, node.Token(1) == "++" ? AssignOp::ADD : AssignOp::SUB, ConditionSet(1, conditions));
 	}
 	else if(node.Size() >= 3)
 	{
 		// Parse the assignment operator.
-		AssignOp ao = AssignOp::ASSIGN;
+		AssignOp     ao             = AssignOp::ASSIGN;
 		const string assignOpString = node.Token(1);
-		auto it = find_if(ASSIGN_OP_TO_TEXT.begin(), ASSIGN_OP_TO_TEXT.end(),
-		                  [&assignOpString](const pair<AssignOp, const string> &e) {
+		auto         it             = find_if(ASSIGN_OP_TO_TEXT.begin(),
+		                                      ASSIGN_OP_TO_TEXT.end(),
+		                                      [&assignOpString](const pair<AssignOp, const string> &e) {
 			                  return e.second == assignOpString;
-		                  });
+		                                      });
 		if(it != ASSIGN_OP_TO_TEXT.end())
 			ao = it->first;
 		else
@@ -191,7 +181,7 @@ void ConditionAssignments::Add(const DataNode &node, const ConditionsStore *cond
 
 		// Parse the expression.
 		ConditionSet expr(conditions);
-		int tokenNr = 2;
+		int          tokenNr = 2;
 		if(!expr.ParseNode(node, tokenNr))
 			return;
 
@@ -210,7 +200,8 @@ void ConditionAssignments::Add(const DataNode &node, const ConditionsStore *cond
 
 
 
-ConditionAssignments::Assignment::Assignment(string conditionToAssignTo, AssignOp assignOperator,
+ConditionAssignments::Assignment::Assignment(string       conditionToAssignTo,
+                                             AssignOp     assignOperator,
                                              ConditionSet expressionToEvaluate)
     : conditionToAssignTo(conditionToAssignTo), assignOperator(assignOperator),
       expressionToEvaluate(expressionToEvaluate)

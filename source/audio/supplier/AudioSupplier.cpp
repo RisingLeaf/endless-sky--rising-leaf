@@ -55,12 +55,12 @@ void AudioSupplier::NextChunk(ALuint buffer, bool spatial)
 				samples[i] = (static_cast<int>(samples[2 * i]) + static_cast<int>(samples[2 * i + 1])) / 2;
 			samples.resize(samples.size() / 2);
 		}
-		alBufferData(buffer, spatial ? FORMAT_SPATIAL : FORMAT, samples.data(), sizeof(sample_t) * samples.size(),
-		             SAMPLE_RATE);
+		alBufferData(
+		    buffer, spatial ? FORMAT_SPATIAL : FORMAT, samples.data(), sizeof(sample_t) * samples.size(), SAMPLE_RATE);
 	}
 	else
 		SetSilence(buffer, OUTPUT_CHUNK);
-	}
+}
 
 
 

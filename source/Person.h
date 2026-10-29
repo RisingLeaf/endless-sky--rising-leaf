@@ -36,8 +36,10 @@ class System;
 // A unique individual who may appear at random times in the game.
 class Person {
 public:
-	void Load(const DataNode &node, const ConditionsStore *playerConditions,
-	          const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	void Load(const DataNode                 &node,
+	          const ConditionsStore          *playerConditions,
+	          const std::set<const System *> *visitedSystems,
+	          const std::set<const Planet *> *visitedPlanets);
 	bool IsValid() const;
 	// Finish loading all the ships in this person specification.
 	void FinishLoading();
@@ -51,9 +53,9 @@ public:
 	// Get the person's characteristics. The ship object is persistent, i.e. it
 	// will be recycled every time this person appears.
 	const std::list<std::shared_ptr<Ship>> &Ships() const;
-	const Government *GetGovernment() const;
-	const Personality &GetPersonality() const;
-	const Phrase &GetHail() const;
+	const Government                       *GetGovernment() const;
+	const Personality                      &GetPersonality() const;
+	const Phrase                           &GetHail() const;
 	// Check if a person has been destroyed or captured.
 	bool IsDestroyed() const;
 	// Mark this person as destroyed.
@@ -72,10 +74,10 @@ public:
 
 
 private:
-	bool isLoaded = false;
-	std::string name;
+	bool           isLoaded = false;
+	std::string    name;
 	LocationFilter location;
-	int frequency = 100;
+	int            frequency = 100;
 
 	// Whether this fleet can respawn even if the flagship is killed.
 	bool neverDies = false;
@@ -83,10 +85,10 @@ private:
 	// the person to die.
 	bool mustDestroyAll = false;
 
-	ShipFactory shipFactory;
+	ShipFactory                      shipFactory;
 	std::list<std::shared_ptr<Ship>> ships;
-	const FormationPattern *formationPattern = nullptr;
-	const Government *government = nullptr;
-	Personality personality;
-	Phrase hail;
+	const FormationPattern          *formationPattern = nullptr;
+	const Government                *government       = nullptr;
+	Personality                      personality;
+	Phrase                           hail;
 };

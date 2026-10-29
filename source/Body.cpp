@@ -40,7 +40,7 @@ Body::Body(const Drawable &other, Point position, Point velocity, Angle facing, 
 {
 	this->position = position;
 	this->velocity = velocity;
-	this->angle = facing;
+	this->angle    = facing;
 }
 
 
@@ -53,7 +53,7 @@ const Mask &Body::GetMask(int step) const
 		SetStep(step);
 
 	static const Mask EMPTY;
-	int current = round(frame);
+	int               current = round(frame);
 	if(!sprite || current < 0)
 		return EMPTY;
 
@@ -170,8 +170,8 @@ void Body::Turn(double amount)
 		return;
 
 	auto RotatePointAroundOrigin = [](Point &toRotate, double radians) -> Point {
-		float si = sin(radians);
-		float co = cos(radians);
+		float si   = sin(radians);
+		float co   = cos(radians);
 		float newX = toRotate.X() * co - toRotate.Y() * si;
 		float newY = toRotate.X() * si + toRotate.Y() * co;
 		return Point(newX, newY);

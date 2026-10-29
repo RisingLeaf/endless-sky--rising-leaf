@@ -51,8 +51,8 @@ protected:
 
 private:
 	std::vector<std::vector<std::string>> rows;
-	std::vector<const Color *> colors;
-	size_t currentRowIndex = 0;
+	std::vector<const Color *>            colors;
+	size_t                                currentRowIndex = 0;
 
 	Table table;
 };

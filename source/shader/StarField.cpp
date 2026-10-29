@@ -52,8 +52,11 @@ namespace {
 	const double STAR_ZOOM = 0.70;
 	const double HAZE_ZOOM = 0.90;
 
-	void AddHaze(DrawList &drawList, const vector<Body> &haze, const Point &topLeft, const Point &bottomRight,
-	             double transparency)
+	void AddHaze(DrawList           &drawList,
+	             const vector<Body> &haze,
+	             const Point        &topLeft,
+	             const Point        &bottomRight,
+	             double              transparency)
 	{
 		for(auto &&it : haze)
 		{
@@ -83,16 +86,16 @@ void StarField::Init(const GraphicsTypes::GraphicsInstance *graphics_instance, c
 	for(size_t i = 0; i < HAZE_COUNT; ++i)
 	{
 		Point next;
-		bool overlaps = true;
+		bool  overlaps = true;
 		while(overlaps)
 		{
-			next = Point(Random::Real() * HAZE_WRAP, Random::Real() * HAZE_WRAP);
+			next     = Point(Random::Real() * HAZE_WRAP, Random::Real() * HAZE_WRAP);
 			overlaps = false;
 			for(const Body &other : haze[0])
 			{
-				Point previous = other.Position();
-				double dx = remainder(previous.X() - next.X(), HAZE_WRAP);
-				double dy = remainder(previous.Y() - next.Y(), HAZE_WRAP);
+				Point  previous = other.Position();
+				double dx       = remainder(previous.X() - next.X(), HAZE_WRAP);
+				double dy       = remainder(previous.Y() - next.Y(), HAZE_WRAP);
 				if(dx * dx + dy * dy < HAZE_DISTANCE * HAZE_DISTANCE)
 				{
 					overlaps = true;
@@ -110,11 +113,11 @@ void StarField::Init(const GraphicsTypes::GraphicsInstance *graphics_instance, c
 void StarField::FinishLoading()
 {
 	const Interface *constants = GameData::Interfaces().Get("starfield");
-	fixedZoom = constants->GetValue("fixed zoom");
-	velocityReducer = constants->GetValue("velocity reducer");
+	fixedZoom                  = constants->GetValue("fixed zoom");
+	velocityReducer            = constants->GetValue("velocity reducer");
 
-	minZoom = max(0., constants->GetValue("minimum zoom"));
-	zoomClamp = constants->GetValue("start clamping zoom");
+	minZoom    = max(0., constants->GetValue("minimum zoom"));
+	zoomClamp  = constants->GetValue("start clamping zoom");
 	clampSlope = max(0., (zoomClamp - minZoom) / zoomClamp);
 }
 
@@ -190,9 +193,9 @@ void StarField::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &blur
 
 	// Check preferences for the parallax quality.
 	const auto parallaxSetting = Preferences::GetBackgroundParallax();
-	const int layers = parallaxSetting == Preferences::BackgroundParallax::FANCY ? 3 : 1;
-	const bool isParallax = parallaxSetting == Preferences::BackgroundParallax::FANCY ||
-	                        parallaxSetting == Preferences::BackgroundParallax::FAST;
+	const int  layers          = parallaxSetting == Preferences::BackgroundParallax::FANCY ? 3 : 1;
+	const bool isParallax      = parallaxSetting == Preferences::BackgroundParallax::FANCY ||
+	                             parallaxSetting == Preferences::BackgroundParallax::FAST;
 
 	// Draw the starfield unless it is disabled in the preferences.
 	double zoom = baseZoom;
@@ -207,17 +210,19 @@ void StarField::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &blur
 				zoom = baseZoom * STAR_ZOOM * pow(pass, 0.2);
 
 			const float length = blur.Length();
-			Point unit = length ? blur.Unit() : Point(1., 0.);
+			Point       unit   = length ? blur.Unit() : Point(1., 0.);
 			// Don't zoom the stars at the same rate as the field; otherwise, at the
 			// farthest out zoom they are too small to draw well.
 			unit /= pow(zoom, .75);
 
-			const auto currentBaseZoom = static_cast<float>(2. * zoom);
-			const gm::vec2 scale = {currentBaseZoom / Screen::Width(), -currentBaseZoom / Screen::Height()};
-			const gm::padded_mat2 rotate = {static_cast<float>(unit.Y()), static_cast<float>(unit.X()),
-			                                static_cast<float>(-unit.X()), static_cast<float>(unit.Y())};
-			const float elongation = length * zoom;
-			const float brightness = min(1.0, pow(zoom, 0.5));
+			const auto            currentBaseZoom = static_cast<float>(2. * zoom);
+			const gm::vec2        scale      = {currentBaseZoom / Screen::Width(), -currentBaseZoom / Screen::Height()};
+			const gm::padded_mat2 rotate     = {static_cast<float>(unit.Y()),
+			                                    static_cast<float>(unit.X()),
+			                                    static_cast<float>(-unit.X()),
+			                                    static_cast<float>(unit.Y())};
+			const float           elongation = length * zoom;
+			const float           brightness = min(1.0, pow(zoom, 0.5));
 
 			// Stars this far beyond the border may still overlap the screen.
 			double borderX = fabs(blur.X()) + 1.;
@@ -235,11 +240,11 @@ void StarField::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &blur
 			{
 				for(int gx = minX; gx < maxX; gx += TILE_SIZE)
 				{
-					Point off = Point(gx, gy) - pos;
+					Point          off       = Point(gx, gy) - pos;
 					const gm::vec2 translate = {static_cast<float>(off.X()), static_cast<float>(off.Y())};
 
 					std::vector<unsigned char> data_cp(info.GetUniformSize());
-					int i = -1;
+					int                        i = -1;
 					info.CopyUniformEntryToBuffer(data_cp.data(), &rotate, ++i);
 					info.CopyUniformEntryToBuffer(data_cp.data(), &translate, ++i);
 					info.CopyUniformEntryToBuffer(data_cp.data(), &scale, ++i);
@@ -252,7 +257,7 @@ void StarField::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &blur
 					const int count = (tileIndex[index + 1] - first) * density / layers;
 
 					const int start = 6 * (first + (pass - 1) * count);
-					const int end = 6 * (count / pass);
+					const int end   = 6 * (count / pass);
 
 					geometry.Draw(cb, GraphicsTypes::PrimitiveType::TRIANGLES, start, end);
 				}
@@ -279,8 +284,8 @@ void StarField::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &blur
 
 	// Any object within this range must be drawn. Some haze sprites may repeat
 	// more than once if the view covers a very large area.
-	Point size = Point(1., 1.) * haze[0].front().Radius();
-	Point topLeft = pos + Screen::TopLeft() / zoom - size;
+	Point size        = Point(1., 1.) * haze[0].front().Radius();
+	Point topLeft     = pos + Screen::TopLeft() / zoom - size;
 	Point bottomRight = pos + Screen::BottomRight() / zoom + size;
 	if(transparency > 0.)
 		AddHaze(drawList, haze[1], topLeft, bottomRight, 1 - transparency);
@@ -322,10 +327,10 @@ void StarField::MakeStars(const GraphicsTypes::GraphicsInstance *graphics_instan
 	tileIndex.clear();
 	tileIndex.resize(static_cast<size_t>(tileCols) * tileCols, 0);
 
-	vector<int> off;
+	vector<int>      off;
 	static const int MAX_OFF = 50;
-	static const int MAX_D = MAX_OFF * MAX_OFF;
-	static const int MIN_D = MAX_D / 4;
+	static const int MAX_D   = MAX_OFF * MAX_OFF;
+	static const int MIN_D   = MAX_D / 4;
 	off.reserve(MAX_OFF * MAX_OFF * 5);
 	for(int x = -MAX_OFF; x <= MAX_OFF; ++x)
 		for(int y = -MAX_OFF; y <= MAX_OFF; ++y)
@@ -372,21 +377,24 @@ void StarField::MakeStars(const GraphicsTypes::GraphicsInstance *graphics_instan
 	for(auto it = temp.begin(); it != temp.end();)
 	{
 		// Figure out what tile this star is in.
-		int x = *it++;
-		int y = *it++;
+		int x     = *it++;
+		int y     = *it++;
 		int index = (x / TILE_SIZE) + (y / TILE_SIZE) * tileCols;
 
 		// Randomize its sub-pixel position and its size / brightness.
-		int random = Random::Int(4096);
-		float fx = (x & (TILE_SIZE - 1)) + (random & 15) * 0.0625f;
-		float fy = (y & (TILE_SIZE - 1)) + (random >> 8) * 0.0625f;
-		float size = (((random >> 4) & 15) + 20) * 0.0625f;
+		int   random = Random::Int(4096);
+		float fx     = (x & (TILE_SIZE - 1)) + (random & 15) * 0.0625f;
+		float fy     = (y & (TILE_SIZE - 1)) + (random >> 8) * 0.0625f;
+		float size   = (((random >> 4) & 15) + 20) * 0.0625f;
 
 		// Fill in the data array.
-		auto dataIt = data.begin() + 6 * 4 * tileIndex[index]++;
-		const float CORNER[6] = {static_cast<float>(0. * PI),  static_cast<float>(.5 * PI),
-		                         static_cast<float>(1.5 * PI), static_cast<float>(.5 * PI),
-		                         static_cast<float>(1.5 * PI), static_cast<float>(1. * PI)};
+		auto        dataIt    = data.begin() + 6 * 4 * tileIndex[index]++;
+		const float CORNER[6] = {static_cast<float>(0. * PI),
+		                         static_cast<float>(.5 * PI),
+		                         static_cast<float>(1.5 * PI),
+		                         static_cast<float>(.5 * PI),
+		                         static_cast<float>(1.5 * PI),
+		                         static_cast<float>(1. * PI)};
 		for(float corner : CORNER)
 		{
 			*dataIt++ = fx;
@@ -398,8 +406,8 @@ void StarField::MakeStars(const GraphicsTypes::GraphicsInstance *graphics_instan
 	// Adjust the tile indices so that tileIndex[i] is the start of tile i.
 	tileIndex.insert(tileIndex.begin(), 0);
 
-	geometry = graphics_layer::ObjectHandle(graphics_instance, data.size() / 4, 4 * sizeof(float), data.data(), {},
-	                                        "starfield");
+	geometry = graphics_layer::ObjectHandle(
+	    graphics_instance, data.size() / 4, 4 * sizeof(float), data.data(), {}, "starfield");
 }
 
 

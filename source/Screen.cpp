@@ -22,11 +22,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	int RAW_WIDTH = 0;
-	int RAW_HEIGHT = 0;
-	int WIDTH = 0;
-	int HEIGHT = 0;
-	int USER_ZOOM = 100;
+	int RAW_WIDTH      = 0;
+	int RAW_HEIGHT     = 0;
+	int WIDTH          = 0;
+	int HEIGHT         = 0;
+	int USER_ZOOM      = 100;
 	int EFFECTIVE_ZOOM = 100;
 } // namespace
 
@@ -35,7 +35,7 @@ namespace {
 Screen::ScreenDimensionsGuard::ScreenDimensionsGuard(int width, int height)
     : valid(true), oldWidth(WIDTH), oldHeight(HEIGHT)
 {
-	WIDTH = width;
+	WIDTH  = width;
 	HEIGHT = height;
 }
 
@@ -53,16 +53,16 @@ void Screen::ScreenDimensionsGuard::Deactivate()
 	if(!valid)
 		return;
 
-	WIDTH = oldWidth;
+	WIDTH  = oldWidth;
 	HEIGHT = oldHeight;
-	valid = false;
+	valid  = false;
 }
 
 
 
 void Screen::SetRaw(int width, int height, bool noResizeEvent)
 {
-	RAW_WIDTH = width;
+	RAW_WIDTH  = width;
 	RAW_HEIGHT = height;
 	SetZoom(USER_ZOOM, noResizeEvent);
 }
@@ -91,18 +91,18 @@ void Screen::SetZoom(int percent, bool noEvent)
 	USER_ZOOM = max(100, percent);
 
 	// Make sure the zoom factor is not set too high for the full UI to fit.
-	static const int MIN_WIDTH = 1000; // Width of main menu
-	static const int MIN_HEIGHT = 500; // Height of preferences panel
-	int minZoomX = 100 * RAW_WIDTH / MIN_WIDTH;
-	int minZoomY = 100 * RAW_HEIGHT / MIN_HEIGHT;
-	int minZoom = min(minZoomX, minZoomY);
+	static const int MIN_WIDTH  = 1000; // Width of main menu
+	static const int MIN_HEIGHT = 500;  // Height of preferences panel
+	int              minZoomX   = 100 * RAW_WIDTH / MIN_WIDTH;
+	int              minZoomY   = 100 * RAW_HEIGHT / MIN_HEIGHT;
+	int              minZoom    = min(minZoomX, minZoomY);
 	// Never go below 100% zoom, no matter how small the window is
 	minZoom = max(minZoom, 100);
 	// Use increments of 10, like the user setting
 	minZoom -= minZoom % 10;
 	EFFECTIVE_ZOOM = min(minZoom, UserZoom());
 
-	WIDTH = RAW_WIDTH * 100 / EFFECTIVE_ZOOM;
+	WIDTH  = RAW_WIDTH * 100 / EFFECTIVE_ZOOM;
 	HEIGHT = RAW_HEIGHT * 100 / EFFECTIVE_ZOOM;
 }
 

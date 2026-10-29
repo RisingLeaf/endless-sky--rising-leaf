@@ -41,14 +41,14 @@ void Table::Clear()
 {
 	columns.clear();
 
-	font = &FontSet::Get(14);
-	rowSize = Point(0., 20.);
-	center = Point(0., font->Height() / 2);
+	font     = &FontSet::Get(14);
+	rowSize  = Point(0., 20.);
+	center   = Point(0., font->Height() / 2);
 	lineSize = Point(0., 1.);
-	lineOff = Point(0., font->Height() + 1);
+	lineOff  = Point(0., font->Height() + 1);
 
 	point = Point();
-	it = columns.begin();
+	it    = columns.begin();
 	color = Color(1.f, 0.f);
 }
 
@@ -67,9 +67,9 @@ void Table::AddColumn(int x, Layout layout)
 // Set the font size. Default is 14 pixels.
 void Table::SetFontSize(int size)
 {
-	font = &FontSet::Get(size);
+	font        = &FontSet::Get(size);
 	lineOff.Y() = font->Height() + 1;
-	center.Y() = font->Height() / 2;
+	center.Y()  = font->Height() / 2;
 }
 
 
@@ -87,12 +87,12 @@ void Table::SetRowHeight(int height) noexcept
 void Table::SetHighlight(int startX, int endX) noexcept
 {
 	rowSize.X() = endX - startX;
-	center.X() = (endX + startX) / 2;
+	center.X()  = (endX + startX) / 2;
 
 	if(!lineSize.X())
 	{
 		lineSize.X() = rowSize.X();
-		lineOff.X() = center.X();
+		lineOff.X()  = center.X();
 	}
 }
 
@@ -103,12 +103,12 @@ void Table::SetHighlight(int startX, int endX) noexcept
 void Table::SetUnderline(int startX, int endX) noexcept
 {
 	lineSize.X() = endX - startX;
-	lineOff.X() = (endX + startX) / 2;
+	lineOff.X()  = (endX + startX) / 2;
 
 	if(!rowSize.X())
 	{
 		rowSize.X() = lineSize.X();
-		center.X() = lineOff.X();
+		center.X()  = lineOff.X();
 	}
 }
 
@@ -120,7 +120,7 @@ void Table::SetUnderline(int startX, int endX) noexcept
 void Table::DrawAt(const Point &point) const
 {
 	this->point = point + Point(0., (rowSize.Y() - font->Height()) / 2);
-	it = columns.begin();
+	it          = columns.begin();
 }
 
 
@@ -207,15 +207,19 @@ void Table::DrawCustom(GraphicsTypes::CommandBufferInstance *cb, const DisplayTe
 
 
 
-void Table::DrawTruncatedPair(GraphicsTypes::CommandBufferInstance *cb, const string &left, const Color &leftColor,
-                              const string &right, const Color &rightColor, Truncate strategy,
-                              bool truncateRightColumn) const
+void Table::DrawTruncatedPair(GraphicsTypes::CommandBufferInstance *cb,
+                              const string                         &left,
+                              const Color                          &leftColor,
+                              const string                         &right,
+                              const Color                          &rightColor,
+                              Truncate                              strategy,
+                              bool                                  truncateRightColumn) const
 {
 	// Compute the width of the non-truncated string, and the margin we have for the possibly-large text.
-	const auto colWidth = it->layout.width;
-	const auto textWidth = font->FormattedWidth({truncateRightColumn ? left : right, {colWidth}});
-	constexpr auto PAD = 5;
-	const auto remainder = max(colWidth - PAD - textWidth, 0);
+	const auto     colWidth  = it->layout.width;
+	const auto     textWidth = font->FormattedWidth({truncateRightColumn ? left : right, {colWidth}});
+	constexpr auto PAD       = 5;
+	const auto     remainder = max(colWidth - PAD - textWidth, 0);
 
 	auto lhs = Layout(truncateRightColumn ? colWidth : remainder, Alignment::LEFT, strategy);
 	auto rhs = Layout(truncateRightColumn ? remainder : colWidth, Alignment::RIGHT, strategy);
@@ -306,16 +310,18 @@ Table::Column::Column(double offset, Layout layout) noexcept : offset(offset), l
 
 
 
-void Table::Draw(GraphicsTypes::CommandBufferInstance *cb, const string &text, const Layout *special,
-                 const Color &color) const
+void Table::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                 const string                         &text,
+                 const Layout                         *special,
+                 const Color                          &color) const
 {
 	if(font && !columns.empty())
 	{
-		const auto &layout = special ? *special : it->layout;
-		const double alignmentOffset = layout.align == Alignment::RIGHT    ? -1.
-		                               : layout.align == Alignment::CENTER ? -0.5
-		                                                                   : 0.;
-		auto pos =
+		const auto  &layout          = special ? *special : it->layout;
+		const double alignmentOffset = layout.align == Alignment::RIGHT  ? -1.
+		                             : layout.align == Alignment::CENTER ? -0.5
+		                                                                 : 0.;
+		auto         pos =
 		    point + Point(it->offset + alignmentOffset * (layout.width >= 0 ? layout.width : font->Width(text)), 0.);
 		font->Draw(cb, {text, layout}, pos, color);
 	}

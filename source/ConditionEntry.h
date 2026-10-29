@@ -35,18 +35,18 @@ public:
 
 	// Prevent copying of ConditionEntries. We cannot safely copy the references to the provider, since we depend on the
 	// conditionsStore to set prefix providers.
-	ConditionEntry(const ConditionEntry &) = delete;
+	ConditionEntry(const ConditionEntry &)            = delete;
 	ConditionEntry &operator=(const ConditionEntry &) = delete;
 	// Also prevent moving, the provider uses a pointer to the entry, so the entry should stay where it is.
-	ConditionEntry(ConditionEntry &&) = delete;
+	ConditionEntry(ConditionEntry &&)            = delete;
 	ConditionEntry &operator=(ConditionEntry &&) = delete;
 
 	const std::string &Name() const;
-	const std::string NameWithoutPrefix() const;
+	const std::string  NameWithoutPrefix() const;
 
 	// int64_t proxy helper functions. Those functions allow access to the conditions
 	// using `operator[]` on ConditionsStores or on ConditionsProviders.
-	operator int64_t() const;
+	                operator int64_t() const;
 	ConditionEntry &operator=(int64_t val);
 	ConditionEntry &operator++();
 	ConditionEntry &operator--();
@@ -71,8 +71,8 @@ public:
 
 
 private:
-	std::string name;  ///< Name of this entry, set during construction of the entry object.
-	int64_t value = 0; ///< Value of this condition, in case of direct access.
+	std::string name;      ///< Name of this entry, set during construction of the entry object.
+	int64_t     value = 0; ///< Value of this condition, in case of direct access.
 
 	/// Get function to get the value of the ConditionEntry. GetFunctions are required for any derived provider.
 	std::function<int64_t(const ConditionEntry &)> getFunction;

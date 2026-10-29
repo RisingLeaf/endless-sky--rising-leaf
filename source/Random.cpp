@@ -26,20 +26,20 @@ using namespace std;
 // Right now thread_local storage is only supported under Linux.
 namespace {
 #ifndef __linux__
-	mutex workaroundMutex;
-	mt19937_64 gen;
+	mutex                              workaroundMutex;
+	mt19937_64                         gen;
 	uniform_int_distribution<uint32_t> uniform;
-	uniform_real_distribution<double> real;
-	normal_distribution<double> normal;
+	uniform_real_distribution<double>  real;
+	normal_distribution<double>        normal;
 #else
-	thread_local mt19937_64 gen;
+	thread_local mt19937_64                         gen;
 	thread_local uniform_int_distribution<uint32_t> uniform;
-	thread_local uniform_real_distribution<double> real;
-	thread_local normal_distribution<double> normal;
+	thread_local uniform_real_distribution<double>  real;
+	thread_local normal_distribution<double>        normal;
 #endif
 
-	bool useFixedSeed = false;
-	uint64_t fixedSeed = 0;
+	bool     useFixedSeed = false;
+	uint64_t fixedSeed    = 0;
 } // namespace
 
 
@@ -59,7 +59,7 @@ void Random::Seed(uint64_t seed)
 void Random::SetFixedSeed(uint64_t seed)
 {
 	useFixedSeed = true;
-	fixedSeed = seed;
+	fixedSeed    = seed;
 }
 
 

@@ -21,7 +21,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	const Point DEFAULT = Point(1., 1.);
+	const Point               DEFAULT = Point(1., 1.);
 	map<const Sprite *, bool> warned;
 
 	string PrintScale(Point s)
@@ -36,8 +36,8 @@ namespace {
 void MaskManager::SetMasks(const Sprite *sprite, vector<Mask> &&masks)
 {
 	lock_guard<mutex> lock(spriteMutex);
-	auto &scales = spriteMasks[sprite];
-	auto it = scales.find(DEFAULT);
+	auto             &scales = spriteMasks[sprite];
+	auto              it     = scales.find(DEFAULT);
 	if(it != scales.end())
 		it->second.swap(masks);
 	else
@@ -50,8 +50,8 @@ void MaskManager::SetMasks(const Sprite *sprite, vector<Mask> &&masks)
 void MaskManager::RegisterScale(const Sprite *sprite, Point scale)
 {
 	lock_guard<mutex> lock(spriteMutex);
-	auto &scales = spriteMasks[sprite];
-	auto lb = scales.lower_bound(scale);
+	auto             &scales = spriteMasks[sprite];
+	auto              lb     = scales.lower_bound(scale);
 	if(lb == scales.end() || lb->first != scale)
 		scales.emplace_hint(lb, scale, vector<Mask>{});
 	else if(!lb->second.empty())
@@ -68,7 +68,7 @@ void MaskManager::ScaleMasks()
 	for(auto &spriteScales : spriteMasks)
 	{
 		auto &scales = spriteScales.second;
-		auto baseIt = scales.find(DEFAULT);
+		auto  baseIt = scales.find(DEFAULT);
 		if(baseIt == scales.end() || baseIt->second.empty())
 			continue;
 
@@ -95,7 +95,7 @@ void MaskManager::ScaleMasks()
 const vector<Mask> &MaskManager::GetMasks(const Sprite *sprite, Point scale) const
 {
 	static const vector<Mask> EMPTY;
-	const auto scalesIt = spriteMasks.find(sprite);
+	const auto                scalesIt = spriteMasks.find(sprite);
 	if(scalesIt == spriteMasks.end())
 	{
 		if(warned.insert(make_pair(sprite, true)).second)
@@ -104,7 +104,7 @@ const vector<Mask> &MaskManager::GetMasks(const Sprite *sprite, Point scale) con
 	}
 
 	const auto &scales = scalesIt->second;
-	const auto maskIt = scales.find(scale);
+	const auto  maskIt = scales.find(scale);
 	if(maskIt != scales.end() && !maskIt->second.empty())
 		return maskIt->second;
 

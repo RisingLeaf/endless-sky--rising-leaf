@@ -52,11 +52,11 @@ public:
 	// that it contains, recursively.
 	static std::vector<std::filesystem::path> RecursiveList(const std::filesystem::path &directory);
 
-	static bool Exists(const std::filesystem::path &filePath);
+	static bool                            Exists(const std::filesystem::path &filePath);
 	static std::filesystem::file_time_type Timestamp(const std::filesystem::path &filePath);
-	static bool Copy(const std::filesystem::path &from, const std::filesystem::path &to);
-	static void Move(const std::filesystem::path &from, const std::filesystem::path &to);
-	static void Delete(const std::filesystem::path &filePath);
+	static bool                            Copy(const std::filesystem::path &from, const std::filesystem::path &to);
+	static void                            Move(const std::filesystem::path &from, const std::filesystem::path &to);
+	static void                            Delete(const std::filesystem::path &filePath);
 
 	// Get the filename from a path.
 	static std::string Name(const std::filesystem::path &path);
@@ -64,7 +64,7 @@ public:
 	// Validate that a character is allowed in a filename.
 	static bool IsValidCharacter(char32_t ch);
 	// Check if a filename is valid.
-	static bool IsValid(const std::string &filename);
+	static bool   IsValid(const std::string &filename);
 	static size_t MaxFilenameLength(const std::filesystem::path &base);
 
 	/// Check whether one path is a parent of another.
@@ -72,11 +72,11 @@ public:
 
 	// File IO.
 	static std::shared_ptr<std::iostream> Open(const std::filesystem::path &path, bool write = false);
-	static std::string Read(const std::filesystem::path &path);
-	static std::string Read(std::shared_ptr<std::iostream> file);
-	static void Write(const std::filesystem::path &path, const std::string &data);
-	static void Write(std::shared_ptr<std::iostream> file, const std::string &data);
-	static void CreateFolder(const std::filesystem::path &path);
+	static std::string                    Read(const std::filesystem::path &path);
+	static std::string                    Read(std::shared_ptr<std::iostream> file);
+	static void                           Write(const std::filesystem::path &path, const std::string &data);
+	static void                           Write(std::shared_ptr<std::iostream> file, const std::string &data);
+	static void                           CreateFolder(const std::filesystem::path &path);
 
 	// Open this user's plugins directory in their native file explorer.
 	static void OpenUserPluginFolder();

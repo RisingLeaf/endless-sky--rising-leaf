@@ -54,14 +54,14 @@ public:
 	const std::set<const Sprite *> &GetScenes() const;
 
 	// Returns height.
-	int Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft, WrappedText &wrap,
-	         const Color &color) const;
+	int
+	Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft, WrappedText &wrap, const Color &color) const;
 
-	const System *SourceSystem() const;
-	void SetSourceSystem(const System *system);
+	const System                   *SourceSystem() const;
+	void                            SetSourceSystem(const System *system);
 	const std::set<const System *> &MarkSystems() const;
 	const std::set<const System *> &CircleSystems() const;
-	bool HasSystems() const;
+	bool                            HasSystems() const;
 
 
 private:

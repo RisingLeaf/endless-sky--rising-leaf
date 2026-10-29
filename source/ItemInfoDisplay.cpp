@@ -34,8 +34,12 @@ using namespace std;
 
 
 ItemInfoDisplay::ItemInfoDisplay()
-    : tooltip(WIDTH, Alignment::LEFT, Tooltip::Direction::DOWN_LEFT, Tooltip::Corner::TOP_LEFT,
-	          GameData::Colors().Get("tooltip background"), GameData::Colors().Get("medium"))
+    : tooltip(WIDTH,
+	          Alignment::LEFT,
+	          Tooltip::Direction::DOWN_LEFT,
+	          Tooltip::Corner::TOP_LEFT,
+	          GameData::Colors().Get("tooltip background"),
+	          GameData::Colors().Get("medium"))
 {
 	description.SetAlignment(Preferences::GetTextAlignment());
 	description.SetWrapWidth(WIDTH - 20);
@@ -78,7 +82,7 @@ int ItemInfoDisplay::AttributesHeight() const
 void ItemInfoDisplay::DrawDescription(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft) const
 {
 	Rectangle hoverTarget = Rectangle::FromCorner(topLeft, Point(PanelWidth(), DescriptionHeight()));
-	Color color =
+	Color     color =
 	    hoverTarget.Contains(hoverPoint) ? *GameData::Colors().Get("bright") : *GameData::Colors().Get("medium");
 	description.Draw(cb, topLeft + Point(10., 12.), color);
 }
@@ -106,7 +110,7 @@ void ItemInfoDisplay::DrawTooltips(GraphicsTypes::CommandBufferInstance *cb) con
 void ItemInfoDisplay::Hover(const Point &point)
 {
 	hoverPoint = point;
-	hasHover = true;
+	hasHover   = true;
 }
 
 
@@ -124,8 +128,8 @@ void ItemInfoDisplay::UpdateDescription(const string &text, const vector<string>
 		description.Wrap(text);
 	else
 	{
-		static const string NOUN[2] = {"outfit", "ship"};
-		string fullText = text + "\tTo purchase this " + NOUN[isShip] + " you must have ";
+		static const string NOUN[2]  = {"outfit", "ship"};
+		string              fullText = text + "\tTo purchase this " + NOUN[isShip] + " you must have ";
 		fullText += Format::List<vector, string>(licenses, [](const string &name) {
 			bool isVoweled = false;
 			for(const char &c : "aeiou")
@@ -148,8 +152,10 @@ void ItemInfoDisplay::UpdateDescription(const string &text, const vector<string>
 
 
 
-Point ItemInfoDisplay::Draw(GraphicsTypes::CommandBufferInstance *cb, Point point, const vector<string> &labels,
-                            const vector<string> &values) const
+Point ItemInfoDisplay::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                            Point                                 point,
+                            const vector<string>                 &labels,
+                            const vector<string>                 &values) const
 {
 	// Add ten pixels of padding at the top.
 	point.Y() += 10.;

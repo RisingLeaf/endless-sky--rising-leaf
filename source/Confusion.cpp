@@ -121,7 +121,7 @@ void Confusion::UpdateConfusion(bool isFocusing)
 		else
 			focusPercentage -= 1. / loseFocusTime;
 		focusPercentage = min(1., max(0., focusPercentage));
-		focus = 1. - (1. - focusMultiplier) * focusPercentage;
+		focus           = 1. - (1. - focusMultiplier) * focusPercentage;
 	}
 
 	confusion = confusionMultiplier * focus * cos(tick * PI * 2 / period);

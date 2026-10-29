@@ -102,7 +102,7 @@ namespace {
 		}
 
 		const Trade::Commodity &commodity = GameData::Commodities()[index];
-		int amount = Random::Int(freeSpace) + 1;
+		int                     amount    = Random::Int(freeSpace) + 1;
 		ship.Cargo().Add(commodity.name, amount);
 	}
 
@@ -111,10 +111,10 @@ namespace {
 	{
 		if(outfits.empty())
 			return;
-		int index = Random::Int(outfits.size());
-		const Outfit *picked = outfits[index];
-		int maxQuantity = floor(static_cast<double>(freeSpace) / picked->Mass());
-		int amount = Random::Int(maxQuantity) + 1;
+		int           index       = Random::Int(outfits.size());
+		const Outfit *picked      = outfits[index];
+		int           maxQuantity = floor(static_cast<double>(freeSpace) / picked->Mass());
+		int           amount      = Random::Int(maxQuantity) + 1;
 		ship.Cargo().Add(picked, amount);
 	}
 } // namespace
@@ -162,10 +162,10 @@ void FleetCargo::LoadSingle(const DataNode &node)
 // up to the number of bunks remaining after required crew.
 void FleetCargo::SetCargo(Ship *ship) const
 {
-	const bool canChooseOutfits = commodities.empty() || !outfitters.empty();
+	const bool canChooseOutfits     = commodities.empty() || !outfitters.empty();
 	const bool canChooseCommodities = outfitters.empty() || !commodities.empty();
 	// Populate the possible outfits that may be chosen.
-	int free = ship->Cargo().Free();
+	int  free    = ship->Cargo().Free();
 	auto outfits = OutfitChoices(outfitters, ship->GetSystem(), free);
 
 	// Choose random outfits or commodities to transport.
@@ -175,7 +175,8 @@ void FleetCargo::SetCargo(Ship *ship) const
 			break;
 		// Remove any outfits that do not fit into remaining cargo.
 		if(canChooseOutfits && !outfits.empty())
-			outfits.erase(remove_if(outfits.begin(), outfits.end(),
+			outfits.erase(remove_if(outfits.begin(),
+			                        outfits.end(),
 			                        [&free](const Outfit *a) {
 				                        return a->Mass() > free;
 			                        }),

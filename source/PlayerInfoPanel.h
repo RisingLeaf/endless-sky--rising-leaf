@@ -61,9 +61,15 @@ private:
 	void DrawPlayer(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &bounds);
 	void DrawFleet(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &bounds);
 	// Draw a list of details about the player, such as the player's licenses or salaries.
-	void DrawList(GraphicsTypes::CommandBufferInstance *cb, const std::vector<std::pair<std::string, int64_t>> &list,
-	              std::shared_ptr<TableArea> &area, Point &topLeft, int width, const std::string &title,
-	              int64_t titleValue, int height, bool drawValues = true);
+	void DrawList(GraphicsTypes::CommandBufferInstance               *cb,
+	              const std::vector<std::pair<std::string, int64_t>> &list,
+	              std::shared_ptr<TableArea>                         &area,
+	              Point                                              &topLeft,
+	              int                                                 width,
+	              const std::string                                  &title,
+	              int64_t                                             titleValue,
+	              int                                                 height,
+	              bool                                                drawValues = true);
 
 	// Handle mouse hover (also including hover during drag actions):
 	bool Hover(const Point &point);
@@ -76,13 +82,13 @@ private:
 
 	class SortableColumn {
 	public:
-		SortableColumn(std::string name, double offset, double endX, Layout layout,
-		               InfoPanelState::ShipComparator *shipSort);
+		SortableColumn(
+		    std::string name, double offset, double endX, Layout layout, InfoPanelState::ShipComparator *shipSort);
 
-		std::string name;
-		double offset = 0.;
-		double endX = 0.;
-		Layout layout;
+		std::string                     name;
+		double                          offset = 0.;
+		double                          endX   = 0.;
+		Layout                          layout;
 		InfoPanelState::ShipComparator *shipSort = nullptr;
 	};
 

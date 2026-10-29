@@ -102,152 +102,152 @@ public:
 	static void Set(const std::string &name, bool on = true);
 
 	/// Toggle the ammo usage preferences, cycling between "never," "frugally," and "always."
-	static void ToggleAmmoUsage();
+	static void        ToggleAmmoUsage();
 	static std::string AmmoUsage();
 
 	/// Date format preferences.
-	static void ToggleDateFormat();
-	static DateFormat GetDateFormat();
+	static void               ToggleDateFormat();
+	static DateFormat         GetDateFormat();
 	static const std::string &DateFormatSetting();
 
 	// Notification preferences.
-	static void ToggleNotificationSetting();
+	static void                ToggleNotificationSetting();
 	static NotificationSetting GetNotificationSetting();
-	static const std::string &NotificationSettingString();
+	static const std::string  &NotificationSettingString();
 
 	// Scroll speed preference.
-	static int ScrollSpeed();
+	static int  ScrollSpeed();
 	static void SetScrollSpeed(int speed);
 
-	static int TooltipActivation();
+	static int  TooltipActivation();
 	static void SetTooltipActivation(int steps);
 
-	static double ViewZoom();
-	static bool ZoomViewIn();
-	static bool ZoomViewOut();
-	static double MinViewZoom();
-	static double MaxViewZoom();
+	static double                     ViewZoom();
+	static bool                       ZoomViewIn();
+	static bool                       ZoomViewOut();
+	static double                     MinViewZoom();
+	static double                     MaxViewZoom();
 	static const std::vector<double> &Zooms();
 
-	static void ToggleScreenMode();
+	static void               ToggleScreenMode();
 	static const std::string &ScreenModeSetting();
 
 	/// VSync setting, either "on", "off", or "adaptive".
-	static bool ToggleVSync();
-	static VSync VSyncState();
+	static bool               ToggleVSync();
+	static VSync              VSyncState();
 	static const std::string &VSyncSetting();
 
-	static void ToggleCameraAcceleration();
-	static CameraAccel CameraAcceleration();
+	static void               ToggleCameraAcceleration();
+	static CameraAccel        CameraAcceleration();
 	static const std::string &CameraAccelerationSetting();
 
-	static void CycleStatusOverlays(OverlayType type);
-	static OverlayState StatusOverlaysState(OverlayType type);
+	static void               CycleStatusOverlays(OverlayType type);
+	static OverlayState       StatusOverlaysState(OverlayType type);
 	static const std::string &StatusOverlaysSetting(OverlayType type);
 
 	/// Turret overlays setting, either "off", "always on", or "blindspots only".
-	static void ToggleTurretOverlays();
-	static TurretOverlays GetTurretOverlays();
+	static void               ToggleTurretOverlays();
+	static TurretOverlays     GetTurretOverlays();
 	static const std::string &TurretOverlaysSetting();
 
 	/// Highlight ships setting, either "off", "flagship", "owned ships", or "all".
-	static void ToggleHighlightShips();
-	static HighlightShips GetHighlightShips();
+	static void               ToggleHighlightShips();
+	static HighlightShips     GetHighlightShips();
 	static const std::string &HighlightShipsSetting();
 
 	/// Auto aim setting, either "off", "always on", or "when firing".
-	static void ToggleAutoAim();
-	static AutoAim GetAutoAim();
+	static void               ToggleAutoAim();
+	static AutoAim            GetAutoAim();
 	static const std::string &AutoAimSetting();
 
 	/// Auto fire setting, either "off", "on", "guns only", or "turrets only".
-	static void ToggleAutoFire();
-	static AutoFire GetAutoFire();
+	static void               ToggleAutoFire();
+	static AutoFire           GetAutoFire();
 	static const std::string &AutoFireSetting();
 
 	/// Background parallax setting, either "fast", "fancy", or "off".
-	static void ToggleParallax();
+	static void               ToggleParallax();
 	static BackgroundParallax GetBackgroundParallax();
 	static const std::string &ParallaxSetting();
 
 	/// Extended jump effects setting, either "off", "medium", or "heavy".
-	static void ToggleExtendedJumpEffects();
+	static void                ToggleExtendedJumpEffects();
 	static ExtendedJumpEffects GetExtendedJumpEffects();
-	static const std::string &ExtendedJumpEffectsSetting();
+	static const std::string  &ExtendedJumpEffectsSetting();
 
 	/// Boarding target setting, either "proximity", "value" or "mixed".
-	static void ToggleBoarding();
-	static BoardingPriority GetBoardingPriority();
+	static void               ToggleBoarding();
+	static BoardingPriority   GetBoardingPriority();
 	static const std::string &BoardingSetting();
 
 	/// Flotsam setting, either "off", "on", "flagship only", or "escorts only".
-	static void ToggleFlotsam();
-	static FlotsamCollection GetFlotsamCollection();
+	static void               ToggleFlotsam();
+	static FlotsamCollection  GetFlotsamCollection();
 	static const std::string &FlotsamSetting();
 
 	/// Red alert siren and symbol.
-	static void ToggleAlert();
-	static AlertIndicator GetAlertIndicator();
+	static void               ToggleAlert();
+	static AlertIndicator     GetAlertIndicator();
 	static const std::string &AlertSetting();
-	static bool PlayAudioAlert();
-	static bool DisplayVisualAlert();
-	static bool DoAlertHelper(AlertIndicator toDo);
+	static bool               PlayAudioAlert();
+	static bool               DisplayVisualAlert();
+	static bool               DoAlertHelper(AlertIndicator toDo);
 
 	/// Minimap display settings.
-	static void ToggleMinimapDisplay();
-	static MinimapDisplay GetMinimapDisplay();
+	static void               ToggleMinimapDisplay();
+	static MinimapDisplay     GetMinimapDisplay();
 	static const std::string &MinimapSetting();
 
 	/// Flagship space priority setting.
-	static void ToggleFlagshipSpacePriority();
+	static void                  ToggleFlagshipSpacePriority();
 	static FlagshipSpacePriority GetFlagshipSpacePriority();
-	static const std::string &FlagshipSpacePrioritySetting();
+	static const std::string    &FlagshipSpacePrioritySetting();
 
 	/// Large graphics reduction setting.
-	static void ToggleLargeGraphicsReduction();
+	static void                   ToggleLargeGraphicsReduction();
 	static LargeGraphicsReduction GetLargeGraphicsReduction();
-	static const std::string &LargeGraphicsReductionSetting();
+	static const std::string     &LargeGraphicsReductionSetting();
 
 	/// Tribute confirmation dialog setting.
-	static void ToggleTributeConfirmation();
+	static void                ToggleTributeConfirmation();
 	static TributeConfirmation GetTributeConfirmation();
-	static const std::string &TributeConfirmationSetting();
+	static const std::string  &TributeConfirmationSetting();
 
 	/// Outfitter ammo refill confirmation setting.
-	static void ToggleAmmoRefill();
-	static AmmoRefill GetAmmoRefill();
+	static void               ToggleAmmoRefill();
+	static AmmoRefill         GetAmmoRefill();
 	static const std::string &AmmoRefillSetting();
 
 	/// Fast-forward CapsLock sync setting
-	static void ToggleFastForwardCapsLockSync();
+	static void                    ToggleFastForwardCapsLockSync();
 	static FastForwardCapsLockSync GetFastForwardCapsLockSync();
-	static const std::string &FastForwardCapsLockSyncSetting();
+	static const std::string      &FastForwardCapsLockSyncSetting();
 
 	/// Text alignment setting.
-	static void ToggleTextAlignment();
-	static Alignment GetTextAlignment();
+	static void               ToggleTextAlignment();
+	static Alignment          GetTextAlignment();
 	static const std::string &TextAlignmentSetting();
 
 	/// Target asteroid strategy setting.
-	static void ToggleTargetAsteroidStrategy();
+	static void                   ToggleTargetAsteroidStrategy();
 	static TargetAsteroidStrategy GetTargetAsteroidStrategy();
-	static const std::string &TargetAsteroidStrategySetting();
+	static const std::string     &TargetAsteroidStrategySetting();
 
 	/// Font size setting.
 	static void ToggleFontSize();
-	static int GetFontSize();
+	static int  GetFontSize();
 
 	static void ToggleBlockScreenSaver();
 
 	static int GetPreviousSaveCount();
 
 #ifdef _WIN32
-	static void ToggleTitleBarTheme();
-	static TitleBarTheme GetTitleBarTheme();
+	static void               ToggleTitleBarTheme();
+	static TitleBarTheme      GetTitleBarTheme();
 	static const std::string &TitleBarThemeSetting();
 
-	static void ToggleWindowRounding();
-	static WindowRounding GetWindowRounding();
+	static void               ToggleWindowRounding();
+	static WindowRounding     GetWindowRounding();
 	static const std::string &WindowRoundingSetting();
 #endif
 };

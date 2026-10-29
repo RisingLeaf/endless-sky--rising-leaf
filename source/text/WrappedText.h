@@ -45,7 +45,7 @@ public:
 	void SetTruncate(Truncate trunc);
 
 	// Set the wrap width. This does not include any margins.
-	int WrapWidth() const;
+	int  WrapWidth() const;
 	void SetWrapWidth(int width);
 
 	// Set the font to use. This will also set sensible defaults for the tab
@@ -54,15 +54,15 @@ public:
 	void SetFont(const Font &font);
 
 	// Set the width in pixels of a single '\t' character.
-	int TabWidth() const;
+	int  TabWidth() const;
 	void SetTabWidth(int width);
 
 	// Set the height in pixels of one line of text within a paragraph.
-	int LineHeight() const;
+	int  LineHeight() const;
 	void SetLineHeight(int height);
 
 	// Set the extra spacing in pixels to be added in between paragraphs.
-	int ParagraphBreak() const;
+	int  ParagraphBreak() const;
 	void SetParagraphBreak(int height);
 
 	// Wrap the given text. Use Draw() to draw it.
@@ -85,7 +85,7 @@ public:
 private:
 	void Wrap();
 	void AdjustLine(size_t &lineBegin, int &lineWidth, bool isEnd);
-	int Space(char c) const;
+	int  Space(char c) const;
 
 
 private:
@@ -95,12 +95,12 @@ private:
 		Word() = default;
 
 		size_t Index() const;
-		Point Pos() const;
+		Point  Pos() const;
 
 	private:
 		size_t index = 0;
-		int x = 0;
-		int y = 0;
+		int    x     = 0;
+		int    y     = 0;
 
 		friend class WrappedText;
 	};
@@ -109,18 +109,18 @@ private:
 private:
 	const Font *font = nullptr;
 
-	int space = 0;
-	int wrapWidth = 1000;
-	int tabWidth = 0;
-	int lineHeight = 0;
-	int paragraphBreak = 0;
-	Alignment alignment = Alignment::JUSTIFIED;
-	Truncate truncate = Truncate::NONE;
+	int       space          = 0;
+	int       wrapWidth      = 1000;
+	int       tabWidth       = 0;
+	int       lineHeight     = 0;
+	int       paragraphBreak = 0;
+	Alignment alignment      = Alignment::JUSTIFIED;
+	Truncate  truncate       = Truncate::NONE;
 
-	std::string original;
-	std::string text;
+	std::string       original;
+	std::string       text;
 	std::vector<Word> words;
-	int height = 0;
+	int               height = 0;
 
 	int longestLineWidth = 0;
 };

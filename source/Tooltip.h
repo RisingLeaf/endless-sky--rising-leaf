@@ -42,8 +42,13 @@ public:
 
 
 public:
-	Tooltip(int width, Alignment alignment, Direction direction, Corner corner, const Color *backColor,
-	        const Color *fontColor, bool shrinkToFit = false);
+	Tooltip(int          width,
+	        Alignment    alignment,
+	        Direction    direction,
+	        Corner       corner,
+	        const Color *backColor,
+	        const Color *fontColor,
+	        bool         shrinkToFit = false);
 
 	void IncrementCount();
 	void DecrementCount();
@@ -72,14 +77,14 @@ private:
 
 
 private:
-	int width;
+	int       width;
 	Direction direction;
-	Corner corner;
+	Corner    corner;
 
 	const Color *backColor;
 	const Color *fontColor;
 
-	Rectangle zone;
+	Rectangle   zone;
 	WrappedText text;
 	// Whether the background of the tooltip should shrink to fit the text.
 	bool shrinkToFit = false;

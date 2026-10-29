@@ -42,9 +42,9 @@ public:
 	void Save(DataWriter &out) const;
 
 	const std::filesystem::path &Path() const;
-	std::string Identifier() const;
-	bool IsEmpty() const;
-	void Clear();
+	std::string                  Identifier() const;
+	bool                         IsEmpty() const;
+	void                         Clear();
 
 	const std::string &Name() const;
 	const std::string &Credits() const;
@@ -54,7 +54,7 @@ public:
 	const std::string &GetPlanet() const;
 	const std::string &GetPlayTime() const;
 
-	const Sprite *ShipSprite() const;
+	const Sprite      *ShipSprite() const;
 	const std::string &ShipName() const;
 
 	void PopulateInfo(Information &info) const;
@@ -72,5 +72,5 @@ private:
 	std::string playTime;
 
 	const Sprite *shipSprite = nullptr;
-	std::string shipName;
+	std::string   shipName;
 };

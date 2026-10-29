@@ -23,16 +23,18 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	const map<string, SoundCategory> categoryNames = {{"ui", SoundCategory::UI},
-	                                                  {"anti-missile", SoundCategory::ANTI_MISSILE},
-	                                                  {"weapon", SoundCategory::WEAPON},
-	                                                  {"engine", SoundCategory::ENGINE},
-	                                                  {"afterburner", SoundCategory::AFTERBURNER},
-	                                                  {"jump", SoundCategory::JUMP},
-	                                                  {"explosion", SoundCategory::EXPLOSION},
-	                                                  {"scan", SoundCategory::SCAN},
-	                                                  {"environment", SoundCategory::ENVIRONMENT},
-	                                                  {"alert", SoundCategory::ALERT}};
+	const map<string, SoundCategory> categoryNames = {
+	    {          "ui",           SoundCategory::UI},
+	    {"anti-missile", SoundCategory::ANTI_MISSILE},
+	    {      "weapon",       SoundCategory::WEAPON},
+	    {      "engine",       SoundCategory::ENGINE},
+	    { "afterburner",  SoundCategory::AFTERBURNER},
+	    {        "jump",         SoundCategory::JUMP},
+	    {   "explosion",    SoundCategory::EXPLOSION},
+	    {        "scan",         SoundCategory::SCAN},
+	    { "environment",  SoundCategory::ENVIRONMENT},
+	    {       "alert",        SoundCategory::ALERT}
+    };
 }
 
 
@@ -58,8 +60,8 @@ void Effect::Load(const DataNode &node)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "sprite")
 			LoadSprite(child);
 		else if(key == "zooms")
@@ -89,12 +91,12 @@ void Effect::Load(const DataNode &node)
 			randomFrameRate = child.Value(1);
 		else if(key == "absolute angle" && hasValue)
 		{
-			absoluteAngle = Angle(child.Value(1));
+			absoluteAngle    = Angle(child.Value(1));
 			hasAbsoluteAngle = true;
 		}
 		else if(key == "absolute velocity" && hasValue)
 		{
-			absoluteVelocity = child.Value(1);
+			absoluteVelocity    = child.Value(1);
 			hasAbsoluteVelocity = true;
 		}
 		else

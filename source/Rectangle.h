@@ -40,9 +40,9 @@ public:
 	Rectangle &operator=(const Rectangle &other) = default;
 
 	// Translation operators.
-	Rectangle operator+(const Point &offset) const;
+	Rectangle  operator+(const Point &offset) const;
 	Rectangle &operator+=(const Point &offset);
-	Rectangle operator-(const Point &offset) const;
+	Rectangle  operator-(const Point &offset) const;
 	Rectangle &operator-=(const Point &offset);
 
 	// Comparison operator.
@@ -50,18 +50,18 @@ public:
 	bool operator!=(const Rectangle &other) const = default;
 
 	// Query the attributes of the rectangle.
-	Point Center() const;
-	Point Dimensions() const;
+	Point  Center() const;
+	Point  Dimensions() const;
 	double Width() const;
 	double Height() const;
 	double Left() const;
 	double Top() const;
 	double Right() const;
 	double Bottom() const;
-	Point TopLeft() const;
-	Point TopRight() const;
-	Point BottomLeft() const;
-	Point BottomRight() const;
+	Point  TopLeft() const;
+	Point  TopRight() const;
+	Point  BottomLeft() const;
+	Point  BottomRight() const;
 
 	// Check if a point is inside this rectangle.
 	bool Contains(const Point &point) const;

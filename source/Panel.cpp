@@ -43,7 +43,7 @@ void Panel::DrawEdgeSprite(GraphicsTypes::CommandBufferInstance *cb, const Sprit
 	{
 		// If the screen is high enough, the edge sprite should repeat.
 		double spriteHeight = edgeSprite->Height();
-		Point pos(posX + .5 * edgeSprite->Width(), Screen::Top() + .5 * spriteHeight);
+		Point  pos(posX + .5 * edgeSprite->Width(), Screen::Top() + .5 * spriteHeight);
 		for(; pos.Y() - .5 * spriteHeight < Screen::Bottom(); pos.Y() += spriteHeight)
 			SpriteShader::Draw(cb, edgeSprite, pos);
 	}
@@ -304,7 +304,7 @@ bool Panel::HasFocus() const
 bool Panel::FocusNext()
 {
 	vector<Panel *> all;
-	int currentFocusIdx = EnumerateTreeAndFindActivePanel(all);
+	int             currentFocusIdx = EnumerateTreeAndFindActivePanel(all);
 
 	int idx = currentFocusIdx + 1;
 	if(idx >= static_cast<int>(all.size()))
@@ -337,7 +337,7 @@ bool Panel::FocusNext()
 bool Panel::FocusPrev()
 {
 	vector<Panel *> all;
-	int currentFocusIdx = EnumerateTreeAndFindActivePanel(all);
+	int             currentFocusIdx = EnumerateTreeAndFindActivePanel(all);
 
 	int idx = currentFocusIdx - 1;
 	if(idx < 0)
@@ -578,9 +578,9 @@ void Panel::RemoveChild(const Panel *panel)
 
 int Panel::EnumerateTreeAndFindActivePanel(vector<Panel *> &descendants)
 {
-	int currentFocusIdx = -1;
+	int            currentFocusIdx = -1;
 	deque<Panel *> q;
-	Panel *p = this;
+	Panel         *p = this;
 	while(p->parent)
 		p = p->parent;
 	q.push_back(p);

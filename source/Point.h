@@ -36,30 +36,30 @@ public:
 
 	// Check if the point is anything but (0, 0).
 	explicit operator bool() const noexcept;
-	bool operator!() const noexcept;
+	bool     operator!() const noexcept;
 
 	bool operator==(const Point &other) const noexcept;
 	bool operator!=(const Point &other) const noexcept;
 
-	Point operator+(const Point &point) const;
+	Point  operator+(const Point &point) const;
 	Point &operator+=(const Point &point);
-	Point operator-(const Point &point) const;
+	Point  operator-(const Point &point) const;
 	Point &operator-=(const Point &point);
-	Point operator-() const;
+	Point  operator-() const;
 
-	Point operator*(double scalar) const;
+	Point        operator*(double scalar) const;
 	friend Point operator*(double scalar, const Point &point);
-	Point &operator*=(double scalar);
-	Point operator/(double scalar) const;
-	Point &operator/=(double scalar);
+	Point       &operator*=(double scalar);
+	Point        operator/(double scalar) const;
+	Point       &operator/=(double scalar);
 
 	// Multiply the respective components of each Point.
-	Point operator*(const Point &other) const;
+	Point  operator*(const Point &other) const;
 	Point &operator*=(const Point &other);
 
-	double &X();
+	double       &X();
 	const double &X() const noexcept;
-	double &Y();
+	double       &Y();
 	const double &Y() const noexcept;
 
 	void Set(double x, double y);
@@ -70,7 +70,7 @@ public:
 
 	double Length() const;
 	double LengthSquared() const;
-	Point Unit() const;
+	Point  Unit() const;
 
 	double Distance(const Point &point) const;
 	double DistanceSquared(const Point &point) const;
@@ -97,7 +97,7 @@ private:
 		double y;
 	};
 	union {
-		__m128d v;
+		__m128d       v;
 		PointInternal val;
 	};
 #else

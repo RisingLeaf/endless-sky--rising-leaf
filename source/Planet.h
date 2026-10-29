@@ -64,7 +64,7 @@ public:
 	// associated with this planet is used even if the planet was not fully
 	// defined (i.e. it belongs to an inactive plugin).
 	const std::string &TrueName() const;
-	void SetTrueName(const std::string &name);
+	void               SetTrueName(const std::string &name);
 	// Get the display name of the planet (all wormholes use the same name).
 	const std::string &DisplayName() const;
 	// Return the description text for the planet, but not the spaceport:
@@ -140,7 +140,7 @@ public:
 	const std::vector<const System *> &Systems() const;
 
 	// Check if planet is part of a wormhole (that is, landing on it will take you to a new system).
-	bool IsWormhole() const;
+	bool            IsWormhole() const;
 	const Wormhole *GetWormhole() const;
 
 	// Check if the given ship has all the attributes necessary to allow it to
@@ -151,33 +151,33 @@ public:
 
 	// Below are convenience functions which access the game state in Politics,
 	// but do so with a less convoluted syntax:
-	bool HasFuelFor(const Ship &ship) const;
-	bool CanBribe() const;
-	bool CanLand(const Ship &ship) const;
-	bool CanLand() const;
+	bool         HasFuelFor(const Ship &ship) const;
+	bool         CanBribe() const;
+	bool         CanLand(const Ship &ship) const;
+	bool         CanLand() const;
 	Friendliness GetFriendliness() const;
-	bool CanUseServices() const;
-	void Bribe(bool fullAccess = true) const;
+	bool         CanUseServices() const;
+	void         Bribe(bool fullAccess = true) const;
 
 	// Demand tribute, and get the planet's response.
 	std::string DemandTribute(PlayerInfo &player) const;
-	void DeployDefense(std::list<std::shared_ptr<Ship>> &ships) const;
-	void ResetDefense() const;
-	bool IsDefending() const;
+	void        DeployDefense(std::list<std::shared_ptr<Ship>> &ships) const;
+	void        ResetDefense() const;
+	bool        IsDefending() const;
 	// The amount of reputation with this planet's government that is lost
 	// daily if the player has dominated this planet.
 	double DailyTributePenalty() const;
 
 
 private:
-	bool isDefined = false;
-	std::string trueName;
-	std::string displayName;
-	Paragraphs description;
-	Port port;
-	mutable const Sprite *landscape = nullptr;
+	bool                         isDefined = false;
+	std::string                  trueName;
+	std::string                  displayName;
+	Paragraphs                   description;
+	Port                         port;
+	mutable const Sprite        *landscape = nullptr;
 	WeightedList<const Sprite *> landscapes;
-	std::string music;
+	std::string                  music;
 
 	std::set<std::string> attributes;
 
@@ -186,20 +186,20 @@ private:
 	ConditionSet toAccessShipyard;
 	ConditionSet toAccessOutfitter;
 
-	std::set<const Shop<Ship> *> shipSales;
+	std::set<const Shop<Ship> *>   shipSales;
 	std::set<const Shop<Outfit> *> outfitSales;
 	// The lists above will be converted into actual ship lists when they are
 	// first asked for:
-	mutable Sale<Ship> shipyard;
+	mutable Sale<Ship>   shipyard;
 	mutable Sale<Outfit> outfitter;
 
-	const Government *government = nullptr;
-	double requiredReputation = 0.;
-	double bribe = 0.01;
-	double bribeThreshold = 0.;
-	double security = .25;
-	bool inhabited = false;
-	bool customSecurity = false;
+	const Government *government         = nullptr;
+	double            requiredReputation = 0.;
+	double            bribe              = 0.01;
+	double            bribeThreshold     = 0.;
+	double            security           = .25;
+	bool              inhabited          = false;
+	bool              customSecurity     = false;
 	// Any required attributes needed to land on this planet.
 	std::set<std::string> requiredAttributes;
 
@@ -209,8 +209,8 @@ private:
 	int defenseThreshold = 4000;
 	// The amount of reputation with this planet's government that is lost
 	// daily if the player has dominated this planet.
-	double dailyTributePenalty = 0.;
-	mutable bool isDefending = false;
+	double       dailyTributePenalty = 0.;
+	mutable bool isDefending         = false;
 	// The defense fleets that should be spawned (in order of specification).
 	std::vector<const Fleet *> defenseFleets;
 	// How many fleets have been spawned, and the index of the next to be spawned.
@@ -218,13 +218,13 @@ private:
 	// Ships that have been created by instantiating its defense fleets.
 	mutable std::list<std::shared_ptr<Ship>> defenders;
 
-	const Phrase *tributeAlreadyPaying = nullptr;
-	const Phrase *tributeUndefined = nullptr;
-	const Phrase *tributeUnworthy = nullptr;
-	const Phrase *tributeFleetLaunching = nullptr;
+	const Phrase *tributeAlreadyPaying   = nullptr;
+	const Phrase *tributeUndefined       = nullptr;
+	const Phrase *tributeUnworthy        = nullptr;
+	const Phrase *tributeFleetLaunching  = nullptr;
 	const Phrase *tributeFleetUndefeated = nullptr;
-	const Phrase *tributeSurrendered = nullptr;
+	const Phrase *tributeSurrendered     = nullptr;
 
-	Wormhole *wormhole = nullptr;
+	Wormhole                   *wormhole = nullptr;
 	std::vector<const System *> systems;
 };

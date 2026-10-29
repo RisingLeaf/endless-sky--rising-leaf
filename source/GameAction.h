@@ -63,10 +63,10 @@ public:
 	// Whether this action instance contains any tasks to perform.
 	bool IsEmpty() const noexcept;
 
-	int64_t Payment() const noexcept;
-	int64_t Fine() const noexcept;
+	int64_t                              Payment() const noexcept;
+	int64_t                              Fine() const noexcept;
 	const std::map<const Outfit *, int> &Outfits() const noexcept;
-	const std::vector<ShipManager> &Ships() const noexcept;
+	const std::vector<ShipManager>      &Ships() const noexcept;
 
 	// Perform this action.
 	void Do(PlayerInfo &player, UI *ui, const Mission *caller) const;
@@ -82,32 +82,32 @@ private:
 		{
 		}
 
-		int64_t amount = 0;
+		int64_t               amount = 0;
 		std::optional<double> interest;
-		int term = 365;
+		int                   term = 365;
 	};
 
 
 private:
-	bool isEmpty = true;
-	BookEntry logEntries;
+	bool                                                    isEmpty = true;
+	BookEntry                                               logEntries;
 	std::map<std::string, std::map<std::string, BookEntry>> specialLogEntries;
-	std::map<std::string, std::vector<std::string>> specialLogClear;
+	std::map<std::string, std::vector<std::string>>         specialLogClear;
 
 	std::map<const GameEvent *, std::pair<int, int>> events;
-	std::vector<ShipManager> giftShips;
-	std::map<const Outfit *, int> giftOutfits;
+	std::vector<ShipManager>                         giftShips;
+	std::map<const Outfit *, int>                    giftOutfits;
 
-	int64_t payment = 0;
-	int64_t paymentMultiplier = 0;
-	int64_t fine = 0;
+	int64_t           payment           = 0;
+	int64_t           paymentMultiplier = 0;
+	int64_t           fine              = 0;
 	std::vector<Debt> debt;
 
 	std::optional<std::string> music;
 
-	std::set<const System *> mark;
+	std::set<const System *>                        mark;
 	std::map<std::string, std::set<const System *>> markOther;
-	std::set<const System *> unmark;
+	std::set<const System *>                        unmark;
 	std::map<std::string, std::set<const System *>> unmarkOther;
 
 	// When this action is performed, the missions with these names fail.

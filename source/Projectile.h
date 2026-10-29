@@ -49,15 +49,15 @@ public:
 		}
 
 		const Weapon &weapon;
-		Point position;
-		double distanceTraveled;
+		Point         position;
+		double        distanceTraveled;
 	};
 
 	enum DeathType {
-		NONE = 0,
-		NATURAL = 1 << 0,
-		COLLISION = 1 << 1,
-		EXPLOSION = 1 << 2,
+		NONE         = 0,
+		NATURAL      = 1 << 0,
+		COLLISION    = 1 << 1,
+		EXPLOSION    = 1 << 2,
 		ANTI_MISSILE = 1 << 3,
 	};
 
@@ -99,7 +99,7 @@ public:
 	// Find out which entity or government this projectile is targeting. Note:
 	// this pointer is not guaranteed to be dereferenceable, so only use it
 	// for comparing.
-	const Entity *Target() const;
+	const Entity     *Target() const;
 	const Government *TargetGovernment() const;
 	// This function is much more costly, so use it only if you need to get a
 	// non-const shared pointer to the target entity.
@@ -127,26 +127,26 @@ private:
 
 
 private:
-	const Weapon *weapon = nullptr;
-	bool isShipExplosion = false;
+	const Weapon *weapon          = nullptr;
+	bool          isShipExplosion = false;
 
 	std::weak_ptr<Entity> target;
-	const Entity *cachedTarget = nullptr;
-	bool targetDisabled = false;
-	const Government *targetGovernment = nullptr;
+	const Entity         *cachedTarget     = nullptr;
+	bool                  targetDisabled   = false;
+	const Government     *targetGovernment = nullptr;
 
 	// The change in velocity of all stages of this projectile
 	// relative to the firing ship.
-	Point dV;
+	Point  dV;
 	double clip = 1.;
 	// A non-zero positive value means the projectile is alive.
 	int lifetime = 0;
 	// The manner by which this projectile died.
-	DeathType death = DeathType::NATURAL;
-	double distanceTraveled = 0.;
-	uint16_t hitsRemaining = 1U;
-	bool hasLock = true;
-	bool isConfused = false;
+	DeathType death            = DeathType::NATURAL;
+	double    distanceTraveled = 0.;
+	uint16_t  hitsRemaining    = 1U;
+	bool      hasLock          = true;
+	bool      isConfused       = false;
 	// A positive value means this projectile will turn to the right;
 	// a negative value means this projectile will turn left.
 	int confusionDirection = 0;

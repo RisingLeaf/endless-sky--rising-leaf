@@ -37,8 +37,8 @@ int64_t Mortgage::Maximum(int64_t annualRevenue, int creditScore, double current
 	if(revenue <= 0.)
 		return 0;
 
-	const double interest = (600 - creditScore / 2) * .00001;
-	const double power = pow(1. + interest, MORTGAGE_TERM);
+	const double interest   = (600 - creditScore / 2) * .00001;
+	const double power      = pow(1. + interest, MORTGAGE_TERM);
 	const double multiplier = interest * MORTGAGE_TERM * power / (power - 1.);
 	return static_cast<int64_t>(max(0., revenue / multiplier));
 }
@@ -83,14 +83,14 @@ void Mortgage::Load(const DataNode &node)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "principal" && hasValue)
 			principal = child.Value(1);
 		else if(key == "interest" && hasValue)
 		{
-			interest = child.Value(1);
-			int f = 100000. * interest;
+			interest       = child.Value(1);
+			int f          = 100000. * interest;
 			interestString = "0." + to_string(f) + "%";
 		}
 		else if(key == "term" && hasValue)

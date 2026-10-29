@@ -28,7 +28,7 @@ public:
 	using sample_t = int16_t;
 
 	static ALuint CreateBuffer();
-	static void DestroyBuffer(ALuint buffer);
+	static void   DestroyBuffer(ALuint buffer);
 
 
 public:
@@ -36,7 +36,7 @@ public:
 	virtual ~AudioSupplier() = default;
 
 	AudioSupplier(const AudioSupplier &) = delete;
-	AudioSupplier(AudioSupplier &&) = default;
+	AudioSupplier(AudioSupplier &&)      = default;
 
 	/// The estimated number of non-silent chunks that can be supplied by further NextChunk()/NextDataChunk() calls.
 	/// Never less than AvailableChunks(), and is always zero when the supplier can't provide new chunks anymore.
@@ -65,7 +65,7 @@ public:
 
 
 protected:
-	static constexpr ALenum FORMAT = AL_FORMAT_STEREO16;
+	static constexpr ALenum FORMAT         = AL_FORMAT_STEREO16;
 	static constexpr ALenum FORMAT_SPATIAL = AL_FORMAT_MONO16;
 	/// How many samples to put in each output chunk. Because the output is in
 	/// stereo, the duration of the sample is half this amount, divided by the sample rate.

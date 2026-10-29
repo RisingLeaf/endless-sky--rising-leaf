@@ -44,8 +44,8 @@ namespace {
 
 	bool ReadPNG(const filesystem::path &path, ImageBuffer &buffer, int frame, bool onlyDimensions);
 	bool ReadJPG(const filesystem::path &path, ImageBuffer &buffer, int frame, bool onlyDimensions);
-	int ReadAVIF(const filesystem::path &path, ImageBuffer &buffer, int frame, bool alphaPreMultiplied,
-	             bool onlyDimensions);
+	int  ReadAVIF(
+	    const filesystem::path &path, ImageBuffer &buffer, int frame, bool alphaPreMultiplied, bool onlyDimensions);
 	void Premultiply(ImageBuffer &buffer, int frame, BlendingMode additive);
 } // namespace
 
@@ -77,7 +77,7 @@ ImageBuffer::~ImageBuffer()
 void ImageBuffer::Clear(int frames)
 {
 	delete[] pixels;
-	pixels = nullptr;
+	pixels       = nullptr;
 	this->frames = frames;
 }
 
@@ -91,8 +91,8 @@ void ImageBuffer::Allocate(int width, int height)
 	if(pixels || !width || !height || !frames)
 		return;
 
-	pixels = new uint32_t[width * height * frames];
-	this->width = width;
+	pixels       = new uint32_t[width * height * frames];
+	this->width  = width;
 	this->height = height;
 }
 
@@ -165,13 +165,13 @@ bool ImageBuffer::ShrinkToHalfSize()
 	result.Allocate(width / 2, height / 2);
 
 	unsigned char *begin = reinterpret_cast<unsigned char *>(pixels);
-	unsigned char *out = reinterpret_cast<unsigned char *>(result.pixels);
+	unsigned char *out   = reinterpret_cast<unsigned char *>(result.pixels);
 	// Loop through every line of every frame of the buffer.
 	for(int y = 0; y < result.height * frames; ++y)
 	{
-		unsigned char *aIt = begin + (4 * width) * (2 * y);
+		unsigned char *aIt  = begin + (4 * width) * (2 * y);
 		unsigned char *aEnd = aIt + 4 * 2 * result.width;
-		unsigned char *bIt = begin + (4 * width) * (2 * y + 1);
+		unsigned char *bIt  = begin + (4 * width) * (2 * y + 1);
 		for(; aIt != aEnd; aIt += 4, bIt += 4)
 		{
 			for(int channel = 0; channel < 4; ++channel, ++aIt, ++bIt, ++out)
@@ -190,15 +190,15 @@ bool ImageBuffer::ShrinkToHalfSize()
 int ImageBuffer::Read(const ImageFileData &data, int frame, bool onlyDimensions)
 {
 	// First, make sure this is a supported file.
-	bool isPNG = PNG_EXTENSIONS.contains(data.extension);
-	bool isJPG = JPG_EXTENSIONS.contains(data.extension);
+	bool isPNG  = PNG_EXTENSIONS.contains(data.extension);
+	bool isJPG  = JPG_EXTENSIONS.contains(data.extension);
 	bool isAVIF = AVIF_EXTENSIONS.contains(data.extension);
 
 	if(!isPNG && !isJPG && !isAVIF)
 		return false;
 
 	bool isAlphaPreMultiplied = data.blendingMode == BlendingMode::PREMULTIPLIED_ALPHA;
-	int loaded;
+	int  loaded;
 	if(isPNG)
 		loaded = ReadPNG(data.path, *this, frame, onlyDimensions);
 	else if(isJPG)
@@ -255,7 +255,7 @@ namespace {
 		png_set_sig_bytes(png, 0);
 
 		png_read_info(png, info);
-		int width = png_get_image_width(png, info);
+		int width  = png_get_image_width(png, info);
 		int height = png_get_image_height(png, info);
 		// If the buffer is not yet allocated, allocate it.
 		try
@@ -291,7 +291,7 @@ namespace {
 
 		// Adjust settings to make sure the result will be an RGBA file.
 		int colorType = png_get_color_type(png, info);
-		int bitDepth = png_get_bit_depth(png, info);
+		int bitDepth  = png_get_bit_depth(png, info);
 
 		if(colorType == PNG_COLOR_TYPE_PALETTE)
 			png_set_palette_to_rgb(png);
@@ -338,7 +338,7 @@ namespace {
 			return false;
 
 		jpeg_decompress_struct cinfo;
-		struct jpeg_error_mgr jerr;
+		struct jpeg_error_mgr  jerr;
 		cinfo.err = jpeg_std_error(&jerr);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
@@ -352,7 +352,7 @@ namespace {
 		// MAYBE: Reading in lots of images in a 32-bit process gets really hairy using the standard approach due to
 		// contiguous memory layout requirements. Investigate using an iterative loading scheme for large images.
 		jpeg_start_decompress(&cinfo);
-		int width = cinfo.image_width;
+		int width  = cinfo.image_width;
 		int height = cinfo.image_height;
 		// If the buffer is not yet allocated, allocate it.
 		try
@@ -407,8 +407,8 @@ namespace {
 	// based on how much longer its duration is compared to this unit.
 	// TODO: If animation properties are exposed here, we can have custom presentation
 	// logic that avoids duplicating the frames.
-	int ReadAVIF(const filesystem::path &path, ImageBuffer &buffer, int frame, bool alphaPreMultiplied,
-	             bool onlyDimensions)
+	int
+	ReadAVIF(const filesystem::path &path, ImageBuffer &buffer, int frame, bool alphaPreMultiplied, bool onlyDimensions)
 	{
 		unique_ptr<avifDecoder, void (*)(avifDecoder *)> decoder(avifDecoderCreate(), avifDecoderDestroy);
 		if(!decoder)
@@ -418,7 +418,7 @@ namespace {
 		}
 		// Maintenance note: this is where decoder defaults should be overwritten (codec, exif/xmp, etc.)
 
-		string data = Files::Read(path);
+		string     data = Files::Read(path);
 		avifResult result =
 		    avifDecoderSetIOMemory(decoder.get(), reinterpret_cast<const uint8_t *>(data.c_str()), data.size());
 		if(result != AVIF_RESULT_OK)
@@ -439,7 +439,7 @@ namespace {
 			return 0;
 
 		// Find the shortest frame duration.
-		double frameTimeUnit = -1;
+		double          frameTimeUnit = -1;
 		avifImageTiming timing;
 		for(int i = 0; i < decoder->imageCount; ++i)
 		{
@@ -456,7 +456,7 @@ namespace {
 		}
 		// Based on this unit, we can calculate how many times each frame is repeated.
 		vector<size_t> repeats(decoder->imageCount);
-		size_t bufferFrameCount = 0;
+		size_t         bufferFrameCount = 0;
 		for(size_t i = 0; i < static_cast<size_t>(decoder->imageCount); ++i)
 		{
 			result = avifDecoderNthImageTiming(decoder.get(), i, &timing);
@@ -494,8 +494,8 @@ namespace {
 			return bufferFrameCount;
 
 		// Load each image in the sequence.
-		int avifFrameIndex = 0;
-		size_t bufferFrame = 0;
+		int    avifFrameIndex = 0;
+		size_t bufferFrame    = 0;
 		while(avifDecoderNextImage(decoder.get()) == AVIF_RESULT_OK)
 		{
 			// Ignore frames with insufficient duration.
@@ -504,10 +504,10 @@ namespace {
 
 			avifRGBImage image;
 			avifRGBImageSetDefaults(&image, decoder->image);
-			image.depth = 8; // Force 8-bit color depth.
+			image.depth              = 8; // Force 8-bit color depth.
 			image.alphaPremultiplied = alphaPreMultiplied;
-			image.rowBytes = image.width * avifRGBImagePixelSize(&image);
-			image.pixels = reinterpret_cast<uint8_t *>(buffer.Begin(0, frame + bufferFrame));
+			image.rowBytes           = image.width * avifRGBImagePixelSize(&image);
+			image.pixels             = reinterpret_cast<uint8_t *>(buffer.Begin(0, frame + bufferFrame));
 
 			result = avifImageYUVToRGB(decoder->image, &image);
 			if(result != AVIF_RESULT_OK)
@@ -521,7 +521,7 @@ namespace {
 			// Now copy the image in the buffer to match frame timings.
 			for(size_t i = 1; i < repeats[avifFrameIndex]; ++i)
 			{
-				uint8_t *end = reinterpret_cast<uint8_t *>(buffer.Begin(0, frame + bufferFrame + 1));
+				uint8_t *end  = reinterpret_cast<uint8_t *>(buffer.Begin(0, frame + bufferFrame + 1));
 				uint8_t *dest = reinterpret_cast<uint8_t *>(buffer.Begin(0, frame + bufferFrame + i));
 				copy(image.pixels, end, dest);
 			}
@@ -548,9 +548,9 @@ namespace {
 				uint64_t value = *it;
 				uint64_t alpha = (value & 0xFF000000) >> 24;
 
-				uint64_t red = (((value & 0xFF0000) * alpha) / 255) & 0xFF0000;
+				uint64_t red   = (((value & 0xFF0000) * alpha) / 255) & 0xFF0000;
 				uint64_t green = (((value & 0xFF00) * alpha) / 255) & 0xFF00;
-				uint64_t blue = (((value & 0xFF) * alpha) / 255) & 0xFF;
+				uint64_t blue  = (((value & 0xFF) * alpha) / 255) & 0xFF;
 
 				value = red | green | blue;
 				if(blend == BlendingMode::HALF_ADDITIVE)

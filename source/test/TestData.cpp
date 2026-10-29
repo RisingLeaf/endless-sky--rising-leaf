@@ -67,7 +67,8 @@ void TestData::Load(const DataNode &node, const filesystem::path &sourceDataFile
 
 
 // Inject the test-data to the proper location.
-bool TestData::Inject(const ConditionsStore *playerConditions, const set<const System *> *visitedSystems,
+bool TestData::Inject(const ConditionsStore     *playerConditions,
+                      const set<const System *> *visitedSystems,
                       const set<const Planet *> *visitedPlanets) const
 {
 	// Check if we have the required data to inject.
@@ -77,12 +78,9 @@ bool TestData::Inject(const ConditionsStore *playerConditions, const set<const S
 	// Determine data-type and call the relevant function.
 	switch(dataSetType)
 	{
-	case Type::SAVEGAME:
-		return InjectSavegame();
-	case Type::MISSION:
-		return InjectMission(playerConditions, visitedSystems, visitedPlanets);
-	default:
-		return false;
+	case Type::SAVEGAME: return InjectSavegame();
+	case Type::MISSION:  return InjectMission(playerConditions, visitedSystems, visitedPlanets);
+	default:             return false;
 	}
 }
 
@@ -124,7 +122,8 @@ bool TestData::InjectSavegame() const
 
 
 
-bool TestData::InjectMission(const ConditionsStore *playerConditions, const set<const System *> *visitedSystems,
+bool TestData::InjectMission(const ConditionsStore     *playerConditions,
+                             const set<const System *> *visitedSystems,
                              const set<const Planet *> *visitedPlanets) const
 {
 	const DataFile sourceData(sourceDataFile);

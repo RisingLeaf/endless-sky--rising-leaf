@@ -27,15 +27,15 @@ public:
 
 
 public:
-	constexpr GameVersion(unsigned major, unsigned minor, unsigned release, unsigned patch = 0,
-	                      bool fullRelease = true);
+	constexpr GameVersion(
+	    unsigned major, unsigned minor, unsigned release, unsigned patch = 0, bool fullRelease = true);
 
 	std::string ToString() const;
 
 
 private:
 	std::array<unsigned, 4> numbers{};
-	bool fullRelease = true;
+	bool                    fullRelease = true;
 };
 
 

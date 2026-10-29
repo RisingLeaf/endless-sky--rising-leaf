@@ -28,7 +28,7 @@ using namespace std;
 
 namespace {
 	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
-	ShaderInfo info;
+	ShaderInfo                                     info;
 
 	graphics_layer::ObjectHandle geometry;
 } // namespace
@@ -57,21 +57,31 @@ void LineShader::Init(const GraphicsTypes::GraphicsInstance *graphics_instance)
 
 
 
-void LineShader::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &from, const Point &to, float width,
-                      const Color &color, const bool roundCap)
+void LineShader::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                      const Point                          &from,
+                      const Point                          &to,
+                      float                                 width,
+                      const Color                          &color,
+                      const bool                            roundCap)
 {
 	DrawGradient(cb, from, to, width, color, color, roundCap);
 }
 
 
 
-void LineShader::DrawDashed(GraphicsTypes::CommandBufferInstance *cb, const Point &from, const Point &to,
-                            const Point &unit, const float width, const Color &color, const double dashLength,
-                            double spaceLength, bool roundCap)
+void LineShader::DrawDashed(GraphicsTypes::CommandBufferInstance *cb,
+                            const Point                          &from,
+                            const Point                          &to,
+                            const Point                          &unit,
+                            const float                           width,
+                            const Color                          &color,
+                            const double                          dashLength,
+                            double                                spaceLength,
+                            bool                                  roundCap)
 {
-	const double length = (to - from).Length();
+	const double length        = (to - from).Length();
 	const double patternLength = dashLength + spaceLength;
-	int segments = length / patternLength;
+	int          segments      = length / patternLength;
 	// If needed, scale pattern down so we can draw at least two of them over length.
 	if(segments < 2)
 	{
@@ -81,14 +91,23 @@ void LineShader::DrawDashed(GraphicsTypes::CommandBufferInstance *cb, const Poin
 	spaceLength /= 2.;
 	const float capOffset = roundCap ? width : 0.;
 	for(int i = 0; i < segments; ++i)
-		Draw(cb, from + unit * (i * length / segments + spaceLength + capOffset),
-		     from + unit * ((i + 1) * length / segments - spaceLength - capOffset), width, color, roundCap);
+		Draw(cb,
+		     from + unit * (i * length / segments + spaceLength + capOffset),
+		     from + unit * ((i + 1) * length / segments - spaceLength - capOffset),
+		     width,
+		     color,
+		     roundCap);
 }
 
 
 
-void LineShader::DrawGradient(GraphicsTypes::CommandBufferInstance *cb, const Point &from, const Point &to, float width,
-                              const Color &fromColor, const Color &toColor, bool roundCap)
+void LineShader::DrawGradient(GraphicsTypes::CommandBufferInstance *cb,
+                              const Point                          &from,
+                              const Point                          &to,
+                              float                                 width,
+                              const Color                          &fromColor,
+                              const Color                          &toColor,
+                              bool                                  roundCap)
 {
 	if(!shader)
 		throw runtime_error("LineShader: Draw() called before Init().");
@@ -97,11 +116,11 @@ void LineShader::DrawGradient(GraphicsTypes::CommandBufferInstance *cb, const Po
 
 	const gm::vec2 scale = {static_cast<float>(Screen::Width()), static_cast<float>(Screen::Height())};
 	const gm::vec2 start = {static_cast<float>(from.X()), static_cast<float>(from.Y())};
-	const gm::vec2 end = {static_cast<float>(to.X()), static_cast<float>(to.Y())};
-	const int cap = roundCap;
+	const gm::vec2 end   = {static_cast<float>(to.X()), static_cast<float>(to.Y())};
+	const int      cap   = roundCap;
 
 	std::vector<unsigned char> data_cp(info.GetUniformSize());
-	int i = -1;
+	int                        i = -1;
 	info.CopyUniformEntryToBuffer(data_cp.data(), &scale, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &start, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &end, ++i);
@@ -116,13 +135,20 @@ void LineShader::DrawGradient(GraphicsTypes::CommandBufferInstance *cb, const Po
 
 
 
-void LineShader::DrawGradientDashed(GraphicsTypes::CommandBufferInstance *cb, const Point &from, const Point &to,
-                                    const Point &unit, const float width, const Color &fromColor, const Color &toColor,
-                                    const double dashLength, double spaceLength, bool roundCap)
+void LineShader::DrawGradientDashed(GraphicsTypes::CommandBufferInstance *cb,
+                                    const Point                          &from,
+                                    const Point                          &to,
+                                    const Point                          &unit,
+                                    const float                           width,
+                                    const Color                          &fromColor,
+                                    const Color                          &toColor,
+                                    const double                          dashLength,
+                                    double                                spaceLength,
+                                    bool                                  roundCap)
 {
-	const double length = (to - from).Length();
+	const double length        = (to - from).Length();
 	const double patternLength = dashLength + spaceLength;
-	int segments = length / patternLength;
+	int          segments      = length / patternLength;
 	// If needed, scale pattern down so we can draw at least two of them over length.
 	if(segments < 2)
 	{
@@ -133,12 +159,16 @@ void LineShader::DrawGradientDashed(GraphicsTypes::CommandBufferInstance *cb, co
 	const float capOffset = roundCap ? width : 0.;
 	for(int i = 0; i < segments; ++i)
 	{
-		const float p = static_cast<float>(i) / segments;
-		Color mixed = Color::Combine(1.f - p, fromColor, p, toColor);
-		const float pv = static_cast<float>(i + 1) / segments;
-		Color mixed2 = Color::Combine(1.f - pv, fromColor, pv, toColor);
-		DrawGradient(cb, from + unit * (i * length / segments + spaceLength + capOffset),
-		             from + unit * ((i + 1) * length / segments - spaceLength - capOffset), width, mixed, mixed2,
+		const float p      = static_cast<float>(i) / segments;
+		Color       mixed  = Color::Combine(1.f - p, fromColor, p, toColor);
+		const float pv     = static_cast<float>(i + 1) / segments;
+		Color       mixed2 = Color::Combine(1.f - pv, fromColor, pv, toColor);
+		DrawGradient(cb,
+		             from + unit * (i * length / segments + spaceLength + capOffset),
+		             from + unit * ((i + 1) * length / segments - spaceLength - capOffset),
+		             width,
+		             mixed,
+		             mixed2,
 		             roundCap);
 	}
 }

@@ -36,11 +36,11 @@ class System;
 // match the motion; otherwise they would seem to jitter around.
 class StarField {
 public:
-	void Init(const GraphicsTypes::GraphicsInstance *graphics_instance, int stars, int width);
-	void FinishLoading();
+	void         Init(const GraphicsTypes::GraphicsInstance *graphics_instance, int stars, int width);
+	void         FinishLoading();
 	const Point &Position() const;
-	void SetPosition(const Point &position);
-	void SetHaze(const Sprite *sprite, bool allowAnimation);
+	void         SetPosition(const Point &position);
+	void         SetHaze(const Sprite *sprite, bool allowAnimation);
 
 	void Step(Point vel, double zoom = 1.);
 	void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &blur, const System *system = nullptr) const;
@@ -53,15 +53,15 @@ private:
 
 
 private:
-	int widthMod;
-	int tileCols;
+	int              widthMod;
+	int              tileCols;
 	std::vector<int> tileIndex;
 
 	// Constants from an Interface that modify the starfield's behavior.
-	double fixedZoom = 1.;
+	double fixedZoom       = 1.;
 	double velocityReducer = 1.;
 
-	Point pos;
+	Point  pos;
 	double baseZoom = 1.;
 
 	double minZoom;
@@ -69,12 +69,12 @@ private:
 	double clampSlope;
 
 	// Track the haze sprite, so we can animate the transition between different hazes.
-	const Sprite *lastSprite;
-	mutable double transparency = 0.;
+	const Sprite     *lastSprite;
+	mutable double    transparency = 0.;
 	std::vector<Body> haze[2];
 
 	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
-	ShaderInfo info;
+	ShaderInfo                                     info;
 
 	graphics_layer::ObjectHandle geometry;
 };

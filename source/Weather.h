@@ -37,8 +37,8 @@ public:
 		}
 
 		const Weapon &weapon;
-		Point position;
-		double scale;
+		Point         position;
+		double        scale;
 	};
 
 public:
@@ -72,17 +72,17 @@ private:
 
 
 private:
-	const Hazard *hazard = nullptr;
-	int totalLifetime = 0;
-	int lifetimeRemaining = 0;
-	double strength = 0.;
-	Point origin;
+	const Hazard *hazard            = nullptr;
+	int           totalLifetime     = 0;
+	int           lifetimeRemaining = 0;
+	double        strength          = 0.;
+	Point         origin;
 	// The current strength and its square root are calculated at the beginning of
 	// each frame for weather that deviates to avoid needing to calculate it
 	// multiple times.
 	double currentStrength = 0.;
-	double sqrtStrength = 0.;
-	double deviation = 0.;
+	double sqrtStrength    = 0.;
+	double deviation       = 0.;
 
 	// Record when this object is marked for removal from the game.
 	bool shouldBeRemoved = false;

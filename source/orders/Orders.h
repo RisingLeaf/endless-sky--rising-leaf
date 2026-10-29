@@ -55,19 +55,19 @@ public:
 
 
 public:
-	void SetTargetShip(std::shared_ptr<Ship> ship);
-	void SetTargetAsteroid(std::shared_ptr<Minable> asteroid);
-	void SetTargetPoint(const Point &point);
-	void SetTargetSystem(const System *system);
-	std::shared_ptr<Ship> GetTargetShip() const;
+	void                     SetTargetShip(std::shared_ptr<Ship> ship);
+	void                     SetTargetAsteroid(std::shared_ptr<Minable> asteroid);
+	void                     SetTargetPoint(const Point &point);
+	void                     SetTargetSystem(const System *system);
+	std::shared_ptr<Ship>    GetTargetShip() const;
 	std::shared_ptr<Minable> GetTargetAsteroid() const;
-	const Point &GetTargetPoint() const;
-	const System *GetTargetSystem() const;
+	const Point             &GetTargetPoint() const;
+	const System            *GetTargetSystem() const;
 
 
 protected:
-	std::weak_ptr<Ship> targetShip;
+	std::weak_ptr<Ship>    targetShip;
 	std::weak_ptr<Minable> targetAsteroid;
-	Point targetPoint;
-	const System *targetSystem = nullptr;
+	Point                  targetPoint;
+	const System          *targetSystem = nullptr;
 };

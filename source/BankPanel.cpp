@@ -40,7 +40,7 @@ namespace {
 	const string HEADING[6] = {"Type", "Principal", "Interest", "Term", "Payment", ""};
 	// X coordinates of the columns of the table.
 	const int COLUMN[5] = {20, 130, 210, 280, 330};
-	const int EXTRA_X = 410;
+	const int EXTRA_X   = 410;
 
 	// Maximum number of rows of mortages, etc. to draw.
 	const int MAX_ROWS = 8;
@@ -70,11 +70,11 @@ void BankPanel::Step()
 void BankPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 {
 	// Draw the "Pay All" button.
-	const Interface *bankUi = GameData::Interfaces().Get(Screen::Width() < 1280 ? "bank (small screen)" : "bank");
-	const Rectangle box = bankUi->GetBox("content");
-	const int MIN_X = box.Left();
-	const int FIRST_Y = box.Top();
-	const int MAX_X = box.Right();
+	const Interface *bankUi  = GameData::Interfaces().Get(Screen::Width() < 1280 ? "bank (small screen)" : "bank");
+	const Rectangle  box     = bankUi->GetBox("content");
+	const int        MIN_X   = box.Left();
+	const int        FIRST_Y = box.Top();
+	const int        MAX_X   = box.Right();
 
 	// Set up the table that will contain most of the information.
 	Table table;
@@ -86,9 +86,9 @@ void BankPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	table.DrawAt(Point(0., FIRST_Y));
 
 	// Use stock colors from the game data.
-	const Color &back = *GameData::Colors().Get("faint");
+	const Color &back       = *GameData::Colors().Get("faint");
 	const Color &unselected = *GameData::Colors().Get("medium");
-	const Color &selected = *GameData::Colors().Get("bright");
+	const Color &selected   = *GameData::Colors().Get("bright");
 
 	// Draw the heading of the table.
 	table.SetColor(selected);
@@ -99,7 +99,7 @@ void BankPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	// Figure out the total payments and principal (other than salaries). This
 	// is in case there are more mortgages than can be displayed.
 	int64_t otherPrincipal = 0;
-	int64_t otherPayment = 0;
+	int64_t otherPayment   = 0;
 	for(const Mortgage &mortgage : player.Accounts().Mortgages())
 	{
 		otherPrincipal += mortgage.Principal();
@@ -108,21 +108,21 @@ void BankPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	int64_t totalPayment = otherPayment;
 
 	// Check if salaries need to be drawn.
-	int64_t salaries = player.Salaries();
+	int64_t salaries         = player.Salaries();
 	int64_t crewSalariesOwed = player.Accounts().CrewSalariesOwed();
-	int64_t salariesIncome = player.Accounts().SalariesIncomeTotal();
-	int64_t tributeIncome = player.GetTributeTotal();
+	int64_t salariesIncome   = player.Accounts().SalariesIncomeTotal();
+	int64_t tributeIncome    = player.GetTributeTotal();
 
 	// Check if maintenance needs to be drawn.
-	PlayerInfo::FleetBalance b = player.MaintenanceAndReturns();
-	int64_t maintenanceDue = player.Accounts().MaintenanceDue();
+	PlayerInfo::FleetBalance b              = player.MaintenanceAndReturns();
+	int64_t                  maintenanceDue = player.Accounts().MaintenanceDue();
 	// Figure out how many rows of the display are for mortgages, and also check
 	// whether multiple mortgages have to be combined into the last row.
-	mortgageRows = MAX_ROWS - (salaries != 0 || crewSalariesOwed != 0) -
-	               (b.maintenanceCosts != 0 || maintenanceDue != 0) -
-	               (b.assetsReturns != 0 || salariesIncome != 0 || tributeIncome != 0);
+	mortgageRows      = MAX_ROWS - (salaries != 0 || crewSalariesOwed != 0) -
+	                    (b.maintenanceCosts != 0 || maintenanceDue != 0) -
+	                    (b.assetsReturns != 0 || salariesIncome != 0 || tributeIncome != 0);
 	int mortgageCount = player.Accounts().Mortgages().size();
-	mergedMortgages = (mortgageCount > mortgageRows);
+	mergedMortgages   = (mortgageCount > mortgageRows);
 	if(!mergedMortgages)
 		mortgageRows = mortgageCount;
 
@@ -213,15 +213,15 @@ void BankPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 		// Your daily income offsets expenses.
 		totalPayment -= salariesIncome + tributeIncome + b.assetsReturns;
 
-		static const string LABEL[] = {"",
-		                               "Your Salary Income",
-		                               "Your Tribute Income",
-		                               "Your Salary and Tribute Income",
-		                               "Your Return on Assets Income",
-		                               "Your Salary and Return on Assets Income",
-		                               "Your Tribute and Return on Assets Income",
-		                               "Your Salary, Tribute, and Returns Income"};
-		const auto incomeLayout = Layout(310, Truncate::BACK);
+		static const string LABEL[]      = {"",
+		                                    "Your Salary Income",
+		                                    "Your Tribute Income",
+		                                    "Your Salary and Tribute Income",
+		                                    "Your Return on Assets Income",
+		                                    "Your Salary and Return on Assets Income",
+		                                    "Your Tribute and Return on Assets Income",
+		                                    "Your Salary, Tribute, and Returns Income"};
+		const auto          incomeLayout = Layout(310, Truncate::BACK);
 		table.DrawCustom(
 		    cb, {LABEL[(salariesIncome != 0) + 2 * (tributeIncome != 0) + 4 * (b.assetsReturns != 0)], incomeLayout});
 		// For crew salaries, only the "payment" field needs to be shown.
@@ -238,7 +238,7 @@ void BankPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 
 	// Draw the credit score.
 	table.DrawAt(Point(0., FIRST_Y + 210.));
-	string credit = "Your credit score is " + to_string(player.Accounts().CreditScore()) + ".";
+	string     credit      = "Your credit score is " + to_string(player.Accounts().CreditScore()) + ".";
 	const auto scoreLayout = Layout(460, Truncate::MIDDLE);
 	table.DrawCustom(cb, {credit, scoreLayout});
 	table.Advance(5);
@@ -285,7 +285,8 @@ bool BankPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 		++selectedRow;
 	else if(key == SDLK_RETURN && selectedRow < mortgageRows)
 	{
-		GetUI().Push(DialogPanel::RequestString(this, &BankPanel::PayExtra,
+		GetUI().Push(DialogPanel::RequestString(this,
+		                                        &BankPanel::PayExtra,
 		                                        "Paying off part of this debt will reduce your daily payments and the "
 		                                        "interest that it costs you. How many extra credits will you pay?"));
 		DoHelp("bank advanced");
@@ -325,11 +326,11 @@ bool BankPanel::Click(int x, int y, MouseButton button, int clicks)
 	if(button != MouseButton::LEFT)
 		return false;
 
-	const Interface *bankUi = GameData::Interfaces().Get(Screen::Width() < 1280 ? "bank (small screen)" : "bank");
-	const Rectangle box = bankUi->GetBox("content");
-	const int MIN_X = box.Left();
-	const int FIRST_Y = box.Top();
-	const int MAX_X = box.Right();
+	const Interface *bankUi  = GameData::Interfaces().Get(Screen::Width() < 1280 ? "bank (small screen)" : "bank");
+	const Rectangle  box     = bankUi->GetBox("content");
+	const int        MIN_X   = box.Left();
+	const int        FIRST_Y = box.Top();
+	const int        MAX_X   = box.Right();
 
 	// Check if the click was on one of the rows of the table that represents a
 	// mortgage or other current debt you have.
@@ -364,7 +365,7 @@ void BankPanel::PayExtra(const string &str)
 	// Check if the selected row is the "Other" row, which is only the case if
 	// you have more mortages than can be displayed.
 	const vector<Mortgage> &mortgages = player.Accounts().Mortgages();
-	bool isOther = (selectedRow == mortgageRows - 1 && mergedMortgages);
+	bool                    isOther   = (selectedRow == mortgageRows - 1 && mergedMortgages);
 
 	// Pay the mortgage. If this is the "other" row, loop through all the
 	// mortgages included in that row.

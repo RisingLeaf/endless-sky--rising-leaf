@@ -121,7 +121,7 @@ Angle Hardpoint::HarmonizedAngle() const
 
 	// Calculate reference point for non-forward facing guns.
 	Angle rotateAngle = Angle() - baseAngle;
-	Point refPoint = rotateAngle.Rotate(point);
+	Point refPoint    = rotateAngle.Rotate(point);
 
 	// Find the point of convergence of shots fired from this gun. That is,
 	// find the angle where the projectile's X offset will be zero when it
@@ -210,10 +210,10 @@ bool Hardpoint::IsReady() const
 // Check if this weapon can't fire because of its blindspots.
 bool Hardpoint::IsBlind() const
 {
-	return any_of(baseAttributes.blindspots.begin(), baseAttributes.blindspots.end(),
-	              [this](pair<Angle, Angle> blindspot) {
-		              return angle.IsInRange(blindspot.first + baseAngle, blindspot.second + baseAngle);
-	              });
+	return any_of(
+	    baseAttributes.blindspots.begin(), baseAttributes.blindspots.end(), [this](pair<Angle, Angle> blindspot) {
+		    return angle.IsInRange(blindspot.first + baseAngle, blindspot.second + baseAngle);
+	    });
 }
 
 
@@ -291,7 +291,7 @@ void Hardpoint::Fire(Ship &ship, vector<Projectile> &projectiles, vector<Visual>
 
 	const Weapon *weapon = outfit->GetWeapon().get();
 
-	Angle aim = ship.Facing();
+	Angle aim   = ship.Facing();
 	Point start = ship.Position() + aim.Rotate(point);
 
 	// Apply the aim and hardpoint offset.
@@ -406,9 +406,9 @@ void Hardpoint::Install(const Outfit *outfit)
 // Reload this weapon.
 void Hardpoint::Reload()
 {
-	reload = 0.;
+	reload      = 0.;
 	burstReload = 0.;
-	burstCount = outfit ? outfit->GetWeapon()->BurstCount() : 0;
+	burstCount  = outfit ? outfit->GetWeapon()->BurstCount() : 0;
 }
 
 
@@ -440,11 +440,11 @@ bool Hardpoint::FireSpecialSystem(Ship &ship, const Body &body, vector<Visual> &
 
 	// Get the weapon range. Anti-missile and tractor beam shots always last a
 	// single frame, so their range is equal to their velocity.
-	double range = weapon->Velocity();
-	Angle facing = ship.Facing();
+	double range  = weapon->Velocity();
+	Angle  facing = ship.Facing();
 
 	// Check if the body is within range of this hardpoint.
-	Point start = ship.Position() + facing.Rotate(point);
+	Point start  = ship.Position() + facing.Rotate(point);
 	Point offset = body.Position() - start;
 	if(offset.Length() > range)
 		return false;
@@ -523,12 +523,12 @@ void Hardpoint::UpdateArc(bool isNewlyConstructed)
 
 	// Restore the initial value (from baseAttributes).
 	isOmnidirectional = baseAttributes.isOmnidirectional;
-	baseAngle = baseAttributes.baseAngle;
+	baseAngle         = baseAttributes.baseAngle;
 	if(isOmnidirectional)
 	{
 		const Angle opposite = baseAngle + Angle(180.);
-		minArc = opposite;
-		maxArc = opposite;
+		minArc               = opposite;
+		maxArc               = opposite;
 	}
 	else
 	{
@@ -538,17 +538,17 @@ void Hardpoint::UpdateArc(bool isNewlyConstructed)
 
 	// The installed weapon restricts the arc of fire.
 	const double hardpointsArc = (maxArc - minArc).AbsDegrees();
-	const double weaponsArc = isNewlyConstructed ? 360. : outfit->GetWeapon()->Arc();
+	const double weaponsArc    = isNewlyConstructed ? 360. : outfit->GetWeapon()->Arc();
 	if(weaponsArc < 360. && (isOmnidirectional || weaponsArc < hardpointsArc))
 	{
-		isOmnidirectional = false;
+		isOmnidirectional        = false;
 		const double weaponsHalf = weaponsArc / 2.;
 
 		// The base angle is placed as close to center as possible.
-		const Angle &firstAngle = minArc;
-		const Angle &secondAngle = maxArc;
-		double hardpointsMinArc = (baseAngle - firstAngle).AbsDegrees();
-		double hardpointsMaxArc = (secondAngle - baseAngle).AbsDegrees();
+		const Angle &firstAngle       = minArc;
+		const Angle &secondAngle      = maxArc;
+		double       hardpointsMinArc = (baseAngle - firstAngle).AbsDegrees();
+		double       hardpointsMaxArc = (secondAngle - baseAngle).AbsDegrees();
 		if(hardpointsMinArc < weaponsHalf)
 			hardpointsMaxArc = weaponsArc - hardpointsMinArc;
 		else if(hardpointsMaxArc < weaponsHalf)

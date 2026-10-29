@@ -84,22 +84,22 @@ private:
 private:
 	// Cached information about the ship. Checked against the ship's current
 	// information during recalibration.
-	double mass = 0.;
+	double        mass          = 0.;
 	const System *currentSystem = nullptr;
 
 	// Cached jump navigation information.
 	double hyperdriveCost = 0.;
 	// Map allowable jump ranges to the fuel required to jump at that range.
 	std::map<double, double> jumpDriveCosts;
-	double maxJumpRange = 0.;
+	double                   maxJumpRange = 0.;
 
 	// What drive types and characteristics the ship has.
-	bool hasHyperdrive = false;
-	bool hasScramDrive = false;
-	bool hasJumpDrive = false;
+	bool hasHyperdrive   = false;
+	bool hasScramDrive   = false;
+	bool hasJumpDrive    = false;
 	bool hasJumpMassCost = false;
 
 	// The speed that this ship can jump at.
-	double jumpSpeed = 0.;
+	double jumpSpeed      = 0.;
 	double scramThreshold = 0.;
 };

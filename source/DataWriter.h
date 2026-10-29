@@ -36,10 +36,10 @@ public:
 	explicit DataWriter(const std::filesystem::path &path);
 	// Constructor for a DataWriter that will not save its contents automatically
 	DataWriter();
-	DataWriter(const DataWriter &) = delete;
-	DataWriter(DataWriter &&) = delete;
+	DataWriter(const DataWriter &)            = delete;
+	DataWriter(DataWriter &&)                 = delete;
 	DataWriter &operator=(const DataWriter &) = delete;
-	DataWriter operator=(DataWriter &&) = delete;
+	DataWriter  operator=(DataWriter &&)      = delete;
 	// The file is not actually saved until the destructor is called. This makes
 	// it possible to write the whole file in a single chunk.
 	~DataWriter();

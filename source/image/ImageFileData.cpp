@@ -27,8 +27,8 @@ namespace {
 	bool IsBlend(char c)
 	{
 		return (c == static_cast<char>(BlendingMode::ALPHA) || c == static_cast<char>(BlendingMode::HALF_ADDITIVE) ||
-		       c == static_cast<char>(BlendingMode::ADDITIVE) ||
-		       c == static_cast<char>(BlendingMode::PREMULTIPLIED_ALPHA) ||
+		        c == static_cast<char>(BlendingMode::ADDITIVE) ||
+		        c == static_cast<char>(BlendingMode::PREMULTIPLIED_ALPHA) ||
 		        c == static_cast<char>(BlendingMode::COMPAT_HALF_ADDITIVE));
 	}
 } // namespace
@@ -40,7 +40,7 @@ ImageFileData::ImageFileData(const filesystem::path &path, const filesystem::pat
 	string name = (path.lexically_relative(source).parent_path() / path.stem()).generic_string();
 	if(name.ends_with("@2x"))
 	{
-		is2x = true;
+		is2x        = true;
 		noReduction = true;
 		name.resize(name.size() - 3);
 	}
@@ -61,7 +61,7 @@ ImageFileData::ImageFileData(const filesystem::path &path, const filesystem::pat
 
 	if(frameNumberStart > 0 && IsBlend(name[frameNumberStart]))
 	{
-		frameNumber = Format::Parse(name.substr(frameNumberStart + 1));
+		frameNumber  = Format::Parse(name.substr(frameNumberStart + 1));
 		blendingMode = static_cast<BlendingMode>(name[frameNumberStart]);
 		name.resize(frameNumberStart);
 

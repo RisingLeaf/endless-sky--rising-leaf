@@ -41,11 +41,11 @@ public:
 	explicit Angle(const Point &point) noexcept;
 
 	// Mathematical operators.
-	Angle operator+(const Angle &other) const;
+	Angle  operator+(const Angle &other) const;
 	Angle &operator+=(const Angle &other);
-	Angle operator-(const Angle &other) const;
+	Angle  operator-(const Angle &other) const;
 	Angle &operator-=(const Angle &other);
-	Angle operator-() const;
+	Angle  operator-() const;
 
 	bool operator==(const Angle &other) const;
 	bool operator!=(const Angle &other) const;
@@ -64,9 +64,15 @@ public:
 	// The range from "base" to "limit" is expressed by "clock" orientation.
 	[[nodiscard]] bool IsInRange(const Angle &base, const Angle &limit) const;
 
-	[[nodiscard]] int32_t Raw() const { return angle; }
+	[[nodiscard]] int32_t Raw() const
+	{
+		return angle;
+	}
 
-	static Angle FromRaw(const int32_t raw) { return Angle(raw); }
+	static Angle FromRaw(const int32_t raw)
+	{
+		return Angle(raw);
+	}
 
 private:
 	explicit Angle(int32_t angle);

@@ -57,20 +57,20 @@ ZipFile::~ZipFile()
 
 vector<filesystem::path> ZipFile::ListFiles(const filesystem::path &directory, bool recursive, bool directories) const
 {
-	filesystem::path relative = GetPathInZip(directory);
+	filesystem::path         relative = GetPathInZip(directory);
 	vector<filesystem::path> fileList;
 
 	if(unzGoToFirstFile(zipFile) != UNZ_OK)
 		throw runtime_error("Failed to go to first file in ZIP");
 	do
 	{
-		char filename[256];
+		char          filename[256];
 		unz_file_info fileInfo;
 		unzGetCurrentFileInfo(zipFile, &fileInfo, filename, sizeof(filename), NULL, 0, NULL, 0);
 
-		filesystem::path zipEntry = filename;
-		bool isDirectory = string(filename).back() == '/';
-		bool isValidSubtree = Files::IsParent(relative, zipEntry);
+		filesystem::path zipEntry       = filename;
+		bool             isDirectory    = string(filename).back() == '/';
+		bool             isValidSubtree = Files::IsParent(relative, zipEntry);
 		bool isRecursive = distance(zipEntry.begin(), zipEntry.end()) == distance(relative.begin(), relative.end()) + 1;
 
 		if(isValidSubtree && isDirectory == directories && (!isRecursive || recursive))
@@ -86,7 +86,7 @@ vector<filesystem::path> ZipFile::ListFiles(const filesystem::path &directory, b
 bool ZipFile::Exists(const filesystem::path &filePath) const
 {
 	filesystem::path relative = GetPathInZip(filePath);
-	string name = relative.generic_string();
+	string           name     = relative.generic_string();
 
 	return unzLocateFile(zipFile, name.c_str(), 0) == UNZ_OK ||
 	       unzLocateFile(zipFile, (name + "/").c_str(), 0) == UNZ_OK;
@@ -109,9 +109,9 @@ string ZipFile::ReadFile(const filesystem::path &filePath) const
 	info.uncompressed_size = 0;
 	unzGetCurrentFileInfo64(zipFile, &info, nullptr, 0, nullptr, 0, nullptr, 0);
 
-	char buffer[8192];
+	char   buffer[8192];
 	string contents;
-	int bytesRead = 0;
+	int    bytesRead = 0;
 	while((bytesRead = unzReadCurrentFile(zipFile, buffer, sizeof(buffer))) > 0)
 		contents.append(buffer, bytesRead);
 

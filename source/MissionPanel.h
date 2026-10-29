@@ -64,13 +64,19 @@ private:
 	// Draw rings around systems that need to be visited for the given mission.
 	void DrawMissionSystem(GraphicsTypes::CommandBufferInstance *cb, const Mission &mission, const Color &color) const;
 	// Draw the backgrounds for the "available jobs" and accepted missions/jobs lists.
-	Point DrawPanel(GraphicsTypes::CommandBufferInstance *cb, Point pos, const std::string &label, int entries,
-	                bool sorter = false) const;
+	Point DrawPanel(GraphicsTypes::CommandBufferInstance *cb,
+	                Point                                 pos,
+	                const std::string                    &label,
+	                int                                   entries,
+	                bool                                  sorter = false) const;
 	// Draw the display names of the given missions, using the reference point.
-	Point DrawList(GraphicsTypes::CommandBufferInstance *cb, const std::list<Mission> &missionList, Point pos,
-	               const std::list<Mission>::const_iterator &selectIt, bool separateDeadlineOrPossible = false) const;
-	void DrawMissionInfo(GraphicsTypes::CommandBufferInstance *cb);
-	void DrawTooltips(GraphicsTypes::CommandBufferInstance *cb);
+	Point DrawList(GraphicsTypes::CommandBufferInstance     *cb,
+	               const std::list<Mission>                 &missionList,
+	               Point                                     pos,
+	               const std::list<Mission>::const_iterator &selectIt,
+	               bool                                      separateDeadlineOrPossible = false) const;
+	void  DrawMissionInfo(GraphicsTypes::CommandBufferInstance *cb);
+	void  DrawTooltips(GraphicsTypes::CommandBufferInstance *cb);
 
 	bool CanAccept() const;
 	void Accept(bool force = false);
@@ -92,22 +98,22 @@ private:
 private:
 	const Interface *missionInterface;
 
-	const std::list<Mission> &available;
-	const std::list<Mission> &accepted;
-	int cycleInvolvedIndex = 0;
+	const std::list<Mission>          &available;
+	const std::list<Mission>          &accepted;
+	int                                cycleInvolvedIndex = 0;
 	std::list<Mission>::const_iterator availableIt;
 	std::list<Mission>::const_iterator acceptedIt;
-	double availableScroll = 0.;
-	double acceptedScroll = 0.;
+	double                             availableScroll = 0.;
+	double                             acceptedScroll  = 0.;
 
 	bool canDrag = true;
 
 	int dragSide = 0;
 
 	// 0 to 3 for each UI element
-	int hoverSort = -1;
+	int             hoverSort = -1;
 	mutable Tooltip tooltip;
 
 	std::shared_ptr<TextArea> description;
-	bool descriptionVisible = false;
+	bool                      descriptionVisible = false;
 };

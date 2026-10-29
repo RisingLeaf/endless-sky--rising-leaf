@@ -32,14 +32,14 @@ public:
 
 	const std::vector<AudioSupplier::sample_t> &Buffer() const;
 	const std::vector<AudioSupplier::sample_t> &Buffer3x() const;
-	bool IsLooping() const;
+	bool                                        IsLooping() const;
 
 	std::unique_ptr<AudioSupplier> CreateSupplier() const;
 
 
 private:
-	std::string name;
+	std::string                          name;
 	std::vector<AudioSupplier::sample_t> buffer;
 	std::vector<AudioSupplier::sample_t> buffer3x;
-	bool isLooped = false;
+	bool                                 isLooped = false;
 };

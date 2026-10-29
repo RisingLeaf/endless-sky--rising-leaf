@@ -31,7 +31,7 @@ using namespace std;
 
 namespace {
 	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
-	ShaderInfo info;
+	ShaderInfo                                     info;
 
 	graphics_layer::ObjectHandle geometry;
 } // namespace
@@ -62,8 +62,8 @@ void RingShader::Init(const GraphicsTypes::GraphicsInstance *graphics_instance)
 
 
 
-void RingShader::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, const float out, const float in,
-                      const Color &color)
+void RingShader::Draw(
+    GraphicsTypes::CommandBufferInstance *cb, const Point &pos, const float out, const float in, const Color &color)
 {
 	const float width = .5f * (1.f + out - in);
 	Draw(cb, pos, out - width, width, 1.f, color);
@@ -71,8 +71,14 @@ void RingShader::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &pos
 
 
 
-void RingShader::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, const float radius, const float width,
-                      const float fraction, const Color &color, const float dash, const float startAngle)
+void RingShader::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                      const Point                          &pos,
+                      const float                           radius,
+                      const float                           width,
+                      const float                           fraction,
+                      const Color                          &color,
+                      const float                           dash,
+                      const float                           startAngle)
 {
 	Bind(cb);
 	Add(cb, pos, radius, width, fraction, color, dash, startAngle);
@@ -90,8 +96,8 @@ void RingShader::Bind(GraphicsTypes::CommandBufferInstance *cb)
 
 
 
-void RingShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, const float out, const float in,
-                     const Color &color)
+void RingShader::Add(
+    GraphicsTypes::CommandBufferInstance *cb, const Point &pos, const float out, const float in, const Color &color)
 {
 	const float width = .5f * (1.f + out - in);
 	Add(cb, pos, out - width, width, 1.f, color);
@@ -99,17 +105,23 @@ void RingShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Point &pos,
 
 
 
-void RingShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, const float radius, const float width,
-                     const float fraction, const Color &color, const float dash, const float startAngle)
+void RingShader::Add(GraphicsTypes::CommandBufferInstance *cb,
+                     const Point                          &pos,
+                     const float                           radius,
+                     const float                           width,
+                     const float                           fraction,
+                     const Color                          &color,
+                     const float                           dash,
+                     const float                           startAngle)
 {
-	const gm::vec2 position = {static_cast<float>(pos.X()), static_cast<float>(pos.Y())};
-	const gm::vec2 scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
-	const float angle = fraction * 2. * PI;
-	const float startAngleV = startAngle * TO_RAD;
-	const float dashV = dash ? 2. * PI / dash : 0.;
+	const gm::vec2 position    = {static_cast<float>(pos.X()), static_cast<float>(pos.Y())};
+	const gm::vec2 scale       = {2.f / Screen::Width(), -2.f / Screen::Height()};
+	const float    angle       = fraction * 2. * PI;
+	const float    startAngleV = startAngle * TO_RAD;
+	const float    dashV       = dash ? 2. * PI / dash : 0.;
 
 	std::vector<unsigned char> data_cp(info.GetUniformSize());
-	int i = -1;
+	int                        i = -1;
 	info.CopyUniformEntryToBuffer(data_cp.data(), &scale, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &position, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &radius, ++i);

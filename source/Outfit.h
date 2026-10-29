@@ -47,15 +47,15 @@ public:
 	// These are all the possible category strings for outfits.
 	static const std::vector<std::string> CATEGORIES;
 
-	static constexpr double DEFAULT_HYPERDRIVE_COST = 100.;
+	static constexpr double DEFAULT_HYPERDRIVE_COST  = 100.;
 	static constexpr double DEFAULT_SCRAM_DRIVE_COST = 150.;
-	static constexpr double DEFAULT_JUMP_DRIVE_COST = 200.;
+	static constexpr double DEFAULT_JUMP_DRIVE_COST  = 200.;
 
 
 public:
 	// Get the limit to how low an attribute is allowed to go on a ship when installing outfits.
 	// An empty optional means that there is no lower limit.
-	static std::optional<double> LowerLimit(const std::string &attribute);
+	static std::optional<double>  LowerLimit(const std::string &attribute);
 	static std::optional<int64_t> LowerLimitPrecise(const std::string &attribute);
 
 
@@ -67,20 +67,20 @@ public:
 
 		// Iterator traits
 		using iterator_category = std::input_iterator_tag;
-		using value_type = std::pair<std::string, double>;
-		using difference_type = void;
-		using pointer = const std::pair<std::string, double> *;
-		using reference = std::pair<std::string, double> &;
+		using value_type        = std::pair<std::string, double>;
+		using difference_type   = void;
+		using pointer           = const std::pair<std::string, double> *;
+		using reference         = std::pair<std::string, double> &;
 
 		std::pair<std::string, double> operator*() const;
-		AttributeIterator &operator++();
-		bool operator==(const AttributeIterator &) const;
-		bool operator!=(const AttributeIterator &) const;
-		bool operator<(const AttributeIterator &) const;
-		bool operator>(const AttributeIterator &) const;
+		AttributeIterator             &operator++();
+		bool                           operator==(const AttributeIterator &) const;
+		bool                           operator!=(const AttributeIterator &) const;
+		bool                           operator<(const AttributeIterator &) const;
+		bool                           operator>(const AttributeIterator &) const;
 
 	private:
-		const Outfit &outfit;
+		const Outfit                       &outfit;
 		Dictionary<int64_t>::const_iterator it;
 	};
 
@@ -92,15 +92,15 @@ public:
 	bool IsDefined() const;
 
 	const std::string &TrueName() const;
-	void SetTrueName(const std::string &name);
+	void               SetTrueName(const std::string &name);
 	const std::string &DisplayName() const;
 	const std::string &PluralName() const;
 	const std::string &Category() const;
 	const std::string &Series() const;
-	int Index() const;
-	std::string Description() const;
-	int64_t Cost() const;
-	double Mass() const;
+	int                Index() const;
+	std::string        Description() const;
+	int64_t            Cost() const;
+	double             Mass() const;
 	// Get the licenses needed to buy or operate this ship.
 	const std::vector<std::string> &Licenses() const;
 	// Get the image to display in the outfitter when buying this item.
@@ -110,8 +110,8 @@ public:
 	// whether this Outfit contains any sprites, effects, sounds, or a weapon.
 	bool Empty() const;
 	// Access to the attribute values.
-	double Get(const char *attribute) const;
-	double Get(const std::string &attribute) const;
+	double  Get(const char *attribute) const;
+	double  Get(const std::string &attribute) const;
 	int64_t GetPrecise(const char *attribute) const;
 	int64_t GetPrecise(const std::string &attribute) const;
 	// Get an iterator over this Outfit's attribute names and values as doubles.
@@ -146,19 +146,19 @@ public:
 	const std::vector<std::pair<Drawable, int>> &FlareSprites() const;
 	const std::vector<std::pair<Drawable, int>> &ReverseFlareSprites() const;
 	const std::vector<std::pair<Drawable, int>> &SteeringFlareSprites() const;
-	const std::map<const Sound *, int> &FlareSounds() const;
-	const std::map<const Sound *, int> &ReverseFlareSounds() const;
-	const std::map<const Sound *, int> &SteeringFlareSounds() const;
+	const std::map<const Sound *, int>          &FlareSounds() const;
+	const std::map<const Sound *, int>          &ReverseFlareSounds() const;
+	const std::map<const Sound *, int>          &SteeringFlareSounds() const;
 	// Get the afterburner effect, if any.
 	const std::map<const Effect *, int> &AfterburnerEffects() const;
 	// Get this outfit's jump effects and sounds, if any.
 	const std::map<const Effect *, double> &JumpEffects() const;
-	const std::map<const Sound *, int> &HyperSounds() const;
-	const std::map<const Sound *, int> &HyperInSounds() const;
-	const std::map<const Sound *, int> &HyperOutSounds() const;
-	const std::map<const Sound *, int> &JumpSounds() const;
-	const std::map<const Sound *, int> &JumpInSounds() const;
-	const std::map<const Sound *, int> &JumpOutSounds() const;
+	const std::map<const Sound *, int>     &HyperSounds() const;
+	const std::map<const Sound *, int>     &HyperInSounds() const;
+	const std::map<const Sound *, int>     &HyperOutSounds() const;
+	const std::map<const Sound *, int>     &JumpSounds() const;
+	const std::map<const Sound *, int>     &JumpInSounds() const;
+	const std::map<const Sound *, int>     &JumpOutSounds() const;
 	// Get this outfit's scan sounds, if any.
 	const std::map<const Sound *, int> &CargoScanSounds() const;
 	const std::map<const Sound *, int> &OutfitScanSounds() const;
@@ -172,7 +172,7 @@ private:
 
 
 private:
-	bool isDefined = false;
+	bool        isDefined = false;
 	std::string trueName;
 	std::string displayName;
 	std::string pluralName;
@@ -180,11 +180,11 @@ private:
 	// The series that this outfit is a part of and its index within that series.
 	// Used for sorting within shops.
 	std::string series;
-	int index = 0;
-	Paragraphs description;
-	Drawable thumbnail;
-	int64_t cost = 0;
-	double mass = 0.;
+	int         index = 0;
+	Paragraphs  description;
+	Drawable    thumbnail;
+	int64_t     cost = 0;
+	double      mass = 0.;
 	// Licenses needed to purchase this item.
 	std::vector<std::string> licenses;
 
@@ -204,20 +204,20 @@ private:
 	std::vector<std::pair<Drawable, int>> flareSprites;
 	std::vector<std::pair<Drawable, int>> reverseFlareSprites;
 	std::vector<std::pair<Drawable, int>> steeringFlareSprites;
-	std::map<const Sound *, int> flareSounds;
-	std::map<const Sound *, int> reverseFlareSounds;
-	std::map<const Sound *, int> steeringFlareSounds;
-	std::map<const Effect *, int> afterburnerEffects;
-	std::map<const Effect *, double> jumpEffects;
-	std::map<const Sound *, int> hyperSounds;
-	std::map<const Sound *, int> hyperInSounds;
-	std::map<const Sound *, int> hyperOutSounds;
-	std::map<const Sound *, int> jumpSounds;
-	std::map<const Sound *, int> jumpInSounds;
-	std::map<const Sound *, int> jumpOutSounds;
-	std::map<const Sound *, int> cargoScanSounds;
-	std::map<const Sound *, int> outfitScanSounds;
-	const Sprite *flotsamSprite = nullptr;
+	std::map<const Sound *, int>          flareSounds;
+	std::map<const Sound *, int>          reverseFlareSounds;
+	std::map<const Sound *, int>          steeringFlareSounds;
+	std::map<const Effect *, int>         afterburnerEffects;
+	std::map<const Effect *, double>      jumpEffects;
+	std::map<const Sound *, int>          hyperSounds;
+	std::map<const Sound *, int>          hyperInSounds;
+	std::map<const Sound *, int>          hyperOutSounds;
+	std::map<const Sound *, int>          jumpSounds;
+	std::map<const Sound *, int>          jumpInSounds;
+	std::map<const Sound *, int>          jumpOutSounds;
+	std::map<const Sound *, int>          cargoScanSounds;
+	std::map<const Sound *, int>          outfitScanSounds;
+	const Sprite                         *flotsamSprite = nullptr;
 };
 
 

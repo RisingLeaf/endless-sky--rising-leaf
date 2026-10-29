@@ -188,7 +188,12 @@ void WrappedText::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &to
 			if(h == w.y && (i != words.size() - 1 && w.y == words[i + 1].y))
 				font->Draw(cb, text.c_str() + w.Index(), w.Pos() + topLeft, color);
 			else
-				font->Draw(cb, {text.c_str() + w.Index(), {wrapWidth, truncate}}, w.Pos() + topLeft, color);
+				font->Draw(cb,
+				           {
+				               text.c_str() + w.Index(), {wrapWidth, truncate}
+                },
+				           w.Pos() + topLeft,
+				           color);
 			h = w.y;
 		}
 	}
@@ -212,7 +217,7 @@ Point WrappedText::Word::Pos() const
 
 void WrappedText::Wrap()
 {
-	height = 0;
+	height           = 0;
 	longestLineWidth = 0;
 
 	if(text.empty() || !font)
@@ -220,7 +225,7 @@ void WrappedText::Wrap()
 
 	// Do this as a finite state machine.
 	Word word;
-	bool traversingWord = false;
+	bool traversingWord      = false;
 	bool currentLineHasWords = false;
 
 	// Keep track of how wide the current line is. This is just so we know how
@@ -244,7 +249,7 @@ void WrappedText::Wrap()
 		{
 			traversingWord = false;
 			// Break the string at this point, and measure the word's width.
-			*it = '\0';
+			*it             = '\0';
 			const int width = font->Width(text.c_str() + word.index);
 			if(word.x + width > wrapWidth)
 			{
@@ -280,9 +285,9 @@ void WrappedText::Wrap()
 		// If we've reached the start of a new word, remember where it begins.
 		else if(!traversingWord)
 		{
-			traversingWord = true;
+			traversingWord      = true;
 			currentLineHasWords = true;
-			word.index = it - text.begin();
+			word.index          = it - text.begin();
 		}
 	}
 
@@ -322,7 +327,7 @@ void WrappedText::Wrap()
 
 void WrappedText::AdjustLine(size_t &lineBegin, int &lineWidth, bool isEnd)
 {
-	int wordCount = static_cast<int>(words.size() - lineBegin);
+	int wordCount  = static_cast<int>(words.size() - lineBegin);
 	int extraSpace = wrapWidth - lineWidth;
 
 	if(lineWidth > longestLineWidth)

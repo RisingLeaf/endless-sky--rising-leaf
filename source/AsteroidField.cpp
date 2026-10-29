@@ -32,8 +32,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	constexpr double WRAP = 4096.;
-	constexpr unsigned CELL_SIZE = 256u;
+	constexpr double   WRAP       = 4096.;
+	constexpr unsigned CELL_SIZE  = 256u;
 	constexpr unsigned CELL_COUNT = WRAP / CELL_SIZE;
 } // namespace
 
@@ -130,12 +130,12 @@ void AsteroidField::CollideAsteroids(const Projectile &projectile, vector<Collis
 	// Check for collisions with ordinary asteroids, which are tiled.
 	// Rather than tiling the collision set, tile the projectile.
 	Point from = projectile.Position();
-	Point to = from + projectile.Velocity();
+	Point to   = from + projectile.Velocity();
 
 	// Map the projectile to a position within the wrap square.
 	Point minimum = Point(min(from.X(), to.X()), min(from.Y(), to.Y()));
 	Point maximum = from + to - minimum;
-	Point grid = WRAP * Point(floor(maximum.X() / WRAP), floor(maximum.Y() / WRAP));
+	Point grid    = WRAP * Point(floor(maximum.X() / WRAP), floor(maximum.Y() / WRAP));
 	from -= grid;
 	to -= grid;
 	// The projectile's bounding rectangle now overlaps the wrap square. If it
@@ -194,7 +194,7 @@ AsteroidField::Asteroid::Asteroid(const Sprite *sprite, double energy)
 	// new direction, so the asteroids don't all appear to be spinning on
 	// exactly the same axis.
 	angle = Angle::Random();
-	spin = Angle::Random(energy) - Angle::Random(energy);
+	spin  = Angle::Random(energy) - Angle::Random(energy);
 
 	// The asteroid's velocity is also determined by the energy level.
 	velocity = angle.Unit() * Random::Real() * energy;
@@ -230,7 +230,7 @@ void AsteroidField::Asteroid::Step()
 void AsteroidField::Asteroid::Draw(DrawList &draw, const Point &center, double zoom) const
 {
 	// Any object within this range must be drawn.
-	Point topLeft = center + (Screen::TopLeft() - size) / zoom;
+	Point topLeft     = center + (Screen::TopLeft() - size) / zoom;
 	Point bottomRight = center + (Screen::BottomRight() + size) / zoom;
 
 	// Figure out the position of the first instance of this asteroid that is to

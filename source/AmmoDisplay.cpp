@@ -64,7 +64,7 @@ void AmmoDisplay::Update(const Ship &flagship)
 			ammoCount = flagship.OutfitCount(secWeapon->Ammo());
 		if(secWeapon->FiringFuel())
 		{
-			double remaining = flagship.FuelLevel();
+			double remaining     = flagship.FuelLevel();
 			double fuelAmmoCount = remaining / secWeapon->FiringFuel();
 			// Decide what remaining ammunition value to display.
 			ammoCount = (ammoCount == -1. ? fuelAmmoCount : min(ammoCount, fuelAmmoCount));
@@ -80,21 +80,21 @@ void AmmoDisplay::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle
 	const Font &font = FontSet::Get(14);
 	ammoIconZones.clear();
 
-	const double &ammoIconWidth = iconDim.X();
+	const double &ammoIconWidth  = iconDim.X();
 	const double &ammoIconHeight = iconDim.Y();
 	// Pad the ammo list by the same amount on all four sides.
-	double ammoPad = .5 * (ammoBox.Width() - ammoIconWidth);
-	const Sprite *selectedSprite = SpriteSet::Get("ui/ammo selected");
+	double        ammoPad          = .5 * (ammoBox.Width() - ammoIconWidth);
+	const Sprite *selectedSprite   = SpriteSet::Get("ui/ammo selected");
 	const Sprite *unselectedSprite = SpriteSet::Get("ui/ammo unselected");
-	const Color &selectedColor = *GameData::Colors().Get("bright");
-	const Color &unselectedColor = *GameData::Colors().Get("dim");
+	const Color  &selectedColor    = *GameData::Colors().Get("bright");
+	const Color  &unselectedColor  = *GameData::Colors().Get("dim");
 
 	// This is the bottom left corner of the ammo display.
 	auto pos = Point(ammoBox.Left() + ammoPad, ammoBox.Bottom() - ammoPad);
 	// These offsets are relative to that corner.
-	auto boxOff = Point(ammoIconWidth - .5 * selectedSprite->Width(), .5 * ammoIconHeight);
-	auto textOff = Point(5. + ammoIconWidth - .5 * ammoIconHeight, .5 * (ammoIconHeight - font.Height()));
-	auto iconOff = Point(.5 * ammoIconHeight, .5 * ammoIconHeight);
+	auto         boxOff      = Point(ammoIconWidth - .5 * selectedSprite->Width(), .5 * ammoIconHeight);
+	auto         textOff     = Point(5. + ammoIconWidth - .5 * ammoIconHeight, .5 * (ammoIconHeight - font.Height()));
+	auto         iconOff     = Point(.5 * ammoIconHeight, .5 * ammoIconHeight);
 	const double iconCenterX = (ammoBox.Right() + ammoBox.Left()) / 2.;
 	for(const auto &it : ammo)
 	{
@@ -103,7 +103,7 @@ void AmmoDisplay::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle
 			break;
 
 		const auto &playerSelectedWeapons = player.SelectedSecondaryWeapons();
-		bool isSelected = (playerSelectedWeapons.find(it.first) != playerSelectedWeapons.end());
+		bool        isSelected            = (playerSelectedWeapons.find(it.first) != playerSelectedWeapons.end());
 
 		SpriteShader::Draw(cb, it.first->GetWeapon()->Icon(), pos + iconOff);
 		SpriteShader::Draw(cb, isSelected ? selectedSprite : unselectedSprite, pos + boxOff);
@@ -116,8 +116,8 @@ void AmmoDisplay::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle
 		if(it.second < 0)
 			continue;
 
-		string amount = Format::AmmoCount(it.second);
-		Point textPos = pos + textOff + Point(-font.Width(amount), 0.);
+		string amount  = Format::AmmoCount(it.second);
+		Point  textPos = pos + textOff + Point(-font.Width(amount), 0.);
 		font.Draw(cb, amount, textPos, isSelected ? selectedColor : unselectedColor);
 	}
 }

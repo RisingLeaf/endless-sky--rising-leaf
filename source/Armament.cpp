@@ -57,8 +57,8 @@ int Armament::Add(const Outfit *outfit, int count)
 	if(!weapon)
 		return 0;
 
-	int existing = 0;
-	int added = 0;
+	int  existing = 0;
+	int  added    = 0;
 	bool isTurret = outfit->Get("turret mounts");
 	// Do not equip weapons that do not define how they are mounted.
 	if(!isTurret && !outfit->Get("gun ports"))
@@ -263,8 +263,8 @@ void Armament::Fire(unsigned index, Ship &ship, vector<Projectile> &projectiles,
 
 
 
-bool Armament::FireAntiMissile(unsigned index, Ship &ship, const Projectile &projectile, vector<Visual> &visuals,
-                               bool jammed)
+bool Armament::FireAntiMissile(
+    unsigned index, Ship &ship, const Projectile &projectile, vector<Visual> &visuals, bool jammed)
 {
 	if(!CheckHardpoint(index, jammed))
 		return false;

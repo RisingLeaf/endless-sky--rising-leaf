@@ -24,10 +24,10 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 void WinConsole::Init()
 {
-	const int UNINITIALIZED = -2;
-	bool redirectStdout = _fileno(stdout) == UNINITIALIZED;
-	bool redirectStderr = _fileno(stderr) == UNINITIALIZED;
-	bool redirectStdin = _fileno(stdin) == UNINITIALIZED;
+	const int UNINITIALIZED  = -2;
+	bool      redirectStdout = _fileno(stdout) == UNINITIALIZED;
+	bool      redirectStderr = _fileno(stderr) == UNINITIALIZED;
+	bool      redirectStdin  = _fileno(stdin) == UNINITIALIZED;
 
 	// Bail if stdin, stdout, and stderr are already initialized (e.g. writing to a file)
 	if(!redirectStdout && !redirectStderr && !redirectStdin)

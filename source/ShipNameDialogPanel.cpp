@@ -24,9 +24,9 @@ using namespace std;
 ShipNameDialogPanel *ShipNameDialogPanel::Create(const FunctionButton &buttonOne, string message, string initialValue)
 {
 	DialogInit init;
-	init.message = std::move(message);
+	init.message      = std::move(message);
 	init.initialValue = std::move(initialValue);
-	init.buttonOne = buttonOne;
+	init.buttonOne    = buttonOne;
 	return new ShipNameDialogPanel(init);
 }
 
@@ -34,7 +34,7 @@ ShipNameDialogPanel *ShipNameDialogPanel::Create(const FunctionButton &buttonOne
 ShipNameDialogPanel::ShipNameDialogPanel(DialogInit &init) : DialogPanel(init)
 {
 	buttonThree = FunctionButton(this, "Random", 'r', &ShipNameDialogPanel::RandomName);
-	numButtons = 3;
+	numButtons  = 3;
 }
 
 

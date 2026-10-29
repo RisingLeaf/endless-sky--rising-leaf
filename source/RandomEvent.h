@@ -29,19 +29,21 @@ public:
 	RandomEvent(const T *event, int period, const DataNode &node, const ConditionsStore *playerConditions) noexcept;
 
 	const T *Get() const noexcept;
-	int Period() const noexcept;
-	bool CanTrigger() const;
+	int      Period() const noexcept;
+	bool     CanTrigger() const;
 
 
 private:
-	const T *event;
-	int period;
+	const T     *event;
+	int          period;
 	ConditionSet conditions;
 };
 
 
 template <typename T>
-RandomEvent<T>::RandomEvent(const T *event, int period, const DataNode &node,
+RandomEvent<T>::RandomEvent(const T               *event,
+                            int                    period,
+                            const DataNode        &node,
                             const ConditionsStore *playerConditions) noexcept
     : event(event), period(period > 0 ? period : 200)
 {

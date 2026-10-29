@@ -38,15 +38,15 @@ public:
 protected:
 	virtual void LoadCatalogThumbnails() const override;
 
-	virtual const Drawable &SelectedSprite() const override;
-	virtual const Drawable &CompareSprite() const override;
+	virtual const Drawable        &SelectedSprite() const override;
+	virtual const Drawable        &CompareSprite() const override;
 	virtual const ItemInfoDisplay &SelectedInfo() const override;
 	virtual const ItemInfoDisplay &CompareInfo() const override;
 
-	virtual void Select(int index) override;
-	virtual void Compare(int index) override;
+	virtual void   Select(int index) override;
+	virtual void   Compare(int index) override;
 	virtual double SystemValue(const System *system) const override;
-	virtual int FindItem(const std::string &text) const override;
+	virtual int    FindItem(const std::string &text) const override;
 
 	virtual void DrawSalesKey(GraphicsTypes::CommandBufferInstance *cb, Information &info) const override;
 	virtual void DrawItems(GraphicsTypes::CommandBufferInstance *cb) override;
@@ -61,7 +61,7 @@ private:
 	std::vector<const Outfit *> list;
 
 	const Outfit *selected = nullptr;
-	const Outfit *compare = nullptr;
+	const Outfit *compare  = nullptr;
 
 	OutfitInfoDisplay selectedInfo;
 	OutfitInfoDisplay compareInfo;

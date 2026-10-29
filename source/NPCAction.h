@@ -36,11 +36,15 @@ class NPCAction {
 public:
 	NPCAction() = default;
 	// Construct and Load() at the same time.
-	explicit NPCAction(const DataNode &node, const ConditionsStore *playerConditions,
-	                   const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	explicit NPCAction(const DataNode                 &node,
+	                   const ConditionsStore          *playerConditions,
+	                   const std::set<const System *> *visitedSystems,
+	                   const std::set<const Planet *> *visitedPlanets);
 
-	void Load(const DataNode &node, const ConditionsStore *playerConditions,
-	          const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	void Load(const DataNode                 &node,
+	          const ConditionsStore          *playerConditions,
+	          const std::set<const System *> *visitedSystems,
+	          const std::set<const Planet *> *visitedPlanets);
 	// Note: the Save() function can assume this is an instantiated mission, not
 	// a template, so it only has to save a subset of the data.
 	void Save(DataWriter &out) const;
@@ -52,13 +56,13 @@ public:
 
 	// "Instantiate" this action by filling in the wildcard text for the actual
 	// destination, payment, cargo, etc.
-	NPCAction Instantiate(std::map<std::string, std::string> &subs, const System *origin, int jumps,
-	                      int64_t payload) const;
+	NPCAction
+	Instantiate(std::map<std::string, std::string> &subs, const System *origin, int jumps, int64_t payload) const;
 
 
 private:
 	std::string trigger;
-	bool triggered = false;
+	bool        triggered = false;
 
 	// Tasks this NPC action performs, such as modifying accounts, inventory, or conditions.
 	MissionAction action;

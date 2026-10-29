@@ -133,18 +133,18 @@ ResourceLevels Entity::AvailableResources() const
 	// the available hull excludes the hull necessary to remain enabled.
 	available.hull = levels.hull - minimumHull;
 	// The availability of all other resources is just how much this entity currently has.
-	available.shields = levels.shields;
-	available.energy = levels.energy;
-	available.heat = levels.heat;
-	available.fuel = levels.fuel;
+	available.shields    = levels.shields;
+	available.energy     = levels.energy;
+	available.heat       = levels.heat;
+	available.fuel       = levels.fuel;
 	available.ionization = levels.ionization;
 	available.scrambling = levels.scrambling;
 	available.disruption = levels.disruption;
-	available.slowness = levels.slowness;
-	available.discharge = levels.discharge;
-	available.corrosion = levels.corrosion;
-	available.leakage = levels.leakage;
-	available.burning = levels.burning;
+	available.slowness   = levels.slowness;
+	available.discharge  = levels.discharge;
+	available.corrosion  = levels.corrosion;
+	available.leakage    = levels.leakage;
+	available.burning    = levels.burning;
 	return available;
 }
 
@@ -195,7 +195,7 @@ double Entity::MinHull() const
 double Entity::HealthFraction() const
 {
 	double hullDivisor = MaxHull() - minimumHull;
-	double divisor = MaxShields() + hullDivisor;
+	double divisor     = MaxShields() + hullDivisor;
 	// This should not happen, but just in case.
 	if(divisor <= 0. || hullDivisor <= 0.)
 		return 0.;
@@ -357,11 +357,11 @@ double Entity::ForceProtection() const
 
 void Entity::Kill()
 {
-	levels.hull = -1;
+	levels.hull    = -1;
 	levels.shields = 0;
-	levels.energy = 0.;
-	levels.heat = 0.;
-	levels.fuel = 0.;
+	levels.energy  = 0.;
+	levels.heat    = 0.;
+	levels.fuel    = 0.;
 	ClearStatusEffects();
 }
 
@@ -369,14 +369,14 @@ void Entity::Kill()
 
 void Entity::ClearStatusEffects()
 {
-	levels.discharge = 0.;
-	levels.corrosion = 0.;
+	levels.discharge  = 0.;
+	levels.corrosion  = 0.;
 	levels.scrambling = 0.;
 	levels.ionization = 0.;
-	levels.leakage = 0.;
-	levels.burning = 0.;
+	levels.leakage    = 0.;
+	levels.burning    = 0.;
 	levels.disruption = 0.;
-	levels.slowness = 0.;
+	levels.slowness   = 0.;
 }
 
 
@@ -496,7 +496,7 @@ void Entity::CreateSparks(vector<Visual> &visuals, const Effect *effect, double 
 
 int Entity::TakeDamage(std::vector<Visual> &visuals, const DamageDealt &damage, const Government *hitBy)
 {
-	bool wasDisabled = IsDisabled();
+	bool wasDisabled  = IsDisabled();
 	bool wasDestroyed = IsDestroyed();
 
 	levels.Damage(damage.Levels());
@@ -504,7 +504,7 @@ int Entity::TakeDamage(std::vector<Visual> &visuals, const DamageDealt &damage, 
 	// Prevent various stats from reaching unallowable values.
 	// ResourceLevels::Damage already ensures that stats aside from hull don't become negative,
 	// so the only remaining unallowable values are overhealing hull or shields.
-	levels.hull = min(levels.hull, MaxHull());
+	levels.hull    = min(levels.hull, MaxHull());
 	levels.shields = min(levels.shields, MaxShields());
 
 	// Create target effect visuals, if there are any.
@@ -520,31 +520,31 @@ void Entity::CacheAttributes()
 {
 	heatDissipation = attributes.Get("heat dissipation");
 
-	opticalSize = attributes.Get("optical size");
+	opticalSize    = attributes.Get("optical size");
 	opticalJamming = attributes.Get("optical jamming");
-	radarJamming = attributes.Get("radar jamming");
+	radarJamming   = attributes.Get("radar jamming");
 
-	piercingProtection = 1. + attributes.Get("piercing protection");
-	piercingResistance = attributes.Get("piercing resistance");
-	highShieldPermeability = attributes.Get("high shield permeability");
-	lowShieldPermeability = attributes.Get("low shield permeability");
-	cloakedShieldPermeability = attributes.Get("cloaked shield permeability");
-	cloakedHullProtection = attributes.Get("cloak hull protection");
-	cloakedShieldProtection = attributes.Get("cloak shield protection");
-	damageProtection.shields = 1. + attributes.Get("shield protection");
-	damageProtection.hull = 1. + attributes.Get("hull protection");
-	damageProtection.energy = 1. + attributes.Get("energy protection");
-	damageProtection.fuel = 1. + attributes.Get("fuel protection");
-	damageProtection.heat = 1. + attributes.Get("heat protection");
-	damageProtection.discharge = 1. + attributes.Get("discharge protection");
-	damageProtection.corrosion = 1. + attributes.Get("corrosion protection");
+	piercingProtection          = 1. + attributes.Get("piercing protection");
+	piercingResistance          = attributes.Get("piercing resistance");
+	highShieldPermeability      = attributes.Get("high shield permeability");
+	lowShieldPermeability       = attributes.Get("low shield permeability");
+	cloakedShieldPermeability   = attributes.Get("cloaked shield permeability");
+	cloakedHullProtection       = attributes.Get("cloak hull protection");
+	cloakedShieldProtection     = attributes.Get("cloak shield protection");
+	damageProtection.shields    = 1. + attributes.Get("shield protection");
+	damageProtection.hull       = 1. + attributes.Get("hull protection");
+	damageProtection.energy     = 1. + attributes.Get("energy protection");
+	damageProtection.fuel       = 1. + attributes.Get("fuel protection");
+	damageProtection.heat       = 1. + attributes.Get("heat protection");
+	damageProtection.discharge  = 1. + attributes.Get("discharge protection");
+	damageProtection.corrosion  = 1. + attributes.Get("corrosion protection");
 	damageProtection.ionization = 1. + attributes.Get("ion protection");
-	damageProtection.burning = 1. + attributes.Get("burn protection");
-	damageProtection.leakage = 1. + attributes.Get("leak protection");
-	damageProtection.slowness = 1. + attributes.Get("slowing protection");
+	damageProtection.burning    = 1. + attributes.Get("burn protection");
+	damageProtection.leakage    = 1. + attributes.Get("leak protection");
+	damageProtection.slowness   = 1. + attributes.Get("slowing protection");
 	damageProtection.scrambling = 1. + attributes.Get("scramble protection");
 	damageProtection.disruption = 1. + attributes.Get("disruption protection");
-	forceProtection = 1. + attributes.Get("force protection");
+	forceProtection             = 1. + attributes.Get("force protection");
 
 	auto CalibrateResistance = [this](const string &name, double &stat, ResourceLevels &cost) -> void {
 		stat = attributes.Get(name + " resistance");
@@ -552,8 +552,8 @@ void Entity::CacheAttributes()
 		if(stat)
 		{
 			cost.energy = attributes.Get(name + " resistance energy") / stat;
-			cost.heat = attributes.Get(name + " resistance heat") / stat;
-			cost.fuel = attributes.Get(name + " resistance fuel") / stat;
+			cost.heat   = attributes.Get(name + " resistance heat") / stat;
+			cost.fuel   = attributes.Get(name + " resistance fuel") / stat;
 		}
 	};
 

@@ -45,7 +45,7 @@ class Panel {
 public:
 	struct Event {
 		Point pos;
-		int id;
+		int   id;
 		enum { MOUSE, TOUCH, BUTTON, AXIS } type;
 	};
 
@@ -134,7 +134,7 @@ protected:
 	// Dim the background of this panel.
 	void DrawBackdrop(GraphicsTypes::CommandBufferInstance *cb) const;
 
-	UI &GetUI() const noexcept;
+	UI  &GetUI() const noexcept;
 	void SetUI(UI *ui);
 
 	// This is not for overriding, but for calling KeyDown with only one or two
@@ -181,7 +181,7 @@ private:
 		}
 
 	private:
-		std::function<void()> fun;
+		std::function<void()>              fun;
 		std::function<void(const Event &)> funDownEvent;
 	};
 
@@ -213,17 +213,17 @@ private:
 private:
 	UI *ui = nullptr;
 
-	bool isFullScreen = false;
-	bool trapAllEvents = true;
+	bool isFullScreen    = false;
+	bool trapAllEvents   = true;
 	bool isInterruptible = true;
 
 	std::list<Zone> zones;
 
 	std::vector<std::shared_ptr<Panel>> children;
 	std::vector<std::shared_ptr<Panel>> childrenToAdd;
-	std::vector<const Panel *> childrenToRemove;
-	Panel *parent = nullptr;
-	bool focus = false;
+	std::vector<const Panel *>          childrenToRemove;
+	Panel                              *parent = nullptr;
+	bool                                focus  = false;
 
 	friend class UI;
 };

@@ -52,7 +52,7 @@ public:
 
 	// Make a mortgage payment. The return value is the amount paid.
 	int64_t MakePayment();
-	void MissPayment();
+	void    MissPayment();
 	// Pay down additional principal. Unlike a "real" mortgage, this reduces
 	// the minimum amount of your future payments, not the term of the mortgage.
 	// This returns the actual amount paid, which may be less if the total
@@ -79,8 +79,8 @@ public:
 private:
 	// Note: once a mortgage is set up, only the principal and term will change.
 	std::string type;
-	int64_t principal = 0;
-	double interest = 0.;
+	int64_t     principal = 0;
+	double      interest  = 0.;
 	std::string interestString;
-	int term = 365;
+	int         term = 365;
 };

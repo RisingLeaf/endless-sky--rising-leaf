@@ -42,8 +42,11 @@ namespace {
 	}
 
 	// Add consecutive frames from the given map to the given vector. Issue warnings for missing or mislabeled frames.
-	void AddValid(const map<size_t, filesystem::path> &frameData, vector<filesystem::path> &sequence,
-	              const string &prefix, bool is2x, bool isSwizzleMask) noexcept(false)
+	void AddValid(const map<size_t, filesystem::path> &frameData,
+	              vector<filesystem::path>            &sequence,
+	              const string                        &prefix,
+	              bool                                 is2x,
+	              bool                                 isSwizzleMask) noexcept(false)
 	{
 		if(frameData.empty())
 			return;
@@ -58,18 +61,18 @@ namespace {
 		}
 
 		// Find the first frame that is not a single increment over the previous frame.
-		auto it = frameData.begin();
+		auto it   = frameData.begin();
 		auto next = it;
-		auto end = frameData.end();
+		auto end  = frameData.end();
 		while(++next != end && next->first == it->first + 1)
 			it = next;
 		// Copy the sorted, valid paths from the map to the frame sequence vector.
 		size_t count = distance(frameData.begin(), next);
 		sequence.resize(count);
-		transform(frameData.begin(), next, sequence.begin(),
-		          [](const pair<size_t, filesystem::path> &p) -> filesystem::path {
-			          return p.second;
-		          });
+		transform(
+		    frameData.begin(), next, sequence.begin(), [](const pair<size_t, filesystem::path> &p) -> filesystem::path {
+			    return p.second;
+		    });
 
 		// If `next` is not the end, then there was at least one discontinuous frame.
 		if(next != frameData.end())
@@ -151,14 +154,14 @@ void ImageSet::ValidateFrames() noexcept(false)
 			}
 		}
 
-	int normalFrames = paths[0].size();
-	auto DropPaths = [&](vector<filesystem::path> &toResize, const string &specifier, bool isMask) {
+	int  normalFrames = paths[0].size();
+	auto DropPaths    = [&](vector<filesystem::path> &toResize, const string &specifier, bool isMask) {
 		int size = toResize.size();
 		if(!size)
 			return;
 		// Neither 2x nor masks should have more frames than the 1x resolution.
 		if(size > normalFrames)
-			{
+		{
 			if(!normalFrames)
 				Logger::Log(prefix + "all frames for the " + specifier +
 				                " sprite will be ignored, "
@@ -171,16 +174,16 @@ void ImageSet::ValidateFrames() noexcept(false)
 			toResize.resize(normalFrames);
 		}
 		else if(!isMask && size < normalFrames)
-			{
+		{
 			Logger::Log(prefix + "sprite has " + to_string(normalFrames - size) +
-				                " more normal resolution "
-				                "frame(s) than " +
-				                specifier + " frames. All " + specifier +
-				                " frames will be dropped to prevent "
-				                "sprite loading issues.",
-				            Logger::Level::WARNING);
+			                " more normal resolution "
+			                "frame(s) than " +
+			                specifier + " frames. All " + specifier +
+			                " frames will be dropped to prevent "
+			                "sprite loading issues.",
+			            Logger::Level::WARNING);
 			toResize.clear();
-			}
+		}
 		else if(isMask && size != 1 && size != normalFrames)
 		{
 			Logger::Log(prefix + "Discarding " + to_string(size - 1) +
@@ -231,8 +234,8 @@ void ImageSet::Load() noexcept(false)
 	// to be in separate locations on the disk. Create masks if needed.
 	for(size_t i = 0; i < paths[0].size(); ++i)
 	{
-		int loadedFrames = buffer[0].Read(paths[0][i], i);
-		const string fileName = "\"" + name + "\" frame #" + to_string(i);
+		int          loadedFrames = buffer[0].Read(paths[0][i], i);
+		const string fileName     = "\"" + name + "\" frame #" + to_string(i);
 		if(!loadedFrames)
 		{
 			Logger::Log("Failed to read image data for " + fileName, Logger::Level::WARNING);
@@ -261,7 +264,7 @@ void ImageSet::Load() noexcept(false)
 				            Logger::Level::WARNING);
 				buffer.Clear();
 				break;
-		}
+			}
 	};
 	// Now, load the mask and 2x sprites, if they exist. Because the number of 1x frames
 	// is definitive, don't load any frames beyond the size of the 1x list.
@@ -275,7 +278,7 @@ void ImageSet::Load() noexcept(false)
 		Logger::Log("Image \"" + name + "\" will be blurry since width and/or height are not even (" +
 		                to_string(buffer[0].Width()) + "x" + to_string(buffer[0].Height()) + ").",
 		            Logger::Level::WARNING);
-	}
+}
 
 
 

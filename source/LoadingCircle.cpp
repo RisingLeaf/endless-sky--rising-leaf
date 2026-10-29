@@ -37,8 +37,10 @@ void LoadingCircle::Step()
 
 
 
-void LoadingCircle::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &position, double progress,
-                         double zoom) const
+void LoadingCircle::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                         const Point                          &position,
+                         double                                progress,
+                         double                                zoom) const
 {
 	// Draw the loading circle.
 	Angle a(rotation);

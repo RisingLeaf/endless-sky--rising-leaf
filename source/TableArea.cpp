@@ -115,7 +115,7 @@ void TableArea::Validate(bool trailingBreak)
 	{
 		scroll.SetMaxValue(table.GetRowSize().Y() * rows.size());
 		scrollHeightIncludesTrailingBreak = trailingBreak;
-		contentsIsValid = true;
+		contentsIsValid                   = true;
 	}
 }
 

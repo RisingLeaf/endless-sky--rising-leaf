@@ -31,20 +31,20 @@ using namespace std;
 void ShipJumpNavigation::Calibrate(const Ship &ship)
 {
 	currentSystem = ship.GetSystem();
-	mass = ship.Mass();
+	mass          = ship.Mass();
 
 	const Outfit &attributes = ship.Attributes();
-	jumpSpeed = attributes.Get("jump speed");
-	scramThreshold = attributes.Get("scram drive");
+	jumpSpeed                = attributes.Get("jump speed");
+	scramThreshold           = attributes.Get("scram drive");
 
-	hasHyperdrive = attributes.Get("hyperdrive");
-	hasScramDrive = scramThreshold;
-	hasJumpDrive = attributes.Get("jump drive");
+	hasHyperdrive   = attributes.Get("hyperdrive");
+	hasScramDrive   = scramThreshold;
+	hasJumpDrive    = attributes.Get("jump drive");
 	hasJumpMassCost = attributes.Get("jump mass cost");
 
 	jumpDriveCosts.clear();
 	hyperdriveCost = 0.;
-	maxJumpRange = 0.;
+	maxJumpRange   = 0.;
 
 	// Make it possible for a hyperdrive or jump drive to be integrated into a ship.
 	ParseOutfit(ship.BaseAttributes());
@@ -69,9 +69,9 @@ void ShipJumpNavigation::Recalibrate(const Ship &ship)
 void ShipJumpNavigation::RecalibrateJumpSpeed(const Ship &ship)
 {
 	const Outfit &attributes = ship.Attributes();
-	jumpSpeed = attributes.Get("jump speed");
-	scramThreshold = attributes.Get("scram drive");
-	hasScramDrive = scramThreshold;
+	jumpSpeed                = attributes.Get("jump speed");
+	scramThreshold           = attributes.Get("scram drive");
+	hasScramDrive            = scramThreshold;
 }
 
 
@@ -146,13 +146,13 @@ pair<JumpType, double> ShipJumpNavigation::GetCheapestJumpType(const System *fro
 {
 	if(!from || !to)
 		return make_pair(JumpType::NONE, 0.);
-	bool linked = from->Links().contains(to);
+	bool   linked          = from->Links().contains(to);
 	double hyperFuelNeeded = HyperdriveFuel();
 	// If these two systems are linked, or if the system we're jumping from has its own jump range,
 	// then use the cheapest jump drive available, which is mapped to a distance of 0.
-	const double distance = from->Position().Distance(to->Position());
-	double jumpFuelNeeded = JumpDriveFuel((linked || from->JumpRange()) ? 0. : distance);
-	bool canJump = jumpFuelNeeded && (linked || !from->JumpRange() || from->JumpRange() >= distance);
+	const double distance       = from->Position().Distance(to->Position());
+	double       jumpFuelNeeded = JumpDriveFuel((linked || from->JumpRange()) ? 0. : distance);
+	bool         canJump        = jumpFuelNeeded && (linked || !from->JumpRange() || from->JumpRange() >= distance);
 	if(linked && hasHyperdrive && (!canJump || hyperFuelNeeded <= jumpFuelNeeded))
 		return make_pair(JumpType::HYPERDRIVE, hyperFuelNeeded);
 	else if(hasJumpDrive && canJump)
@@ -176,7 +176,7 @@ bool ShipJumpNavigation::CanJump(const System *from, const System *to) const
 		return false;
 
 	const double distanceSquared = from->Position().DistanceSquared(to->Position());
-	double maxRange = from->JumpRange() ? from->JumpRange() : jumpDriveCosts.rbegin()->first;
+	double       maxRange        = from->JumpRange() ? from->JumpRange() : jumpDriveCosts.rbegin()->first;
 	return maxRange * maxRange >= distanceSquared;
 }
 

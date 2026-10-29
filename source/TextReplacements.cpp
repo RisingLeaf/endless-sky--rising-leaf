@@ -92,9 +92,9 @@ void TextReplacements::Substitutions(map<string, string> &subs) const
 {
 	for(const auto &sub : substitutions)
 	{
-		const string &key = sub.first;
-		const ConditionSet &toSub = sub.second.first;
-		const string &replacement = sub.second.second;
+		const string       &key         = sub.first;
+		const ConditionSet &toSub       = sub.second.first;
+		const string       &replacement = sub.second.second;
 		if(toSub.Test())
 			subs[key] = replacement;
 	}

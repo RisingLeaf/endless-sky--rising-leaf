@@ -36,10 +36,10 @@ public:
 
 
 private:
-	double rotation = 0.;
-	Point position;
-	double zoom = 1.;
-	bool isTargetingFlagship = true;
-	double radius = 15.;
+	double       rotation = 0.;
+	Point        position;
+	double       zoom                = 1.;
+	bool         isTargetingFlagship = true;
+	double       radius              = 15.;
 	const Color *color;
 };

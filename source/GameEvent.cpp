@@ -27,8 +27,16 @@ using namespace std;
 
 namespace {
 	const set<string> DEFINITION_NODES = {
-	    "fleet",  "galaxy",   "government", "outfitter",     "news",
-	    "planet", "shipyard", "system",     "substitutions", "wormhole",
+	    "fleet",
+	    "galaxy",
+	    "government",
+	    "outfitter",
+	    "news",
+	    "planet",
+	    "shipyard",
+	    "system",
+	    "substitutions",
+	    "wormhole",
 	};
 }
 
@@ -42,7 +50,7 @@ map<string, set<string>> GameEvent::DeferredDefinitions(const list<DataNode> &ch
 	for(auto &&node : changes)
 		if(node.Size() >= 2 && node.HasChildren() && DEFINITION_NODES.contains(node.Token(0)))
 		{
-			const string &key = node.Token(0);
+			const string &key  = node.Token(0);
 			const string &name = node.Token(1);
 			if(key == "system")
 			{
@@ -98,8 +106,8 @@ void GameEvent::Load(const DataNode &node, const ConditionsStore *playerConditio
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "date" && child.Size() >= 4)
 			date = Date(child.Value(1), child.Value(2), child.Value(3));
 		else if(key == "unvisit" && hasValue)

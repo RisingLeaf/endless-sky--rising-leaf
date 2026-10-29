@@ -60,13 +60,13 @@ public:
 
 	// Check to see if the player has done anything they should be fined for.
 	// Each government can only fine you once per day.
-	std::pair<const Conversation *, std::string> Fine(PlayerInfo &player, const Government *gov, int scan,
-	                                                  const Ship *target, double security);
+	std::pair<const Conversation *, std::string>
+	Fine(PlayerInfo &player, const Government *gov, int scan, const Ship *target, double security);
 
 	// Get or set your reputation with the given government.
 	double Reputation(const Government *gov) const;
-	void AddReputation(const Government *gov, double value);
-	void SetReputation(const Government *gov, double value);
+	void   AddReputation(const Government *gov, double value);
+	void   SetReputation(const Government *gov, double value);
 
 	// Reset any temporary effects (typically because a day has passed).
 	void ResetDaily();
@@ -79,9 +79,9 @@ private:
 	// because Republic ships will help a merchant under attack does not mean
 	// that merchants will come to the aid of Republic ships.
 	std::map<const Government *, double> reputationWith;
-	std::set<const Government *> provoked;
-	std::set<const Government *> bribed;
-	std::map<const Planet *, bool> bribedPlanets;
-	std::set<const Planet *> dominatedPlanets;
-	std::set<const Government *> fined;
+	std::set<const Government *>         provoked;
+	std::set<const Government *>         bribed;
+	std::map<const Planet *, bool>       bribedPlanets;
+	std::set<const Planet *>             dominatedPlanets;
+	std::set<const Government *>         fined;
 };

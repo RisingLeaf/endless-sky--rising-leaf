@@ -39,8 +39,8 @@ string Phrase::ExpandPhrases(const string &source)
 		if(next == string::npos)
 			break;
 		++next;
-		string phraseName = string{source, var + 2, next - var - 3};
-		const Phrase *phrase = GameData::Phrases().Find(phraseName);
+		string        phraseName = string{source, var + 2, next - var - 3};
+		const Phrase *phrase     = GameData::Phrases().Find(phraseName);
 		result.append(phrase ? phrase->Get() : phraseName);
 	}
 	// Optimization for most common case: no phrase in string:
@@ -176,9 +176,9 @@ Phrase::Choice::Choice(const DataNode &node, bool isPhraseName)
 
 		// Add the text up to the ${, and then add the contained phrase name.
 		++right;
-		size_t length = right - left;
-		auto text = string{entry, start, left - start};
-		auto phraseName = string{entry, left + 2, length - 3};
+		size_t length     = right - left;
+		auto   text       = string{entry, start, left - start};
+		auto   phraseName = string{entry, left + 2, length - 3};
 		emplace_back(text, nullptr);
 		emplace_back(string{}, GameData::Phrases().Get(phraseName));
 		start = right;

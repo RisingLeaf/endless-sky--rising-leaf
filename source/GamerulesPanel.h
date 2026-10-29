@@ -82,23 +82,23 @@ private:
 	std::unique_ptr<GraphicsTypes::CommandBufferInstance> PreRenderCmd;
 
 	// The gamerules being modified.
-	Gamerules &gamerules;
-	bool existingPilot;
+	Gamerules            &gamerules;
+	bool                  existingPilot;
 	std::function<void()> callback = nullptr;
 
 	const Interface *gamerulesUi;
 	const Interface *presetUi;
 
-	int selectedIndex = 0;
-	int hoverIndex = -1;
+	int selectedIndex    = 0;
+	int hoverIndex       = -1;
 	int oldSelectedIndex = 0;
-	int oldHoverIndex = 0;
-	int latestIndex = 0;
+	int oldHoverIndex    = 0;
+	int latestIndex      = 0;
 	// Which page we're on. g = gamerules, p = presets.
 	char page = 'g';
 
-	Point hoverPoint;
-	Tooltip tooltip;
+	Point       hoverPoint;
+	Tooltip     tooltip;
 	std::string selectedItem;
 	std::string hoverItem;
 
@@ -111,8 +111,8 @@ private:
 
 	std::unique_ptr<RenderBuffer> presetListClip;
 	std::unique_ptr<RenderBuffer> presetDescriptionBuffer;
-	ScrollVar<double> presetListScroll;
-	ScrollVar<double> presetDescriptionScroll;
+	ScrollVar<double>             presetListScroll;
+	ScrollVar<double>             presetDescriptionScroll;
 };
 
 

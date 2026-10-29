@@ -34,7 +34,7 @@ class Sound;
 class Effect : public Drawable {
 public:
 	const std::string &TrueName() const;
-	void SetTrueName(const std::string &name);
+	void               SetTrueName(const std::string &name);
 
 	void Load(const DataNode &node);
 
@@ -42,24 +42,24 @@ public:
 private:
 	std::string trueName;
 
-	const Sound *sound = nullptr;
+	const Sound  *sound         = nullptr;
 	SoundCategory soundCategory = SoundCategory::EXPLOSION;
 
 	// Parameters used for randomizing spin and velocity. The random angle is
 	// added to the parent angle, and then a random velocity in that direction
 	// is added to the parent velocity.
-	double velocityScale = 1.;
-	double randomVelocity = 0.;
-	double randomAngle = 0.;
-	double randomSpin = 0.;
+	double velocityScale   = 1.;
+	double randomVelocity  = 0.;
+	double randomAngle     = 0.;
+	double randomSpin      = 0.;
 	double randomFrameRate = 0.;
 	// Absolute values are independent of the parent Body if specified.
-	Angle absoluteAngle;
-	bool hasAbsoluteAngle = false;
-	double absoluteVelocity = 0.;
-	bool hasAbsoluteVelocity = false;
+	Angle  absoluteAngle;
+	bool   hasAbsoluteAngle    = false;
+	double absoluteVelocity    = 0.;
+	bool   hasAbsoluteVelocity = false;
 
-	int lifetime = 0;
+	int lifetime       = 0;
 	int randomLifetime = 0;
 
 	// If set, this effect's scale can be modified based on the "zoom" of the object it is used on.

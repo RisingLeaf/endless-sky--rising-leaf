@@ -29,15 +29,17 @@ using namespace std;
 
 
 
-void Person::Load(const DataNode &node, const ConditionsStore *playerConditions,
-                  const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+void Person::Load(const DataNode            &node,
+                  const ConditionsStore     *playerConditions,
+                  const set<const System *> *visitedSystems,
+                  const set<const Planet *> *visitedPlanets)
 {
-	name = node.Token(1);
+	name     = node.Token(1);
 	isLoaded = true;
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 
 		if(key == "system")
 			location.Load(child, visitedSystems, visitedPlanets);
@@ -207,7 +209,7 @@ bool Person::Do(const ShipEvent &event)
 	// itself so that when this Person is respawned, it doesn't steal the ship away
 	// from the capturer.
 	const shared_ptr<Ship> &target = event.Target();
-	int type = event.Type();
+	int                     type   = event.Type();
 	for(shared_ptr<Ship> &ptr : ships)
 		if(ptr == target)
 		{

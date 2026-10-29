@@ -62,10 +62,10 @@ using namespace std;
 PlanetPanel::PlanetPanel(PlayerInfo &player, function<void()> callback)
     : player(player), callback(std::move(callback)), planet(*player.GetPlanet()), system(*player.GetSystem())
 {
-	trading = make_shared<TradingPanel>(player);
-	bank = make_shared<BankPanel>(player);
+	trading   = make_shared<TradingPanel>(player);
+	bank      = make_shared<BankPanel>(player);
 	spaceport = make_shared<SpaceportPanel>(player);
-	hiring = make_shared<HiringPanel>(player);
+	hiring    = make_shared<HiringPanel>(player);
 
 	description = make_shared<TextArea>();
 	description->SetFont(FontSet::Get(Preferences::GetFontSize()));
@@ -141,7 +141,7 @@ void PlanetPanel::Step()
 	if(!hasLoadedThumbnails || SpriteLoadManager::RecheckThumbnails())
 	{
 		hasLoadedThumbnails = true;
-		TaskQueue &queue = GetUI().AsyncQueue();
+		TaskQueue &queue    = GetUI().AsyncQueue();
 		// Load the thumbnails for any ships and outfits sold in the shop.
 		for(const Ship *ship : shipyardStock)
 			SpriteLoadManager::LoadDeferred(queue, ship->Thumbnail());
@@ -258,11 +258,11 @@ bool PlanetPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, b
 	if(player.IsDead())
 		return true;
 
-	Panel *oldPanel = selectedPanel.get();
+	Panel      *oldPanel = selectedPanel.get();
 	const Ship *flagship = player.Flagship();
 
-	UI::UISound sound = UI::UISound::NORMAL;
-	bool hasAccess = planet.CanUseServices();
+	UI::UISound sound     = UI::UISound::NORMAL;
+	bool        hasAccess = planet.CanUseServices();
 	if(command.Has(Command::MAP))
 	{
 		GetUI().Push(new MapDetailPanel(player));
@@ -287,7 +287,7 @@ bool PlanetPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, b
 	}
 	else if(key == 'l')
 	{
-		sound = UI::UISound::NONE;
+		sound         = UI::UISound::NONE;
 		selectedPanel = nullptr;
 	}
 	else if(key == 't' && hasAccess && planet.GetPort().HasService(Port::ServicesType::Trading) && system.HasTrade())
@@ -404,8 +404,11 @@ void PlanetPanel::TakeOffIfReady()
 				}
 				else
 				{
-					GetUI().Push(new ConversationPanel(player, *GameData::Conversations().Get("flight check: " + check),
-					                                   nullptr, nullptr, result.first));
+					GetUI().Push(new ConversationPanel(player,
+					                                   *GameData::Conversations().Get("flight check: " + check),
+					                                   nullptr,
+					                                   nullptr,
+					                                   result.first));
 					return;
 				}
 			}
@@ -416,7 +419,8 @@ void PlanetPanel::TakeOffIfReady()
 			// Pop back the last ", " in the string.
 			shipNames.pop_back();
 			shipNames.pop_back();
-			GetUI().Push(DialogPanel::CallFunctionIfOk(this, &PlanetPanel::CheckWarningsAndTakeOff,
+			GetUI().Push(DialogPanel::CallFunctionIfOk(this,
+			                                           &PlanetPanel::CheckWarningsAndTakeOff,
 			                                           "Some of your ships in other systems are not able to fly:\n" +
 			                                               shipNames + "\nDo you want to park those ships and depart?",
 			                                           Truncate::MIDDLE));
@@ -448,15 +452,15 @@ void PlanetPanel::CheckWarningsAndTakeOff()
 	absentCannotFly.clear();
 
 	// Check for items that would be sold, or mission passengers that would be abandoned on-planet.
-	const Ship *flagship = player.Flagship();
-	const CargoHold &cargo = player.DistributeCargo();
+	const Ship      *flagship = player.Flagship();
+	const CargoHold &cargo    = player.DistributeCargo();
 	// Are you overbooked? Don't count fireable flagship crew.
 	// (If your ship can't support its required crew, it is counted as having no fireable crew.)
-	const int overbooked = cargo.Passengers() - max(0, flagship->Crew() - flagship->RequiredCrew());
+	const int overbooked         = cargo.Passengers() - max(0, flagship->Crew() - flagship->RequiredCrew());
 	const int missionCargoToSell = cargo.MissionCargoSize();
 	// Will you have to sell something other than regular cargo?
-	const int commoditiesToSell = cargo.CommoditiesSize();
-	int outfitsToSell = 0;
+	const int                commoditiesToSell = cargo.CommoditiesSize();
+	int                      outfitsToSell     = 0;
 	map<const Outfit *, int> uniquesToSell;
 	for(const auto &[outfit, count] : cargo.Outfits())
 	{
@@ -489,9 +493,9 @@ void PlanetPanel::CheckWarningsAndTakeOff()
 	   !leftUniques.empty())
 	{
 		ostringstream out;
-		auto ListUniques = [&out](const map<const Outfit *, int> &uniques) {
+		auto          ListUniques = [&out](const map<const Outfit *, int> &uniques) {
 			const int detailedSize = (uniques.size() > 5 ? 4 : uniques.size());
-			auto it = uniques.begin();
+			auto      it           = uniques.begin();
 			for(int i = 0; i < detailedSize; ++i)
 			{
 				out << "\n" + to_string(it->second) + " " +

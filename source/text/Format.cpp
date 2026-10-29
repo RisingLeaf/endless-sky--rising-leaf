@@ -30,20 +30,22 @@ using namespace std;
 
 namespace {
 	// The greatest number displayed without switching to scientific notation.
-	constexpr int64_t SCIENTIFIC_THRESHOLD = 1e15;
-	constexpr int64_t K = 1000;
-	static const vector<pair<const char *, int64_t>> WORD_NUMBERS = {{"quintillion", K * K * K * K * K * K},
-	                                                                 {"quadrillion", K * K * K * K * K},
-	                                                                 {"trillion", K * K * K * K},
-	                                                                 {"billion", K * K * K},
-	                                                                 {"million", K * K},
-	                                                                 {"thousand", K}};
+	constexpr int64_t                                SCIENTIFIC_THRESHOLD = 1e15;
+	constexpr int64_t                                K                    = 1000;
+	static const vector<pair<const char *, int64_t>> WORD_NUMBERS         = {
+	    {"quintillion", K * K * K * K * K * K},
+	    {"quadrillion",     K * K * K * K * K},
+	    {   "trillion",         K * K * K * K},
+	    {    "billion",             K * K * K},
+	    {    "million",                 K * K},
+	    {   "thousand",                     K}
+    };
 	static const vector<const char *> ONES_NAMES = {"zero ",    "one ",     "two ",       "three ",    "four ",
 	                                                "five ",    "six ",     "seven ",     "eight ",    "nine ",
 	                                                "ten ",     "eleven ",  "twelve ",    "thirteen ", "fourteen ",
 	                                                "fifteen ", "sixteen ", "seventeen ", "eighteen ", "nineteen "};
-	static const vector<const char *> TENS_NAMES = {"error", "error", "twenty",  "thirty", "forty",
-	                                                "fifty", "sixty", "seventy", "eighty", "ninety"};
+	static const vector<const char *> TENS_NAMES = {
+	    "error", "error", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"};
 
 	// This struct exists just to allow the operator<< below.
 	struct Wrapped {
@@ -105,10 +107,10 @@ namespace {
 				break;
 			if(below)
 				continue;
-			const size_t BUFLEN = 100;
-			char buf[BUFLEN] = {0};
-			snprintf(buf, BUFLEN, "%s%.3f %s", negative ? "negative " : "", above / 1000.0,
-			         WORD_NUMBERS[magnitude].first);
+			const size_t BUFLEN      = 100;
+			char         buf[BUFLEN] = {0};
+			snprintf(
+			    buf, BUFLEN, "%s%.3f %s", negative ? "negative " : "", above / 1000.0, WORD_NUMBERS[magnitude].first);
 			buf[BUFLEN - 1] = '\0';
 			return string(buf);
 		}
@@ -145,7 +147,7 @@ namespace {
 		if(!places || (!fraction && trimTrailingZeros))
 			return;
 		// Keep track of the digit in each place.
-		double digit;
+		double      digit;
 		vector<int> digits(places);
 		// Account for floating-point representation error by adding EPS after multiplying.
 		constexpr double EPS = 1e-10;
@@ -196,7 +198,7 @@ namespace {
 		target.reserve(source.length());
 
 		string key;
-		size_t start = 0;
+		size_t start  = 0;
 		size_t search = start;
 		while(search < source.length())
 		{
@@ -216,7 +218,7 @@ namespace {
 			{
 				target.append(source, start, left - start);
 				target.append(*sub, 0, string::npos);
-				start = right;
+				start  = right;
 				search = start;
 			}
 			else
@@ -229,8 +231,11 @@ namespace {
 
 	// Helper function for Format::Expand, to recursively expand one key,
 	// detecting cycles in the graph (and thus avoiding infinite recursion).
-	void ExpandInto(const string &key, const string &oldValue, const map<string, string> &source,
-	                map<string, string> &result, unordered_set<string> &keysBeingExpanded)
+	void ExpandInto(const string              &key,
+	                const string              &oldValue,
+	                const map<string, string> &source,
+	                map<string, string>       &result,
+	                unordered_set<string>     &keysBeingExpanded)
 	{
 		// Optimization for a common case: no substitutions in the substitution.
 		if(oldValue.find('<') == string::npos)
@@ -277,8 +282,13 @@ namespace {
 	//
 	// The getter() acts like ConditionsStore.Get(), providing condition values.
 	// These are passed through Format::Whatever(), and appended to the result.
-	void AppendCondition(string &result, const string &source, const Format::ConditionGetter &getter,
-	                     size_t formatStart, size_t formatSize, size_t conditionStart, size_t conditionSize)
+	void AppendCondition(string                        &result,
+	                     const string                  &source,
+	                     const Format::ConditionGetter &getter,
+	                     size_t                         formatStart,
+	                     size_t                         formatSize,
+	                     size_t                         conditionStart,
+	                     size_t                         conditionSize)
 	{
 		int64_t value = getter(source, conditionStart, conditionSize);
 
@@ -322,8 +332,7 @@ namespace {
 	{
 		switch(Preferences::GetDateFormat())
 		{
-		case Preferences::DateFormat::YMD:
-			return DEFAULT_TIMESTAMP_FORMAT;
+		case Preferences::DateFormat::YMD: return DEFAULT_TIMESTAMP_FORMAT;
 		case Preferences::DateFormat::MDY:
 #ifdef _WIN32
 			return "%#I:%M:%S %p on %b %#d, %Y";
@@ -367,7 +376,8 @@ string Format::AbbreviatedNumber(int64_t value)
 
 	// Handle numbers bigger than a million.
 	static constexpr array<pair<int64_t, char>, 3> THRESHOLD_SUFFIX = {
-	    {{1000000000000ll, 'T'}, {1000000000ll, 'B'}, {1000000ll, 'M'}}};
+	    {{1000000000000ll, 'T'}, {1000000000ll, 'B'}, {1000000ll, 'M'}}
+    };
 	for(const auto &[threshold, suffix] : THRESHOLD_SUFFIX)
 		if(absolute > threshold)
 		{
@@ -451,10 +461,10 @@ string Format::StepsToSeconds(size_t steps)
 // Convert a time in seconds to years/days/hours/minutes/seconds
 string Format::PlayTime(double timeVal)
 {
-	string result;
-	int timeValFormat = 0;
-	static const array<char, 5> SUFFIX = {'s', 'm', 'h', 'd', 'y'};
-	static const array<int, 4> PERIOD = {60, 60, 24, 365};
+	string                      result;
+	int                         timeValFormat = 0;
+	static const array<char, 5> SUFFIX        = {'s', 'm', 'h', 'd', 'y'};
+	static const array<int, 4>  PERIOD        = {60, 60, 24, 365};
 
 	timeValFormat = max(0., timeVal);
 	// Break time into larger and larger units until the largest one, or the value is empty
@@ -462,7 +472,7 @@ string Format::PlayTime(double timeVal)
 	do
 	{
 		int period = (i < SUFFIX.size() - 1 ? timeValFormat % PERIOD[i] : timeValFormat);
-		result = (i == 0 ? result + SUFFIX[i] : result + ' ' + SUFFIX[i]);
+		result     = (i == 0 ? result + SUFFIX[i] : result + ' ' + SUFFIX[i]);
 		do
 		{
 			result += static_cast<char>('0' + period % 10);
@@ -486,9 +496,9 @@ string Format::TimestampString(chrono::time_point<chrono::system_clock> time, bo
 	// TODO: Replace with chrono formatting when it is properly supported.
 	time_t timestamp = chrono::system_clock::to_time_t(time);
 
-	const char *format = ignorePreferences ? DEFAULT_TIMESTAMP_FORMAT : TimestampFormatString();
+	const char         *format   = ignorePreferences ? DEFAULT_TIMESTAMP_FORMAT : TimestampFormatString();
 	static const size_t BUF_SIZE = 28;
-	char str[BUF_SIZE];
+	char                str[BUF_SIZE];
 
 #ifdef _MSC_VER
 	// Use the "safe" function with MSVC.
@@ -536,11 +546,12 @@ string Format::AmmoCount(int64_t value)
 
 	// Handle numbers bigger than a thousand.
 	static constexpr array<pair<int64_t, char>, 4> THRESHOLD_SUFFIX = {
-	    {{1000000000000ll, 'T'}, {1000000000ll, 'B'}, {1000000ll, 'M'}, {1000ll, 'k'}}};
+	    {{1000000000000ll, 'T'}, {1000000000ll, 'B'}, {1000000ll, 'M'}, {1000ll, 'k'}}
+    };
 	for(const auto &[threshold, suffix] : THRESHOLD_SUFFIX)
 		if(absolute >= threshold)
 		{
-			int head = absolute / threshold;
+			int     head = absolute / threshold;
 			int64_t tail = absolute % threshold;
 			do
 			{
@@ -562,8 +573,7 @@ string Format::AmmoCount(int64_t value)
 				result += '.';
 				result += '0' + tail;
 				break;
-			default:
-				break;
+			default: break;
 			}
 			result += suffix;
 			break;
@@ -596,8 +606,8 @@ string Format::Number(double value, optional<int> decimalPlaces, bool trimTraili
 	}
 
 	string result;
-	bool isNegative = (value < 0.);
-	value = fabs(value);
+	bool   isNegative = (value < 0.);
+	value             = fabs(value);
 
 	double decimal = modf(value, &value);
 	// If no explicit decimal places were given, then only show at least one decimal place for
@@ -746,7 +756,7 @@ double Format::Parse(const string &str)
 	double place = 1.;
 	double value = 0.;
 
-	string::const_iterator it = str.begin();
+	string::const_iterator it  = str.begin();
 	string::const_iterator end = str.end();
 	while(it != end && (*it < '0' || *it > '9') && *it != '.')
 		++it;
@@ -807,7 +817,7 @@ string Format::Replace(const string &source, const map<string, string> &keys)
 
 void Format::Expand(map<string, string> &keys)
 {
-	map<string, string> newKeys;
+	map<string, string>   newKeys;
 	unordered_set<string> keysBeingExpanded;
 	for(auto it = keys.begin(); it != keys.end(); ++it)
 		if(newKeys.find(it->first) == newKeys.end())
@@ -827,7 +837,7 @@ void Format::ReplaceAll(string &text, const string &target, const string &replac
 	newString.reserve(text.length());
 
 	// Index at which to begin searching for the target string.
-	size_t start = 0;
+	size_t start       = 0;
 	size_t matchLength = target.length();
 	// Index at which the target string was found.
 	size_t findPos = string::npos;
@@ -849,7 +859,7 @@ void Format::ReplaceAll(string &text, const string &target, const string &replac
 string Format::Capitalize(const string &str)
 {
 	string result = str;
-	bool first = true;
+	bool   first  = true;
 	for(char &c : result)
 	{
 		if(isspace(static_cast<unsigned char>(c)))
@@ -880,7 +890,7 @@ string Format::LowerCase(const string &str)
 vector<string> Format::Split(const string &str, const string &separator)
 {
 	vector<string> result;
-	size_t begin = 0;
+	size_t         begin = 0;
 	while(true)
 	{
 		size_t pos = str.find(separator, begin);
@@ -905,10 +915,10 @@ string Format::ExpandConditions(const string &source, const ConditionGetter &get
 	string result;
 	result.reserve(source.size());
 
-	size_t formatStart = string::npos;
-	size_t formatSize = string::npos;
+	size_t formatStart    = string::npos;
+	size_t formatSize     = string::npos;
 	size_t conditionStart = string::npos;
-	size_t conditionSize = string::npos;
+	size_t conditionSize  = string::npos;
 
 	// Hand-coded regular grammar parser for:
 	//	&[format@condition]
@@ -922,12 +932,12 @@ string Format::ExpandConditions(const string &source, const ConditionGetter &get
 
 	// Anything inside a &[...] is sent to AppendCondition
 
-	static const char OUTER = '_';
-	static const char PREFIX = '&';
-	static const char LPAREN = '[';
-	static const char RPAREN = ']';
+	static const char OUTER   = '_';
+	static const char PREFIX  = '&';
+	static const char LPAREN  = '[';
+	static const char RPAREN  = ']';
 	static const char DIVIDER = '@';
-	static const char NESTED = 'N';
+	static const char NESTED  = 'N';
 
 	char state = OUTER;
 	// Depth of nested [] within the &[...]
@@ -956,18 +966,18 @@ string Format::ExpandConditions(const string &source, const ConditionGetter &get
 		else if(state == PREFIX && next == LPAREN)
 		{
 			formatStart = formatSize = conditionStart = conditionSize = string::npos;
-			state = LPAREN;
+			state                                                     = LPAREN;
 		}
 		else if(state == LPAREN && next == DIVIDER)
 		{
 			formatStart = start + 2;
-			formatSize = look - formatStart;
-			state = DIVIDER;
+			formatSize  = look - formatStart;
+			state       = DIVIDER;
 		}
 		else if(state == DIVIDER && next == RPAREN)
 		{
 			conditionStart = formatStart + formatSize + 1;
-			conditionSize = look - conditionStart;
+			conditionSize  = look - conditionStart;
 			AppendCondition(result, source, getter, formatStart, formatSize, conditionStart, conditionSize);
 			start = look + 1;
 			state = OUTER;
@@ -975,8 +985,8 @@ string Format::ExpandConditions(const string &source, const ConditionGetter &get
 		else if((state == LPAREN || state == DIVIDER) && next == LPAREN)
 		{
 			oldState = state;
-			state = NESTED;
-			depth = 1;
+			state    = NESTED;
+			depth    = 1;
 		}
 		else if(state == NESTED && next == LPAREN)
 			depth++;
@@ -987,7 +997,7 @@ string Format::ExpandConditions(const string &source, const ConditionGetter &get
 		else if(state == LPAREN && next == RPAREN)
 		{
 			conditionStart = start + 2;
-			conditionSize = look - conditionStart;
+			conditionSize  = look - conditionStart;
 			AppendCondition(result, source, getter, formatStart, formatSize, conditionStart, conditionSize);
 			start = look + 1;
 			state = OUTER;

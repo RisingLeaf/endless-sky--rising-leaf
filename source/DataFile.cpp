@@ -103,10 +103,10 @@ void DataFile::LoadData(const string &data)
 	// node at each level - that is, the node that will be the "parent" of any
 	// new node added at the next deeper indentation level.
 	vector<DataNode *> stack(1, &root);
-	vector<int> separatorStack(1, -1);
-	bool fileIsTabs = false;
-	bool fileIsSpaces = false;
-	size_t lineNumber = 0;
+	vector<int>        separatorStack(1, -1);
+	bool               fileIsTabs   = false;
+	bool               fileIsSpaces = false;
+	size_t             lineNumber   = 0;
 
 	size_t end = data.length();
 
@@ -118,11 +118,11 @@ void DataFile::LoadData(const string &data)
 	while(pos < end)
 	{
 		++lineNumber;
-		size_t tokenPos = pos;
-		char32_t c = Utf8::DecodeCodePoint(data, pos);
+		size_t   tokenPos = pos;
+		char32_t c        = Utf8::DecodeCodePoint(data, pos);
 
 		bool mixedIndentation = false;
-		int separators = 0;
+		int  separators       = 0;
 		// Find the first tokenizable character in this line (i.e. neither space nor tab).
 		while(c <= ' ' && c != '\n')
 		{
@@ -140,7 +140,7 @@ void DataFile::LoadData(const string &data)
 
 			++separators;
 			tokenPos = pos;
-			c = Utf8::DecodeCodePoint(data, pos);
+			c        = Utf8::DecodeCodePoint(data, pos);
 		}
 
 		// If the line is a comment, skip to the end of the line.
@@ -166,7 +166,7 @@ void DataFile::LoadData(const string &data)
 		// Add this node as a child of the proper node.
 		list<DataNode> &children = stack.back()->children;
 		children.emplace_back(stack.back());
-		DataNode &node = children.back();
+		DataNode &node  = children.back();
 		node.lineNumber = lineNumber;
 
 		// Remember where in the tree we are.
@@ -179,11 +179,11 @@ void DataFile::LoadData(const string &data)
 			// Check if this token begins with a quotation mark. If so, it will
 			// include everything up to the next instance of that mark.
 			char32_t endQuote = c;
-			bool isQuoted = (endQuote == '"' || endQuote == '`');
+			bool     isQuoted = (endQuote == '"' || endQuote == '`');
 			if(isQuoted)
 			{
 				tokenPos = pos;
-				c = Utf8::DecodeCodePoint(data, pos);
+				c        = Utf8::DecodeCodePoint(data, pos);
 			}
 
 			size_t endPos = tokenPos;
@@ -192,7 +192,7 @@ void DataFile::LoadData(const string &data)
 			while(c != '\n' && (isQuoted ? (c != endQuote) : (c > ' ')))
 			{
 				endPos = pos;
-				c = Utf8::DecodeCodePoint(data, pos);
+				c      = Utf8::DecodeCodePoint(data, pos);
 			}
 
 			// It ought to be legal to construct a string from an empty iterator
@@ -213,12 +213,12 @@ void DataFile::LoadData(const string &data)
 				if(isQuoted)
 				{
 					tokenPos = pos;
-					c = Utf8::DecodeCodePoint(data, pos);
+					c        = Utf8::DecodeCodePoint(data, pos);
 				}
 				while(c != '\n' && c <= ' ' && c != '#')
 				{
 					tokenPos = pos;
-					c = Utf8::DecodeCodePoint(data, pos);
+					c        = Utf8::DecodeCodePoint(data, pos);
 				}
 
 				// If a comment is encountered outside of a token, skip the rest

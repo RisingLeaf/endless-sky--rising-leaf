@@ -42,7 +42,7 @@ public:
 	const Ship *ShipModel() const;
 	// The identifier that the given/taken ship will have.
 	const std::string &Id() const;
-	bool Giving() const;
+	bool               Giving() const;
 
 
 private:
@@ -54,9 +54,9 @@ private:
 	const Ship *model = nullptr;
 	std::string name;
 	std::string id;
-	int count = 1;
-	bool taking = false;
-	bool unconstrained = false;
-	bool requireOutfits = false;
-	bool takeOutfits = false;
+	int         count          = 1;
+	bool        taking         = false;
+	bool        unconstrained  = false;
+	bool        requireOutfits = false;
+	bool        takeOutfits    = false;
 };

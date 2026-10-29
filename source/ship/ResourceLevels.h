@@ -79,16 +79,16 @@ public:
 	// no shields.
 	std::optional<MissingResource> CanFire(const Weapon &weapon, const ResourceLevels &capacities) const;
 
-	ResourceLevels operator*(double scalar) const;
+	ResourceLevels        operator*(double scalar) const;
 	friend ResourceLevels operator*(double scalar, const ResourceLevels &levels);
 
 
 public:
-	double hull = 0.;
+	double hull    = 0.;
 	double shields = 0.;
-	double energy = 0.;
-	double heat = 0.;
-	double fuel = 0.;
+	double energy  = 0.;
+	double heat    = 0.;
+	double fuel    = 0.;
 
 	// Accrued "corrosion damage" that will affect this ship's hull over time.
 	double corrosion = 0.;

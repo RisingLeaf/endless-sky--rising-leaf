@@ -53,19 +53,21 @@ public:
 
 
 protected:
-	virtual int TileSize() const override;
-	virtual int VisibilityCheckboxesSize() const override;
+	virtual int  TileSize() const override;
+	virtual int  VisibilityCheckboxesSize() const override;
 	virtual bool HasItem(const std::string &name) const override;
-	virtual void DrawItem(GraphicsTypes::CommandBufferInstance *cb, const std::string &name,
-	                      const Point &point) override;
-	virtual double DrawDetails(GraphicsTypes::CommandBufferInstance *cb, const Point &center) override;
-	TransactionResult CanMoveOutfit(OutfitLocation fromLocation, OutfitLocation toLocation,
+	virtual void
+	DrawItem(GraphicsTypes::CommandBufferInstance *cb, const std::string &name, const Point &point) override;
+	virtual double    DrawDetails(GraphicsTypes::CommandBufferInstance *cb, const Point &center) override;
+	TransactionResult CanMoveOutfit(OutfitLocation     fromLocation,
+	                                OutfitLocation     toLocation,
 	                                const std::string &actionName = "no action specified") const;
-	TransactionResult MoveOutfit(OutfitLocation fromLocation, OutfitLocation toLocation,
+	TransactionResult MoveOutfit(OutfitLocation     fromLocation,
+	                             OutfitLocation     toLocation,
 	                             const std::string &actionName = "no action specified") const;
-	bool ButtonActive(char key, bool shipRelatedOnly = false);
-	virtual bool ShouldHighlight(const Ship *ship) override;
-	virtual void DrawKey(GraphicsTypes::CommandBufferInstance *cb) override;
+	bool              ButtonActive(char key, bool shipRelatedOnly = false);
+	virtual bool      ShouldHighlight(const Ship *ship) override;
+	virtual void      DrawKey(GraphicsTypes::CommandBufferInstance *cb) override;
 	virtual std::optional<Rectangle> KeyArea() const override;
 
 	// Toggles for the display filters.
@@ -76,19 +78,22 @@ protected:
 
 	virtual int FindItem(const std::string &text) const override;
 
-	virtual double ButtonPanelHeight() const override;
-	virtual void DrawButtons(GraphicsTypes::CommandBufferInstance *cb) override;
+	virtual double            ButtonPanelHeight() const override;
+	virtual void              DrawButtons(GraphicsTypes::CommandBufferInstance *cb) override;
 	virtual TransactionResult HandleShortcuts(SDL_Keycode key) override;
 
 
 private:
 	static bool ShipCanAdd(const Ship *ship, const Outfit *outfit);
 	static bool ShipCanRemove(const Ship *ship, const Outfit *outfit);
-	void DrawOutfit(GraphicsTypes::CommandBufferInstance *cb, const Outfit &outfit, const Point &center,
-	                bool isSelected, bool isOwned) const;
-	bool HasLicense(const std::string &name) const;
-	void CheckRefill();
-	void Refill();
+	void        DrawOutfit(GraphicsTypes::CommandBufferInstance *cb,
+	                       const Outfit                         &outfit,
+	                       const Point                          &center,
+	                       bool                                  isSelected,
+	                       bool                                  isOwned) const;
+	bool        HasLicense(const std::string &name) const;
+	void        CheckRefill();
+	void        Refill();
 	// Shared code for reducing the selected ships to those that have the
 	// same quantity of the selected outfit.
 	const std::vector<Ship *> GetShipsToOutfit(bool isInstall = false) const;

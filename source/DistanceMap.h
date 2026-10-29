@@ -47,8 +47,11 @@ public:
 	explicit DistanceMap(const PlayerInfo &player, const System *center = nullptr);
 	// Find paths from the given system, potentially using wormholes, a jump drive, or both.
 	// Optional arguments are as above.
-	explicit DistanceMap(const System *center, WormholeStrategy wormholeStrategy, bool useJumpDrive,
-	                     int maxSystems = -1, int maxDays = -1);
+	explicit DistanceMap(const System    *center,
+	                     WormholeStrategy wormholeStrategy,
+	                     bool             useJumpDrive,
+	                     int              maxSystems = -1,
+	                     int              maxDays    = -1);
 
 	// Find out if the given system is reachable.
 	bool HasRoute(const System &system) const;
@@ -98,15 +101,15 @@ private:
 	// popped, that's the best route to that system - and then adjacent links
 	// from that system are processed, which will build upon the popped Edge.
 	std::priority_queue<RouteEdge> edgesTodo;
-	const PlayerInfo *player = nullptr;
-	const System *center = nullptr;
-	int maxSystems = -1;
-	int maxDays = -1;
-	const System *destination = nullptr;
-	WormholeStrategy wormholeStrategy = WormholeStrategy::ALL;
+	const PlayerInfo              *player           = nullptr;
+	const System                  *center           = nullptr;
+	int                            maxSystems       = -1;
+	int                            maxDays          = -1;
+	const System                  *destination      = nullptr;
+	WormholeStrategy               wormholeStrategy = WormholeStrategy::ALL;
 
-	double jumpRangeMax = 0.;
-	const Ship *ship = nullptr;
+	double      jumpRangeMax = 0.;
+	const Ship *ship         = nullptr;
 
 	friend class RoutePlan;
 };

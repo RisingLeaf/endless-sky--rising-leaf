@@ -38,13 +38,13 @@ using namespace std;
 
 Minable::Payload::Payload(const DataNode &node)
 {
-	outfit = GameData::Outfits().Get(node.Token(1));
+	outfit   = GameData::Outfits().Get(node.Token(1));
 	maxDrops = (node.Size() == 2 ? 1 : max<int>(1, node.Value(2)));
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 
 		if(!hasValue)
 			child.PrintTrace("Expected key to have a value:");
@@ -68,13 +68,13 @@ void Minable::Load(const DataNode &node, const ConditionsStore *playerConditions
 	if(node.Size() >= 2)
 		name = node.Token(1);
 
-	entityType = Entity::Type::MINABLE;
+	entityType    = Entity::Type::MINABLE;
 	neverDisabled = true;
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 
 		if(key == "attributes")
 			attributes.Load(child, playerConditions);
@@ -182,9 +182,9 @@ void Minable::Place(double energy, double beltRadius)
 	// more likely to start out there. So, rather than a uniform distribution of
 	// angles, favor ones near 180 degrees. (Note: this is not the "correct"
 	// equation; it is just a reasonable approximation.)
-	theta = Random::Real();
+	theta         = Random::Real();
 	double curved = (pow(asin(theta * 2. - 1.) / (.5 * PI), 3.) + 1.) * .5;
-	theta = (eccentricity * curved + (1. - eccentricity) * theta) * 2. * PI;
+	theta         = (eccentricity * curved + (1. - eccentricity) * theta) * 2. * PI;
 
 	// Now, pick the orbital "scale" such that, relative to the "belt radius":
 	// periapsis distance (scale / (1 + e)) is no closer than .4: scale >= .4 * (1 + e)
@@ -193,7 +193,7 @@ void Minable::Place(double energy, double beltRadius)
 	// apoapsis distance is no closer than .8: scale >= .8 * (1 - e)
 	double sMin = max(.4 * (1. + eccentricity), .8 * (1. - eccentricity));
 	double sMax = min(4. * (1. - eccentricity), 1.3 * (1. + eccentricity));
-	orbitScale = (sMin + Random::Real() * (sMax - sMin)) * beltRadius;
+	orbitScale  = (sMin + Random::Real() * (sMax - sMin)) * beltRadius;
 
 	// At periapsis, the object should have this velocity:
 	double maximumVelocity = (Random::Real() + 2. * eccentricity) * .5 * energy;
@@ -202,14 +202,14 @@ void Minable::Place(double energy, double beltRadius)
 
 	// Start the object off with a random facing angle and spin rate.
 	angle = Angle::Random();
-	spin = Angle::Random(energy) - Angle::Random(energy);
+	spin  = Angle::Random(energy) - Angle::Random(energy);
 	if(useRandomFrameRate)
 		SetFrameRate(Random::Real() * 4. * energy + 5.);
 	// Choose a random direction for the angle of periapsis.
 	rotation = Random::Real() * 2. * PI;
 
 	// Calculate the object's initial position.
-	radius = orbitScale / (1. + eccentricity * cos(theta));
+	radius   = orbitScale / (1. + eccentricity * cos(theta));
 	position = radius * Point(cos(theta + rotation), sin(theta + rotation));
 
 	// Add a random amount of hull value to the object.
@@ -344,7 +344,7 @@ int64_t Minable::GetHighestQualityValue() const
 Minable::LiveEffect::LiveEffect(const DataNode &node)
 {
 	interval = (node.Size() == 2 ? 1 : node.Value(2));
-	effect = GameData::Effects().Get(node.Token(1));
+	effect   = GameData::Effects().Get(node.Token(1));
 	for(const DataNode &child : node)
 	{
 		if(child.Token(0) == "relative to system center")

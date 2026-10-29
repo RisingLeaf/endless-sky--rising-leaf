@@ -47,9 +47,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	const int SCROLL_MOD = 2;
-	int scrollSpeed = 1;
-	bool showCreditsWarning = true;
+	const int SCROLL_MOD         = 2;
+	int       scrollSpeed        = 1;
+	bool      showCreditsWarning = true;
 } // namespace
 
 
@@ -92,10 +92,10 @@ MenuPanel::MenuPanel(PlayerInfo &player, UI &gamePanels)
 	if(!scrollSpeed)
 		scrollSpeed = 1;
 
-	xSpeed = mainMenuUi->GetValue("x speed");
-	ySpeed = mainMenuUi->GetValue("y speed");
+	xSpeed     = mainMenuUi->GetValue("x speed");
+	ySpeed     = mainMenuUi->GetValue("y speed");
 	yAmplitude = mainMenuUi->GetValue("y amplitude");
-	returnPos = GameData::GetBackgroundPosition();
+	returnPos  = GameData::GetBackgroundPosition();
 	GameData::SetBackgroundPosition(Point());
 
 	// When the player is in the menu, pause the game sounds.
@@ -254,11 +254,11 @@ bool MenuPanel::Click(int x, int y, MouseButton button, int clicks)
 
 void MenuPanel::DrawCredits(GraphicsTypes::CommandBufferInstance *cb) const
 {
-	const Font &font = FontSet::Get(14);
-	const auto creditsRect = mainMenuUi->GetBox("credits");
-	const int top = static_cast<int>(creditsRect.Top());
-	const int bottom = static_cast<int>(creditsRect.Bottom());
-	int y = bottom + 5 - scroll / SCROLL_MOD;
+	const Font &font        = FontSet::Get(14);
+	const auto  creditsRect = mainMenuUi->GetBox("credits");
+	const int   top         = static_cast<int>(creditsRect.Top());
+	const int   bottom      = static_cast<int>(creditsRect.Bottom());
+	int         y           = bottom + 5 - scroll / SCROLL_MOD;
 	for(const string &line : credits)
 	{
 		float fade = 1.f;

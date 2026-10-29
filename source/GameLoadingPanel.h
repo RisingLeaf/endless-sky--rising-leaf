@@ -29,20 +29,20 @@ class UI;
 // (like game data and save files).
 class GameLoadingPanel final : public Panel {
 public:
-	GameLoadingPanel(PlayerInfo &player, TaskQueue &queue, const Conversation &conversation, UI &gamePanels,
-	                 bool &finishedLoading);
+	GameLoadingPanel(
+	    PlayerInfo &player, TaskQueue &queue, const Conversation &conversation, UI &gamePanels, bool &finishedLoading);
 
 	void Step() final;
 	void Draw(GraphicsTypes::CommandBufferInstance *cb) final;
 
 
 private:
-	PlayerInfo &player;
-	TaskQueue &queue;
+	PlayerInfo         &player;
+	TaskQueue          &queue;
 	const Conversation &conversation;
-	UI &gamePanels;
-	bool &finishedLoading;
+	UI                 &gamePanels;
+	bool               &finishedLoading;
 
-	double progress = 0;
+	double        progress = 0;
 	LoadingCircle loadingCircle;
 };

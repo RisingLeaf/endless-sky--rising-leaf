@@ -87,7 +87,7 @@ void Edit::Clear()
 	historyPos = 0;
 	textHistory.clear();
 	UpdateText("", 0); // Make sure the history is not empty.
-	caretPos = 0;
+	caretPos     = 0;
 	highlightPos = INVALID_POS;
 }
 
@@ -105,9 +105,9 @@ void Edit::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	{
 		bgColor = *GameData::Colors().Get("panel background");
 	}
-	const Font &font = FontSet::Get(fontSize);
-	const Color &hover = *GameData::Colors().Get("hover");
-	const Color &active = *GameData::Colors().Get("active");
+	const Font  &font     = FontSet::Get(fontSize);
+	const Color &hover    = *GameData::Colors().Get("hover");
+	const Color &active   = *GameData::Colors().Get("active");
 	const Color &inactive = *GameData::Colors().Get("inactive");
 
 	FillShader::Fill(cb, position.Center(), position.Dimensions(), bgColor);
@@ -131,9 +131,9 @@ void Edit::Draw(GraphicsTypes::CommandBufferInstance *cb)
 
 void Edit::SetPadding(int p)
 {
-	leftPadding = p;
-	rightPadding = p;
-	topPadding = p;
+	leftPadding   = p;
+	rightPadding  = p;
+	topPadding    = p;
 	bottomPadding = p;
 	ComputeTextBounds();
 }
@@ -181,7 +181,7 @@ bool Edit::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isN
 	caret.BlinkOn();
 
 	bool shift = (mod & SDL_KMOD_SHIFT) != 0;
-	bool ctrl = (mod & SDL_KMOD_CTRL) != 0;
+	bool ctrl  = (mod & SDL_KMOD_CTRL) != 0;
 
 	switch(key)
 	{
@@ -191,12 +191,8 @@ bool Edit::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isN
 		else
 			FocusNext();
 		break;
-	case SDLK_HOME:
-		MoveCaret(0);
-		break;
-	case SDLK_END:
-		MoveCaret(Text().size());
-		break;
+	case SDLK_HOME: MoveCaret(0); break;
+	case SDLK_END:  MoveCaret(Text().size()); break;
 	case SDLK_LEFT:
 		if(caretPos > 0)
 			MoveCaret(caretPos - 1);
@@ -208,7 +204,7 @@ bool Edit::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isN
 	case SDLK_BACKSPACE:
 		if(highlightPos != INVALID_POS)
 		{
-			int left = highlightPos;
+			int left  = highlightPos;
 			int right = caretPos;
 			if(left > right)
 				swap(left, right);
@@ -223,7 +219,7 @@ bool Edit::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isN
 	case SDLK_DELETE:
 		if(highlightPos != INVALID_POS)
 		{
-			int left = highlightPos;
+			int left  = highlightPos;
 			int right = caretPos;
 			if(left > right)
 				swap(left, right);
@@ -300,11 +296,8 @@ bool Edit::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isN
 		return false;
 		break;
 	case SDLK_AC_BACK:
-	case SDLK_ESCAPE:
-		SetFocus(false);
-		break;
-	default:
-		return false;
+	case SDLK_ESCAPE:  SetFocus(false); break;
+	default:           return false;
 	}
 
 	return true;
@@ -326,8 +319,8 @@ bool Edit::Click(int x, int y, MouseButton button, int clicks)
 
 	SetFocus(true);
 
-	const string &s = Text();
-	size_t newPos = 0;
+	const string &s      = Text();
+	size_t        newPos = 0;
 	for(; newPos < s.size(); ++newPos)
 	{
 		if(AlignedOffset(newPos + 1).X() > x)
@@ -350,8 +343,8 @@ bool Edit::Drag(double dx, double dy)
 		dragPos.X() += dx;
 		dragPos.Y() += dy;
 
-		const string &s = Text();
-		size_t newPos = 0;
+		const string &s      = Text();
+		size_t        newPos = 0;
 		for(; newPos < s.size(); ++newPos)
 		{
 			if(AlignedOffset(newPos + 1).X() > dragPos.X())
@@ -410,20 +403,20 @@ bool Edit::TextInput(const string &s)
 	size_t newPos;
 	if(highlightPos != INVALID_POS)
 	{
-		int left = highlightPos;
+		int left  = highlightPos;
 		int right = caretPos;
 		if(left > right)
 			swap(left, right);
 
 		newText = Text().substr(0, left) + s + Text().substr(right);
-		newPos = left + s.size();
+		newPos  = left + s.size();
 
 		highlightPos = INVALID_POS;
 	}
 	else
 	{
 		newText = Text().substr(0, caretPos) + s + Text().substr(caretPos);
-		newPos = caretPos + s.size();
+		newPos  = caretPos + s.size();
 	}
 	// Someday, we should make the text scroll and clip if we type something too
 	// long, but for now, just ignore input if it is too big to fit.
@@ -443,7 +436,7 @@ void Edit::MoveCaret(size_t pos)
 	if(pos > Text().size())
 		pos = Text().size();
 
-	auto mod = SDL_GetModState();
+	auto mod   = SDL_GetModState();
 	bool shift = (mod & SDL_KMOD_SHIFT) != 0;
 
 	if(highlightPos == INVALID_POS && shift)
@@ -501,7 +494,7 @@ void Edit::Cut()
 	}
 	else
 	{
-		int left = highlightPos;
+		int left  = highlightPos;
 		int right = caretPos;
 		if(left > right)
 			swap(left, right);
@@ -519,7 +512,7 @@ void Edit::Copy() const
 		SDL_SetClipboardText(Text().c_str());
 	else
 	{
-		int left = highlightPos;
+		int left  = highlightPos;
 		int right = caretPos;
 		if(left > right)
 			swap(left, right);
@@ -540,7 +533,7 @@ void Edit::Paste()
 	else
 	{
 		// replace highlighted text
-		int left = highlightPos;
+		int left  = highlightPos;
 		int right = caretPos;
 		if(left > right)
 			swap(left, right);
@@ -577,14 +570,12 @@ void Edit::Redo()
 
 Point Edit::AlignedOffset(size_t offset)
 {
-	const Font &font = FontSet::Get(fontSize);
-	const string &s = Text();
-	Point ret{};
+	const Font   &font = FontSet::Get(fontSize);
+	const string &s    = Text();
+	Point         ret{};
 	switch(alignment)
 	{
-	case Edit::LEFT:
-		ret = Point(textBounds.Left(), textBounds.Center().Y() - font.Height() / 2.0);
-		break;
+	case Edit::LEFT: ret = Point(textBounds.Left(), textBounds.Center().Y() - font.Height() / 2.0); break;
 	case Edit::RIGHT:
 		ret = Point(textBounds.Right() - font.Width(s), textBounds.Center().Y() - font.Height() / 2.0);
 		break;
@@ -604,13 +595,13 @@ void Edit::UpdateHighlightRect(size_t o1, size_t o2)
 {
 	assert(o1 != INVALID_POS);
 	assert(o2 != INVALID_POS);
-	int highlightLeft = AlignedOffset(o1).X();
+	int highlightLeft  = AlignedOffset(o1).X();
 	int highlightRight = AlignedOffset(o2).X();
 	if(highlightLeft > highlightRight)
 		swap(highlightLeft, highlightRight);
 	Point tl(highlightLeft, textBounds.Center().Y() - fontSize / 2.0);
 	Point br = tl;
-	br.X() = highlightRight;
+	br.X()   = highlightRight;
 	br.Y() += fontSize;
 	highlight = Rectangle::WithCorners(tl, br);
 }

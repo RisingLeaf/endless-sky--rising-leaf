@@ -19,7 +19,8 @@ using namespace std;
 
 
 
-OptionalInputDialogPanel::OptionalInputDialogPanel(DialogInit &init, function<void(std::optional<int>)> intFun,
+OptionalInputDialogPanel::OptionalInputDialogPanel(DialogInit                           &init,
+                                                   function<void(std::optional<int>)>    intFun,
                                                    function<void(std::optional<double>)> doubleFun)
     : DialogPanel(init), optionalIntFun(std::move(intFun)), optionalDoubleFun(std::move(doubleFun))
 {
@@ -36,7 +37,7 @@ OptionalInputDialogPanel::OptionalInputDialogPanel(DialogInit &init, function<vo
 		};
 	}
 	buttonThree = FunctionButton(this, "Unset", 'u', &OptionalInputDialogPanel::Unset);
-	numButtons = 3;
+	numButtons  = 3;
 	DialogPanel::Resize();
 }
 

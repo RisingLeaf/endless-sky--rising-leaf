@@ -132,7 +132,7 @@ void Files::Init(const char *const *argv)
 		// the executable, but are under the same prefix (/usr or /usr/local).
 		// When used as an iterator, a trailing / will create an empty item at
 		// the end, so parent paths do not include it.
-		static const filesystem::path LOCAL_PATH = "/usr/local";
+		static const filesystem::path LOCAL_PATH    = "/usr/local";
 		static const filesystem::path STANDARD_PATH = "/usr";
 		static const filesystem::path RESOURCE_PATH = "share/games/endless-sky/";
 
@@ -151,9 +151,9 @@ void Files::Init(const char *const *argv)
 			throw runtime_error("Unable to find the resource directories!");
 		resources = resources.parent_path();
 	}
-	dataPath = resources / "data";
-	imagePath = resources / "images";
-	soundPath = resources / "sounds";
+	dataPath         = resources / "data";
+	imagePath        = resources / "images";
+	soundPath        = resources / "sounds";
 	globalPluginPath = resources / "plugins";
 
 	if(config.empty())
@@ -469,11 +469,17 @@ shared_ptr<iostream> Files::Open(const filesystem::path &path, bool write)
 
 	if(write)
 #ifdef _WIN32
-		return shared_ptr<iostream>{new fstream{path, ios::out}};
+		return shared_ptr<iostream>{
+		    new fstream{path, ios::out}
+        };
 #else
-		return shared_ptr<iostream>{new fstream{path, ios::out | ios::binary}};
+		return shared_ptr<iostream>{
+		    new fstream{path, ios::out | ios::binary}
+        };
 #endif
-	return shared_ptr<iostream>{new fstream{path, ios::in | ios::binary}};
+	return shared_ptr<iostream>{
+	    new fstream{path, ios::in | ios::binary}
+    };
 }
 
 

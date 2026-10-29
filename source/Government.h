@@ -50,7 +50,7 @@ class Government {
 public:
 	struct Atrocity {
 		// False if a global atrocity is ignored by this government.
-		bool isAtrocity = true;
+		bool                isAtrocity          = true;
 		const Conversation *customDeathSentence = nullptr;
 	};
 
@@ -63,7 +63,7 @@ public:
 		{
 		}
 
-		double reputationChange;
+		double         reputationChange;
 		SpecialPenalty specialPenalty;
 	};
 
@@ -73,14 +73,15 @@ public:
 	Government();
 
 	// Load a government's definition from a file.
-	void Load(const DataNode &node, const std::set<const System *> *visitedSystems,
+	void Load(const DataNode                 &node,
+	          const std::set<const System *> *visitedSystems,
 	          const std::set<const Planet *> *visitedPlanets);
 	bool IsDefined() const;
 
 	// Get the display name of this government.
 	const std::string &DisplayName() const;
 	// Set / Get the true name used for this government in the data files.
-	void SetTrueName(const std::string &trueName);
+	void               SetTrueName(const std::string &trueName);
 	const std::string &TrueName() const;
 	// Get the color swizzle to use for ships of this government.
 	const Swizzle *GetSwizzle() const;
@@ -105,7 +106,7 @@ public:
 	// This government will fine you the given fraction of the maximum fine for
 	// carrying illegal cargo or outfits. Zero means they will not fine you.
 	double GetFineFraction() const;
-	bool Trusts(const Government *other) const;
+	bool   Trusts(const Government *other) const;
 	// A government might not exercise the ability to perform scans or fine
 	// the player in every system.
 	bool CanEnforce(const System *system) const;
@@ -163,15 +164,15 @@ public:
 	void Bribe() const;
 	// Check to see if the player has done anything they should be fined for.
 	// Each government can only fine you once per day.
-	std::pair<const Conversation *, std::string> Fine(PlayerInfo &player, int scan = 0, const Ship *target = nullptr,
-	                                                  double security = 1.) const;
+	std::pair<const Conversation *, std::string>
+	Fine(PlayerInfo &player, int scan = 0, const Ship *target = nullptr, double security = 1.) const;
 	// Check to see if the items are condemnable (atrocities) or warrant a fine.
 	Atrocity Condemns(const Outfit *outfit) const;
 	Atrocity Condemns(const Ship *ship) const;
-	bool IgnoresUniversalAtrocities() const;
+	bool     IgnoresUniversalAtrocities() const;
 	// Returns the fine for given item for this government.
-	int Fines(const Outfit *outfit) const;
-	int Fines(const Ship *ship) const;
+	int  Fines(const Outfit *outfit) const;
+	int  Fines(const Ship *ship) const;
 	bool IgnoresUniversalIllegals() const;
 	// Check if given ship has illegal outfits or cargo.
 	bool FinesContents(const Ship *ship) const;
@@ -180,8 +181,8 @@ public:
 	double Reputation() const;
 	double ReputationMax() const;
 	double ReputationMin() const;
-	void AddReputation(double value) const;
-	void SetReputation(double value) const;
+	void   AddReputation(double value) const;
+	void   SetReputation(double value) const;
 
 	// Get the government's crew attack/defense values
 	double CrewAttack() const;
@@ -195,54 +196,54 @@ public:
 
 
 private:
-	unsigned id;
-	std::string trueName;
-	std::string displayName;
-	bool isDefined = false;
-	const Swizzle *swizzle = Swizzle::None();
+	unsigned             id;
+	std::string          trueName;
+	std::string          displayName;
+	bool                 isDefined = false;
+	const Swizzle       *swizzle   = Swizzle::None();
 	ExclusiveItem<Color> color;
 
-	std::vector<double> attitudeToward;
-	double defaultAttitude = 0.;
-	std::set<const Government *> trusted;
+	std::vector<double>                              attitudeToward;
+	double                                           defaultAttitude = 0.;
+	std::set<const Government *>                     trusted;
 	std::map<unsigned, std::map<int, PenaltyEffect>> customPenalties;
-	double initialPlayerReputation = 0.;
-	double reputationMax = std::numeric_limits<double>::max();
-	double reputationMin = std::numeric_limits<double>::lowest();
-	std::map<int, PenaltyEffect> penaltyFor;
-	std::map<const Outfit *, int> illegalOutfits;
-	std::map<std::string, int> illegalShips;
-	bool ignoreUniversalIllegals = false;
-	std::map<const Outfit *, Atrocity> atrocityOutfits;
-	std::map<std::string, Atrocity> atrocityShips;
-	bool ignoreUniversalAtrocities = false;
-	double bribe = 0.;
-	double bribeThreshold = 0.;
-	double fine = 1.;
-	std::vector<LocationFilter> enforcementZones;
-	LocationFilter travelRestrictions;
-	const Conversation *deathSentence = nullptr;
-	const Phrase *friendlyHail = nullptr;
-	const Phrase *friendlyDisabledHail = nullptr;
-	const Phrase *hostileHail = nullptr;
-	const Phrase *hostileDisabledHail = nullptr;
-	const Phrase *shipBribeAcceptanceHail = nullptr;
-	const Phrase *shipBribeRejectionHail = nullptr;
-	const Phrase *planetBribeAcceptanceHail = nullptr;
-	const Phrase *planetBribeRejectionHail = nullptr;
-	const Phrase *tributeAlreadyPaying = nullptr;
-	const Phrase *tributeUndefined = nullptr;
-	const Phrase *tributeUnworthy = nullptr;
-	const Phrase *tributeFleetLaunching = nullptr;
-	const Phrase *tributeFleetUndefeated = nullptr;
-	const Phrase *tributeSurrendered = nullptr;
-	std::string language;
-	bool sendUntranslatedHails = false;
-	std::vector<RaidFleet> raidFleets;
-	double crewAttack = 1.;
-	double crewDefense = 2.;
-	bool provokedOnScan = false;
-	ExclusiveItem<Confusion> confusion;
+	double                                           initialPlayerReputation = 0.;
+	double                                           reputationMax           = std::numeric_limits<double>::max();
+	double                                           reputationMin           = std::numeric_limits<double>::lowest();
+	std::map<int, PenaltyEffect>                     penaltyFor;
+	std::map<const Outfit *, int>                    illegalOutfits;
+	std::map<std::string, int>                       illegalShips;
+	bool                                             ignoreUniversalIllegals = false;
+	std::map<const Outfit *, Atrocity>               atrocityOutfits;
+	std::map<std::string, Atrocity>                  atrocityShips;
+	bool                                             ignoreUniversalAtrocities = false;
+	double                                           bribe                     = 0.;
+	double                                           bribeThreshold            = 0.;
+	double                                           fine                      = 1.;
+	std::vector<LocationFilter>                      enforcementZones;
+	LocationFilter                                   travelRestrictions;
+	const Conversation                              *deathSentence             = nullptr;
+	const Phrase                                    *friendlyHail              = nullptr;
+	const Phrase                                    *friendlyDisabledHail      = nullptr;
+	const Phrase                                    *hostileHail               = nullptr;
+	const Phrase                                    *hostileDisabledHail       = nullptr;
+	const Phrase                                    *shipBribeAcceptanceHail   = nullptr;
+	const Phrase                                    *shipBribeRejectionHail    = nullptr;
+	const Phrase                                    *planetBribeAcceptanceHail = nullptr;
+	const Phrase                                    *planetBribeRejectionHail  = nullptr;
+	const Phrase                                    *tributeAlreadyPaying      = nullptr;
+	const Phrase                                    *tributeUndefined          = nullptr;
+	const Phrase                                    *tributeUnworthy           = nullptr;
+	const Phrase                                    *tributeFleetLaunching     = nullptr;
+	const Phrase                                    *tributeFleetUndefeated    = nullptr;
+	const Phrase                                    *tributeSurrendered        = nullptr;
+	std::string                                      language;
+	bool                                             sendUntranslatedHails = false;
+	std::vector<RaidFleet>                           raidFleets;
+	double                                           crewAttack     = 1.;
+	double                                           crewDefense    = 2.;
+	bool                                             provokedOnScan = false;
+	ExclusiveItem<Confusion>                         confusion;
 	// If a government appears in this set, and the reputation with this government is affected by actions,
 	// and events performed against that government, use the penalties that government applies for the
 	// action instead of this government's own penalties.

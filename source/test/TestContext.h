@@ -34,7 +34,7 @@ private:
 	// Class to describe a running test and running test-step within the test.
 	class ActiveTestStep {
 	public:
-		const Test *test;
+		const Test  *test;
 		unsigned int step;
 
 

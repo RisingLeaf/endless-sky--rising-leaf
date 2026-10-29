@@ -60,8 +60,12 @@ namespace {
 
 
 // Constructor.
-ConversationPanel::ConversationPanel(PlayerInfo &player, const Conversation &conversation, const Mission *caller,
-                                     const System *system, const shared_ptr<Ship> &ship, bool useTransactions)
+ConversationPanel::ConversationPanel(PlayerInfo             &player,
+                                     const Conversation     &conversation,
+                                     const Mission          *caller,
+                                     const System           *system,
+                                     const shared_ptr<Ship> &ship,
+                                     bool                    useTransactions)
     : player(player), caller(caller), useTransactions(useTransactions), conversation(conversation), scroll(0.),
       system(system), ship(ship)
 {
@@ -70,7 +74,7 @@ ConversationPanel::ConversationPanel(PlayerInfo &player, const Conversation &con
 	// text is prepared for display. Some substitutions already in the map
 	// should not be overwritten.
 	static const array<string, 3> subsToSave = {"<system>", "<date>", "<day>"};
-	map<string, string> savedSubs;
+	map<string, string>           savedSubs;
 	for(const auto &sub : subsToSave)
 	{
 		const auto it = subs.find(sub);
@@ -83,7 +87,7 @@ ConversationPanel::ConversationPanel(PlayerInfo &player, const Conversation &con
 		subs[it.first].swap(it.second);
 	if(ship)
 	{
-		subs["<ship>"] = ship->GivenName();
+		subs["<ship>"]  = ship->GivenName();
 		subs["<model>"] = ship->DisplayModelName();
 	}
 
@@ -136,19 +140,19 @@ void ConversationPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	// Draw the panel itself, stretching from top to bottom of the screen on
 	// the left side. The edge sprite contains 10 pixels of the margin; the rest
 	// of the margin is included in the filled rectangle drawn here:
-	const Color &back = *GameData::Colors().Get("conversation background");
-	double boxWidth = WIDTH + 2. * MARGIN - 10.;
+	const Color &back     = *GameData::Colors().Get("conversation background");
+	double       boxWidth = WIDTH + 2. * MARGIN - 10.;
 	FillShader::Fill(cb, Point(Screen::Left() + .5 * boxWidth, 0.), Point(boxWidth, Screen::Height()), back);
 
 	Panel::DrawEdgeSprite(cb, SpriteSet::Get("ui/right edge"), Screen::Left() + boxWidth);
 
 	// Get the font and colors we'll need for drawing everything.
-	const Font &font = FontSet::Get(Preferences::GetFontSize());
+	const Font  &font           = FontSet::Get(Preferences::GetFontSize());
 	const Color &selectionColor = *GameData::Colors().Get("faint");
-	const Color &dim = *GameData::Colors().Get("dim");
-	const Color &gray = *GameData::Colors().Get("medium");
-	const Color &bright = *GameData::Colors().Get("bright");
-	const Color &dark = *GameData::Colors().Get("dark");
+	const Color &dim            = *GameData::Colors().Get("dim");
+	const Color &gray           = *GameData::Colors().Get("medium");
+	const Color &bright         = *GameData::Colors().Get("bright");
+	const Color &dark           = *GameData::Colors().Get("dark");
 
 	// Figure out where we should start drawing.
 	Point point(Screen::Left() + MARGIN, Screen::Top() + MARGIN + scroll);
@@ -160,10 +164,10 @@ void ConversationPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	if(node < 0)
 	{
 		// The conversation has already ended. Draw a "done" button.
-		static const string done = "[done]";
-		int width = font.Width(done);
-		int height = font.Height();
-		Point off(Screen::Left() + MARGIN + WIDTH - width, point.Y());
+		static const string done   = "[done]";
+		int                 width  = font.Width(done);
+		int                 height = font.Height();
+		Point               off(Screen::Left() + MARGIN + WIDTH - width, point.Y());
 		font.Draw(cb, done, off, bright);
 
 		// Handle clicks on this button.
@@ -174,11 +178,11 @@ void ConversationPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	else if(choices.empty())
 	{
 		// This conversation node is prompting the player to enter their name.
-		Point fieldSize(150, 20);
+		Point      fieldSize(150, 20);
 		const auto layout = Layout(fieldSize.X() - 10, Truncate::FRONT);
 		for(int side = 0; side < 2; ++side)
 		{
-			Point center = point + Point(side ? 420 : 190, 7);
+			Point center     = point + Point(side ? 420 : 190, 7);
 			Point unselected = point + Point(side ? 190 : 420, 7);
 			// Handle mouse clicks in whatever field is not selected.
 			if(side != choice)
@@ -207,10 +211,10 @@ void ConversationPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 		font.Draw(cb, {lastName, layout}, point + Point(350, 0), choice ? bright : gray);
 
 		// Draw the OK button, and remember its location.
-		static const string ok = "[ok]";
-		int width = font.Width(ok);
-		int height = font.Height();
-		Point off(Screen::Left() + MARGIN + WIDTH - width, point.Y());
+		static const string ok     = "[ok]";
+		int                 width  = font.Width(ok);
+		int                 height = font.Height();
+		Point               off(Screen::Left() + MARGIN + WIDTH - width, point.Y());
 		font.Draw(cb, ok, off, bright);
 
 		// Handle clicks on this button.
@@ -219,7 +223,7 @@ void ConversationPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	else
 	{
 		string label = "0:";
-		int index = 0;
+		int    index = 0;
 		for(const auto &it : choices)
 		{
 			++label[0];
@@ -290,14 +294,14 @@ bool ConversationPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comm
 	if(choices.empty())
 	{
 		// Right now we're asking the player to enter their name.
-		string &name = (choice ? lastName : firstName);
+		string &name      = (choice ? lastName : firstName);
 		string &otherName = (choice ? firstName : lastName);
 		// Allow editing the text. The tab key toggles to the other entry field,
 		// as does the return key if the other field is still empty.
 		// Names must contain characters valid for use in file names. They also can't include '~', as that is
 		// reserved by the game for differentiating between main saves and snapshot saves.
-		size_t maxSaveLength = Files::MaxFilenameLength(Files::Saves());
-		auto NameCharFilter = [](char32_t ch) -> bool {
+		size_t maxSaveLength  = Files::MaxFilenameLength(Files::Saves());
+		auto   NameCharFilter = [](char32_t ch) -> bool {
 			return Files::IsValidCharacter(ch) && ch != '~';
 		};
 		if(Clipboard::KeyDown(name, key, mod, maxSaveLength, NameCharFilter))
@@ -330,7 +334,7 @@ bool ConversationPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comm
 
 			player.SetName(firstName, lastName);
 			subs["<first>"] = player.FirstName();
-			subs["<last>"] = player.LastName();
+			subs["<last>"]  = player.LastName();
 
 			Goto(node + 1);
 		}
@@ -407,8 +411,8 @@ bool ConversationPanel::Hover(int x, int y)
 // The player just selected the given choice.
 void ConversationPanel::Goto(int index, int selectedChoice)
 {
-	const ConditionsStore &conditions = player.Conditions();
-	Format::ConditionGetter getter = [&conditions](const string &str, size_t start, size_t length) -> int64_t {
+	const ConditionsStore  &conditions = player.Conditions();
+	Format::ConditionGetter getter     = [&conditions](const string &str, size_t start, size_t length) -> int64_t {
 		return conditions.Get(str.substr(start, length));
 	};
 
@@ -588,8 +592,9 @@ Point ConversationPanel::Paragraph::Center() const
 
 // Draw this paragraph, and return the point that the next paragraph below it
 // should be drawn at.
-Point ConversationPanel::Paragraph::Draw(GraphicsTypes::CommandBufferInstance *cb, Point point,
-                                         const Color &color) const
+Point ConversationPanel::Paragraph::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                                         Point                                 point,
+                                         const Color                          &color) const
 {
 	if(scene)
 	{

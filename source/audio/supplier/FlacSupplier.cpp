@@ -29,7 +29,7 @@ FlacSupplier::FlacSupplier(shared_ptr<iostream> data, bool looping) : AsyncAudio
 
 FLAC__StreamDecoderWriteStatus FlacSupplier::write_callback(const FLAC__Frame *frame, const FLAC__int32 *const buffer[])
 {
-	const size_t channels = frame->header.channels;
+	const size_t channels  = frame->header.channels;
 	const size_t blocksize = frame->header.blocksize;
 
 	AwaitBufferSpace();
@@ -81,8 +81,8 @@ void FlacSupplier::error_callback(FLAC__StreamDecoderErrorStatus status)
 FLAC__StreamDecoderReadStatus FlacSupplier::read_callback(FLAC__byte buffer[], size_t *bytes)
 {
 	size_t requestedBytes = *bytes;
-	size_t readBytes = ReadInput(reinterpret_cast<char *>(buffer), requestedBytes);
-	*bytes = readBytes;
+	size_t readBytes      = ReadInput(reinterpret_cast<char *>(buffer), requestedBytes);
+	*bytes                = readBytes;
 	if(readBytes != requestedBytes)
 		lastReadWasEof = true;
 

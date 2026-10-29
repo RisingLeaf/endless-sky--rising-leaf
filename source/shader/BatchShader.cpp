@@ -25,7 +25,7 @@ using namespace std;
 
 namespace {
 	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
-	ShaderInfo info;
+	ShaderInfo                                     info;
 } // namespace
 
 
@@ -62,12 +62,12 @@ void BatchShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Sprite *sp
 	if(data.empty())
 		return;
 
-	const gm::vec2 scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
-	const int frame_count = sprite->Frames();
+	const gm::vec2 scale       = {2.f / Screen::Width(), -2.f / Screen::Height()};
+	const int      frame_count = sprite->Frames();
 
 
 	std::vector<unsigned char> data_cp(info.GetUniformSize());
-	int i = -1;
+	int                        i = -1;
 	info.CopyUniformEntryToBuffer(data_cp.data(), &scale, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &frame_count, ++i);
 	cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);

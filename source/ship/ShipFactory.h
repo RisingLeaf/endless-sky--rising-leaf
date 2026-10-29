@@ -49,18 +49,19 @@ public:
 	// Instantiate this factory's ships into the provided container.
 	// Ships without a name use the given name function to generate one.
 	// Makes text substitutions in the names of any ships if a substitution map is provided.
-	void Instantiate(std::list<std::shared_ptr<Ship>> &container,
+	void Instantiate(std::list<std::shared_ptr<Ship>>                                &container,
 	                 const std::function<std::string(const std::shared_ptr<Ship> &)> &nameFunc = nullptr,
-	                 const std::map<std::string, std::string> *subs = nullptr) const;
-	void Instantiate(std::vector<std::shared_ptr<Ship>> &container,
+	                 const std::map<std::string, std::string>                        *subs     = nullptr) const;
+	void Instantiate(std::vector<std::shared_ptr<Ship>>                              &container,
 	                 const std::function<std::string(const std::shared_ptr<Ship> &)> &nameFunc = nullptr,
-	                 const std::map<std::string, std::string> *subs = nullptr) const;
+	                 const std::map<std::string, std::string>                        *subs     = nullptr) const;
 
 
 private:
 	template <class T>
-	void InstantiateContainer(T &container, const std::function<std::string(const std::shared_ptr<Ship> &)> &nameFunc,
-	                          const std::map<std::string, std::string> *subs) const;
+	void InstantiateContainer(T                                                               &container,
+	                          const std::function<std::string(const std::shared_ptr<Ship> &)> &nameFunc,
+	                          const std::map<std::string, std::string>                        *subs) const;
 
 
 private:
@@ -72,16 +73,16 @@ private:
 
 
 template <class T>
-void ShipFactory::InstantiateContainer(T &container,
+void ShipFactory::InstantiateContainer(T                                                               &container,
                                        const std::function<std::string(const std::shared_ptr<Ship> &)> &nameFunc,
-                                       const std::map<std::string, std::string> *subs) const
+                                       const std::map<std::string, std::string>                        *subs) const
 {
 	for(const auto &[shipDef, name] : ships)
 	{
 		// Instantiation of a container involves copying the contents of this factory into new
 		// shared pointers. This factory remains unchanged after instantiation of its ships.
-		const std::shared_ptr<Ship> &ship = container.emplace_back(std::make_shared<Ship>(*shipDef));
-		std::string giveName = (name.empty() && nameFunc) ? nameFunc(ship) : name;
+		const std::shared_ptr<Ship> &ship     = container.emplace_back(std::make_shared<Ship>(*shipDef));
+		std::string                  giveName = (name.empty() && nameFunc) ? nameFunc(ship) : name;
 		if(giveName.empty())
 			continue;
 		giveName = Phrase::ExpandPhrases(giveName);

@@ -31,212 +31,217 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	const vector<pair<double, string>> SCALE_LABELS = {make_pair(60., ""),        make_pair(60. * 60., ""),
-	                                                   make_pair(60. * 100., ""), make_pair(100., "%"),
-	                                                   make_pair(100., ""),       make_pair(1. / 60., "s")};
+	const vector<pair<double, string>> SCALE_LABELS = {make_pair(60., ""),
+	                                                   make_pair(60. * 60., ""),
+	                                                   make_pair(60. * 100., ""),
+	                                                   make_pair(100., "%"),
+	                                                   make_pair(100., ""),
+	                                                   make_pair(1. / 60., "s")};
 
-	const map<string, int> SCALE = {{"active cooling", 0},
-	                                {"afterburner shields", 0},
-	                                {"afterburner hull", 0},
-	                                {"afterburner energy", 0},
-	                                {"afterburner fuel", 0},
-	                                {"afterburner heat", 0},
-	                                {"burn resistance energy", 0},
-	                                {"burn resistance fuel", 0},
-	                                {"burn resistance heat", 0},
-	                                {"cloak", 0},
-	                                {"cloaking energy", 0},
-	                                {"cloaking fuel", 0},
-	                                {"cloaking heat", 0},
-	                                {"cloaking shields", 0},
-	                                {"cloaked firing", 0},
-	                                {"cooling", 0},
-	                                {"cooling energy", 0},
-	                                {"corrosion resistance energy", 0},
-	                                {"corrosion resistance fuel", 0},
-	                                {"corrosion resistance heat", 0},
-	                                {"discharge resistance energy", 0},
-	                                {"discharge resistance fuel", 0},
-	                                {"discharge resistance heat", 0},
-	                                {"disruption resistance energy", 0},
-	                                {"disruption resistance fuel", 0},
-	                                {"disruption resistance heat", 0},
-	                                {"energy consumption", 0},
-	                                {"energy generation", 0},
-	                                {"fuel consumption", 0},
-	                                {"fuel energy", 0},
-	                                {"fuel generation", 0},
-	                                {"fuel heat", 0},
-	                                {"heat generation", 0},
-	                                {"heat dissipation", 0},
-	                                {"hull repair rate", 0},
-	                                {"hull energy", 0},
-	                                {"hull fuel", 0},
-	                                {"hull heat", 0},
-	                                {"delayed hull repair rate", 0},
-	                                {"delayed hull energy", 0},
-	                                {"delayed hull fuel", 0},
-	                                {"delayed hull heat", 0},
-	                                {"ion resistance energy", 0},
-	                                {"ion resistance fuel", 0},
-	                                {"ion resistance heat", 0},
-	                                {"scramble resistance energy", 0},
-	                                {"scramble resistance fuel", 0},
-	                                {"scramble resistance heat", 0},
-	                                {"jump speed", 0},
-	                                {"leak resistance energy", 0},
-	                                {"leak resistance fuel", 0},
-	                                {"leak resistance heat", 0},
-	                                {"overheat damage rate", 0},
-	                                {"reverse thrusting shields", 0},
-	                                {"reverse thrusting hull", 0},
-	                                {"reverse thrusting energy", 0},
-	                                {"reverse thrusting fuel", 0},
-	                                {"reverse thrusting heat", 0},
-	                                {"scram drive", 0},
-	                                {"shield generation", 0},
-	                                {"shield energy", 0},
-	                                {"shield fuel", 0},
-	                                {"shield heat", 0},
-	                                {"delayed shield generation", 0},
-	                                {"delayed shield energy", 0},
-	                                {"delayed shield fuel", 0},
-	                                {"delayed shield heat", 0},
-	                                {"slowing resistance energy", 0},
-	                                {"slowing resistance fuel", 0},
-	                                {"slowing resistance heat", 0},
-	                                {"solar collection", 0},
-	                                {"solar heat", 0},
-	                                {"thrusting shields", 0},
-	                                {"thrusting hull", 0},
-	                                {"thrusting energy", 0},
-	                                {"thrusting fuel", 0},
-	                                {"thrusting heat", 0},
-	                                {"turn", 0},
-	                                {"turning shields", 0},
-	                                {"turning hull", 0},
-	                                {"turning energy", 0},
-	                                {"turning fuel", 0},
-	                                {"turning heat", 0},
+	const map<string, int> SCALE = {
+	    {              "active cooling", 0},
+	    {         "afterburner shields", 0},
+	    {            "afterburner hull", 0},
+	    {          "afterburner energy", 0},
+	    {            "afterburner fuel", 0},
+	    {            "afterburner heat", 0},
+	    {      "burn resistance energy", 0},
+	    {        "burn resistance fuel", 0},
+	    {        "burn resistance heat", 0},
+	    {                       "cloak", 0},
+	    {             "cloaking energy", 0},
+	    {               "cloaking fuel", 0},
+	    {               "cloaking heat", 0},
+	    {            "cloaking shields", 0},
+	    {              "cloaked firing", 0},
+	    {                     "cooling", 0},
+	    {              "cooling energy", 0},
+	    { "corrosion resistance energy", 0},
+	    {   "corrosion resistance fuel", 0},
+	    {   "corrosion resistance heat", 0},
+	    { "discharge resistance energy", 0},
+	    {   "discharge resistance fuel", 0},
+	    {   "discharge resistance heat", 0},
+	    {"disruption resistance energy", 0},
+	    {  "disruption resistance fuel", 0},
+	    {  "disruption resistance heat", 0},
+	    {          "energy consumption", 0},
+	    {           "energy generation", 0},
+	    {            "fuel consumption", 0},
+	    {                 "fuel energy", 0},
+	    {             "fuel generation", 0},
+	    {                   "fuel heat", 0},
+	    {             "heat generation", 0},
+	    {            "heat dissipation", 0},
+	    {            "hull repair rate", 0},
+	    {                 "hull energy", 0},
+	    {                   "hull fuel", 0},
+	    {                   "hull heat", 0},
+	    {    "delayed hull repair rate", 0},
+	    {         "delayed hull energy", 0},
+	    {           "delayed hull fuel", 0},
+	    {           "delayed hull heat", 0},
+	    {       "ion resistance energy", 0},
+	    {         "ion resistance fuel", 0},
+	    {         "ion resistance heat", 0},
+	    {  "scramble resistance energy", 0},
+	    {    "scramble resistance fuel", 0},
+	    {    "scramble resistance heat", 0},
+	    {                  "jump speed", 0},
+	    {      "leak resistance energy", 0},
+	    {        "leak resistance fuel", 0},
+	    {        "leak resistance heat", 0},
+	    {        "overheat damage rate", 0},
+	    {   "reverse thrusting shields", 0},
+	    {      "reverse thrusting hull", 0},
+	    {    "reverse thrusting energy", 0},
+	    {      "reverse thrusting fuel", 0},
+	    {      "reverse thrusting heat", 0},
+	    {                 "scram drive", 0},
+	    {           "shield generation", 0},
+	    {               "shield energy", 0},
+	    {                 "shield fuel", 0},
+	    {                 "shield heat", 0},
+	    {   "delayed shield generation", 0},
+	    {       "delayed shield energy", 0},
+	    {         "delayed shield fuel", 0},
+	    {         "delayed shield heat", 0},
+	    {   "slowing resistance energy", 0},
+	    {     "slowing resistance fuel", 0},
+	    {     "slowing resistance heat", 0},
+	    {            "solar collection", 0},
+	    {                  "solar heat", 0},
+	    {           "thrusting shields", 0},
+	    {              "thrusting hull", 0},
+	    {            "thrusting energy", 0},
+	    {              "thrusting fuel", 0},
+	    {              "thrusting heat", 0},
+	    {                        "turn", 0},
+	    {             "turning shields", 0},
+	    {                "turning hull", 0},
+	    {              "turning energy", 0},
+	    {                "turning fuel", 0},
+	    {                "turning heat", 0},
 
-	                                {"thrust", 1},
-	                                {"reverse thrust", 1},
-	                                {"afterburner thrust", 1},
+	    {                      "thrust", 1},
+	    {              "reverse thrust", 1},
+	    {          "afterburner thrust", 1},
 
-	                                {"afterburner discharge", 2},
-	                                {"afterburner corrosion", 2},
-	                                {"afterburner ion", 2},
-	                                {"afterburner scramble", 2},
-	                                {"afterburner leakage", 2},
-	                                {"afterburner burn", 2},
-	                                {"afterburner slowing", 2},
-	                                {"afterburner disruption", 2},
+	    {       "afterburner discharge", 2},
+	    {       "afterburner corrosion", 2},
+	    {             "afterburner ion", 2},
+	    {        "afterburner scramble", 2},
+	    {         "afterburner leakage", 2},
+	    {            "afterburner burn", 2},
+	    {         "afterburner slowing", 2},
+	    {      "afterburner disruption", 2},
 
-	                                {"reverse thrusting discharge", 2},
-	                                {"reverse thrusting corrosion", 2},
-	                                {"reverse thrusting ion", 2},
-	                                {"reverse thrusting scramble", 2},
-	                                {"reverse thrusting leakage", 2},
-	                                {"reverse thrusting burn", 2},
-	                                {"reverse thrusting slowing", 2},
-	                                {"reverse thrusting disruption", 2},
+	    { "reverse thrusting discharge", 2},
+	    { "reverse thrusting corrosion", 2},
+	    {       "reverse thrusting ion", 2},
+	    {  "reverse thrusting scramble", 2},
+	    {   "reverse thrusting leakage", 2},
+	    {      "reverse thrusting burn", 2},
+	    {   "reverse thrusting slowing", 2},
+	    {"reverse thrusting disruption", 2},
 
-	                                {"thrusting discharge", 2},
-	                                {"thrusting corrosion", 2},
-	                                {"thrusting ion", 2},
-	                                {"thrusting scramble", 2},
-	                                {"thrusting leakage", 2},
-	                                {"thrusting burn", 2},
-	                                {"thrusting slowing", 2},
-	                                {"thrusting disruption", 2},
+	    {         "thrusting discharge", 2},
+	    {         "thrusting corrosion", 2},
+	    {               "thrusting ion", 2},
+	    {          "thrusting scramble", 2},
+	    {           "thrusting leakage", 2},
+	    {              "thrusting burn", 2},
+	    {           "thrusting slowing", 2},
+	    {        "thrusting disruption", 2},
 
-	                                {"turning discharge", 2},
-	                                {"turning corrosion", 2},
-	                                {"turning ion", 2},
-	                                {"turning scramble", 2},
-	                                {"turning leakage", 2},
-	                                {"turning burn", 2},
-	                                {"turning slowing", 2},
-	                                {"turning disruption", 2},
+	    {           "turning discharge", 2},
+	    {           "turning corrosion", 2},
+	    {                 "turning ion", 2},
+	    {            "turning scramble", 2},
+	    {             "turning leakage", 2},
+	    {                "turning burn", 2},
+	    {             "turning slowing", 2},
+	    {          "turning disruption", 2},
 
-	                                {"ion resistance", 2},
-	                                {"scramble resistance", 2},
-	                                {"disruption resistance", 2},
-	                                {"slowing resistance", 2},
-	                                {"discharge resistance", 2},
-	                                {"corrosion resistance", 2},
-	                                {"leak resistance", 2},
-	                                {"burn resistance", 2},
+	    {              "ion resistance", 2},
+	    {         "scramble resistance", 2},
+	    {       "disruption resistance", 2},
+	    {          "slowing resistance", 2},
+	    {        "discharge resistance", 2},
+	    {        "corrosion resistance", 2},
+	    {             "leak resistance", 2},
+	    {             "burn resistance", 2},
 
-	                                {"flotsam chance", 3},
+	    {              "flotsam chance", 3},
 
-	                                {"cloak by mass", 3},
-	                                {"shield multiplier", 3},
-	                                {"hull multiplier", 3},
-	                                {"hull repair multiplier", 3},
-	                                {"hull energy multiplier", 3},
-	                                {"hull fuel multiplier", 3},
-	                                {"hull heat multiplier", 3},
-	                                {"piercing resistance", 3},
-	                                {"shield generation multiplier", 3},
-	                                {"shield energy multiplier", 3},
-	                                {"shield fuel multiplier", 3},
-	                                {"shield heat multiplier", 3},
-	                                {"threshold percentage", 3},
-	                                {"overheat damage threshold", 3},
-	                                {"high shield permeability", 3},
-	                                {"low shield permeability", 3},
-	                                {"cloaked shield permeability", 3},
-	                                {"cloaked regen multiplier", 3},
-	                                {"cloaked repair multiplier", 3},
-	                                {"acceleration multiplier", 3},
-	                                {"turn multiplier", 3},
-	                                {"turret turn multiplier", 3},
+	    {               "cloak by mass", 3},
+	    {           "shield multiplier", 3},
+	    {             "hull multiplier", 3},
+	    {      "hull repair multiplier", 3},
+	    {      "hull energy multiplier", 3},
+	    {        "hull fuel multiplier", 3},
+	    {        "hull heat multiplier", 3},
+	    {         "piercing resistance", 3},
+	    {"shield generation multiplier", 3},
+	    {    "shield energy multiplier", 3},
+	    {      "shield fuel multiplier", 3},
+	    {      "shield heat multiplier", 3},
+	    {        "threshold percentage", 3},
+	    {   "overheat damage threshold", 3},
+	    {    "high shield permeability", 3},
+	    {     "low shield permeability", 3},
+	    { "cloaked shield permeability", 3},
+	    {    "cloaked regen multiplier", 3},
+	    {   "cloaked repair multiplier", 3},
+	    {     "acceleration multiplier", 3},
+	    {             "turn multiplier", 3},
+	    {      "turret turn multiplier", 3},
 
-	                                {"burn protection", 3},
-	                                {"corrosion protection", 3},
-	                                {"discharge protection", 3},
-	                                {"disruption protection", 3},
-	                                {"drag reduction", 3},
-	                                {"energy protection", 3},
-	                                {"force protection", 3},
-	                                {"fuel protection", 3},
-	                                {"heat protection", 3},
-	                                {"hull protection", 3},
-	                                {"inertia reduction", 3},
-	                                {"ion protection", 3},
-	                                {"scramble protection", 3},
-	                                {"leak protection", 3},
-	                                {"piercing protection", 3},
-	                                {"shield protection", 3},
-	                                {"slowing protection", 3},
-	                                {"cloak hull protection", 3},
-	                                {"cloak shield protection", 3},
+	    {             "burn protection", 3},
+	    {        "corrosion protection", 3},
+	    {        "discharge protection", 3},
+	    {       "disruption protection", 3},
+	    {              "drag reduction", 3},
+	    {           "energy protection", 3},
+	    {            "force protection", 3},
+	    {             "fuel protection", 3},
+	    {             "heat protection", 3},
+	    {             "hull protection", 3},
+	    {           "inertia reduction", 3},
+	    {              "ion protection", 3},
+	    {         "scramble protection", 3},
+	    {             "leak protection", 3},
+	    {         "piercing protection", 3},
+	    {           "shield protection", 3},
+	    {          "slowing protection", 3},
+	    {       "cloak hull protection", 3},
+	    {     "cloak shield protection", 3},
 
-	                                {"repair delay", 5},
-	                                {"cloaking repair delay", 5},
-	                                {"disabled repair delay", 5},
-	                                {"shield delay", 5},
-	                                {"cloaking shield delay", 5},
-	                                {"depleted shield delay", 5},
-	                                {"disabled recovery time", 5}};
+	    {                "repair delay", 5},
+	    {       "cloaking repair delay", 5},
+	    {       "disabled repair delay", 5},
+	    {                "shield delay", 5},
+	    {       "cloaking shield delay", 5},
+	    {       "depleted shield delay", 5},
+	    {      "disabled recovery time", 5}
+    };
 
 	const map<string, string> BOOLEAN_ATTRIBUTES = {
-	    {"unplunderable", "Cannot be plundered while installed."},
-	    {"installable", "This is not an installable item."},
-	    {"hyperdrive", "Allows you to make hyperjumps."},
-	    {"jump drive", "Lets you jump to any nearby system."},
-	    {"minable", "This item is mined from asteroids."},
-	    {"map minables", "This map reveals minables."},
-	    {"atrocity", "This outfit is considered an atrocity."},
-	    {"unique", "This item is unique."},
-	    {"cloaked afterburner", "You may use afterburners while cloaked."},
-	    {"cloaked boarding", "You may board while cloaked."},
-	    {"cloaked communication", "You may make hails while cloaked."},
-	    {"cloaked deployment", "You may deploy from bays while cloaked."},
-	    {"cloaked pickup", "You may pick up flotsam while cloaked."},
-	    {"cloaked scanning", "You may scan other ships while cloaked."},
-	    {"can jettison", "Can be jettisoned while installed."},
+	    {        "unplunderable",    "Cannot be plundered while installed."},
+	    {          "installable",        "This is not an installable item."},
+	    {           "hyperdrive",          "Allows you to make hyperjumps."},
+	    {           "jump drive",     "Lets you jump to any nearby system."},
+	    {              "minable",      "This item is mined from asteroids."},
+	    {         "map minables",              "This map reveals minables."},
+	    {             "atrocity",  "This outfit is considered an atrocity."},
+	    {               "unique",                    "This item is unique."},
+	    {  "cloaked afterburner", "You may use afterburners while cloaked."},
+	    {     "cloaked boarding",            "You may board while cloaked."},
+	    {"cloaked communication",       "You may make hails while cloaked."},
+	    {   "cloaked deployment", "You may deploy from bays while cloaked."},
+	    {       "cloaked pickup",  "You may pick up flotsam while cloaked."},
+	    {     "cloaked scanning", "You may scan other ships while cloaked."},
+	    {         "can jettison",      "Can be jettisoned while installed."},
 	};
 
 	bool IsNotRequirement(const string &label)
@@ -250,7 +255,7 @@ namespace {
 
 std::string OutfitInfoDisplay::FormatAttribute(const std::string &attribute, double value)
 {
-	auto sit = SCALE.find(attribute);
+	auto   sit   = SCALE.find(attribute);
 	double scale = (sit == SCALE.end() ? 1. : SCALE_LABELS[sit->second].first);
 	string units = (sit == SCALE.end() ? "" : SCALE_LABELS[sit->second].second);
 
@@ -259,8 +264,10 @@ std::string OutfitInfoDisplay::FormatAttribute(const std::string &attribute, dou
 
 
 
-OutfitInfoDisplay::OutfitInfoDisplay(const Outfit &outfit, const PlayerInfo &player, bool canSell,
-                                     bool descriptionCollapsed)
+OutfitInfoDisplay::OutfitInfoDisplay(const Outfit     &outfit,
+                                     const PlayerInfo &player,
+                                     bool              canSell,
+                                     bool              descriptionCollapsed)
 {
 	Update(outfit, player, canSell, descriptionCollapsed);
 }
@@ -293,16 +300,18 @@ void OutfitInfoDisplay::DrawRequirements(GraphicsTypes::CommandBufferInstance *c
 
 
 
-void OutfitInfoDisplay::UpdateRequirements(const Outfit &outfit, const PlayerInfo &player, bool canSell,
-                                           bool descriptionCollapsed)
+void OutfitInfoDisplay::UpdateRequirements(const Outfit     &outfit,
+                                           const PlayerInfo &player,
+                                           bool              canSell,
+                                           bool              descriptionCollapsed)
 {
 	requirementLabels.clear();
 	requirementValues.clear();
 	requirementsHeight = 20;
 
-	int day = player.GetDate().DaysSinceEpoch();
-	int64_t cost = outfit.Cost();
-	int64_t buyValue = player.StockDepreciation().Value(&outfit, day);
+	int     day       = player.GetDate().DaysSinceEpoch();
+	int64_t cost      = outfit.Cost();
+	int64_t buyValue  = player.StockDepreciation().Value(&outfit, day);
 	int64_t sellValue = player.FleetDepreciation().Value(&outfit, day);
 
 	for(const string &license : outfit.Licenses())
@@ -355,8 +364,8 @@ void OutfitInfoDisplay::UpdateRequirements(const Outfit &outfit, const PlayerInf
 	requirementValues.emplace_back();
 	requirementsHeight += 10;
 
-	bool hasContent = false;
-	static const vector<string> BEFORE = {"outfit space", "weapon capacity", "engine capacity"};
+	bool                        hasContent = false;
+	static const vector<string> BEFORE     = {"outfit space", "weapon capacity", "engine capacity"};
 	for(const auto &attr : BEFORE)
 	{
 		if(outfit.Get(attr) < 0)
@@ -425,8 +434,8 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 	// These attributes are regularly negative on outfits, so when positive,
 	// tag them with "added" and show them first. They conveniently
 	// don't use SCALE or BOOLEAN_ATTRIBUTES.
-	static const vector<string> EXPECTED_NEGATIVE = {"outfit space", "weapon capacity", "engine capacity", "gun ports",
-	                                                 "turret mounts"};
+	static const vector<string> EXPECTED_NEGATIVE = {
+	    "outfit space", "weapon capacity", "engine capacity", "gun ports", "turret mounts"};
 
 	for(const string &attr : EXPECTED_NEGATIVE)
 	{
@@ -528,16 +537,45 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 	}
 
 	static const vector<pair<string, string>> VALUE_NAMES = {
-	    {"shield damage", ""},     {"hull damage", ""},       {"minable damage", ""},   {"fuel damage", ""},
-	    {"heat damage", ""},       {"energy damage", ""},     {"ion damage", ""},       {"scrambling damage", ""},
-	    {"slowing damage", ""},    {"disruption damage", ""}, {"discharge damage", ""}, {"corrosion damage", ""},
-	    {"leak damage", ""},       {"burn damage", ""},       {"% shield damage", "%"}, {"% hull damage", "%"},
-	    {"% minable damage", "%"}, {"% fuel damage", "%"},    {"% heat damage", "%"},   {"% energy damage", "%"},
-	    {"firing energy", ""},     {"firing heat", ""},       {"firing fuel", ""},      {"firing hull", ""},
-	    {"firing shields", ""},    {"firing ion", ""},        {"firing scramble", ""},  {"firing slowing", ""},
-	    {"firing disruption", ""}, {"firing discharge", ""},  {"firing corrosion", ""}, {"firing leak", ""},
-	    {"firing burn", ""},       {"% firing energy", "%"},  {"% firing heat", "%"},   {"% firing fuel", "%"},
-	    {"% firing hull", "%"},    {"% firing shields", "%"}};
+	    {    "shield damage",  ""},
+        {      "hull damage",  ""},
+        {   "minable damage",  ""},
+        {      "fuel damage",  ""},
+	    {      "heat damage",  ""},
+        {    "energy damage",  ""},
+        {       "ion damage",  ""},
+        {"scrambling damage",  ""},
+	    {   "slowing damage",  ""},
+        {"disruption damage",  ""},
+        { "discharge damage",  ""},
+        { "corrosion damage",  ""},
+	    {      "leak damage",  ""},
+        {      "burn damage",  ""},
+        {  "% shield damage", "%"},
+        {    "% hull damage", "%"},
+	    { "% minable damage", "%"},
+        {    "% fuel damage", "%"},
+        {    "% heat damage", "%"},
+        {  "% energy damage", "%"},
+	    {    "firing energy",  ""},
+        {      "firing heat",  ""},
+        {      "firing fuel",  ""},
+        {      "firing hull",  ""},
+	    {   "firing shields",  ""},
+        {       "firing ion",  ""},
+        {  "firing scramble",  ""},
+        {   "firing slowing",  ""},
+	    {"firing disruption",  ""},
+        { "firing discharge",  ""},
+        { "firing corrosion",  ""},
+        {      "firing leak",  ""},
+	    {      "firing burn",  ""},
+        {  "% firing energy", "%"},
+        {    "% firing heat", "%"},
+        {    "% firing fuel", "%"},
+	    {    "% firing hull", "%"},
+        { "% firing shields", "%"}
+    };
 
 	vector<double> values = {
 	    weapon->ShieldDamage(),
@@ -593,8 +631,8 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 			}
 	}
 
-	bool oneFrame = (weapon->TotalLifetime() == 1.);
-	bool isContinuous = (reload <= 1. && oneFrame);
+	bool oneFrame          = (weapon->TotalLifetime() == 1.);
+	bool isContinuous      = (reload <= 1. && oneFrame);
 	bool isContinuousBurst = (weapon->BurstCount() > 1 && weapon->BurstReload() <= 1. && oneFrame);
 	attributeLabels.emplace_back("shots / second:");
 	if(isContinuous)
@@ -630,8 +668,11 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 	}
 	static const vector<string> PERCENT_NAMES = {
 	    "tracking:", "optical tracking:", "infrared tracking:", "radar tracking:", "piercing:"};
-	vector<double> percentValues = {weapon->Tracking(), weapon->OpticalTracking(), weapon->InfraredTracking(),
-	                                weapon->RadarTracking(), weapon->Piercing()};
+	vector<double> percentValues = {weapon->Tracking(),
+	                                weapon->OpticalTracking(),
+	                                weapon->InfraredTracking(),
+	                                weapon->RadarTracking(),
+	                                weapon->Piercing()};
 	for(unsigned i = 0; i < PERCENT_NAMES.size(); ++i)
 		if(percentValues[i])
 		{
@@ -672,7 +713,12 @@ void OutfitInfoDisplay::UpdateAttributes(const Outfit &outfit)
 	}
 
 	static const vector<string> OTHER_NAMES = {
-	    "inaccuracy:", "blast radius:", "missile strength:", "anti-missile:", "tractor beam:", "mining precision:",
+	    "inaccuracy:",
+	    "blast radius:",
+	    "missile strength:",
+	    "anti-missile:",
+	    "tractor beam:",
+	    "mining precision:",
 	};
 	vector<double> otherValues = {
 	    weapon->Inaccuracy(),

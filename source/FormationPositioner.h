@@ -73,7 +73,7 @@ private:
 	double centerBodyRadius = 150;
 
 	// The body around which the formation will be formed and the pattern to follow.
-	const Body *formationLead;
+	const Body             *formationLead;
 	const FormationPattern *pattern;
 
 	// The formation facing direction.

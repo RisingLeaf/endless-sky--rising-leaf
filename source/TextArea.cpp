@@ -39,8 +39,7 @@ TextArea::TextArea(const Rectangle &r) : TextArea()
 
 
 // Stub destructor, so that unique_ptrs are destructed in the correct scope.
-TextArea::~TextArea()
-= default;
+TextArea::~TextArea() = default;
 
 
 
@@ -128,7 +127,7 @@ void TextArea::Validate(const bool trailingBreak)
 		wrappedText.Wrap(text);
 		scroll.SetMaxValue(wrappedText.Height(trailingBreak));
 		scrollHeightIncludesTrailingBreak = trailingBreak;
-		contentsIsValid = true;
+		contentsIsValid                   = true;
 	}
 }
 

@@ -37,7 +37,7 @@ public:
 
 	const Weapon &GetWeapon() const;
 	const Entity &GetEntity() const;
-	double Scaling() const;
+	double        Scaling() const;
 
 	// Calculate the damage dealt to the entity at this exact moment.
 	DamageDealt CalculateDamage() const;

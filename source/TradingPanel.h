@@ -43,22 +43,22 @@ protected:
 
 
 private:
-	void Buy(int64_t amount);
-	void SellOutfitsOrMinables(bool sellMinables);
+	void        Buy(int64_t amount);
+	void        SellOutfitsOrMinables(bool sellMinables);
 	std::string OutfitSalesMessage(bool sellMinables) const;
-	void StoreOutfitsFromCargo() const;
+	void        StoreOutfitsFromCargo() const;
 
 
 private:
-	PlayerInfo &player;
+	PlayerInfo   &player;
 	const Planet &planet;
 	const System &system;
-	const int COMMODITY_COUNT;
+	const int     COMMODITY_COUNT;
 	// There are multiple requirements to selling or storing outfits. This caches the calculation in Step().
-	bool canSellOutfits = false;
+	bool canSellOutfits  = false;
 	bool canStoreOutfits = false;
 
 	// Keep track of how much we sold and how much profit was made.
-	int tonsSold = 0;
-	int64_t profit = 0;
+	int     tonsSold = 0;
+	int64_t profit   = 0;
 };

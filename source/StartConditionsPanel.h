@@ -38,8 +38,10 @@ class StartConditionsPanel : public Panel {
 	using StartConditionsList = std::vector<StartConditions>;
 
 public:
-	StartConditionsPanel(PlayerInfo &player, UI &gamePanels, const StartConditionsList &allScenarios,
-	                     const Panel *parent);
+	StartConditionsPanel(PlayerInfo                &player,
+	                     UI                        &gamePanels,
+	                     const StartConditionsList &allScenarios,
+	                     const Panel               *parent);
 
 	virtual void Draw(GraphicsTypes::CommandBufferInstance *cb) override final;
 
@@ -61,7 +63,7 @@ private:
 
 private:
 	PlayerInfo &player;
-	UI &gamePanels;
+	UI         &gamePanels;
 	// The panel to close when a scenario is chosen.
 	const Panel *parent;
 	// The list of starting scenarios to pick from.
@@ -79,7 +81,7 @@ private:
 	// Displayed information for the selected scenario.
 	Information info;
 
-	bool hasHover = false;
+	bool  hasHover = false;
 	Point hoverPoint;
 
 	double entriesScroll = 0.;
@@ -91,5 +93,5 @@ private:
 	Rectangle descriptionBox;
 	Rectangle entryBox;
 	Rectangle entriesContainer;
-	Point entryTextPadding;
+	Point     entryTextPadding;
 };

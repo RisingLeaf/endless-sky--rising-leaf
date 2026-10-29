@@ -44,10 +44,10 @@ public:
 	explicit ConditionsStore(std::initializer_list<std::pair<std::string, int64_t>> initialConditions);
 	explicit ConditionsStore(const std::map<std::string, int64_t> &initialConditions);
 
-	ConditionsStore(const ConditionsStore &) = delete;
+	ConditionsStore(const ConditionsStore &)            = delete;
 	ConditionsStore &operator=(const ConditionsStore &) = delete;
-	ConditionsStore(ConditionsStore &&) = delete;
-	ConditionsStore &operator=(ConditionsStore &&) = default;
+	ConditionsStore(ConditionsStore &&)                 = delete;
+	ConditionsStore &operator=(ConditionsStore &&)      = default;
 
 	// Serialization support for this class.
 	void Load(const DataNode &node);
@@ -74,7 +74,7 @@ private:
 	// Retrieve a condition entry based on a condition name, the entry doesn't
 	// get created if it doesn't exist yet (the Set function will handle
 	// creation if required).
-	ConditionEntry *GetEntry(const std::string &name);
+	ConditionEntry       *GetEntry(const std::string &name);
 	const ConditionEntry *GetEntry(const std::string &name) const;
 
 

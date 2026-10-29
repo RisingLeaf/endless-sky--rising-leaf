@@ -94,37 +94,44 @@ protected:
 		// Metadata that may be used along with the overall success/message in order to
 		// better decide the course of action when dealing with the failure reason.
 		bool canSource = true;
-		bool canPlace = true;
+		bool canPlace  = true;
 
 	private:
-		bool success = true;
+		bool        success = true;
 		std::string message;
 	};
 
 
 protected:
-	void DrawShip(GraphicsTypes::CommandBufferInstance *cb, const Ship &ship, const Point &center,
-	              bool isSelected) const;
-	void DrawShipIcon(GraphicsTypes::CommandBufferInstance *cb, const Drawable &thumbnail, const Point &center,
-	                  const Color &color, const Swizzle *swizzle) const;
-	void DrawThumbnail(GraphicsTypes::CommandBufferInstance *cb, const Drawable &thumbnail, bool animate,
-	                   const Point &center, float zoom = 1.f, const Swizzle *swizzle = Swizzle::None()) const;
+	void
+	DrawShip(GraphicsTypes::CommandBufferInstance *cb, const Ship &ship, const Point &center, bool isSelected) const;
+	void DrawShipIcon(GraphicsTypes::CommandBufferInstance *cb,
+	                  const Drawable                       &thumbnail,
+	                  const Point                          &center,
+	                  const Color                          &color,
+	                  const Swizzle                        *swizzle) const;
+	void DrawThumbnail(GraphicsTypes::CommandBufferInstance *cb,
+	                   const Drawable                       &thumbnail,
+	                   bool                                  animate,
+	                   const Point                          &center,
+	                   float                                 zoom    = 1.f,
+	                   const Swizzle                        *swizzle = Swizzle::None()) const;
 
 	void CheckForMissions(Mission::Location location) const;
 	void ValidateSelectedShips();
 
 	// These are for the individual shop panels to override.
-	virtual int TileSize() const = 0;
-	virtual int VisibilityCheckboxesSize() const;
-	virtual bool HasItem(const std::string &name) const = 0;
-	virtual void DrawItem(GraphicsTypes::CommandBufferInstance *cb, const std::string &name, const Point &point) = 0;
-	virtual double ButtonPanelHeight() const = 0;
-	virtual double DrawDetails(GraphicsTypes::CommandBufferInstance *cb, const Point &center) = 0;
-	virtual void DrawButtons(GraphicsTypes::CommandBufferInstance *cb) = 0;
-	virtual TransactionResult HandleShortcuts(SDL_Keycode key) = 0;
+	virtual int    TileSize() const = 0;
+	virtual int    VisibilityCheckboxesSize() const;
+	virtual bool   HasItem(const std::string &name) const                                                          = 0;
+	virtual void   DrawItem(GraphicsTypes::CommandBufferInstance *cb, const std::string &name, const Point &point) = 0;
+	virtual double ButtonPanelHeight() const                                                                       = 0;
+	virtual double DrawDetails(GraphicsTypes::CommandBufferInstance *cb, const Point &center)                      = 0;
+	virtual void   DrawButtons(GraphicsTypes::CommandBufferInstance *cb)                                           = 0;
+	virtual TransactionResult HandleShortcuts(SDL_Keycode key)                                                     = 0;
 
-	virtual bool ShouldHighlight(const Ship *ship);
-	virtual void DrawKey(GraphicsTypes::CommandBufferInstance *cb) {};
+	virtual bool                     ShouldHighlight(const Ship *ship);
+	virtual void                     DrawKey(GraphicsTypes::CommandBufferInstance *cb) {};
 	virtual std::optional<Rectangle> KeyArea() const
 	{
 		return std::nullopt;
@@ -138,13 +145,17 @@ protected:
 	virtual bool Release(int x, int y, MouseButton button) override;
 	virtual bool Scroll(double dx, double dy) override;
 
-	void DoFind(const std::string &text);
+	void        DoFind(const std::string &text);
 	virtual int FindItem(const std::string &text) const = 0;
 
 	int64_t LicenseCost(const Outfit *outfit, bool onlyOwned = false) const;
 
-	void DrawButton(GraphicsTypes::CommandBufferInstance *cb, const std::string &name, const Rectangle &buttonShape,
-	                bool isActive, bool hovering, char keyCode);
+	void DrawButton(GraphicsTypes::CommandBufferInstance *cb,
+	                const std::string                    &name,
+	                const Rectangle                      &buttonShape,
+	                bool                                  isActive,
+	                bool                                  hovering,
+	                char                                  keyCode);
 	void CheckSelection();
 
 
@@ -154,7 +165,7 @@ protected:
 		explicit Zone(Point center, Point size, const Ship *ship);
 		explicit Zone(Point center, Point size, const Outfit *outfit);
 
-		const Ship *GetShip() const;
+		const Ship   *GetShip() const;
 		const Outfit *GetOutfit() const;
 
 	private:
@@ -167,33 +178,33 @@ protected:
 protected:
 	static constexpr int SIDEBAR_PADDING = 5;
 	static constexpr int SIDEBAR_CONTENT = 250;
-	static constexpr int SIDEBAR_WIDTH = SIDEBAR_CONTENT + SIDEBAR_PADDING;
-	static constexpr int INFOBAR_WIDTH = 300;
-	static constexpr int SIDE_WIDTH = SIDEBAR_WIDTH + INFOBAR_WIDTH;
-	static constexpr int SHIP_SIZE = 250;
-	static constexpr int OUTFIT_SIZE = 183;
+	static constexpr int SIDEBAR_WIDTH   = SIDEBAR_CONTENT + SIDEBAR_PADDING;
+	static constexpr int INFOBAR_WIDTH   = 300;
+	static constexpr int SIDE_WIDTH      = SIDEBAR_WIDTH + INFOBAR_WIDTH;
+	static constexpr int SHIP_SIZE       = 250;
+	static constexpr int OUTFIT_SIZE     = 183;
 	// Button size/placement info:
 	static constexpr double BUTTON_ROW_START_PAD = 10;
-	static constexpr double BUTTON_ROW_PAD = 9.;
-	static constexpr double BUTTON_COL_PAD = 9.;
-	static constexpr double BUTTON_HEIGHT = 30.;
-	static constexpr double BUTTON_WIDTH = 73.;
+	static constexpr double BUTTON_ROW_PAD       = 9.;
+	static constexpr double BUTTON_COL_PAD       = 9.;
+	static constexpr double BUTTON_HEIGHT        = 30.;
+	static constexpr double BUTTON_WIDTH         = 73.;
 
 
 protected:
 	PlayerInfo &player;
 	// Remember the current day, for calculating depreciation.
-	int day;
+	int           day;
 	const Planet *planet = nullptr;
-	const bool isOutfitter;
+	const bool    isOutfitter;
 	// Step counter for thumbnail animations.
 	int step = 0;
 
 	// The player-owned ship that was first selected in the sidebar (or most recently purchased).
 	Ship *playerShip = nullptr;
 	// The player-owned ship being reordered.
-	Ship *dragShip = nullptr;
-	bool isDraggingShip = false;
+	Ship *dragShip       = nullptr;
+	bool  isDraggingShip = false;
 	Point dragPoint;
 	// The group of all selected, player-owned ships.
 	std::set<Ship *> playerShips;
@@ -207,8 +218,8 @@ protected:
 	ScrollVar<double> mainScroll;
 	ScrollVar<double> sidebarScroll;
 	ScrollVar<double> infobarScroll;
-	ShopPane activePane = ShopPane::Main;
-	char hoverButton = '\0';
+	ShopPane          activePane  = ShopPane::Main;
+	char              hoverButton = '\0';
 
 	ScrollBar mainScrollbar;
 	ScrollBar sidebarScrollbar;
@@ -216,29 +227,29 @@ protected:
 
 	double previousX = 0.;
 
-	std::vector<Zone> zones;
-	std::vector<ClickZone<char>> buttonZones;
+	std::vector<Zone>                    zones;
+	std::vector<ClickZone<char>>         buttonZones;
 	std::vector<ClickZone<const Ship *>> shipZones;
-	std::vector<ClickZone<std::string>> categoryZones;
+	std::vector<ClickZone<std::string>>  categoryZones;
 
 	std::map<std::string, std::vector<std::string>> catalog;
-	const CategoryList &categories;
-	std::set<std::string> &collapsed;
-	bool hasFleetCapacity;
+	const CategoryList                             &categories;
+	std::set<std::string>                          &collapsed;
+	bool                                            hasFleetCapacity;
 
-	ShipInfoDisplay shipInfo;
+	ShipInfoDisplay   shipInfo;
 	OutfitInfoDisplay outfitInfo;
 
-	bool delayedAutoScroll = false;
+	bool  delayedAutoScroll = false;
 	Point hoverPoint;
 
-	Tooltip shipsTooltip;
-	Tooltip creditsTooltip;
-	Tooltip buttonsTooltip;
+	Tooltip       shipsTooltip;
+	Tooltip       creditsTooltip;
+	Tooltip       buttonsTooltip;
 	LoadingCircle loadingCircle;
 
 	std::shared_ptr<Dropdown> selectedQuantity;
-	bool quantityIsModifier = false;
+	bool                      quantityIsModifier = false;
 
 
 private:
@@ -248,17 +259,17 @@ private:
 
 	int DrawPlayerShipInfo(GraphicsTypes::CommandBufferInstance *cb, const Point &point);
 
-	bool DoScroll(double dy, int steps = 5);
-	bool SetScrollToTop();
-	bool SetScrollToBottom();
-	void SideSelect(int count);
-	void SideSelect(Ship *ship, int clicks = 1);
-	void MainAutoScroll(const std::vector<Zone>::const_iterator &selected);
-	void MainLeft();
-	void MainRight();
-	void MainUp();
-	void MainDown();
-	void CategoryAdvance(const std::string &category);
+	bool                              DoScroll(double dy, int steps = 5);
+	bool                              SetScrollToTop();
+	bool                              SetScrollToBottom();
+	void                              SideSelect(int count);
+	void                              SideSelect(Ship *ship, int clicks = 1);
+	void                              MainAutoScroll(const std::vector<Zone>::const_iterator &selected);
+	void                              MainLeft();
+	void                              MainRight();
+	void                              MainUp();
+	void                              MainDown();
+	void                              CategoryAdvance(const std::string &category);
 	std::vector<Zone>::const_iterator Selected() const;
 	// Check if the given point is within the button zone, and if so return the
 	// letter of the button (or ' ' if it's not on a button).

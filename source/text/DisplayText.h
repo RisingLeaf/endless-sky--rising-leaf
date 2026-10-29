@@ -28,10 +28,10 @@ public:
 	DisplayText(const std::string &text, Layout layout);
 
 	const std::string &GetText() const noexcept;
-	const Layout &GetLayout() const noexcept;
+	const Layout      &GetLayout() const noexcept;
 
 
 private:
-	Layout layout;
+	Layout      layout;
 	std::string text;
 };

@@ -52,8 +52,8 @@ public:
 
 private:
 	uint32_t blinkCounter = 0;
-	Color color{1.0, 1.0, 1.0, .75};
+	Color    color{1.0, 1.0, 1.0, .75};
 
-	int height = 14;
+	int   height = 14;
 	Point pos{0, 0};
 };

@@ -39,8 +39,8 @@ namespace {
 			for(const DataNode &child : node)
 				if(child.Size() == 2)
 				{
-					auto *plugin = plugins.Get(child.Token(0));
-					plugin->enabled = child.Value(1);
+					auto *plugin         = plugins.Get(child.Token(0));
+					plugin->enabled      = child.Value(1);
 					plugin->currentState = child.Value(1);
 				}
 		}
@@ -55,22 +55,22 @@ const Plugin *PluginManager::Load(const filesystem::path &path)
 	// Get the name of the folder containing the plugin.
 	string name = path.filename().string();
 
-	filesystem::path pluginFile = path / "plugin.txt";
-	string aboutText;
-	string version;
-	set<string> authors;
-	set<string> tags;
+	filesystem::path           pluginFile = path / "plugin.txt";
+	string                     aboutText;
+	string                     version;
+	set<string>                authors;
+	set<string>                tags;
 	Plugin::PluginDependencies dependencies;
 
 	// Load plugin metadata from plugin.txt.
 	bool hasName = false;
 	for(const DataNode &child : DataFile(pluginFile))
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "name" && hasValue)
 		{
-			name = child.Token(1);
+			name    = child.Token(1);
 			hasName = true;
 		}
 		else if(key == "about" && hasValue)
@@ -87,8 +87,8 @@ const Plugin *PluginManager::Load(const filesystem::path &path)
 		{
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
-				bool grandHasValue = grand.Size() >= 2;
+				const string &grandKey      = grand.Token(0);
+				bool          grandHasValue = grand.Size() >= 2;
 				if(grandKey == "game version" && grandHasValue)
 					dependencies.gameVersion = grand.Token(1);
 				else if(grandKey == "requires")
@@ -142,9 +142,9 @@ const Plugin *PluginManager::Load(const filesystem::path &path)
 	}
 	else
 		plugin->aboutText = std::move(aboutText);
-	plugin->version = std::move(version);
-	plugin->authors = std::move(authors);
-	plugin->tags = std::move(tags);
+	plugin->version      = std::move(version);
+	plugin->authors      = std::move(authors);
+	plugin->tags         = std::move(tags);
 	plugin->dependencies = std::move(dependencies);
 
 	return plugin;
@@ -214,6 +214,6 @@ const Set<Plugin> &PluginManager::Get()
 // Toggles enabling or disabling a plugin for the next game restart.
 void PluginManager::TogglePlugin(const string &name)
 {
-	auto *plugin = plugins.Get(name);
+	auto *plugin         = plugins.Get(name);
 	plugin->currentState = !plugin->currentState;
 }

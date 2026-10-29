@@ -24,8 +24,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	Rectangle CreateBox(const Rectangle &zone, const Point &boxSize, Tooltip::Direction direction,
-	                    Tooltip::Corner corner)
+	Rectangle
+	CreateBox(const Rectangle &zone, const Point &boxSize, Tooltip::Direction direction, Tooltip::Corner corner)
 	{
 		// Find the anchor point that the tooltip should be created from.
 		Point anchor;
@@ -70,8 +70,8 @@ namespace {
 	// Determine where this tooltip should be positioned. Account for whether the
 	// default settings would generate a tooltip that goes off screen, and create
 	// an adjusted tooltip position if this occurs.
-	Rectangle PositionBox(const Rectangle &zone, const Point &boxSize, Tooltip::Direction direction,
-	                      Tooltip::Corner corner)
+	Rectangle
+	PositionBox(const Rectangle &zone, const Point &boxSize, Tooltip::Direction direction, Tooltip::Corner corner)
 	{
 		// Generate a tooltip box from the given parameters.
 		Rectangle box = CreateBox(zone, boxSize, direction, corner);
@@ -157,8 +157,13 @@ namespace {
 
 
 
-Tooltip::Tooltip(int width, Alignment alignment, Direction direction, Corner corner, const Color *backColor,
-                 const Color *fontColor, bool shrinkToFit)
+Tooltip::Tooltip(int          width,
+                 Alignment    alignment,
+                 Direction    direction,
+                 Corner       corner,
+                 const Color *backColor,
+                 const Color *fontColor,
+                 bool         shrinkToFit)
     : width(width), direction(direction), corner(corner), backColor(backColor), fontColor(fontColor),
       shrinkToFit(shrinkToFit)
 {
@@ -260,9 +265,9 @@ void Tooltip::Draw(GraphicsTypes::CommandBufferInstance *cb, bool forceDraw) con
 		return;
 
 	// Determine the tooltip's size and location.
-	Point textSize(text.WrapWidth(), text.Height(false));
-	Point boxSize = textSize + Point(20., 20.);
-	Rectangle box = PositionBox(zone, boxSize, direction, corner);
+	Point     textSize(text.WrapWidth(), text.Height(false));
+	Point     boxSize = textSize + Point(20., 20.);
+	Rectangle box     = PositionBox(zone, boxSize, direction, corner);
 
 	FillShader::Fill(cb, box, *backColor);
 	text.Draw(cb, box.TopLeft() + Point(10., 10.), *fontColor);

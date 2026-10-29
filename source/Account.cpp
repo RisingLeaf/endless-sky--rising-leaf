@@ -38,18 +38,18 @@ void Account::Load(const DataNode &node, bool clearFirst)
 {
 	if(clearFirst)
 	{
-		credits = 0;
+		credits          = 0;
 		crewSalariesOwed = 0;
-		maintenanceDue = 0;
-		creditScore = 400;
+		maintenanceDue   = 0;
+		creditScore      = 400;
 		mortgages.clear();
 		history.clear();
 	}
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "credits" && hasValue)
 			credits = child.Value(1);
 		else if(key == "salaries income")
@@ -210,8 +210,8 @@ string Account::Step(int64_t assets, int64_t salaries, int64_t maintenance)
 	// Unlike salaries, each mortgage payment must either be made in its entirety,
 	// or skipped completely (accruing interest and reducing your credit score).
 	int64_t mortgagesPaid = 0;
-	int64_t finesPaid = 0;
-	int64_t debtPaid = 0;
+	int64_t finesPaid     = 0;
+	int64_t debtPaid      = 0;
 	for(Mortgage &mortgage : mortgages)
 	{
 		int64_t payment = mortgage.Payment();
@@ -293,7 +293,9 @@ const map<string, int64_t> &Account::SalariesIncome() const
 
 int64_t Account::SalariesIncomeTotal() const
 {
-	return accumulate(salariesIncome.begin(), salariesIncome.end(), 0,
+	return accumulate(salariesIncome.begin(),
+	                  salariesIncome.end(),
+	                  0,
 	                  [](int64_t value, const map<string, int64_t>::value_type &salary) {
 		                  return value + salary.second;
 	                  });
@@ -384,7 +386,7 @@ void Account::AddDebt(int64_t amount, optional<double> interest, int term)
 // Check how big a mortgage the player can afford to pay at their current income.
 int64_t Account::Prequalify() const
 {
-	double payments = 0.;
+	double  payments    = 0.;
 	int64_t liabilities = 0;
 	for(const Mortgage &mortgage : mortgages)
 	{

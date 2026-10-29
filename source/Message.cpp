@@ -33,21 +33,24 @@ void Message::Category::Load(const DataNode &node)
 {
 	if(node.Size() < 2)
 		return;
-	name = node.Token(1);
+	name     = node.Token(1);
 	isLoaded = true;
 
 	auto setColor = [](const DataNode &node, ExclusiveItem<Color> &color) noexcept -> void {
 		if(node.Size() >= 4)
-			color = ExclusiveItem<Color>{{static_cast<float>(node.Value(1)), static_cast<float>(node.Value(2)),
-			                              static_cast<float>(node.Value(3))}};
+			color = ExclusiveItem<Color>{
+			    {static_cast<float>(node.Value(1)),
+				 static_cast<float>(node.Value(2)),
+				 static_cast<float>(node.Value(3))}
+            };
 		else
 			color = ExclusiveItem<Color>{GameData::Colors().Get(node.Token(1))};
 	};
 
 	for(const auto &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 
 		if(key == "main color" && hasValue)
 			setColor(child, mainColor);
@@ -169,17 +172,17 @@ void Message::Load(const DataNode &node)
 
 	for(const auto &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 
 		if(key == "text" && hasValue)
 		{
-			text = child.Token(1);
+			text     = child.Token(1);
 			isPhrase = false;
 		}
 		else if(key == "phrase" && hasValue)
 		{
-			text = child.Token(1);
+			text     = child.Token(1);
 			isPhrase = true;
 		}
 		else if(key == "category" && hasValue)

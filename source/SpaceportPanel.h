@@ -46,19 +46,19 @@ protected:
 
 
 private:
-	void InitNewsTextArea();
-	void ResizeNewsTextArea() const;
+	void        InitNewsTextArea();
+	void        ResizeNewsTextArea() const;
 	const News *PickNews() const;
 
 
 private:
-	PlayerInfo &player;
+	PlayerInfo               &player;
 	std::shared_ptr<TextArea> description;
-	const Port &port;
+	const Port               &port;
 
 	// Current news item (if any):
-	bool hasNews = false;
-	bool hasPortrait = false;
-	Information newsInfo;
+	bool                      hasNews     = false;
+	bool                      hasPortrait = false;
+	Information               newsInfo;
 	std::shared_ptr<TextArea> newsMessage;
 };

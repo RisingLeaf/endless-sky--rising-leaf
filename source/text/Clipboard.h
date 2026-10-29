@@ -32,7 +32,10 @@ public:
 	// Handle keys used for clipboard operations on inputBuffer. Return false if the keys
 	// don't have any functionality assigned to them. Optionally, size limit of the input buffer
 	// and a set of forbidden characters can be provided.
-	static bool KeyDown(std::string &inputBuffer, SDL_Keycode key, Uint16 mod, size_t maxSize = -1,
+	static bool KeyDown(std::string                         &inputBuffer,
+	                    SDL_Keycode                          key,
+	                    Uint16                               mod,
+	                    size_t                               maxSize   = -1,
 	                    const std::function<bool(char32_t)> &forbidden = nullptr);
 
 

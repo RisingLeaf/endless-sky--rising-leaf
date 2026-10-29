@@ -54,18 +54,20 @@ vector<AudioSupplier::sample_t> WavSupplier::NextDataChunk()
 		return samples;
 
 	size_t currentSampleCount = 0;
-	do {
+	do
+	{
 		// If restarting the buffer, check 3x status.
 		if(!currentSample)
 		{
-			is3x = nextPlaybackIs3x;
+			is3x       = nextPlaybackIs3x;
 			wasStarted = true;
 		}
-		const vector<sample_t> &input = is3x ? sound.Buffer3x() : sound.Buffer();
-		size_t readChunk = min(input.size() - currentSample, samples.size() - currentSampleCount);
+		const vector<sample_t> &input     = is3x ? sound.Buffer3x() : sound.Buffer();
+		size_t                  readChunk = min(input.size() - currentSample, samples.size() - currentSampleCount);
 		std::copy_n(input.begin() + currentSample, readChunk, samples.begin() + currentSampleCount);
 		currentSampleCount += readChunk;
 		currentSample = (currentSample + readChunk) % input.size();
-	} while(currentSampleCount < samples.size() && isLooping);
+	}
+	while(currentSampleCount < samples.size() && isLooping);
 	return samples;
 }

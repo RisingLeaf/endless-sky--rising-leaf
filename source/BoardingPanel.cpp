@@ -52,9 +52,13 @@ using namespace std;
 
 // Constructor.
 BoardingPanel::BoardingPanel(PlayerInfo &player, const shared_ptr<Ship> &victim)
-    : player(player), you(player.FlagshipPtr()), victim(victim),
-      tooltip(300, Alignment::LEFT, Tooltip::Direction::DOWN_RIGHT, Tooltip::Corner::BOTTOM_LEFT,
-	          GameData::Colors().Get("tooltip background"), GameData::Colors().Get("medium"), true),
+    : player(player), you(player.FlagshipPtr()), victim(victim), tooltip(300,
+	                                                                     Alignment::LEFT,
+	                                                                     Tooltip::Direction::DOWN_RIGHT,
+	                                                                     Tooltip::Corner::BOTTOM_LEFT,
+	                                                                     GameData::Colors().Get("tooltip background"),
+	                                                                     GameData::Colors().Get("medium"),
+	                                                                     true),
       attackOdds(*you, *victim), defenseOdds(*victim, *you)
 {
 	Audio::Pause();
@@ -85,7 +89,7 @@ BoardingPanel::BoardingPanel(PlayerInfo &player, const shared_ptr<Ship> &victim)
 	AddPlunder(victim->Cargo().Outfits(), true);
 
 	const Interface *boarding = GameData::Interfaces().Get("boarding");
-	messageDisplay = make_shared<TextArea>();
+	messageDisplay            = make_shared<TextArea>();
 	messageDisplay->SetFont(FontSet::Get(Preferences::GetFontSize()));
 	messageDisplay->SetParagraphBreak(0);
 	messageDisplay->SetColor(*GameData::Colors().Get("bright"));
@@ -141,25 +145,25 @@ void BoardingPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	DrawBackdrop(cb);
 
 	// Draw the list of plunder.
-	const Interface *boarding = GameData::Interfaces().Get("boarding");
-	const Color &opaque = *GameData::Colors().Get("panel background");
-	const Color &back = *GameData::Colors().Get("faint");
-	const Color &dim = *GameData::Colors().Get("dim");
-	const Color &medium = *GameData::Colors().Get("medium");
-	const Color &bright = *GameData::Colors().Get("bright");
-	const Sprite *cargo = SpriteSet::Get("ui/in cargo");
-	const Sprite *installed = SpriteSet::Get("ui/installed");
-	const Rectangle plunderTableFrame = boarding->GetBox("plunder table: frame");
+	const Interface *boarding          = GameData::Interfaces().Get("boarding");
+	const Color     &opaque            = *GameData::Colors().Get("panel background");
+	const Color     &back              = *GameData::Colors().Get("faint");
+	const Color     &dim               = *GameData::Colors().Get("dim");
+	const Color     &medium            = *GameData::Colors().Get("medium");
+	const Color     &bright            = *GameData::Colors().Get("bright");
+	const Sprite    *cargo             = SpriteSet::Get("ui/in cargo");
+	const Sprite    *installed         = SpriteSet::Get("ui/installed");
+	const Rectangle  plunderTableFrame = boarding->GetBox("plunder table: frame");
 	FillShader::Fill(cb, plunderTableFrame, opaque);
 
 	const Rectangle plunderTableInner = boarding->GetBox("plunder table: inner");
-	int index = (scroll.AnimatedValue() - 10) / 20;
-	int y = plunderTableInner.Top() - scroll.AnimatedValue() + 20 * index;
-	int endY = 60;
+	int             index             = (scroll.AnimatedValue() - 10) / 20;
+	int             y                 = plunderTableInner.Top() - scroll.AnimatedValue() + 20 * index;
+	int             endY              = 60;
 
-	int tableWidth = plunderTableInner.Width();
+	int tableWidth   = plunderTableInner.Width();
 	int sizeColWidth = boarding->GetValue("plunder table: size column: width");
-	int iconOffset = boarding->GetValue("plunder table: icon offset");
+	int iconOffset   = boarding->GetValue("plunder table: icon offset");
 
 	const Font &font = FontSet::Get(14);
 	// Y offset to center the text in a 20-pixel high row.
@@ -169,7 +173,7 @@ void BoardingPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	for(; y < endY && static_cast<unsigned>(index) < plunder.size(); y += 20, ++index)
 	{
 		const Plunder &item = plunder[index];
-		Rectangle plunderZone =
+		Rectangle      plunderZone =
 		    Rectangle(Point(plunderTableFrame.Center().X(), y + 10.), Point(plunderTableFrame.Width(), 20.));
 		Point pos(plunderTableInner.Left() + iconOffset, y + fontOff);
 
@@ -195,8 +199,18 @@ void BoardingPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 		// Color the item based on whether you have space for it.
 		const Color &color = item.CanTake(*you) ? isSelected ? bright : medium : dim;
 		font.Draw(cb, item.Name(), pos, color);
-		font.Draw(cb, {item.Value(), {tableWidth - sizeColWidth - iconOffset, Alignment::RIGHT}}, pos, color);
-		font.Draw(cb, {item.Size(), {tableWidth - iconOffset, Alignment::RIGHT}}, pos, color);
+		font.Draw(cb,
+		          {
+		              item.Value(), {tableWidth - sizeColWidth - iconOffset, Alignment::RIGHT}
+        },
+		          pos,
+		          color);
+		font.Draw(cb,
+		          {
+		              item.Size(), {tableWidth - iconOffset, Alignment::RIGHT}
+        },
+		          pos,
+		          color);
 	}
 
 	// Set which buttons are active.
@@ -289,9 +303,9 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 			return true;
 		}
 
-		Plunder &selectedPlunder = plunder[selected];
-		CargoHold &cargo = you->Cargo();
-		int count = selectedPlunder.Count();
+		Plunder   &selectedPlunder = plunder[selected];
+		CargoHold &cargo           = you->Cargo();
+		int        count           = selectedPlunder.Count();
 
 		const Outfit *outfit = selectedPlunder.GetOutfit();
 		if(outfit)
@@ -355,7 +369,7 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 	}
 	else if((key == 'a' || key == 'd' || key == 'D') && CanAttack())
 	{
-		int yourStartCrew = you->Crew();
+		int yourStartCrew  = you->Crew();
 		int enemyStartCrew = victim->Crew();
 
 		// Figure out what action the other ship will take. As a special case,
@@ -378,7 +392,7 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 		}
 		else
 		{
-			unsigned int yourCasualties = 0;
+			unsigned int yourCasualties  = 0;
 			unsigned int enemyCasualties = 0;
 
 			// To speed things up, have multiple rounds of combat each time you
@@ -386,7 +400,7 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 			int rounds = max(1, yourStartCrew / 5);
 			for(int round = 0; round < rounds; ++round)
 			{
-				int yourCrew = you->Crew();
+				int yourCrew  = you->Crew();
 				int enemyCrew = victim->Crew();
 				if(!yourCrew || !enemyCrew)
 					break;
@@ -396,7 +410,7 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 					// Your chance of winning this round is equal to the ratio of
 					// your power to the enemy's power.
 					double yourAttackPower = attackOdds.AttackerPower(yourCrew);
-					double total = yourAttackPower + attackOdds.DefenderPower(enemyCrew);
+					double total           = yourAttackPower + attackOdds.DefenderPower(enemyCrew);
 
 					if(total)
 					{
@@ -419,7 +433,7 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 				if(enemyAttacks)
 				{
 					double yourDefensePower = defenseOdds.DefenderPower(yourCrew);
-					double total = defenseOdds.AttackerPower(enemyCrew) + yourDefensePower;
+					double total            = defenseOdds.AttackerPower(enemyCrew) + yourDefensePower;
 
 					if(total)
 					{
@@ -464,7 +478,7 @@ bool BoardingPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command,
 			{
 				AddMessage("You have been killed. Your ship is lost.");
 				you->WasCaptured(victim);
-				playerDied = true;
+				playerDied  = true;
 				isCapturing = false;
 			}
 			else if(!victim->Crew())
@@ -536,9 +550,9 @@ bool BoardingPanel::Click(int x, int y, MouseButton button, int clicks)
 		return false;
 
 	// Was the click inside the plunder list?
-	const Interface *boarding = GameData::Interfaces().Get("boarding");
-	Rectangle plunderTableFrame = boarding->GetBox("plunder table: frame");
-	Rectangle plunderTableInner = boarding->GetBox("plunder table: inner");
+	const Interface *boarding          = GameData::Interfaces().Get("boarding");
+	Rectangle        plunderTableFrame = boarding->GetBox("plunder table: frame");
+	Rectangle        plunderTableInner = boarding->GetBox("plunder table: inner");
 	if(plunderTableFrame.Contains(Point(x, y)))
 	{
 		// These numerical gymnastics are to make sure the scrollable

@@ -49,8 +49,11 @@ public:
 
 	// Get all possible collisions along a line. Collisions are not necessarily sorted by
 	// distance.
-	void Line(const Point &from, const Point &to, std::vector<Collision> &result, const Government *pGov = nullptr,
-	          const Body *target = nullptr) const;
+	void Line(const Point            &from,
+	          const Point            &to,
+	          std::vector<Collision> &result,
+	          const Government       *pGov   = nullptr,
+	          const Body             *target = nullptr) const;
 
 	// Get all objects within the given range of the given point.
 	void Circle(const Point &center, double radius, std::vector<Body *> &result) const;
@@ -70,10 +73,10 @@ private:
 		{
 		}
 
-		Body *body;
+		Body    *body;
 		unsigned seenIndex;
-		int x;
-		int y;
+		int      x;
+		int      y;
 	};
 
 
@@ -95,8 +98,8 @@ private:
 
 	// Vectors to store the objects in the collision set.
 	std::vector<Body *> all;
-	std::vector<Entry> added;
-	std::vector<Entry> sorted;
+	std::vector<Entry>  added;
+	std::vector<Entry>  sorted;
 	// After Finish(), counts[index] is where a certain bin begins.
 	std::vector<unsigned> counts;
 };

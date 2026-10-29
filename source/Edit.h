@@ -35,11 +35,11 @@ public:
 	Edit();
 
 	void SetFontSize(int f);
-	int FontSize() const
+	int  FontSize() const
 	{
 		return fontSize;
 	}
-	void SetPosition(const Rectangle &position);
+	void             SetPosition(const Rectangle &position);
 	const Rectangle &Position() const
 	{
 		return position;
@@ -54,8 +54,8 @@ public:
 	}
 
 	const std::string &Text() const;
-	virtual void SetText(const std::string &s);
-	void Clear();
+	virtual void       SetText(const std::string &s);
+	void               Clear();
 
 	virtual void Draw(GraphicsTypes::CommandBufferInstance *cb) override;
 
@@ -68,11 +68,11 @@ public:
 		return alignment;
 	}
 	virtual void SetPadding(int p);
-	void SetLeftPadding(int p);
+	void         SetLeftPadding(int p);
 	virtual void SetRightPadding(int p);
-	void SetTopPadding(int p);
-	void SetBottomPadding(int p);
-	int Padding() const
+	void         SetTopPadding(int p);
+	void         SetBottomPadding(int p);
+	int          Padding() const
 	{
 		return leftPadding;
 	}
@@ -111,7 +111,7 @@ public:
 	}
 
 	typedef std::function<bool(std::string &)> ChangedCallback;
-	void SetCallback(ChangedCallback cb)
+	void                                       SetCallback(ChangedCallback cb)
 	{
 		changedCallback = cb;
 	}
@@ -138,7 +138,7 @@ protected:
 	// Given an offset into the string, return the position where caret or
 	// highlight would go.
 	Point AlignedOffset(size_t offset);
-	void UpdateHighlightRect(size_t o1, size_t o2);
+	void  UpdateHighlightRect(size_t o1, size_t o2);
 
 	void ComputeTextBounds();
 
@@ -146,27 +146,27 @@ protected:
 private:
 	Rectangle position;
 	Rectangle textBounds;
-	Color bgColor;
+	Color     bgColor;
 
 	std::vector<std::pair<std::string, size_t>> textHistory;
-	size_t historyPos = 0;
+	size_t                                      historyPos = 0;
 
-	Caret caret;
+	Caret  caret;
 	size_t caretPos = 0;
 
 	Rectangle highlight{};
-	size_t highlightPos = -1;
+	size_t    highlightPos = -1;
 
-	bool isActive = true;
+	bool isActive   = true;
 	bool isEditable = true;
-	bool isHover = false;
+	bool isHover    = false;
 
-	int fontSize = 18;
-	ALIGN alignment = LEFT;
-	int leftPadding = 5;
-	int rightPadding = 5;
-	int topPadding = 5;
-	int bottomPadding = 5;
+	int   fontSize      = 18;
+	ALIGN alignment     = LEFT;
+	int   leftPadding   = 5;
+	int   rightPadding  = 5;
+	int   topPadding    = 5;
+	int   bottomPadding = 5;
 
 	bool visible = true;
 

@@ -184,11 +184,11 @@ void PlayerInfoPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	interfaceInfo.SetCondition("player tab");
 	if(panelState.CanEdit() && !panelState.Ships().empty())
 	{
-		bool allParked = true;
-		bool allParkedSystem = true;
-		bool hasOtherShips = false;
-		const Ship *flagship = player.Flagship();
-		const System *flagshipSystem = flagship ? flagship->GetSystem() : player.GetSystem();
+		bool          allParked       = true;
+		bool          allParkedSystem = true;
+		bool          hasOtherShips   = false;
+		const Ship   *flagship        = player.Flagship();
+		const System *flagshipSystem  = flagship ? flagship->GetSystem() : player.GetSystem();
 		for(const auto &it : panelState.Ships())
 			if(!it->IsDisabled() && it.get() != flagship)
 			{
@@ -208,7 +208,7 @@ void PlayerInfoPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 		if(!panelState.AllSelected().empty())
 		{
 			bool parkable = false;
-			allParked = true;
+			allParked     = true;
 			for(int i : panelState.AllSelected())
 			{
 				const Ship &ship = *panelState.Ships()[i];
@@ -259,7 +259,7 @@ bool PlayerInfoPanel::AllowsFastForward() const noexcept
 bool PlayerInfoPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress)
 {
 	bool control = (mod & (SDL_KMOD_CTRL | SDL_KMOD_GUI));
-	bool shift = (mod & SDL_KMOD_SHIFT);
+	bool shift   = (mod & SDL_KMOD_SHIFT);
 	if(key == 'd' || key == SDLK_ESCAPE || (key == 'w' && control) || key == 'i' || command.Has(Command::INFO))
 	{
 		GetUI().Pop(this);
@@ -328,7 +328,7 @@ bool PlayerInfoPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comman
 
 			// Clamp the destination index to the end of the ships list.
 			size_t moved = panelState.AllSelected().size();
-			toIndex = min(panelState.Ships().size() - moved, toIndex);
+			toIndex      = min(panelState.Ships().size() - moved, toIndex);
 
 			if(panelState.ReorderShipsTo(toIndex))
 				ScrollAbsolute(panelState.SelectedIndex() - 12);
@@ -337,8 +337,8 @@ bool PlayerInfoPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comman
 		else
 		{
 			// Move the selection up or down one space.
-			int selectedIndex = panelState.SelectedIndex() + (key == SDLK_DOWN) - (key == SDLK_UP);
-			bool isValidIndex = static_cast<unsigned>(selectedIndex) < panelState.Ships().size();
+			int  selectedIndex = panelState.SelectedIndex() + (key == SDLK_DOWN) - (key == SDLK_UP);
+			bool isValidIndex  = static_cast<unsigned>(selectedIndex) < panelState.Ships().size();
 			if(selectedIndex < 0)
 			{
 				if(isNewPress)
@@ -384,8 +384,8 @@ bool PlayerInfoPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comman
 	else if(panelState.CanEdit() && (key == 'k' || (key == 'p' && shift)) && !panelState.AllSelected().empty())
 	{
 		// Toggle the parked status for all selected ships.
-		bool allParked = true;
-		const Ship *flagship = player.Flagship();
+		bool        allParked = true;
+		const Ship *flagship  = player.Flagship();
 		for(int i : panelState.AllSelected())
 		{
 			const Ship &ship = *panelState.Ships()[i];
@@ -403,8 +403,8 @@ bool PlayerInfoPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comman
 	else if(panelState.CanEdit() && (key == 'a') && !panelState.Ships().empty())
 	{
 		// Toggle the parked status for all ships except the flagship.
-		bool allParked = true;
-		const Ship *flagship = player.Flagship();
+		bool        allParked = true;
+		const Ship *flagship  = player.Flagship();
 		for(const auto &it : panelState.Ships())
 			if(!it->IsDisabled() && it.get() != flagship)
 				allParked &= it->IsParked();
@@ -416,8 +416,8 @@ bool PlayerInfoPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &comman
 	else if(panelState.CanEdit() && (key == 'c') && !panelState.Ships().empty())
 	{
 		// Toggle the parked status for all ships in system except the flagship.
-		bool allParked = true;
-		const Ship *flagship = player.Flagship();
+		bool          allParked      = true;
+		const Ship   *flagship       = player.Flagship();
 		const System *flagshipSystem = flagship ? flagship->GetSystem() : player.GetSystem();
 		for(const auto &it : panelState.Ships())
 			if(!it->IsDisabled() && it.get() != flagship && it->GetSystem() == flagshipSystem)
@@ -505,7 +505,7 @@ bool PlayerInfoPanel::Click(int x, int y, MouseButton button, int clicks)
 	if(hoverIndex < 0)
 		return true;
 
-	bool shift = (SDL_GetModState() & SDL_KMOD_SHIFT);
+	bool shift   = (SDL_GetModState() & SDL_KMOD_SHIFT);
 	bool control = (SDL_GetModState() & (SDL_KMOD_CTRL | SDL_KMOD_GUI));
 	if(panelState.CanEdit() && (shift || control || clicks < 2))
 	{
@@ -520,7 +520,7 @@ bool PlayerInfoPanel::Click(int x, int y, MouseButton button, int clicks)
 			{
 				// Select all the ships between the previous selection and this one.
 				int start = max(0, min(panelState.SelectedIndex(), hoverIndex));
-				int end = max(panelState.SelectedIndex(), hoverIndex);
+				int end   = max(panelState.SelectedIndex(), hoverIndex);
 				panelState.SelectMany(start, end + 1);
 				panelState.SetSelectedIndex(hoverIndex);
 			}
@@ -585,28 +585,28 @@ void PlayerInfoPanel::DrawPlayer(GraphicsTypes::CommandBufferInstance *cb, const
 		return;
 
 	// Colors to draw with.
-	const Color &dim = *GameData::Colors().Get("medium");
+	const Color &dim    = *GameData::Colors().Get("medium");
 	const Color &bright = *GameData::Colors().Get("bright");
 
 	// Two columns of opposite alignment are used to simulate a single visual column.
-	Table table;
+	Table     table;
 	const int columnWidth = 230;
 	table.AddColumn(0, {columnWidth, Alignment::LEFT});
 	table.AddColumn(columnWidth, {columnWidth, Alignment::RIGHT});
 	table.SetUnderline(0, columnWidth);
 	table.DrawAt(bounds.TopLeft() + Point(10., 8.));
 
-	table.DrawTruncatedPair(cb, "player:", dim, player.FirstName() + " " + player.LastName(), bright, Truncate::MIDDLE,
-	                        true);
-	table.DrawTruncatedPair(cb, "net worth:", dim, Format::CreditString(player.Accounts().NetWorth()), bright,
-	                        Truncate::MIDDLE, true);
-	table.DrawTruncatedPair(cb, "time played:", dim, Format::PlayTime(player.GetPlayTime()), bright, Truncate::MIDDLE,
-	                        true);
+	table.DrawTruncatedPair(
+	    cb, "player:", dim, player.FirstName() + " " + player.LastName(), bright, Truncate::MIDDLE, true);
+	table.DrawTruncatedPair(
+	    cb, "net worth:", dim, Format::CreditString(player.Accounts().NetWorth()), bright, Truncate::MIDDLE, true);
+	table.DrawTruncatedPair(
+	    cb, "time played:", dim, Format::PlayTime(player.GetPlayTime()), bright, Truncate::MIDDLE, true);
 
 	// Determine the player's combat rating.
-	int combatExperience = player.Conditions().Get("combat rating");
-	int combatLevel = log(max<int64_t>(1, combatExperience));
-	string combatRating = GameData::Rating("combat", combatLevel);
+	int    combatExperience = player.Conditions().Get("combat rating");
+	int    combatLevel      = log(max<int64_t>(1, combatExperience));
+	string combatRating     = GameData::Rating("combat", combatLevel);
 	if(!combatRating.empty())
 	{
 		table.DrawGap(10);
@@ -615,27 +615,31 @@ void PlayerInfoPanel::DrawPlayer(GraphicsTypes::CommandBufferInstance *cb, const
 		table.Advance();
 		table.DrawGap(5);
 
-		table.DrawTruncatedPair(cb, "rank:", dim, to_string(combatLevel) + " - " + combatRating, dim, Truncate::MIDDLE,
-		                        false);
+		table.DrawTruncatedPair(
+		    cb, "rank:", dim, to_string(combatLevel) + " - " + combatRating, dim, Truncate::MIDDLE, false);
 		table.DrawTruncatedPair(cb, "experience:", dim, Format::Number(combatExperience), dim, Truncate::MIDDLE, false);
 		bool maxRank = (combatRating == GameData::Rating("combat", combatLevel + 1));
-		table.DrawTruncatedPair(cb, "    for next rank:", dim,
-		                        maxRank ? "MAX" : Format::Number(ceil(exp(combatLevel + 1))), dim, Truncate::MIDDLE,
+		table.DrawTruncatedPair(cb,
+		                        "    for next rank:",
+		                        dim,
+		                        maxRank ? "MAX" : Format::Number(ceil(exp(combatLevel + 1))),
+		                        dim,
+		                        Truncate::MIDDLE,
 		                        false);
 	}
 
 	// Display the factors affecting piracy targeting the player.
 	if(GameData::GetGamerules().SpawnRaidFleets())
 	{
-		auto factors = player.RaidFleetFactors();
-		double attractionLevel = max(0., log2(max(factors.first, 0.)));
-		double deterrenceLevel = max(0., log2(max(factors.second, 0.)));
+		auto   factors          = player.RaidFleetFactors();
+		double attractionLevel  = max(0., log2(max(factors.first, 0.)));
+		double deterrenceLevel  = max(0., log2(max(factors.second, 0.)));
 		string attractionRating = GameData::Rating("cargo attractiveness", attractionLevel);
 		string deterrenceRating = GameData::Rating("armament deterrence", deterrenceLevel);
 		if(!attractionRating.empty() && !deterrenceRating.empty())
 		{
 			double attraction = max(0., min(1., .005 * (factors.first - factors.second - 2.)));
-			double prob = 1. - pow(1. - attraction, 10.);
+			double prob       = 1. - pow(1. - attraction, 10.);
 
 			table.DrawGap(10);
 			table.DrawUnderline(cb, dim);
@@ -645,11 +649,19 @@ void PlayerInfoPanel::DrawPlayer(GraphicsTypes::CommandBufferInstance *cb, const
 
 			// Format the attraction and deterrence levels with tens places, so it
 			// is clear which is higher even if they round to the same level.
-			table.DrawTruncatedPair(cb, "cargo: " + attractionRating, dim,
-			                        "(+" + Format::Number(attractionLevel, 1, false) + ")", dim, Truncate::MIDDLE,
+			table.DrawTruncatedPair(cb,
+			                        "cargo: " + attractionRating,
+			                        dim,
+			                        "(+" + Format::Number(attractionLevel, 1, false) + ")",
+			                        dim,
+			                        Truncate::MIDDLE,
 			                        false);
-			table.DrawTruncatedPair(cb, "fleet: " + deterrenceRating, dim,
-			                        "(-" + Format::Number(deterrenceLevel, 1, false) + ")", dim, Truncate::MIDDLE,
+			table.DrawTruncatedPair(cb,
+			                        "fleet: " + deterrenceRating,
+			                        dim,
+			                        "(-" + Format::Number(deterrenceLevel, 1, false) + ")",
+			                        dim,
+			                        Truncate::MIDDLE,
 			                        false);
 		}
 	}
@@ -661,14 +673,26 @@ void PlayerInfoPanel::DrawPlayer(GraphicsTypes::CommandBufferInstance *cb, const
 	for(const auto &[name, value] : player.Accounts().SalariesIncome())
 		salary.emplace_back(name, value);
 	sort(salary.begin(), salary.end(), std::greater<>());
-	DrawList(cb, salary, salaryArea, start, columnWidth, "salary:", player.Accounts().SalariesIncomeTotal(),
+	DrawList(cb,
+	         salary,
+	         salaryArea,
+	         start,
+	         columnWidth,
+	         "salary:",
+	         player.Accounts().SalariesIncomeTotal(),
 	         min<int>(salary.size(), 4) * 20);
 
 	vector<pair<string, int64_t>> tribute;
 	for(const auto &[planet, value] : player.GetTribute())
 		tribute.emplace_back(planet->TrueName(), value);
 	sort(tribute.begin(), tribute.end(), std::greater<>());
-	DrawList(cb, tribute, tributeArea, start, columnWidth, "tribute:", player.GetTributeTotal(),
+	DrawList(cb,
+	         tribute,
+	         tributeArea,
+	         start,
+	         columnWidth,
+	         "tribute:",
+	         player.GetTributeTotal(),
 	         min<int>(tribute.size(), 4) * 20);
 
 	vector<pair<string, int64_t>> licenses;
@@ -686,14 +710,14 @@ void PlayerInfoPanel::DrawFleet(GraphicsTypes::CommandBufferInstance *cb, const 
 		return;
 
 	// Colors to draw with.
-	const Color &back = *GameData::Colors().Get("faint");
+	const Color &back         = *GameData::Colors().Get("faint");
 	const Color &selectedBack = *GameData::Colors().Get("dimmer");
-	const Color &dim = *GameData::Colors().Get("medium");
-	const Color &bright = *GameData::Colors().Get("bright");
-	const Color &elsewhere = *GameData::Colors().Get("dim");
-	const Color &dead = *GameData::Colors().Get("dead");
-	const Color &flagship = *GameData::Colors().Get("flagship");
-	const Color &disabled = *GameData::Colors().Get("disabled");
+	const Color &dim          = *GameData::Colors().Get("medium");
+	const Color &bright       = *GameData::Colors().Get("bright");
+	const Color &elsewhere    = *GameData::Colors().Get("dim");
+	const Color &dead         = *GameData::Colors().Get("dead");
+	const Color &flagship     = *GameData::Colors().Get("flagship");
+	const Color &disabled     = *GameData::Colors().Get("disabled");
 
 	// Table attributes.
 	Table table;
@@ -724,7 +748,7 @@ void PlayerInfoPanel::DrawFleet(GraphicsTypes::CommandBufferInstance *cb, const 
 	table.DrawGap(5);
 
 	// Loop through all the player's ships.
-	int index = panelState.Scroll();
+	int index  = panelState.Scroll();
 	hoverIndex = -1;
 	for(auto sit = panelState.Ships().begin() + panelState.Scroll(); sit < panelState.Ships().end(); ++sit)
 	{
@@ -739,15 +763,15 @@ void PlayerInfoPanel::DrawFleet(GraphicsTypes::CommandBufferInstance *cb, const 
 			table.DrawHighlight(cb, back);
 
 		// Find out if the mouse is hovering over the ship
-		Rectangle shipZone = Rectangle(table.GetCenterPoint(), table.GetRowSize());
-		bool isHovered = (hoverIndex == -1) && shipZone.Contains(hoverPoint);
+		Rectangle shipZone  = Rectangle(table.GetCenterPoint(), table.GetRowSize());
+		bool      isHovered = (hoverIndex == -1) && shipZone.Contains(hoverPoint);
 		if(isHovered)
 			hoverIndex = index;
 
-		const Ship &ship = **sit;
-		bool isElsewhere = (ship.GetSystem() != player.GetSystem());
+		const Ship &ship        = **sit;
+		bool        isElsewhere = (ship.GetSystem() != player.GetSystem());
 		isElsewhere |= ((ship.CanBeCarried() || ship.GetPlanet() != player.GetPlanet()) && player.GetPlanet());
-		bool isDead = ship.IsDestroyed();
+		bool isDead     = ship.IsDestroyed();
 		bool isDisabled = ship.IsDisabled();
 		bool isFlagship = &ship == player.Flagship();
 
@@ -787,7 +811,7 @@ void PlayerInfoPanel::DrawFleet(GraphicsTypes::CommandBufferInstance *cb, const 
 	if(isDragging)
 	{
 		const Font &font = FontSet::Get(14);
-		Point pos(hoverPoint.X(), hoverPoint.Y());
+		Point       pos(hoverPoint.X(), hoverPoint.Y());
 		for(int i : panelState.AllSelected())
 		{
 			const string &name = panelState.Ships()[i]->GivenName();
@@ -800,19 +824,35 @@ void PlayerInfoPanel::DrawFleet(GraphicsTypes::CommandBufferInstance *cb, const 
 
 
 
-void PlayerInfoPanel::DrawList(GraphicsTypes::CommandBufferInstance *cb, const vector<pair<string, int64_t>> &list,
-                               shared_ptr<TableArea> &area, Point &topLeft, int width, const string &title,
-                               int64_t titleValue, int height, bool drawValues)
+void PlayerInfoPanel::DrawList(GraphicsTypes::CommandBufferInstance *cb,
+                               const vector<pair<string, int64_t>>  &list,
+                               shared_ptr<TableArea>                &area,
+                               Point                                &topLeft,
+                               int                                   width,
+                               const string                         &title,
+                               int64_t                               titleValue,
+                               int                                   height,
+                               bool                                  drawValues)
 {
 	if(list.empty())
 		return;
 
-	const Font &font = FontSet::Get(14);
+	const Font  &font   = FontSet::Get(14);
 	const Color &bright = *GameData::Colors().Get("bright");
-	const Color &dim = *GameData::Colors().Get("medium");
+	const Color &dim    = *GameData::Colors().Get("medium");
 
-	font.Draw(cb, {title, {width, Alignment::LEFT}}, topLeft, bright);
-	font.Draw(cb, {Format::Number(titleValue), {width, Alignment::RIGHT}}, topLeft, dim);
+	font.Draw(cb,
+	          {
+	              title, {width, Alignment::LEFT}
+    },
+	          topLeft,
+	          bright);
+	font.Draw(cb,
+	          {
+	              Format::Number(titleValue), {width, Alignment::RIGHT}
+    },
+	          topLeft,
+	          dim);
 	FillShader::Fill(cb, Rectangle::FromCorner(topLeft + Point(0., font.Height() - 2.), Point(width, 1.)), dim);
 	topLeft.Y() += 25.;
 
@@ -851,7 +891,7 @@ void PlayerInfoPanel::SortShips(InfoPanelState::ShipComparator *shipComparator)
 
 	// Save selected ships to preserve selection after sort.
 	multiset<shared_ptr<Ship>, InfoPanelState::ShipComparator *> selectedShips(shipComparator);
-	shared_ptr<Ship> lastSelected =
+	shared_ptr<Ship>                                             lastSelected =
 	    panelState.SelectedIndex() == -1 ? nullptr : panelState.Ships()[panelState.SelectedIndex()];
 
 	for(int i : panelState.AllSelected())
@@ -937,8 +977,8 @@ bool PlayerInfoPanel::Scroll(int distance)
 
 
 
-PlayerInfoPanel::SortableColumn::SortableColumn(string name, double offset, double endX, Layout layout,
-                                                InfoPanelState::ShipComparator *shipSort)
+PlayerInfoPanel::SortableColumn::SortableColumn(
+    string name, double offset, double endX, Layout layout, InfoPanelState::ShipComparator *shipSort)
     : name(name), offset(offset), endX(endX), layout(layout), shipSort(shipSort)
 {
 }

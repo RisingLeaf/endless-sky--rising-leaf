@@ -37,8 +37,8 @@ class Sprite;
 class EscortDisplay {
 public:
 	void Clear();
-	void Add(const std::shared_ptr<Ship> &ship, bool isHere, bool systemNameKnown, bool fleetIsJumping,
-	         bool isSelected);
+	void
+	Add(const std::shared_ptr<Ship> &ship, bool isHere, bool systemNameKnown, bool fleetIsJumping, bool isSelected);
 
 	// Draw as many escort icons as will fit in the given bounding box.
 	void Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &bounds) const;
@@ -51,28 +51,33 @@ public:
 private:
 	class Icon {
 	public:
-		Icon(const std::shared_ptr<Ship> &ship, bool isHere, bool systemNameKnown, bool fleetIsJumping, bool isSelected,
-		     int basicHeight, int systemLabelHeight);
+		Icon(const std::shared_ptr<Ship> &ship,
+		     bool                         isHere,
+		     bool                         systemNameKnown,
+		     bool                         fleetIsJumping,
+		     bool                         isSelected,
+		     int                          basicHeight,
+		     int                          systemLabelHeight);
 
 		// Sorting operator.
 		bool operator<(const Icon &other) const;
 
-		int Height() const;
+		int  Height() const;
 		void Merge(const Icon &other);
 
-		const Sprite *sprite;
-		bool isDisabled;
-		bool isHere;
-		bool isHostile;
-		bool notReadyToJump;
-		bool cannotJump;
-		bool isSelected;
-		int64_t cost;
-		std::string system;
-		std::vector<double> low;
-		std::vector<double> high;
+		const Sprite                    *sprite;
+		bool                             isDisabled;
+		bool                             isHere;
+		bool                             isHostile;
+		bool                             notReadyToJump;
+		bool                             cannotJump;
+		bool                             isSelected;
+		int64_t                          cost;
+		std::string                      system;
+		std::vector<double>              low;
+		std::vector<double>              high;
 		std::vector<std::weak_ptr<Ship>> ships;
-		int height = 0;
+		int                              height = 0;
 	};
 
 
@@ -81,11 +86,11 @@ private:
 
 
 private:
-	mutable std::list<Icon> icons;
+	mutable std::list<Icon>                               icons;
 	mutable std::vector<std::vector<std::weak_ptr<Ship>>> stacks;
-	mutable std::vector<Rectangle> zones;
+	mutable std::vector<Rectangle>                        zones;
 
-	const Interface *element = nullptr;
-	int basicHeight = 0;
-	int systemLabelHeight = 0;
+	const Interface *element           = nullptr;
+	int              basicHeight       = 0;
+	int              systemLabelHeight = 0;
 };

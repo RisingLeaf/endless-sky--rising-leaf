@@ -107,7 +107,10 @@ private:
 		/// to avoid dangerous systems.
 		/// @param wormholeKeys A vector of attributes required to enter wormholes that this ship is capable of
 		/// entering. (See Planet::IsAccessible.)
-		RouteCacheKey(std::size_t jumpHash, std::size_t personalityHash, const System *to, bool isPlayer,
+		RouteCacheKey(std::size_t                     jumpHash,
+		              std::size_t                     personalityHash,
+		              const System                   *to,
+		              bool                            isPlayer,
 		              const std::vector<std::string> &wormholeKeys);
 
 		// To support use as a map key:
@@ -120,10 +123,10 @@ private:
 		};
 
 	public:
-		size_t jumpHash;
-		size_t personalityHash;
-		const System *to;
-		bool isPlayer;
+		size_t                   jumpHash;
+		size_t                   personalityHash;
+		const System            *to;
+		bool                     isPlayer;
 		std::vector<std::string> wormholeKeys;
 	};
 
@@ -141,11 +144,11 @@ private:
 	// Obtain a list of ships matching the desired hostility.
 	std::vector<Ship *> GetShipsList(const Ship &ship, bool targetEnemies, double maxRange = -1.) const;
 
-	bool FollowOrders(Ship &ship, Command &command);
-	void MoveInFormation(Ship &ship, Command &command);
-	void MoveIndependent(Ship &ship, Command &command);
-	void MoveWithParent(Ship &ship, Command &command, const Ship &parent);
-	void MoveEscort(Ship &ship, Command &command);
+	bool        FollowOrders(Ship &ship, Command &command);
+	void        MoveInFormation(Ship &ship, Command &command);
+	void        MoveIndependent(Ship &ship, Command &command);
+	void        MoveWithParent(Ship &ship, Command &command, const Ship &parent);
+	void        MoveEscort(Ship &ship, Command &command);
 	static void Refuel(Ship &ship, Command &command);
 	static bool CanRefuel(const Ship &ship, const StellarObject *target);
 	// Set the ship's target system or planet in order to reach the
@@ -160,18 +163,23 @@ private:
 	// "precision" is an optional argument corresponding to a value of the dot product of the current and target facing
 	// vectors above which no turning should be attempting, to reduce constant, minute corrections.
 	static double TurnToward(const Ship &ship, const Point &vector, const double precision = 0.9999);
-	static bool MoveToPlanet(const Ship &ship, Command &command, double cruiseSpeed = 0.);
-	static bool MoveTo(const Ship &ship, Command &command, const Point &targetPosition, const Point &targetVelocity,
-	                   double radius, double slow, double cruiseSpeed = 0.);
-	static bool Stop(const Ship &ship, Command &command, double maxSpeed = 0., const Point &direction = Point());
-	static void PrepareForHyperspace(const Ship &ship, Command &command);
-	static void CircleAround(const Ship &ship, Command &command, const Body &target);
-	static void Swarm(const Ship &ship, Command &command, const Body &target);
-	static void KeepStation(const Ship &ship, Command &command, const Body &target);
-	static void Attack(const Ship &ship, Command &command, const Ship &target, FireCommand &targeting);
-	static void AimToAttack(const Ship &ship, Command &command, const Body &target, FireCommand &targeting);
-	static void MoveToAttack(const Ship &ship, Command &command, const Body &target, FireCommand &targeting);
-	static void PickUp(const Ship &ship, Command &command, const Body &target);
+	static bool   MoveToPlanet(const Ship &ship, Command &command, double cruiseSpeed = 0.);
+	static bool   MoveTo(const Ship  &ship,
+	                     Command     &command,
+	                     const Point &targetPosition,
+	                     const Point &targetVelocity,
+	                     double       radius,
+	                     double       slow,
+	                     double       cruiseSpeed = 0.);
+	static bool   Stop(const Ship &ship, Command &command, double maxSpeed = 0., const Point &direction = Point());
+	static void   PrepareForHyperspace(const Ship &ship, Command &command);
+	static void   CircleAround(const Ship &ship, Command &command, const Body &target);
+	static void   Swarm(const Ship &ship, Command &command, const Body &target);
+	static void   KeepStation(const Ship &ship, Command &command, const Body &target);
+	static void   Attack(const Ship &ship, Command &command, const Ship &target, FireCommand &targeting);
+	static void   AimToAttack(const Ship &ship, Command &command, const Body &target, FireCommand &targeting);
+	static void   MoveToAttack(const Ship &ship, Command &command, const Body &target, FireCommand &targeting);
+	static void   PickUp(const Ship &ship, Command &command, const Body &target);
 	// Special personality behaviors.
 	void DoAppeasing(const std::shared_ptr<Ship> &ship, double *threshold) const;
 	void DoSwarming(Ship &ship, Command &command, std::shared_ptr<Ship> &target);
@@ -191,16 +199,23 @@ private:
 	// returns the direction to the target.
 	// For only the player's flagship, which secondary weapons are currently selected should be provided
 	// so that the flagship doesn't try to aim with weapons that the player isn't even using.
-	static Point TargetAim(const Ship &ship, FireCommand &targeting,
-	                       const std::set<const Outfit *> *includeSecondaries = nullptr);
-	static Point TargetAim(const Ship &ship, const Body &target, FireCommand &targeting,
+	static Point
+	TargetAim(const Ship &ship, FireCommand &targeting, const std::set<const Outfit *> *includeSecondaries = nullptr);
+	static Point TargetAim(const Ship                     &ship,
+	                       const Body                     &target,
+	                       FireCommand                    &targeting,
 	                       const std::set<const Outfit *> *includeSecondaries = nullptr);
 	// Aim the given ship's turrets.
-	void AimTurrets(const Ship &ship, FireCommand &command, bool opportunistic = false,
+	void AimTurrets(const Ship                 &ship,
+	                FireCommand                &command,
+	                bool                        opportunistic  = false,
 	                const std::optional<Point> &targetOverride = std::nullopt) const;
 	// Fire whichever of the given ship's weapons can hit a hostile target.
 	// Return a bitmask giving the weapons to fire.
-	void AutoFire(const Ship &ship, FireCommand &command, bool secondary = true, bool isFlagship = false,
+	void AutoFire(const Ship                     &ship,
+	              FireCommand                    &command,
+	              bool                            secondary          = true,
+	              bool                            isFlagship         = false,
 	              const std::set<const Outfit *> *includeSecondaries = nullptr) const;
 	void AutoFire(const Ship &ship, FireCommand &command, const Body &target) const;
 
@@ -233,7 +248,7 @@ private:
 
 	void IssueOrder(const OrderSingle &newOrder, const std::string &description);
 	// Convert order types based on fulfillment status.
-	void UpdateOrders(const Ship &ship);
+	void      UpdateOrders(const Ship &ship);
 	RoutePlan GetRoutePlan(const Ship &ship, const System *targetSystem);
 
 
@@ -241,7 +256,7 @@ private:
 	// TODO: Figure out a way to remove the player dependency.
 	PlayerInfo &player;
 	// Data from the game engine.
-	const List<Ship> &ships;
+	const List<Ship>    &ships;
 	const List<Minable> &minables;
 	const List<Flotsam> &flotsam;
 
@@ -259,7 +274,7 @@ private:
 	FireCommand firingCommands;
 
 	bool escortsAreFrugal = true;
-	bool escortsUseAmmo = true;
+	bool escortsUseAmmo   = true;
 
 	// The minimum speed before landing will consider non-landable objects.
 	const float MIN_LANDING_VELOCITY = 80.;
@@ -270,32 +285,32 @@ private:
 	std::map<const Ship *, OrderSet> orders;
 
 	// Records of what various AI ships and factions have done.
-	typedef std::owner_less<std::weak_ptr<const Ship>> Comp;
+	typedef std::owner_less<std::weak_ptr<const Ship>>                                        Comp;
 	std::map<std::weak_ptr<const Ship>, std::map<std::weak_ptr<const Ship>, int, Comp>, Comp> actions;
-	std::map<std::weak_ptr<const Ship>, std::map<const Government *, int>, Comp> notoriety;
-	std::map<const Government *, std::map<std::weak_ptr<const Ship>, int, Comp>> governmentActions;
-	std::map<const Government *, bool> scanPermissions;
-	std::map<std::weak_ptr<const Ship>, int, Comp> playerActions;
-	std::map<const Ship *, std::weak_ptr<Ship>> helperList;
-	std::map<const Ship *, int> swarmCount;
-	std::map<const Ship *, int> fenceCount;
-	std::map<const Ship *, std::set<const Ship *>> cargoScans;
-	std::map<const Ship *, std::set<const Ship *>> outfitScans;
-	std::map<const Ship *, int> scanTime;
-	std::map<const Ship *, Angle> miningAngle;
-	std::map<const Ship *, double> miningRadius;
-	std::map<const Ship *, int> miningTime;
-	std::map<const Ship *, double> appeasementThreshold;
-	std::map<const Ship *, const Ship *> boarders;
+	std::map<std::weak_ptr<const Ship>, std::map<const Government *, int>, Comp>              notoriety;
+	std::map<const Government *, std::map<std::weak_ptr<const Ship>, int, Comp>>              governmentActions;
+	std::map<const Government *, bool>                                                        scanPermissions;
+	std::map<std::weak_ptr<const Ship>, int, Comp>                                            playerActions;
+	std::map<const Ship *, std::weak_ptr<Ship>>                                               helperList;
+	std::map<const Ship *, int>                                                               swarmCount;
+	std::map<const Ship *, int>                                                               fenceCount;
+	std::map<const Ship *, std::set<const Ship *>>                                            cargoScans;
+	std::map<const Ship *, std::set<const Ship *>>                                            outfitScans;
+	std::map<const Ship *, int>                                                               scanTime;
+	std::map<const Ship *, Angle>                                                             miningAngle;
+	std::map<const Ship *, double>                                                            miningRadius;
+	std::map<const Ship *, int>                                                               miningTime;
+	std::map<const Ship *, double>                                                            appeasementThreshold;
+	std::map<const Ship *, const Ship *>                                                      boarders;
 	std::map<const Ship *, std::set<std::weak_ptr<const Ship>, std::owner_less<std::weak_ptr<const Ship>>>> closeBy;
 
 	// Records for formations flying around leadships and other objects.
 	std::map<const Body *, std::map<const FormationPattern *, FormationPositioner>> formations;
 
 	// Records that affect the combat behavior of various governments.
-	std::map<const Ship *, int64_t> shipStrength;
-	std::map<const Government *, int64_t> enemyStrength;
-	std::map<const Government *, int64_t> allyStrength;
+	std::map<const Ship *, int64_t>                   shipStrength;
+	std::map<const Government *, int64_t>             enemyStrength;
+	std::map<const Government *, int64_t>             allyStrength;
 	std::map<const Government *, std::vector<Ship *>> governmentRosters;
 	std::map<const Government *, std::vector<Ship *>> enemyLists;
 	std::map<const Government *, std::vector<Ship *>> allyLists;

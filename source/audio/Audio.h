@@ -44,7 +44,7 @@ public:
 
 	// Get or set the volume (between 0 and 1).
 	static double Volume(SoundCategory category);
-	static void SetVolume(double level, SoundCategory category);
+	static void   SetVolume(double level, SoundCategory category);
 
 	// Get a pointer to the named sound. The name is the path relative to the
 	// "sound/" folder, and without ~ if it's on the end, or the extension.

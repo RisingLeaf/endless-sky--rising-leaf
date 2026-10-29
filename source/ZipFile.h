@@ -37,8 +37,8 @@ public:
 	/// @param directory The complete file path, including the zip's path.
 	/// @param recursive List all files in the subtree, rather than just the top level.
 	/// @param directories Whether to list only directories instead of only regular files.
-	std::vector<std::filesystem::path> ListFiles(const std::filesystem::path &directory, bool recursive,
-	                                             bool directories) const;
+	std::vector<std::filesystem::path>
+	ListFiles(const std::filesystem::path &directory, bool recursive, bool directories) const;
 
 	/// Checks whether the given file or directory exists in the zip.
 	/// @param filePath The complete file path, including the zip's path.

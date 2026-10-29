@@ -90,12 +90,9 @@ Point AlignText(Dropdown::ALIGN alignment, const Font &font, const Rectangle &po
 {
 	switch(alignment)
 	{
-	case Dropdown::LEFT:
-		return Point(pos.Left(), pos.Center().Y() - font.Height() / 2.0);
-	case Dropdown::RIGHT:
-		return Point(pos.Right() - font.Width(s), pos.Center().Y() - font.Height() / 2.0);
-	default:
-		return pos.Center() - Point(font.Width(s) / 2.0, font.Height() / 2.0);
+	case Dropdown::LEFT:  return Point(pos.Left(), pos.Center().Y() - font.Height() / 2.0);
+	case Dropdown::RIGHT: return Point(pos.Right() - font.Width(s), pos.Center().Y() - font.Height() / 2.0);
+	default:              return pos.Center() - Point(font.Width(s) / 2.0, font.Height() / 2.0);
 	}
 }
 
@@ -159,7 +156,7 @@ void Dropdown::SetPadding(int p)
 void Dropdown::SetRightPadding(int p)
 {
 	rightPaddingWithoutDrop = p;
-	int iconPadding = 0;
+	int iconPadding         = 0;
 	if(showDropIcon || Edit::Enabled())
 		iconPadding = FontSize();
 	Edit::SetRightPadding(p + iconPadding);
@@ -200,8 +197,8 @@ int Dropdown::IdxFromPoint(int x, int y) const
 	bool isDrawnDown = (Position().Bottom() + bgSize.Y() <= Screen::Bottom());
 
 	const Rectangle optRect = isDrawnDown
-	                              ? Rectangle::FromCorner({Position().Left(), Position().Bottom()}, bgSize)
-	                              : Rectangle::FromCorner({Position().Left(), Position().Top() - bgSize.Y()}, bgSize);
+	                            ? Rectangle::FromCorner({Position().Left(), Position().Bottom()}, bgSize)
+	                            : Rectangle::FromCorner({Position().Left(), Position().Top() - bgSize.Y()}, bgSize);
 	if(optRect.Contains(Point(x, y)))
 	{
 		int idx = static_cast<int>(y - optRect.Top()) / Position().Height();
@@ -228,10 +225,10 @@ Dropdown::DroppedPanel::DroppedPanel(Dropdown *parent) : dd(parent), clickStamp(
 
 void Dropdown::DroppedPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 {
-	const Font &font = FontSet::Get(dd->FontSize());
-	const Color &active = *GameData::Colors().Get("active");
+	const Font  &font     = FontSet::Get(dd->FontSize());
+	const Color &active   = *GameData::Colors().Get("active");
 	const Color &inactive = *GameData::Colors().Get("inactive");
-	const Color &outline = *GameData::Colors().Get("panel outline");
+	const Color &outline  = *GameData::Colors().Get("panel outline");
 
 	Point bgSize{dd->Position().Width(), dd->Position().Height() * dd->options.size()};
 	// If the Dropdown is close to the bottom of the screen, then draw the
@@ -251,7 +248,9 @@ void Dropdown::DroppedPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	{
 		const Rectangle highlightRect = Rectangle::FromCorner(
 		    bgRect.TopLeft() + Point(0, dd->Position().Height() * highlightIndex), dd->Position().Dimensions());
-		FillShader::Fill(cb, highlightRect.Center(), highlightRect.Dimensions(),
+		FillShader::Fill(cb,
+		                 highlightRect.Center(),
+		                 highlightRect.Dimensions(),
 		                 *GameData::Colors().Get("shop side panel background"));
 	}
 	Rectangle optPos(bgRect.TopLeft() + dd->Position().Dimensions() * .5,
@@ -259,7 +258,9 @@ void Dropdown::DroppedPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 
 	for(size_t i = 0; i < dd->options.size(); ++i)
 	{
-		font.Draw(cb, dd->options[i], AlignText(dd->Align(), font, optPos, dd->options[i]),
+		font.Draw(cb,
+		          dd->options[i],
+		          AlignText(dd->Align(), font, optPos, dd->options[i]),
 		          static_cast<int>(i) == dd->selectedIndex ? active : inactive);
 		optPos += Point(0, dd->Position().Height());
 	}

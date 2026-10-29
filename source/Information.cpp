@@ -23,7 +23,7 @@ using namespace std;
 
 void Information::SetRegion(const Rectangle &rect)
 {
-	region = rect;
+	region          = rect;
 	hasCustomRegion = true;
 }
 
@@ -43,12 +43,12 @@ bool Information::HasCustomRegion() const
 
 
 
-void Information::SetSprite(const string &name, const Sprite *sprite, const Point &unit, float frame,
-                            const Swizzle *swizzle)
+void Information::SetSprite(
+    const string &name, const Sprite *sprite, const Point &unit, float frame, const Swizzle *swizzle)
 {
-	sprites[name] = sprite;
-	spriteUnits[name] = unit;
-	spriteFrames[name] = frame;
+	sprites[name]        = sprite;
+	spriteUnits[name]    = unit;
+	spriteFrames[name]   = frame;
 	spriteSwizzles[name] = swizzle;
 }
 
@@ -109,7 +109,7 @@ const string &Information::GetString(const string &name) const
 
 void Information::SetBar(const string &name, double value, double segments)
 {
-	bars[name] = value;
+	bars[name]        = value;
 	barSegments[name] = segments;
 }
 

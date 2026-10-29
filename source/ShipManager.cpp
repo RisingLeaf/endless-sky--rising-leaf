@@ -39,14 +39,14 @@ void ShipManager::Load(const DataNode &node)
 		return;
 	}
 	taking = node.Token(0) == "take";
-	model = GameData::Ships().Get(node.Token(2));
+	model  = GameData::Ships().Get(node.Token(2));
 	if(node.Size() >= 4)
 		name = node.Token(3);
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 
 		if(key == "id" && hasValue)
 			id = child.Token(1);
@@ -138,7 +138,7 @@ void ShipManager::Do(PlayerInfo &player) const
 ShipManager ShipManager::Instantiate(const map<string, string> &subs) const
 {
 	ShipManager result = *this;
-	result.name = Format::Replace(Phrase::ExpandPhrases(name), subs);
+	result.name        = Format::Replace(Phrase::ExpandPhrases(name), subs);
 	return result;
 }
 
@@ -166,9 +166,9 @@ bool ShipManager::Giving() const
 
 vector<shared_ptr<Ship>> ShipManager::SatisfyingShips(const PlayerInfo &player) const
 {
-	const System *here = player.GetSystem();
-	const auto shipToTakeId = player.GiftedShips().find(id);
-	bool foundShip = shipToTakeId != player.GiftedShips().end();
+	const System            *here         = player.GetSystem();
+	const auto               shipToTakeId = player.GiftedShips().find(id);
+	bool                     foundShip    = shipToTakeId != player.GiftedShips().end();
 	vector<shared_ptr<Ship>> satisfyingShips;
 
 	for(const auto &ship : player.Ships())
@@ -199,8 +199,8 @@ vector<shared_ptr<Ship>> ShipManager::SatisfyingShips(const PlayerInfo &player) 
 		if(requireOutfits)
 			for(const auto &it : model->Outfits())
 			{
-				const auto &outfit = ship->Outfits().find(it.first);
-				int amountEquipped = (outfit != ship->Outfits().end() ? outfit->second : 0);
+				const auto &outfit         = ship->Outfits().find(it.first);
+				int         amountEquipped = (outfit != ship->Outfits().end() ? outfit->second : 0);
 				if(it.second > amountEquipped)
 				{
 					hasRequiredOutfits = false;

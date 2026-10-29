@@ -39,14 +39,14 @@ public:
 
 		// Iterator traits
 		using iterator_category = std::input_iterator_tag;
-		using value_type = Point;
-		using difference_type = void;
-		using pointer = const Point *;
-		using reference = Point &;
+		using value_type        = Point;
+		using difference_type   = void;
+		using pointer           = const Point *;
+		using reference         = Point &;
 
 		// A subset of the default input_iterator operations. Limiting to
 		// only a subset, since not all operations are used in-game.
-		const Point &operator*() const;
+		const Point      &operator*() const;
 		PositionIterator &operator++();
 
 	private:
@@ -81,13 +81,13 @@ public:
 
 	// Returns the name of this pattern.
 	const std::string &TrueName() const;
-	void SetTrueName(const std::string &name);
+	void               SetTrueName(const std::string &name);
 
 	// Get an iterator to iterate over the formation positions in this pattern.
 	PositionIterator begin(double centerBodyRadius) const;
 
 	// Information about allowed rotating and mirroring that still results in the same formation.
-	int Rotatable() const;
+	int  Rotatable() const;
 	bool FlippableY() const;
 	bool FlippableX() const;
 
@@ -101,8 +101,8 @@ private:
 	unsigned int Positions(unsigned int ring, unsigned int lineNr, unsigned int repeatNr) const;
 
 	// Calculate a position based on the current ring, line/arc, repeat-section and position on the line-repeat-section.
-	Point Position(unsigned int ring, unsigned int lineNr, unsigned int repeatNr,
-	               unsigned int lineRepeatPosition) const;
+	Point
+	Position(unsigned int ring, unsigned int lineNr, unsigned int repeatNr, unsigned int lineRepeatPosition) const;
 
 private:
 	class LineRepeat {
@@ -133,9 +133,9 @@ private:
 		int positions = 1;
 
 		// Properties of how the line behaves.
-		bool isArc = false;
+		bool isArc     = false;
 		bool skipFirst = false;
-		bool skipLast = false;
+		bool skipLast  = false;
 	};
 
 

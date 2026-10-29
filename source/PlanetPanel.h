@@ -64,30 +64,30 @@ private:
 
 
 private:
-	PlayerInfo &player;
-	std::function<void()> callback = nullptr;
-	bool requestedLaunch = false;
+	PlayerInfo           &player;
+	std::function<void()> callback        = nullptr;
+	bool                  requestedLaunch = false;
 
 	const Planet &planet;
 	const System &system;
 
 	// Whether this planet has a shipyard or outfitter
 	// and the items that are for sale in each shop.
-	bool initializedShops = false;
-	bool hasShipyard = false;
-	bool hasOutfitter = false;
-	Sale<Ship> shipyardStock;
+	bool         initializedShops = false;
+	bool         hasShipyard      = false;
+	bool         hasOutfitter     = false;
+	Sale<Ship>   shipyardStock;
 	Sale<Outfit> outfitterStock;
 	// Whether the thumbnails for the ships and outfits visible in the shops have been loaded.
 	// May be set back to false if a mission could have gifted the player a ship or outfit, or
 	// added new items to the shop.
 	bool hasLoadedThumbnails = false;
 
-	std::shared_ptr<Panel> trading;
-	std::shared_ptr<Panel> bank;
+	std::shared_ptr<Panel>          trading;
+	std::shared_ptr<Panel>          bank;
 	std::shared_ptr<SpaceportPanel> spaceport;
-	std::shared_ptr<Panel> hiring;
-	std::shared_ptr<Panel> selectedPanel;
+	std::shared_ptr<Panel>          hiring;
+	std::shared_ptr<Panel>          selectedPanel;
 
 	std::shared_ptr<TextArea> description;
 

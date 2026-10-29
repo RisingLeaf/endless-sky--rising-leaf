@@ -24,16 +24,16 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 using namespace std;
 
-const int Radar::PLAYER = 0;
-const int Radar::FRIENDLY = 1;
+const int Radar::PLAYER     = 0;
+const int Radar::FRIENDLY   = 1;
 const int Radar::UNFRIENDLY = 2;
-const int Radar::HOSTILE = 3;
-const int Radar::INACTIVE = 4;
-const int Radar::SPECIAL = 5;
-const int Radar::ANOMALOUS = 6;
-const int Radar::BLINK = 7;
-const int Radar::VIEWPORT = 8;
-const int Radar::STAR = 9;
+const int Radar::HOSTILE    = 3;
+const int Radar::INACTIVE   = 4;
+const int Radar::SPECIAL    = 5;
+const int Radar::ANOMALOUS  = 6;
+const int Radar::BLINK      = 7;
+const int Radar::VIEWPORT   = 8;
+const int Radar::STAR       = 9;
 
 
 
@@ -85,18 +85,21 @@ void Radar::AddViewportBoundary(const Point &vertex)
 
 
 // Draw the radar display at the given coordinates.
-void Radar::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &center, double scale, double radius,
-                 double pointerRadius) const
+void Radar::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                 const Point                          &center,
+                 double                                scale,
+                 double                                radius,
+                 double                                pointerRadius) const
 {
 	// Draw any desired line vectors.
 	for(const Line &line : lines)
 	{
 		Point start = line.base * scale;
-		Point v = line.vector * scale;
+		Point v     = line.vector * scale;
 
 		// At least one endpoint must be within the radar display.
 		double startExcess = start.Length() - radius;
-		double endExcess = (start + v).Length() - radius;
+		double endExcess   = (start + v).Length() - radius;
 		if(startExcess > 0 && endExcess > 0)
 			continue;
 		else if(startExcess > 0)
@@ -116,8 +119,8 @@ void Radar::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &center, 
 	RingShader::Bind(cb);
 	for(const Object &object : objects)
 	{
-		Point position = object.position * scale;
-		double length = position.Length();
+		Point  position = object.position * scale;
+		double length   = position.Length();
 		if(length > radius)
 			position *= radius / length;
 		position += center;
@@ -135,12 +138,16 @@ void Radar::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &center, 
 
 const Color &Radar::GetColor(int type)
 {
-	static const vector<Color> color = {
-	    *GameData::Colors().Get("radar player"),     *GameData::Colors().Get("radar friendly"),
-	    *GameData::Colors().Get("radar unfriendly"), *GameData::Colors().Get("radar hostile"),
-	    *GameData::Colors().Get("radar inactive"),   *GameData::Colors().Get("radar special"),
-	    *GameData::Colors().Get("radar anomalous"),  *GameData::Colors().Get("radar blink"),
-	    *GameData::Colors().Get("radar viewport"),   *GameData::Colors().Get("radar star")};
+	static const vector<Color> color = {*GameData::Colors().Get("radar player"),
+	                                    *GameData::Colors().Get("radar friendly"),
+	                                    *GameData::Colors().Get("radar unfriendly"),
+	                                    *GameData::Colors().Get("radar hostile"),
+	                                    *GameData::Colors().Get("radar inactive"),
+	                                    *GameData::Colors().Get("radar special"),
+	                                    *GameData::Colors().Get("radar anomalous"),
+	                                    *GameData::Colors().Get("radar blink"),
+	                                    *GameData::Colors().Get("radar viewport"),
+	                                    *GameData::Colors().Get("radar star")};
 
 	if(static_cast<size_t>(type) >= color.size())
 		type = INACTIVE;

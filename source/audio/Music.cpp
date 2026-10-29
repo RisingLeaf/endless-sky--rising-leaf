@@ -36,12 +36,12 @@ void Music::Init(const vector<filesystem::path> &sources)
 	for(const auto &source : sources)
 	{
 		// Find all the sound files that this resource source provides.
-		filesystem::path root = source / "sounds";
+		filesystem::path         root  = source / "sounds";
 		vector<filesystem::path> files = Files::RecursiveList(root);
 
 		for(const auto &path : files)
 		{
-			string name = (path.parent_path() / path.stem()).lexically_relative(root).generic_string();
+			string name      = (path.parent_path() / path.stem()).lexically_relative(root).generic_string();
 			string extension = Format::LowerCase(path.extension().string());
 			if(extension == ".mp3")
 				paths[name] = {path, MusicFileType::MP3};
@@ -58,9 +58,13 @@ unique_ptr<AudioSupplier> Music::CreateSupplier(const string &name, bool looping
 		switch(paths[name].second)
 		{
 		case MusicFileType::MP3:
-			return unique_ptr<AudioSupplier>{new Mp3Supplier{Files::Open(paths[name].first), looping}};
+			return unique_ptr<AudioSupplier>{
+			    new Mp3Supplier{Files::Open(paths[name].first), looping}
+            };
 		case MusicFileType::FLAC:
-			return unique_ptr<AudioSupplier>{new FlacSupplier{Files::Open(paths[name].first), looping}};
+			return unique_ptr<AudioSupplier>{
+			    new FlacSupplier{Files::Open(paths[name].first), looping}
+            };
 		}
 	return {};
 }

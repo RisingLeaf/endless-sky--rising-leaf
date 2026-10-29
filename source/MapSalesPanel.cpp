@@ -48,8 +48,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 const double MapSalesPanel::ICON_HEIGHT = 90.;
-const double MapSalesPanel::PAD = 8.;
-const int MapSalesPanel::WIDTH = 270;
+const double MapSalesPanel::PAD         = 8.;
+const int    MapSalesPanel::WIDTH       = 270;
 
 
 
@@ -157,12 +157,12 @@ bool MapSalesPanel::Click(int x, int y, MouseButton button, int clicks)
 	if(button != MouseButton::LEFT)
 		return MapPanel::Click(x, y, button, clicks);
 
-	const Interface *keyInterface = GameData::Interfaces().Get("map: sales key");
-	const Rectangle keyContentBox = keyInterface->GetBox("content");
+	const Interface *keyInterface  = GameData::Interfaces().Get("map: sales key");
+	const Rectangle  keyContentBox = keyInterface->GetBox("content");
 	if(x < Screen::Left() + WIDTH)
 	{
 		const Point point(x, y);
-		const auto zone = find_if(zones.begin(), zones.end(), [&](const ClickZone<int> zone) {
+		const auto  zone = find_if(zones.begin(), zones.end(), [&](const ClickZone<int> zone) {
 			return zone.Contains(point);
 		});
 
@@ -191,19 +191,19 @@ bool MapSalesPanel::Click(int x, int y, MouseButton button, int clicks)
 		// This click was in the map key.
 		if(clickRow == 2)
 		{
-			onlyShowSoldHere = !onlyShowSoldHere;
+			onlyShowSoldHere    = !onlyShowSoldHere;
 			onlyShowStorageHere = false;
 			UI::PlaySound(UI::UISound::NORMAL);
 		}
 		else if(clickRow == 3)
 		{
-			onlyShowSoldHere = false;
+			onlyShowSoldHere    = false;
 			onlyShowStorageHere = !onlyShowStorageHere;
 			UI::PlaySound(UI::UISound::NORMAL);
 		}
 		else
 		{
-			onlyShowSoldHere = false;
+			onlyShowSoldHere    = false;
 			onlyShowStorageHere = false;
 			UI::PlaySound(UI::UISound::NORMAL);
 		}
@@ -291,14 +291,14 @@ void MapSalesPanel::DrawInfo(GraphicsTypes::CommandBufferInstance *cb) const
 {
 	if(selected >= 0)
 	{
-		const Sprite *left = SpriteSet::Get("ui/left edge");
+		const Sprite *left   = SpriteSet::Get("ui/left edge");
 		const Sprite *bottom = SpriteSet::Get(compare >= 0 ? "ui/bottom edges" : "ui/bottom edge");
-		const Sprite *box = SpriteSet::Get(compare >= 0 ? "ui/thumb boxes" : "ui/thumb box");
+		const Sprite *box    = SpriteSet::Get(compare >= 0 ? "ui/thumb boxes" : "ui/thumb box");
 
 		const ItemInfoDisplay &selectedInfo = SelectedInfo();
-		const ItemInfoDisplay &compareInfo = CompareInfo();
-		int height = max<int>(selectedInfo.AttributesHeight(), box->Height());
-		int width = selectedInfo.PanelWidth();
+		const ItemInfoDisplay &compareInfo  = CompareInfo();
+		int                    height       = max<int>(selectedInfo.AttributesHeight(), box->Height());
+		int                    width        = selectedInfo.PanelWidth();
 		if(compare >= 0)
 		{
 			height = max(height, compareInfo.AttributesHeight());
@@ -306,8 +306,8 @@ void MapSalesPanel::DrawInfo(GraphicsTypes::CommandBufferInstance *cb) const
 		}
 
 		const Color &back = *GameData::Colors().Get("map side panel background");
-		Point size(width, height);
-		Point topLeft(Screen::Right() - size.X(), Screen::Top());
+		Point        size(width, height);
+		Point        topLeft(Screen::Right() - size.X(), Screen::Top());
 		FillShader::Fill(cb, Rectangle::FromCorner(topLeft, size), back);
 
 		Point leftPos = topLeft + Point(-.5 * left->Width(), size.Y() - .5 * left->Height());
@@ -349,7 +349,7 @@ bool MapSalesPanel::DrawHeader(GraphicsTypes::CommandBufferInstance *cb, Point &
 	SpriteShader::Draw(cb, arrow, corner + Point(15., 25.));
 
 	const Color &textColor = *GameData::Colors().Get(hide ? "medium" : "bright");
-	const Font &bigFont = FontSet::Get(18);
+	const Font  &bigFont   = FontSet::Get(18);
 	bigFont.Draw(cb, category, corner + Point(30., 15.), textColor);
 	AddZone(Rectangle::FromCorner(corner, Point(WIDTH, 40.)), [this, category]() {
 		ClickCategory(category);
@@ -361,8 +361,11 @@ bool MapSalesPanel::DrawHeader(GraphicsTypes::CommandBufferInstance *cb, Point &
 
 
 
-void MapSalesPanel::DrawSprite(GraphicsTypes::CommandBufferInstance *cb, const Point &corner, const Drawable &drawable,
-                               bool animate, const Swizzle *swizzle) const
+void MapSalesPanel::DrawSprite(GraphicsTypes::CommandBufferInstance *cb,
+                               const Point                          &corner,
+                               const Drawable                       &drawable,
+                               bool                                  animate,
+                               const Swizzle                        *swizzle) const
 {
 	const Sprite *sprite = drawable.GetSprite();
 	if(!sprite)
@@ -387,26 +390,34 @@ void MapSalesPanel::DrawSprite(GraphicsTypes::CommandBufferInstance *cb, const P
 
 
 
-void MapSalesPanel::Draw(GraphicsTypes::CommandBufferInstance *cb, Point &corner, const Drawable &drawable,
-                         const Swizzle *swizzle, bool isForSale, bool isSelected, const string &name,
-                         const string &variantName, const string &price, const string &info, const string &storage)
+void MapSalesPanel::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                         Point                                &corner,
+                         const Drawable                       &drawable,
+                         const Swizzle                        *swizzle,
+                         bool                                  isForSale,
+                         bool                                  isSelected,
+                         const string                         &name,
+                         const string                         &variantName,
+                         const string                         &price,
+                         const string                         &info,
+                         const string                         &storage)
 {
-	const Font &font = FontSet::Get(14);
+	const Font  &font           = FontSet::Get(14);
 	const Color &selectionColor = *GameData::Colors().Get("item selected");
 
 	// Set the padding so the text takes the same height overall,
 	// regardless of whether it's three lines of text or four.
-	const auto pad = storage.empty() && variantName.empty() ? PAD : (PAD * 2. / 3.);
+	const auto pad   = storage.empty() && variantName.empty() ? PAD : (PAD * 2. / 3.);
 	const auto lines = storage.empty() && variantName.empty() ? 3 : 4;
-	Point nameOffset(ICON_HEIGHT, .5 * (ICON_HEIGHT - (lines - 1) * pad - lines * font.Height()));
-	Point priceOffset(ICON_HEIGHT, nameOffset.Y() + font.Height() + pad);
-	Point infoOffset(ICON_HEIGHT, priceOffset.Y() + font.Height() + pad);
-	Point storageOffset(ICON_HEIGHT, infoOffset.Y() + font.Height() + pad);
-	Point variantOffset = priceOffset;
+	Point      nameOffset(ICON_HEIGHT, .5 * (ICON_HEIGHT - (lines - 1) * pad - lines * font.Height()));
+	Point      priceOffset(ICON_HEIGHT, nameOffset.Y() + font.Height() + pad);
+	Point      infoOffset(ICON_HEIGHT, priceOffset.Y() + font.Height() + pad);
+	Point      storageOffset(ICON_HEIGHT, infoOffset.Y() + font.Height() + pad);
+	Point      variantOffset = priceOffset;
 	if(!variantName.empty())
 	{
 		priceOffset = infoOffset;
-		infoOffset = storageOffset;
+		infoOffset  = storageOffset;
 	}
 	Point blockSize(WIDTH, ICON_HEIGHT);
 
@@ -418,11 +429,11 @@ void MapSalesPanel::Draw(GraphicsTypes::CommandBufferInstance *cb, Point &corner
 		DrawSprite(cb, corner, drawable, isSelected, swizzle);
 
 		const Color &mediumColor = *GameData::Colors().Get("medium");
-		const Color &dimColor = *GameData::Colors().Get("dim");
-		const Color textColor = isForSale         ? mediumColor
-		                        : storage.empty() ? dimColor
-		                                          : Color::Combine(.5f, mediumColor, .5f, dimColor);
-		auto layout = Layout(static_cast<int>(WIDTH - ICON_HEIGHT - 1), Truncate::BACK);
+		const Color &dimColor    = *GameData::Colors().Get("dim");
+		const Color  textColor   = isForSale       ? mediumColor
+		                         : storage.empty() ? dimColor
+		                                           : Color::Combine(.5f, mediumColor, .5f, dimColor);
+		auto         layout      = Layout(static_cast<int>(WIDTH - ICON_HEIGHT - 1), Truncate::BACK);
 		font.Draw(cb, {name, layout}, corner + nameOffset, textColor);
 		if(!variantName.empty())
 			font.Draw(cb, {"\t" + variantName, layout}, corner + variantOffset, textColor);

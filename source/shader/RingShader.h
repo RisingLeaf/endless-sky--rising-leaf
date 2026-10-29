@@ -30,15 +30,27 @@ class RingShader {
 public:
 	static void Init(const GraphicsTypes::GraphicsInstance *graphics_instance);
 
-	static void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, float out, float in,
-	                 const Color &color);
-	static void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, float radius, float width,
-	                 float fraction, const Color &color, float dash = 0.f, float startAngle = 0.f);
+	static void
+	Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, float out, float in, const Color &color);
+	static void Draw(GraphicsTypes::CommandBufferInstance *cb,
+	                 const Point                          &pos,
+	                 float                                 radius,
+	                 float                                 width,
+	                 float                                 fraction,
+	                 const Color                          &color,
+	                 float                                 dash       = 0.f,
+	                 float                                 startAngle = 0.f);
 
 	static void Bind(GraphicsTypes::CommandBufferInstance *cb);
-	static void Add(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, float out, float in,
-	                const Color &color);
-	static void Add(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, float radius, float width,
-	                float fraction, const Color &color, float dash = 0.f, float startAngle = 0.f);
+	static void
+	Add(GraphicsTypes::CommandBufferInstance *cb, const Point &pos, float out, float in, const Color &color);
+	static void Add(GraphicsTypes::CommandBufferInstance *cb,
+	                const Point                          &pos,
+	                float                                 radius,
+	                float                                 width,
+	                float                                 fraction,
+	                const Color                          &color,
+	                float                                 dash       = 0.f,
+	                float                                 startAngle = 0.f);
 	static void Clear();
 };

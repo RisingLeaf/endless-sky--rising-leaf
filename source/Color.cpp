@@ -70,9 +70,9 @@ bool Color::operator!=(const Color &other) const
 // Set all four color components to the given values.
 void Color::Load(const double r, const double g, const double b, const double a)
 {
-	color[0] = static_cast<float>(r);// SRGBToLinear(r, a);
-	color[1] = static_cast<float>(g);// SRGBToLinear(g, a);
-	color[2] = static_cast<float>(b);// SRGBToLinear(b, a);
+	color[0] = static_cast<float>(r); // SRGBToLinear(r, a);
+	color[1] = static_cast<float>(g); // SRGBToLinear(g, a);
+	color[2] = static_cast<float>(b); // SRGBToLinear(b, a);
 	color[3] = static_cast<float>(a);
 
 	isLoaded = true;
@@ -113,7 +113,7 @@ const float *Color::Get() const
 // Get an opaque version of this color.
 Color Color::Opaque() const
 {
-	Color opaque = *this;
+	Color opaque    = *this;
 	opaque.color[3] = 1.f;
 	return opaque;
 }
@@ -136,7 +136,7 @@ Color Color::Transparent(float alpha) const
 // Assuming this color is opaque, get an additive version of it.
 Color Color::Additive(float alpha) const
 {
-	Color result = Transparent(alpha);
+	Color result    = Transparent(alpha);
 	result.color[3] = 0.f;
 
 	return result;
@@ -146,8 +146,10 @@ Color Color::Additive(float alpha) const
 
 Color Color::Combine(float a1, Color c1, float a2, Color c2)
 {
-	return Color(a1 * c1.color[0] + a2 * c2.color[0], a1 * c1.color[1] + a2 * c2.color[1],
-	             a1 * c1.color[2] + a2 * c2.color[2], a1 * c1.color[3] + a2 * c2.color[3]);
+	return Color(a1 * c1.color[0] + a2 * c2.color[0],
+	             a1 * c1.color[1] + a2 * c2.color[1],
+	             a1 * c1.color[2] + a2 * c2.color[2],
+	             a1 * c1.color[3] + a2 * c2.color[3]);
 }
 
 

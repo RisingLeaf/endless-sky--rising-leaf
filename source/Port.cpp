@@ -40,7 +40,7 @@ namespace {
 // Load a port's description from a node.
 void Port::Load(const DataNode &node, const ConditionsStore *playerConditions)
 {
-	loaded = true;
+	loaded              = true;
 	const int nameIndex = 1 + (node.Token(0) == "add");
 	if(node.Size() > nameIndex)
 		displayName = node.Token(nameIndex);
@@ -48,12 +48,12 @@ void Port::Load(const DataNode &node, const ConditionsStore *playerConditions)
 	// The "to recharge" and "to service" condition set maps should be cleared
 	// if a new condition set is provided.
 	bool overwriteToRecharge = true;
-	bool overwriteToService = true;
+	bool overwriteToService  = true;
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "recharges" && (child.HasChildren() || hasValue))
 		{
 			auto setRecharge = [&](const DataNode &valueNode, const string &value) noexcept -> void {
@@ -131,9 +131,9 @@ void Port::Load(const DataNode &node, const ConditionsStore *playerConditions)
 					if(listValue == "all")
 					{
 						toRecharge[RechargeType::Shields] = conditionSet;
-						toRecharge[RechargeType::Hull] = conditionSet;
-						toRecharge[RechargeType::Energy] = conditionSet;
-						toRecharge[RechargeType::Fuel] = conditionSet;
+						toRecharge[RechargeType::Hull]    = conditionSet;
+						toRecharge[RechargeType::Energy]  = conditionSet;
+						toRecharge[RechargeType::Fuel]    = conditionSet;
 					}
 					else if(listValue == "shields")
 						toRecharge[RechargeType::Shields] = conditionSet;
@@ -160,10 +160,10 @@ void Port::Load(const DataNode &node, const ConditionsStore *playerConditions)
 					const string &listValue = child.Token(i);
 					if(listValue == "all")
 					{
-						toService[ServicesType::Trading] = conditionSet;
-						toService[ServicesType::JobBoard] = conditionSet;
-						toService[ServicesType::Bank] = conditionSet;
-						toService[ServicesType::HireCrew] = conditionSet;
+						toService[ServicesType::Trading]        = conditionSet;
+						toService[ServicesType::JobBoard]       = conditionSet;
+						toService[ServicesType::Bank]           = conditionSet;
+						toService[ServicesType::HireCrew]       = conditionSet;
 						toService[ServicesType::OffersMissions] = conditionSet;
 					}
 					else if(listValue == "trading")
@@ -193,9 +193,9 @@ void Port::Load(const DataNode &node, const ConditionsStore *playerConditions)
 void Port::LoadDefaultSpaceport()
 {
 	displayName = SPACEPORT;
-	recharge = RechargeType::All;
-	services = ServicesType::All;
-	hasNews = true;
+	recharge    = RechargeType::All;
+	services    = ServicesType::All;
+	hasNews     = true;
 }
 
 
@@ -203,9 +203,9 @@ void Port::LoadDefaultSpaceport()
 void Port::LoadUninhabitedSpaceport()
 {
 	displayName = SPACEPORT;
-	recharge = RechargeType::All;
-	services = ServicesType::OffersMissions;
-	hasNews = true;
+	recharge    = RechargeType::All;
+	services    = ServicesType::OffersMissions;
+	hasNews     = true;
 }
 
 

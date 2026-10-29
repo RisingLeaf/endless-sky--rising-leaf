@@ -69,18 +69,22 @@ public:
 public:
 	NPC() = default;
 	// Copying an NPC instance isn't allowed.
-	NPC(const NPC &) = delete;
-	NPC &operator=(const NPC &) = delete;
-	NPC(NPC &&) noexcept = default;
+	NPC(const NPC &)                = delete;
+	NPC &operator=(const NPC &)     = delete;
+	NPC(NPC &&) noexcept            = default;
 	NPC &operator=(NPC &&) noexcept = default;
-	~NPC() noexcept = default;
+	~NPC() noexcept                 = default;
 
 	// Construct and Load() at the same time.
-	explicit NPC(const DataNode &node, const ConditionsStore *playerConditions,
-	             const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	explicit NPC(const DataNode                 &node,
+	             const ConditionsStore          *playerConditions,
+	             const std::set<const System *> *visitedSystems,
+	             const std::set<const Planet *> *visitedPlanets);
 
-	void Load(const DataNode &node, const ConditionsStore *playerConditions,
-	          const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	void Load(const DataNode                 &node,
+	          const ConditionsStore          *playerConditions,
+	          const std::set<const System *> *visitedSystems,
+	          const std::set<const Planet *> *visitedPlanets);
 	// Note: the Save() function can assume this is an instantiated mission, not
 	// a template, so fleets will be replaced by individual ships already.
 	void Save(DataWriter &out) const;
@@ -113,8 +117,12 @@ public:
 
 	// Create a copy of this NPC but with the fleets replaced by the actual
 	// ships they represent, wildcards in the conversation text replaced, etc.
-	NPC Instantiate(const PlayerInfo &player, std::map<std::string, std::string> &subs, const System *origin,
-	                const System *destination, int jumps, int64_t payload) const;
+	NPC Instantiate(const PlayerInfo                   &player,
+	                std::map<std::string, std::string> &subs,
+	                const System                       *origin,
+	                const System                       *destination,
+	                int                                 jumps,
+	                int64_t                             payload) const;
 
 
 private:
@@ -125,23 +133,23 @@ private:
 private:
 	// The government of the ships in this NPC:
 	const Government *government = nullptr;
-	Personality personality;
+	Personality       personality;
 
 	// The cargo ships in this NPC will be able to carry.
 	FleetCargo cargo;
-	bool overrideFleetCargo = false;
+	bool       overrideFleetCargo = false;
 
 	EsUuid uuid;
 
 	// Start out in a location matching this filter, or in a particular system:
 	LocationFilter location;
-	const System *system = nullptr;
-	bool isAtDestination = false;
+	const System  *system          = nullptr;
+	bool           isAtDestination = false;
 	// Start out landed on this planet.
 	const Planet *planet = nullptr;
 
 	// Dialog or conversation to show when all requirements for this NPC are met:
-	DialogSettings dialog;
+	DialogSettings              dialog;
 	ExclusiveItem<Conversation> conversation;
 
 	// Conditions that must be met in order for this NPC to be placed or despawned:
@@ -158,15 +166,15 @@ private:
 	bool checkedSpawnConditions = false;
 
 	// The ship and fleet definition that make up this NPC.
-	ShipFactory factory;
+	ShipFactory                     factory;
 	std::list<ExclusiveItem<Fleet>> fleets;
 	// The actual instantiated ships.
 	std::list<std::shared_ptr<Ship>> ships;
 
 	// This must be done to each ship in this set to complete the mission:
-	int succeedIf = 0;
-	int failIf = 0;
-	bool mustEvade = false;
+	int  succeedIf     = 0;
+	int  failIf        = 0;
+	bool mustEvade     = false;
 	bool mustAccompany = false;
 	// The ShipEvent actions that have been done to each ship.
 	std::map<const Ship *, int> shipEvents;

@@ -33,28 +33,29 @@ namespace {
 	{
 		switch(trigger)
 		{
-		case MissionTimer::TimerTrigger::TIMEUP:
-			return "on timeup";
-		case MissionTimer::TimerTrigger::DEACTIVATION:
-			return "on deactivation";
-		default:
-			return "unknown trigger";
+		case MissionTimer::TimerTrigger::TIMEUP:       return "on timeup";
+		case MissionTimer::TimerTrigger::DEACTIVATION: return "on deactivation";
+		default:                                       return "unknown trigger";
 		}
 	}
 } // namespace
 
 
 
-MissionTimer::MissionTimer(const DataNode &node, const ConditionsStore *playerConditions,
-                           const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+MissionTimer::MissionTimer(const DataNode            &node,
+                           const ConditionsStore     *playerConditions,
+                           const set<const System *> *visitedSystems,
+                           const set<const Planet *> *visitedPlanets)
 {
 	Load(node, playerConditions, visitedSystems, visitedPlanets);
 }
 
 
 
-void MissionTimer::Load(const DataNode &node, const ConditionsStore *playerConditions,
-                        const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+void MissionTimer::Load(const DataNode            &node,
+                        const ConditionsStore     *playerConditions,
+                        const set<const System *> *visitedSystems,
+                        const set<const Planet *> *visitedPlanets)
 {
 	if(node.Size() < 2)
 	{
@@ -68,8 +69,8 @@ void MissionTimer::Load(const DataNode &node, const ConditionsStore *playerCondi
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 
 		if(key == "elapsed" && hasValue)
 			timeElapsed = child.Value(1);
@@ -83,7 +84,7 @@ void MissionTimer::Load(const DataNode &node, const ConditionsStore *playerCondi
 			for(const DataNode &grand : child)
 			{
 				const string &grandKey = grand.Token(0);
-				hasValue = grand.Size() >= 2;
+				hasValue               = grand.Size() >= 2;
 
 				if(grandKey == "idle")
 				{
@@ -219,22 +220,22 @@ void MissionTimer::Save(DataWriter &out) const
 
 
 
-MissionTimer MissionTimer::Instantiate(map<string, string> &subs, const System *origin, int jumps,
-                                       int64_t payload) const
+MissionTimer
+MissionTimer::Instantiate(map<string, string> &subs, const System *origin, int jumps, int64_t payload) const
 {
 	MissionTimer result;
 	result.optional = optional;
-	result.pauses = pauses;
+	result.pauses   = pauses;
 
-	result.hasRequirements = hasRequirements;
-	result.requirePeaceful = requirePeaceful;
+	result.hasRequirements  = hasRequirements;
+	result.requirePeaceful  = requirePeaceful;
 	result.requireUncloaked = requireUncloaked;
-	result.requireCloaked = requireCloaked;
-	result.requireIdle = requireIdle;
-	result.idleMaxSpeed = idleMaxSpeed;
-	result.requireSolo = requireSolo;
-	result.system = system;
-	result.systems = systems;
+	result.requireCloaked   = requireCloaked;
+	result.requireIdle      = requireIdle;
+	result.idleMaxSpeed     = idleMaxSpeed;
+	result.requireSolo      = requireSolo;
+	result.system           = system;
+	result.systems          = systems;
 
 	// Calculate the random variance to the wait time.
 	result.waitTime = waitTime;
@@ -243,7 +244,7 @@ MissionTimer MissionTimer::Instantiate(map<string, string> &subs, const System *
 
 	// Validate all the actions attached to the timer, and if they're all valid, instantiate them too.
 	string reason;
-	auto ait = actions.begin();
+	auto   ait = actions.begin();
 	for(; ait != actions.end(); ++ait)
 	{
 		reason = ait->second.Validate();

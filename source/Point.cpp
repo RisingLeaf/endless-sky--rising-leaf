@@ -59,8 +59,8 @@ bool Point::operator!() const noexcept
 {
 #ifdef __SSE2__
 	__m128d zero = _mm_setzero_pd();
-	__m128d cmp = _mm_cmpeq_pd(v, zero);
-	int mask = _mm_movemask_pd(cmp);
+	__m128d cmp  = _mm_cmpeq_pd(v, zero);
+	int     mask = _mm_movemask_pd(cmp);
 	return mask == 3;
 #else
 	return (!x & !y);
@@ -72,8 +72,8 @@ bool Point::operator!() const noexcept
 bool Point::operator==(const Point &other) const noexcept
 {
 #ifdef __SSE2__
-	__m128d cmp = _mm_cmpeq_pd(v, other.v);
-	int mask = _mm_movemask_pd(cmp);
+	__m128d cmp  = _mm_cmpeq_pd(v, other.v);
+	int     mask = _mm_movemask_pd(cmp);
 	return mask == 3;
 #else
 	return (x == other.x) && (y == other.y);
@@ -178,7 +178,7 @@ Point &Point::operator*=(double scalar)
 	v *= _mm_loaddup_pd(&scalar);
 #elif defined(__SSE2__)
 	__m128d scalar_vec = _mm_set1_pd(scalar);
-	v = _mm_mul_pd(v, scalar_vec);
+	v                  = _mm_mul_pd(v, scalar_vec);
 	return *this;
 #else
 	x *= scalar;
@@ -235,7 +235,7 @@ Point &Point::operator/=(double scalar)
 	v /= _mm_loaddup_pd(&scalar);
 #elif defined(__SSE2__)
 	__m128d scalar_vec = _mm_set1_pd(scalar);
-	v = _mm_div_pd(v, scalar_vec);
+	v                  = _mm_div_pd(v, scalar_vec);
 #else
 	x /= scalar;
 	y /= scalar;
@@ -262,11 +262,11 @@ double Point::Dot(const Point &point) const
 {
 #ifdef __SSE3__
 	__m128d b = v * point.v;
-	b = _mm_hadd_pd(b, b);
+	b         = _mm_hadd_pd(b, b);
 	return reinterpret_cast<double &>(b);
 #elif defined(__SSE2__)
 	__m128d mul = _mm_mul_pd(v, point.v);
-	double result[2];
+	double  result[2];
 	_mm_storeu_pd(result, mul);
 	return result[0] + result[1];
 #else
@@ -285,7 +285,7 @@ double Point::Cross(const Point &point) const
 	return reinterpret_cast<double &>(b);
 #elif defined(__SSE2__)
 	__m128d mul = _mm_mul_pd(v, _mm_shuffle_pd(point.v, point.v, 0x1));
-	double result[2];
+	double  result[2];
 	_mm_storeu_pd(result, mul);
 	return result[0] - result[1];
 #else
@@ -299,12 +299,12 @@ double Point::Length() const
 {
 #ifdef __SSE3__
 	__m128d b = v * v;
-	b = _mm_hadd_pd(b, b);
-	b = _mm_sqrt_pd(b);
+	b         = _mm_hadd_pd(b, b);
+	b         = _mm_sqrt_pd(b);
 	return reinterpret_cast<double &>(b);
 #elif defined(__SSE2__)
 	__m128d mul = _mm_mul_pd(v, v);
-	double result[2];
+	double  result[2];
 	_mm_storeu_pd(result, mul);
 	return sqrt(result[0] + result[1]);
 #else
@@ -325,7 +325,7 @@ Point Point::Unit() const
 {
 #ifdef __SSE3__
 	__m128d b = v * v;
-	b = _mm_hadd_pd(b, b);
+	b         = _mm_hadd_pd(b, b);
 	if(!_mm_cvtsd_f64(b))
 		return Point(1., 0.);
 	b = _mm_sqrt_pd(b);

@@ -37,15 +37,15 @@ void EscortDisplay::Clear()
 {
 	icons.clear();
 
-	element = GameData::Interfaces().Get("escort element");
-	basicHeight = element->GetValue("basic height");
+	element           = GameData::Interfaces().Get("escort element");
+	basicHeight       = element->GetValue("basic height");
 	systemLabelHeight = element->GetValue("system label height");
 }
 
 
 
-void EscortDisplay::Add(const shared_ptr<Ship> &ship, bool isHere, bool systemNameKnown, bool fleetIsJumping,
-                        bool isSelected)
+void EscortDisplay::Add(
+    const shared_ptr<Ship> &ship, bool isHere, bool systemNameKnown, bool fleetIsJumping, bool isSelected)
 {
 	icons.emplace_back(ship, isHere, systemNameKnown, fleetIsJumping, isSelected, basicHeight, systemLabelHeight);
 }
@@ -68,12 +68,12 @@ void EscortDisplay::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectang
 	// Top left corner of the current escort icon.
 	Point corner = Point(bounds.Left(), bounds.Bottom());
 
-	const Color &disabledColor = *colors.Get("escort disabled");
-	const Color &elsewhereColor = *colors.Get("escort elsewhere");
-	const Color &cannotJumpColor = *colors.Get("escort blocked");
+	const Color &disabledColor       = *colors.Get("escort disabled");
+	const Color &elsewhereColor      = *colors.Get("escort elsewhere");
+	const Color &cannotJumpColor     = *colors.Get("escort blocked");
 	const Color &notReadyToJumpColor = *colors.Get("escort not ready");
-	const Color &hereColor = *colors.Get("escort present");
-	const Color &hostileColor = *colors.Get("escort hostile");
+	const Color &hereColor           = *colors.Get("escort present");
+	const Color &hostileColor        = *colors.Get("escort hostile");
 
 	for(const Icon &escort : icons)
 	{
@@ -120,8 +120,8 @@ void EscortDisplay::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectang
 		// Figure out what scale should be applied to the ship sprite.
 		info.SetSprite("icon", escort.sprite);
 		info.SetOutlineColor(color);
-		const Point dimensions(width, escort.Height());
-		const Point center(corner + dimensions / 2.);
+		const Point     dimensions(width, escort.Height());
+		const Point     center(corner + dimensions / 2.);
 		const Rectangle region(center, dimensions);
 		const Rectangle zone = region + Point(0., -5.);
 		zones.emplace_back(zone);
@@ -136,11 +136,13 @@ void EscortDisplay::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectang
 		// Draw the status bars.
 		for(int i = 0; i < 5; ++i)
 		{
-			static const string levels[5][2] = {{"shields high", "shields low"},
-			                                    {"hull high", "hull low"},
-			                                    {"energy high", "energy low"},
-			                                    {"heat high", "heat low"},
-			                                    {"fuel high", "fuel low"}};
+			static const string levels[5][2] = {
+			    {"shields high", "shields low"},
+			    {   "hull high",    "hull low"},
+			    { "energy high",  "energy low"},
+			    {   "heat high",    "heat low"},
+			    {   "fuel high",    "fuel low"}
+            };
 			info.SetBar(levels[i][0], escort.high[i]);
 			info.SetBar(levels[i][1], escort.low[i]);
 		}
@@ -168,15 +170,23 @@ const vector<weak_ptr<Ship>> &EscortDisplay::Click(const Point &point) const
 
 
 
-EscortDisplay::Icon::Icon(const shared_ptr<Ship> &ship, bool isHere, bool systemNameKnown, bool fleetIsJumping,
-                          bool isSelected, int basicHeight, int systemLabelHeight)
+EscortDisplay::Icon::Icon(const shared_ptr<Ship> &ship,
+                          bool                    isHere,
+                          bool                    systemNameKnown,
+                          bool                    fleetIsJumping,
+                          bool                    isSelected,
+                          int                     basicHeight,
+                          int                     systemLabelHeight)
     : sprite(ship->GetSprite()), isDisabled(ship->IsDisabled()), isHere(isHere),
       isHostile(ship->GetGovernment() && ship->GetGovernment()->IsEnemy()),
       notReadyToJump(fleetIsJumping && !ship->IsHyperspacing() && !ship->IsReadyToJump(true)),
       cannotJump(fleetIsJumping && !ship->IsHyperspacing() && !ship->JumpsRemaining()), isSelected(isSelected),
       cost(ship->Cost()),
       system((!isHere && ship->GetSystem()) ? (systemNameKnown ? ship->GetSystem()->DisplayName() : "???") : ""),
-      low({ship->ShieldFraction(), ship->HullFraction(), ship->EnergyFraction(), min(ship->HeatFraction(), 1.),
+      low({ship->ShieldFraction(),
+	       ship->HullFraction(),
+	       ship->EnergyFraction(),
+	       min(ship->HeatFraction(), 1.),
 	       ship->FuelFraction()}),
       high(low), ships(1, ship)
 {
@@ -215,7 +225,7 @@ void EscortDisplay::Icon::Merge(const Icon &other)
 
 	for(unsigned i = 0; i < low.size(); ++i)
 	{
-		low[i] = min(low[i], other.low[i]);
+		low[i]  = min(low[i], other.low[i]);
 		high[i] = max(high[i], other.high[i]);
 	}
 	ships.insert(ships.end(), other.ships.begin(), other.ships.end());
@@ -252,7 +262,7 @@ void EscortDisplay::MergeStacks(int maxHeight) const
 		// The "cheapest" element in the list may be removed to merge it with an
 		// earlier ship of the same type, so store a copy of its sprite pointer:
 		const Sprite *sprite = cheapest->sprite;
-		auto it = icons.begin();
+		auto          it     = icons.begin();
 		while(it != icons.end())
 		{
 			if(it->sprite != sprite)

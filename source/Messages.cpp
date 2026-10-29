@@ -28,8 +28,8 @@ namespace {
 	mutex incomingMutex;
 
 	vector<pair<string, const Message::Category *>> incoming;
-	vector<Messages::Entry> recent;
-	deque<pair<string, const Message::Category *>> logged;
+	vector<Messages::Entry>                         recent;
+	deque<pair<string, const Message::Category *>>  logged;
 } // namespace
 
 

@@ -26,7 +26,7 @@ using namespace std;
 
 namespace {
 	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
-	ShaderInfo info;
+	ShaderInfo                                     info;
 
 	graphics_layer::ObjectHandle geometry;
 } // namespace
@@ -58,24 +58,31 @@ void OutlineShader::Init(const GraphicsTypes::GraphicsInstance *graphics_instanc
 
 
 
-void OutlineShader::Draw(GraphicsTypes::CommandBufferInstance *cb, const Sprite *sprite, const Point &pos,
-                         const Point &size, const Color &color, const Point &unit, const float frame)
+void OutlineShader::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                         const Sprite                         *sprite,
+                         const Point                          &pos,
+                         const Point                          &size,
+                         const Color                          &color,
+                         const Point                          &unit,
+                         const float                           frame)
 {
 	cb->BindShader(shader.get());
 
-	const gm::vec2 scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
-	const gm::vec2 off = {static_cast<float>(.5 / size.X()), static_cast<float>(.5 / size.Y())};
-	const float frameCount = sprite->Frames();
+	const gm::vec2 scale      = {2.f / Screen::Width(), -2.f / Screen::Height()};
+	const gm::vec2 off        = {static_cast<float>(.5 / size.X()), static_cast<float>(.5 / size.Y())};
+	const float    frameCount = sprite->Frames();
 
-	Point uw = unit * size.X();
-	Point uh = unit * size.Y();
-	const gm::padded_mat2 transform = {static_cast<float>(-uw.Y()), static_cast<float>(uw.X()),
-	                                   static_cast<float>(-uh.X()), static_cast<float>(-uh.Y())};
+	Point                 uw        = unit * size.X();
+	Point                 uh        = unit * size.Y();
+	const gm::padded_mat2 transform = {static_cast<float>(-uw.Y()),
+	                                   static_cast<float>(uw.X()),
+	                                   static_cast<float>(-uh.X()),
+	                                   static_cast<float>(-uh.Y())};
 
 	const gm::vec2 position = {static_cast<float>(pos.X()), static_cast<float>(pos.Y())};
 
 	std::vector<unsigned char> data_cp(info.GetUniformSize());
-	int i = -1;
+	int                        i = -1;
 	info.CopyUniformEntryToBuffer(data_cp.data(), &scale, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &position, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &transform, ++i);

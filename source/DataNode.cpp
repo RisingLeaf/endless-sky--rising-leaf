@@ -49,8 +49,8 @@ DataNode::DataNode(const DataNode &other)
 // Copy assignment operator.
 DataNode &DataNode::operator=(const DataNode &other)
 {
-	children = other.children;
-	tokens = other.tokens;
+	children   = other.children;
+	tokens     = other.tokens;
 	lineNumber = std::move(other.lineNumber);
 	Reparent();
 	return *this;
@@ -200,8 +200,8 @@ bool DataNode::IsNumber(int index) const
 bool DataNode::IsNumber(const string &token)
 {
 	bool hasDecimalPoint = false;
-	bool hasExponent = false;
-	bool isLeading = true;
+	bool hasExponent     = false;
+	bool isLeading       = true;
 	for(const char *it = token.c_str(); *it; ++it)
 	{
 		// If this is the start of the number or the exponent, it is allowed to

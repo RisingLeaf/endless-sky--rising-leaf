@@ -27,7 +27,7 @@ using namespace std;
 
 namespace {
 	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
-	ShaderInfo info;
+	ShaderInfo                                     info;
 
 	graphics_layer::ObjectHandle geometry;
 } // namespace
@@ -67,8 +67,13 @@ void RenderBuffer::Clear()
 
 // Create a texture of the given size that can be used as a render target.
 RenderBuffer::RenderBuffer(const gm::ivec2 &dimensions)
-    : framebuffer(GameWindow::GraphicsInstance(), dimensions[0], dimensions[1], GraphicsTypes::ImageFormat::RGBA_SRGB,
-	              GraphicsTypes::ImageFormat::INVALID, 1, "render_buffer"),
+    : framebuffer(GameWindow::GraphicsInstance(),
+	              dimensions[0],
+	              dimensions[1],
+	              GraphicsTypes::ImageFormat::RGBA_SRGB,
+	              GraphicsTypes::ImageFormat::INVALID,
+	              1,
+	              "render_buffer"),
       size(dimensions)
 {
 	GameWindow::GraphicsInstance()->CreateCommandBuffer(RenderCmd);
@@ -91,7 +96,7 @@ GraphicsTypes::CommandBufferInstance *RenderBuffer::SetTarget()
 	Screen::SetRaw(size[0], size[1], true);
 
 	RenderCmd->Begin();
-	auto render_state = graphics_bootstrap::RenderStateSimpleBlending(size[0], size[1]);
+	auto render_state         = graphics_bootstrap::RenderStateSimpleBlending(size[0], size[1]);
 	render_state.ClearColor.a = 0.f;
 	RenderCmd->SetState(render_state);
 	framebuffer.Bind(RenderCmd.get());
@@ -120,23 +125,27 @@ void RenderBuffer::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &p
 
 
 // Draw the contents of this buffer at the specified position.
-void RenderBuffer::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &position, const Point &clipsize,
-                        const Point &srcposition)
+void RenderBuffer::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                        const Point                          &position,
+                        const Point                          &clipsize,
+                        const Point                          &srcposition)
 {
 	cb->BindShader(shader.get());
 	graphics_layer::QuickBindTextures(cb, {framebuffer.GetTexture()});
 
-	const auto sizeV = gm::vec2(clipsize.X(), clipsize.Y());
-	const auto positionV = gm::vec2(position.X(), position.Y());
-	const auto scaleV = gm::vec2(2.f / Screen::Width(), -2.f / Screen::Height());
+	const auto sizeV        = gm::vec2(clipsize.X(), clipsize.Y());
+	const auto positionV    = gm::vec2(position.X(), position.Y());
+	const auto scaleV       = gm::vec2(2.f / Screen::Width(), -2.f / Screen::Height());
 	const auto srcPositionV = gm::vec2(srcposition.X(), srcposition.Y());
-	const auto srcScaleV = gm::vec2(1.f / size[0], 1.f / size[1]);
-	const auto fadePaddingV = gm::vec4(fadePadding[0] / clipsize.Y(), fadePadding[1] / clipsize.Y(),
-	                                   fadePadding[2] / clipsize.X(), fadePadding[3] / clipsize.X());
+	const auto srcScaleV    = gm::vec2(1.f / size[0], 1.f / size[1]);
+	const auto fadePaddingV = gm::vec4(fadePadding[0] / clipsize.Y(),
+	                                   fadePadding[1] / clipsize.Y(),
+	                                   fadePadding[2] / clipsize.X(),
+	                                   fadePadding[3] / clipsize.X());
 
 
 	std::vector<unsigned char> data_cp(info.GetUniformSize());
-	int i = -1;
+	int                        i = -1;
 	info.CopyUniformEntryToBuffer(data_cp.data(), &sizeV, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &positionV, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &scaleV, ++i);

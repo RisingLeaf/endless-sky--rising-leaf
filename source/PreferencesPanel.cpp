@@ -54,50 +54,50 @@ using namespace std;
 
 namespace {
 	// Settings that require special handling.
-	const string ZOOM_FACTOR = "Main zoom factor";
-	const int ZOOM_FACTOR_MIN = 100;
-	const int ZOOM_FACTOR_INCREMENT = 10;
-	const string VIEW_ZOOM_FACTOR = "View zoom factor";
-	const string FONT_SIZE = "UI font size";
-	const string AUTO_AIM_SETTING = "Automatic aiming";
-	const string AUTO_FIRE_SETTING = "Automatic firing";
-	const string SCREEN_MODE_SETTING = "Screen mode";
-	const string VSYNC_SETTING = "VSync";
-	const string CAMERA_ACCELERATION = "Camera acceleration";
-	const string LARGE_GRAPHICS_REDUCTION = "Reduce large graphics";
-	const string CLOAK_OUTLINE = "Cloaked ship outlines";
-	const string TEXTURE_FILTERING = "Texture filtering";
-	const string STATUS_OVERLAYS_ALL = "Show status overlays";
-	const string STATUS_OVERLAYS_FLAGSHIP = "   Show flagship overlay";
-	const string STATUS_OVERLAYS_ESCORT = "   Show escort overlays";
-	const string STATUS_OVERLAYS_ENEMY = "   Show enemy overlays";
-	const string STATUS_OVERLAYS_NEUTRAL = "   Show neutral overlays";
-	const string TURRET_OVERLAYS = "Turret overlays";
-	const string HIGHLIGHT_SHIPS = "Highlight ships";
-	const string EXPEND_AMMO = "Escorts expend ammo";
-	const string FLOTSAM_SETTING = "Flotsam collection";
-	const string TURRET_TRACKING = "Turret tracking";
-	const string FOCUS_PREFERENCE = "Turrets focus fire";
-	const string REACTIVATE_HELP = "Reactivate first-time help";
-	const string SCROLL_SPEED = "Scroll speed";
-	const string TOOLTIP_ACTIVATION = "Tooltip activation time";
-	const string FIGHTER_REPAIR = "Repair fighters in";
-	const string FLAGSHIP_SPACE_PRIORITY = "Prioritize flagship use";
-	const string SHIP_OUTLINES = "Ship outlines in shops";
-	const string DATE_FORMAT = "Date format";
-	const string NOTIFY_ON_DEST = "Notify on destination";
-	const string BOARDING_PRIORITY = "Boarding target priority";
-	const string ASTEROID_TARGETING = "Asteroid targeting";
-	const string BACKGROUND_PARALLAX = "Parallax background";
-	const string EXTENDED_JUMP_EFFECTS = "Extended jump effects";
-	const string ALERT_INDICATOR = "Alert indicator";
-	const string MINIMAP_DISPLAY = "Show mini-map";
-	const string HUD_SHIP_OUTLINES = "Ship outlines in HUD";
-	const string BLOCK_SCREEN_SAVER = "Block screen saver";
-	const string TRIBUTE_CONFIRMATION = "Tribute confirmation";
-	const string AMMO_REFILL = "Auto refill ammo";
+	const string ZOOM_FACTOR               = "Main zoom factor";
+	const int    ZOOM_FACTOR_MIN           = 100;
+	const int    ZOOM_FACTOR_INCREMENT     = 10;
+	const string VIEW_ZOOM_FACTOR          = "View zoom factor";
+	const string FONT_SIZE                 = "UI font size";
+	const string AUTO_AIM_SETTING          = "Automatic aiming";
+	const string AUTO_FIRE_SETTING         = "Automatic firing";
+	const string SCREEN_MODE_SETTING       = "Screen mode";
+	const string VSYNC_SETTING             = "VSync";
+	const string CAMERA_ACCELERATION       = "Camera acceleration";
+	const string LARGE_GRAPHICS_REDUCTION  = "Reduce large graphics";
+	const string CLOAK_OUTLINE             = "Cloaked ship outlines";
+	const string TEXTURE_FILTERING         = "Texture filtering";
+	const string STATUS_OVERLAYS_ALL       = "Show status overlays";
+	const string STATUS_OVERLAYS_FLAGSHIP  = "   Show flagship overlay";
+	const string STATUS_OVERLAYS_ESCORT    = "   Show escort overlays";
+	const string STATUS_OVERLAYS_ENEMY     = "   Show enemy overlays";
+	const string STATUS_OVERLAYS_NEUTRAL   = "   Show neutral overlays";
+	const string TURRET_OVERLAYS           = "Turret overlays";
+	const string HIGHLIGHT_SHIPS           = "Highlight ships";
+	const string EXPEND_AMMO               = "Escorts expend ammo";
+	const string FLOTSAM_SETTING           = "Flotsam collection";
+	const string TURRET_TRACKING           = "Turret tracking";
+	const string FOCUS_PREFERENCE          = "Turrets focus fire";
+	const string REACTIVATE_HELP           = "Reactivate first-time help";
+	const string SCROLL_SPEED              = "Scroll speed";
+	const string TOOLTIP_ACTIVATION        = "Tooltip activation time";
+	const string FIGHTER_REPAIR            = "Repair fighters in";
+	const string FLAGSHIP_SPACE_PRIORITY   = "Prioritize flagship use";
+	const string SHIP_OUTLINES             = "Ship outlines in shops";
+	const string DATE_FORMAT               = "Date format";
+	const string NOTIFY_ON_DEST            = "Notify on destination";
+	const string BOARDING_PRIORITY         = "Boarding target priority";
+	const string ASTEROID_TARGETING        = "Asteroid targeting";
+	const string BACKGROUND_PARALLAX       = "Parallax background";
+	const string EXTENDED_JUMP_EFFECTS     = "Extended jump effects";
+	const string ALERT_INDICATOR           = "Alert indicator";
+	const string MINIMAP_DISPLAY           = "Show mini-map";
+	const string HUD_SHIP_OUTLINES         = "Ship outlines in HUD";
+	const string BLOCK_SCREEN_SAVER        = "Block screen saver";
+	const string TRIBUTE_CONFIRMATION      = "Tribute confirmation";
+	const string AMMO_REFILL               = "Auto refill ammo";
 	const string FASTFORWARD_CAPSLOCK_SYNC = "Sync FF to CapsLock";
-	const string TEXT_ALIGNMENT = "Text alignment";
+	const string TEXT_ALIGNMENT            = "Text alignment";
 #ifdef _WIN32
 	const string TITLE_BAR_THEME = "Title bar theme";
 	const string WINDOW_ROUNDING = "Window rounding";
@@ -107,25 +107,31 @@ namespace {
 	const int CONTROLS_PAGE_COUNT = 2;
 	const int SETTINGS_PAGE_COUNT = 3;
 
-	const map<string, SoundCategory> volumeBars = {{"volume", SoundCategory::MASTER},
-	                                               {"music volume", SoundCategory::MUSIC},
-	                                               {"ui volume", SoundCategory::UI},
-	                                               {"anti-missile volume", SoundCategory::ANTI_MISSILE},
-	                                               {"weapon volume", SoundCategory::WEAPON},
-	                                               {"engine volume", SoundCategory::ENGINE},
-	                                               {"afterburner volume", SoundCategory::AFTERBURNER},
-	                                               {"jump volume", SoundCategory::JUMP},
-	                                               {"explosion volume", SoundCategory::EXPLOSION},
-	                                               {"scan volume", SoundCategory::SCAN},
-	                                               {"environment volume", SoundCategory::ENVIRONMENT},
-	                                               {"alert volume", SoundCategory::ALERT}};
+	const map<string, SoundCategory> volumeBars = {
+	    {             "volume",       SoundCategory::MASTER},
+	    {       "music volume",        SoundCategory::MUSIC},
+	    {          "ui volume",           SoundCategory::UI},
+	    {"anti-missile volume", SoundCategory::ANTI_MISSILE},
+	    {      "weapon volume",       SoundCategory::WEAPON},
+	    {      "engine volume",       SoundCategory::ENGINE},
+	    { "afterburner volume",  SoundCategory::AFTERBURNER},
+	    {        "jump volume",         SoundCategory::JUMP},
+	    {   "explosion volume",    SoundCategory::EXPLOSION},
+	    {        "scan volume",         SoundCategory::SCAN},
+	    { "environment volume",  SoundCategory::ENVIRONMENT},
+	    {       "alert volume",        SoundCategory::ALERT}
+    };
 } // namespace
 
 
 
 PreferencesPanel::PreferencesPanel(PlayerInfo &player)
-    : player(player), tooltip(270, Alignment::LEFT, Tooltip::Direction::DOWN_LEFT, Tooltip::Corner::TOP_LEFT,
-	                          GameData::Colors().Get("tooltip background"), GameData::Colors().Get("medium"))
+    : player(player), tooltip(270,
+	                          Alignment::LEFT,
+	                          Tooltip::Direction::DOWN_LEFT,
+	                          Tooltip::Corner::TOP_LEFT,
+	                          GameData::Colors().Get("tooltip background"),
+	                          GameData::Colors().Get("medium"))
 {
 	GameWindow::GraphicsInstance()->CreateCommandBuffer(PreRenderCmd);
 
@@ -140,8 +146,8 @@ PreferencesPanel::PreferencesPanel(PlayerInfo &player)
 	SetIsFullScreen(true);
 
 	// Set the initial plugin list and description scroll ranges.
-	const Interface *pluginUi = GameData::Interfaces().Get("plugins");
-	Rectangle pluginListBox = pluginUi->GetBox("plugin list");
+	const Interface *pluginUi      = GameData::Interfaces().Get("plugins");
+	Rectangle        pluginListBox = pluginUi->GetBox("plugin list");
 
 	int pluginListHeight = 0;
 	for(const auto &plugin : PluginManager::Get())
@@ -307,13 +313,13 @@ bool PreferencesPanel::Click(int x, int y, MouseButton button, int clicks)
 		return false;
 	EndEditing();
 
-	Point point(x, y);
+	Point            point(x, y);
 	const Interface *preferencesUI = GameData::Interfaces().Get("preferences");
-	Rectangle volumeBox = preferencesUI->GetBox("volume box");
+	Rectangle        volumeBox     = preferencesUI->GetBox("volume box");
 	if(volumeBox.Contains(point))
 	{
 		double barSize = preferencesUI->GetValue("master volume bar size");
-		double volume = (volumeBox.Center().Y() - point.Y()) / barSize + .5;
+		double volume  = (volumeBox.Center().Y() - point.Y()) / barSize + .5;
 
 		Audio::SetVolume(volume, SoundCategory::MASTER);
 		Audio::Play(Audio::Get("warder"), SoundCategory::MASTER);
@@ -345,8 +351,8 @@ bool PreferencesPanel::Click(int x, int y, MouseButton button, int clicks)
 	if(page == 'p')
 	{
 		// Don't handle clicks outside of the clipped area.
-		const Interface *pluginUi = GameData::Interfaces().Get("plugins");
-		Rectangle pluginListBox = pluginUi->GetBox("plugin list");
+		const Interface *pluginUi      = GameData::Interfaces().Get("plugins");
+		Rectangle        pluginListBox = pluginUi->GetBox("plugin list");
 		if(pluginListBox.Contains(point))
 		{
 			int index = 0;
@@ -355,7 +361,7 @@ bool PreferencesPanel::Click(int x, int y, MouseButton button, int clicks)
 				if(zone.Contains(point) && selectedPlugin != zone.Value())
 				{
 					selectedPlugin = zone.Value();
-					selected = index;
+					selected       = index;
 					RenderPluginDescription(selectedPlugin);
 					break;
 				}
@@ -366,7 +372,7 @@ bool PreferencesPanel::Click(int x, int y, MouseButton button, int clicks)
 	else if(page == 'a')
 	{
 		const Interface *audioUI = GameData::Interfaces().Get("audio");
-		double barSize = audioUI->GetValue("volume bar size");
+		double           barSize = audioUI->GetValue("volume bar size");
 		for(const auto &[name, category] : volumeBars)
 		{
 			if(category != SoundCategory::MASTER)
@@ -481,8 +487,8 @@ bool PreferencesPanel::Scroll(double dx, double dy)
 	}
 	else if(page == 'p')
 	{
-		auto ui = GameData::Interfaces().Get("plugins");
-		const Rectangle &pluginBox = ui->GetBox("plugin list");
+		auto             ui             = GameData::Interfaces().Get("plugins");
+		const Rectangle &pluginBox      = ui->GetBox("plugin list");
 		const Rectangle &descriptionBox = ui->GetBox("plugin description");
 
 		if(pluginBox.Contains(hoverPoint))
@@ -505,8 +511,8 @@ bool PreferencesPanel::Drag(double dx, double dy)
 {
 	if(page == 'p')
 	{
-		auto ui = GameData::Interfaces().Get("plugins");
-		const Rectangle &pluginBox = ui->GetBox("plugin list");
+		auto             ui             = GameData::Interfaces().Get("plugins");
+		const Rectangle &pluginBox      = ui->GetBox("plugin list");
 		const Rectangle &descriptionBox = ui->GetBox("plugin description");
 
 		if(pluginBox.Contains(hoverPoint))
@@ -531,8 +537,8 @@ void PreferencesPanel::Resize()
 {
 	if(page == 'p')
 	{
-		const Interface *pluginUi = GameData::Interfaces().Get("plugins");
-		Rectangle pluginListBox = pluginUi->GetBox("plugin list");
+		const Interface *pluginUi      = GameData::Interfaces().Get("plugins");
+		Rectangle        pluginListBox = pluginUi->GetBox("plugin list");
 		pluginListClip =
 		    make_unique<RenderBuffer>(gm::ivec2(pluginListBox.Dimensions().X(), pluginListBox.Dimensions().Y()));
 		RenderPluginDescription(selectedPlugin);
@@ -550,13 +556,13 @@ void PreferencesPanel::EndEditing()
 
 void PreferencesPanel::DrawControls(GraphicsTypes::CommandBufferInstance *cb)
 {
-	const Color &back = *GameData::Colors().Get("faint");
-	const Color &dim = *GameData::Colors().Get("dim");
+	const Color &back   = *GameData::Colors().Get("faint");
+	const Color &dim    = *GameData::Colors().Get("dim");
 	const Color &medium = *GameData::Colors().Get("medium");
 	const Color &bright = *GameData::Colors().Get("bright");
 
 	// Colors for highlighting.
-	const Color &warning = *GameData::Colors().Get("warning conflict");
+	const Color &warning   = *GameData::Colors().Get("warning conflict");
 	const Color &noCommand = *GameData::Colors().Get("warning no command");
 
 	if(selected != oldSelected)
@@ -565,7 +571,7 @@ void PreferencesPanel::DrawControls(GraphicsTypes::CommandBufferInstance *cb)
 		latest = hover;
 
 	oldSelected = selected;
-	oldHover = hover;
+	oldHover    = hover;
 
 	Table table;
 	table.AddColumn(-115, {230, Alignment::LEFT});
@@ -587,7 +593,7 @@ void PreferencesPanel::DrawControls(GraphicsTypes::CommandBufferInstance *cb)
 	//   page count (count of '\n' characters plus one).
 	static const string CATEGORIES[] = {
 	    "Keyboard Navigation", "Fleet", "\t", "Targeting", "Weapons", "\n", "Interface"};
-	const string *category = CATEGORIES;
+	const string        *category   = CATEGORIES;
 	static const Command COMMANDS[] = {Command::NONE,
 	                                   Command::FORWARD,
 	                                   Command::LEFT,
@@ -682,8 +688,8 @@ void PreferencesPanel::DrawControls(GraphicsTypes::CommandBufferInstance *cb)
 			    command.Has(Command::FASTFORWARD) &&
 			    Preferences::GetFastForwardCapsLockSync() == Preferences::FastForwardCapsLockSync::ALWAYS;
 			bool isConflicted = command.HasConflict() && !isFastForwardSyncToCapsLock;
-			bool isEmpty = !command.HasBinding() && !isFastForwardSyncToCapsLock;
-			bool isEditing = (index == editing);
+			bool isEmpty      = !command.HasBinding() && !isFastForwardSyncToCapsLock;
+			bool isEditing    = (index == editing);
 			if(isConflicted || isEditing || isEmpty)
 			{
 				table.SetHighlight(56, 120);
@@ -709,7 +715,7 @@ void PreferencesPanel::DrawControls(GraphicsTypes::CommandBufferInstance *cb)
 
 			zones.emplace_back(table.GetCenterPoint(), table.GetRowSize(), command);
 
-			const Color &keyColor = isFastForwardSyncToCapsLock ? dim : medium;
+			const Color &keyColor  = isFastForwardSyncToCapsLock ? dim : medium;
 			const Color &descColor = isFastForwardSyncToCapsLock ? dim : medium;
 			table.Draw(cb, command.Description(), descColor);
 			table.Draw(cb, command.KeyName(), isEditing ? bright : keyColor);
@@ -721,8 +727,8 @@ void PreferencesPanel::DrawControls(GraphicsTypes::CommandBufferInstance *cb)
 
 void PreferencesPanel::DrawSettings(GraphicsTypes::CommandBufferInstance *cb)
 {
-	const Color &back = *GameData::Colors().Get("faint");
-	const Color &dim = *GameData::Colors().Get("dim");
+	const Color &back   = *GameData::Colors().Get("faint");
+	const Color &dim    = *GameData::Colors().Get("dim");
 	const Color &medium = *GameData::Colors().Get("medium");
 	const Color &bright = *GameData::Colors().Get("bright");
 
@@ -847,7 +853,7 @@ void PreferencesPanel::DrawSettings(GraphicsTypes::CommandBufferInstance *cb)
 	};
 
 	bool isCategory = true;
-	int page = 0;
+	int  page       = 0;
 	for(const string &setting : SETTINGS)
 	{
 		// Check if this is a page break.
@@ -892,7 +898,7 @@ void PreferencesPanel::DrawSettings(GraphicsTypes::CommandBufferInstance *cb)
 
 		// Get the "on / off" text for this setting. Setting "isOn"
 		// draws the setting "bright" (i.e. the setting is active).
-		bool isOn = Preferences::Has(setting);
+		bool   isOn = Preferences::Has(setting);
 		string text;
 		if(setting == ZOOM_FACTOR)
 		{
@@ -1049,14 +1055,14 @@ void PreferencesPanel::DrawSettings(GraphicsTypes::CommandBufferInstance *cb)
 		else if(setting == REACTIVATE_HELP)
 		{
 			// Check how many help messages have been displayed.
-			const map<string, string> &help = GameData::HelpTemplates();
-			int shown = 0;
-			int total = 0;
+			const map<string, string> &help  = GameData::HelpTemplates();
+			int                        shown = 0;
+			int                        total = 0;
 			for(const auto &it : help)
 			{
 				// Don't count certain special help messages that are always
 				// active for new players.
-				bool special = false;
+				bool         special        = false;
 				const string SPECIAL_HELP[] = {"basics", "lost"};
 				for(const string &str : SPECIAL_HELP)
 					if(it.first.find(str) == 0)
@@ -1161,10 +1167,10 @@ void PreferencesPanel::DrawSettings(GraphicsTypes::CommandBufferInstance *cb)
 
 void PreferencesPanel::DrawPlugins(GraphicsTypes::CommandBufferInstance *cb)
 {
-	const Color &back = *GameData::Colors().Get("faint");
-	const Color &dim = *GameData::Colors().Get("dim");
-	const Color &medium = *GameData::Colors().Get("medium");
-	const Color &bright = *GameData::Colors().Get("bright");
+	const Color     &back     = *GameData::Colors().Get("faint");
+	const Color     &dim      = *GameData::Colors().Get("dim");
+	const Color     &medium   = *GameData::Colors().Get("medium");
+	const Color     &bright   = *GameData::Colors().Get("bright");
 	const Interface *pluginUI = GameData::Interfaces().Get("plugins");
 
 	const Sprite *box[2] = {SpriteSet::Get("ui/unchecked"), SpriteSet::Get("ui/checked")};
@@ -1199,9 +1205,9 @@ void PreferencesPanel::DrawPlugins(GraphicsTypes::CommandBufferInstance *cb)
 			if(isSelected || plugin.name == hoverItem)
 				table.DrawHighlight(target, back);
 
-			const Sprite *sprite = box[plugin.currentState];
-			const Point topLeft = table.GetRowBounds().TopLeft() - Point(sprite->Width(), 0.);
-			Rectangle spriteBounds = Rectangle::FromCorner(topLeft, Point(sprite->Width(), sprite->Height()));
+			const Sprite *sprite       = box[plugin.currentState];
+			const Point   topLeft      = table.GetRowBounds().TopLeft() - Point(sprite->Width(), 0.);
+			Rectangle     spriteBounds = Rectangle::FromCorner(topLeft, Point(sprite->Width(), sprite->Height()));
 			SpriteShader::Draw(target, sprite, spriteBounds.Center());
 
 			Rectangle zoneBounds = spriteBounds + pluginListBox.Center();
@@ -1237,15 +1243,15 @@ void PreferencesPanel::DrawPlugins(GraphicsTypes::CommandBufferInstance *cb)
 		// Draw up and down pointers, mostly to indicate when scrolling
 		// is possible, but might as well make them clickable too.
 		Rectangle topRight({pluginListBox.Right(), pluginListBox.Top() + POINTER_OFFSET.Y()}, {20.0, 20.0});
-		PointerShader::Draw(cb, topRight.Center(), UP, 10.f, 10.f, 5.f,
-		                    Color(pluginListScroll.IsScrollAtMin() ? .2f : .8f, 0.f));
+		PointerShader::Draw(
+		    cb, topRight.Center(), UP, 10.f, 10.f, 5.f, Color(pluginListScroll.IsScrollAtMin() ? .2f : .8f, 0.f));
 		AddZone(topRight, [&]() {
 			pluginListScroll.Scroll(-Preferences::ScrollSpeed());
 		});
 
 		Rectangle bottomRight(pluginListBox.BottomRight() - POINTER_OFFSET, {20.0, 20.0});
-		PointerShader::Draw(cb, bottomRight.Center(), DOWN, 10.f, 10.f, 5.f,
-		                    Color(pluginListScroll.IsScrollAtMax() ? .2f : .8f, 0.f));
+		PointerShader::Draw(
+		    cb, bottomRight.Center(), DOWN, 10.f, 10.f, 5.f, Color(pluginListScroll.IsScrollAtMax() ? .2f : .8f, 0.f));
 		AddZone(bottomRight, [&]() {
 			pluginListScroll.Scroll(Preferences::ScrollSpeed());
 		});
@@ -1260,7 +1266,9 @@ void PreferencesPanel::DrawPlugins(GraphicsTypes::CommandBufferInstance *cb)
 		                                        pluginDescriptionScroll.IsScrollAtMax() ? 0 : 20);
 
 		Rectangle descriptionBox = pluginUI->GetBox("plugin description");
-		pluginDescriptionBuffer->Draw(cb, descriptionBox.Center(), descriptionBox.Dimensions(),
+		pluginDescriptionBuffer->Draw(cb,
+		                              descriptionBox.Center(),
+		                              descriptionBox.Dimensions(),
 		                              Point(0, static_cast<int>(pluginDescriptionScroll.AnimatedValue())));
 
 		if(pluginDescriptionScroll.Scrollable())
@@ -1269,14 +1277,24 @@ void PreferencesPanel::DrawPlugins(GraphicsTypes::CommandBufferInstance *cb)
 			// scrolling is possible, but might as well make them
 			// clickable too.
 			Rectangle topRight({descriptionBox.Right(), descriptionBox.Top() + POINTER_OFFSET.Y()}, {20.0, 20.0});
-			PointerShader::Draw(cb, topRight.Center(), UP, 10.f, 10.f, 5.f,
+			PointerShader::Draw(cb,
+			                    topRight.Center(),
+			                    UP,
+			                    10.f,
+			                    10.f,
+			                    5.f,
 			                    Color(pluginDescriptionScroll.IsScrollAtMin() ? .2f : .8f, 0.f));
 			AddZone(topRight, [&]() {
 				pluginDescriptionScroll.Scroll(-Preferences::ScrollSpeed());
 			});
 
 			Rectangle bottomRight(descriptionBox.BottomRight() - POINTER_OFFSET, {20.0, 20.0});
-			PointerShader::Draw(cb, bottomRight.Center(), DOWN, 10.f, 10.f, 5.f,
+			PointerShader::Draw(cb,
+			                    bottomRight.Center(),
+			                    DOWN,
+			                    10.f,
+			                    10.f,
+			                    5.f,
 			                    Color(pluginDescriptionScroll.IsScrollAtMax() ? .2f : .8f, 0.f));
 			AddZone(bottomRight, [&]() {
 				pluginDescriptionScroll.Scroll(Preferences::ScrollSpeed());
@@ -1307,16 +1325,16 @@ void PreferencesPanel::RenderPluginDescription(const string &pluginName)
 void PreferencesPanel::RenderPluginDescription(GraphicsTypes::CommandBufferInstance *cb, const Plugin &plugin)
 {
 	const Color &medium = *GameData::Colors().Get("medium");
-	const Font &font = FontSet::Get(Preferences::GetFontSize());
-	Rectangle box = GameData::Interfaces().Get("plugins")->GetBox("plugin description");
+	const Font  &font   = FontSet::Get(Preferences::GetFontSize());
+	Rectangle    box    = GameData::Interfaces().Get("plugins")->GetBox("plugin description");
 
 	// We are resizing and redrawing the description buffer. Reset the scroll
 	// back to zero.
 	pluginDescriptionScroll.Set(0, 0);
 
 	// Compute the height before drawing, so that we know the scroll bounds.
-	const Sprite *sprite = SpriteSet::Get(plugin.name);
-	int descriptionHeight = 0;
+	const Sprite *sprite            = SpriteSet::Get(plugin.name);
+	int           descriptionHeight = 0;
 	if(sprite)
 		descriptionHeight += sprite->Height() + 10;
 
@@ -1538,16 +1556,13 @@ void PreferencesPanel::HandleUp()
 	selected = max(0, selected - 1);
 	switch(page)
 	{
-	case 's':
-		selectedItem = prefZones.at(selected).Value();
-		break;
+	case 's': selectedItem = prefZones.at(selected).Value(); break;
 	case 'p':
 		selectedPlugin = pluginZones.at(selected).Value();
 		RenderPluginDescription(selectedPlugin);
 		ScrollSelectedPlugin();
 		break;
-	default:
-		break;
+	default: break;
 	}
 }
 
@@ -1562,17 +1577,16 @@ void PreferencesPanel::HandleDown()
 			selected++;
 		break;
 	case 's':
-		selected = min(selected + 1, static_cast<int>(prefZones.size() - 1));
+		selected     = min(selected + 1, static_cast<int>(prefZones.size() - 1));
 		selectedItem = prefZones.at(selected).Value();
 		break;
 	case 'p':
-		selected = min(selected + 1, static_cast<int>(pluginZones.size() - 1));
+		selected       = min(selected + 1, static_cast<int>(pluginZones.size() - 1));
 		selectedPlugin = pluginZones.at(selected).Value();
 		RenderPluginDescription(selectedPlugin);
 		ScrollSelectedPlugin();
 		break;
-	default:
-		break;
+	default: break;
 	}
 }
 
@@ -1582,17 +1596,10 @@ void PreferencesPanel::HandleConfirm()
 {
 	switch(page)
 	{
-	case 'c':
-		editing = selected;
-		break;
-	case 's':
-		HandleSettingsString(selectedItem, Screen::Dimensions() / 2.);
-		break;
-	case 'p':
-		PluginManager::TogglePlugin(selectedPlugin);
-		break;
-	default:
-		break;
+	case 'c': editing = selected; break;
+	case 's': HandleSettingsString(selectedItem, Screen::Dimensions() / 2.); break;
+	case 'p': PluginManager::TogglePlugin(selectedPlugin); break;
+	default:  break;
 	}
 }
 

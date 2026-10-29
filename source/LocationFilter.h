@@ -38,11 +38,13 @@ class LocationFilter {
 public:
 	LocationFilter() noexcept = default;
 	// Construct and Load() at the same time.
-	explicit LocationFilter(const DataNode &node, const std::set<const System *> *visitedSystems,
+	explicit LocationFilter(const DataNode                 &node,
+	                        const std::set<const System *> *visitedSystems,
 	                        const std::set<const Planet *> *visitedPlanets);
 
 	// Examine all the children of the given node and load any that are filters.
-	void Load(const DataNode &node, const std::set<const System *> *visitedSystems,
+	void Load(const DataNode                 &node,
+	          const std::set<const System *> *visitedSystems,
 	          const std::set<const Planet *> *visitedPlanets);
 	// This only saves the children. Save the root node separately. It does
 	// handle indenting, however.
@@ -70,7 +72,8 @@ public:
 
 private:
 	// Load one particular line of conditions.
-	void LoadChild(const DataNode &child, const std::set<const System *> *visitedSystems,
+	void LoadChild(const DataNode                 &child,
+	               const std::set<const System *> *visitedSystems,
 	               const std::set<const Planet *> *visitedPlanets);
 	// Check if the filter matches the given system. If it did not, return true
 	// only if the filter wasn't looking for planet characteristics or if the
@@ -95,16 +98,16 @@ private:
 	std::list<std::set<std::string>> attributes;
 
 	// The system must satisfy these conditions:
-	std::set<const System *> systems;
+	std::set<const System *>     systems;
 	std::set<const Government *> governments;
 	// The reference point and distance limits of a "near <system>" filter.
-	const System *center = nullptr;
-	int centerMinDistance = 0;
-	int centerMaxDistance = 1;
+	const System               *center            = nullptr;
+	int                         centerMinDistance = 0;
+	int                         centerMaxDistance = 1;
 	DistanceCalculationSettings centerDistanceOptions;
 	// Distance limits used in a "distance" filter.
-	int originMinDistance = 0;
-	int originMaxDistance = -1;
+	int                         originMinDistance = 0;
+	int                         originMaxDistance = -1;
 	DistanceCalculationSettings originDistanceOptions;
 
 	// At least one of the outfits from each set must be available

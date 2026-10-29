@@ -84,8 +84,8 @@ void Flotsam::Place(const Body &source, const Point &dv)
 {
 	position = source.Position();
 	velocity = source.Velocity() + dv;
-	angle = Angle::Random();
-	spin = Angle::Random(10.);
+	angle    = Angle::Random();
+	spin     = Angle::Random(10.);
 
 	// Special case: allow a harvested outfit item to define its flotsam sprite
 	// using the field that usually defines a secondary weapon's icon.
@@ -197,7 +197,7 @@ int Flotsam::TransferTo(Ship *collector)
 {
 	int amount = outfit ? collector->Cargo().Add(outfit, count) : collector->Cargo().Add(commodity, count);
 
-	Point relative = collector->Velocity() - velocity;
+	Point  relative   = collector->Velocity() - velocity;
 	double proportion = static_cast<double>(amount) / count;
 	velocity += relative * proportion;
 

@@ -30,10 +30,10 @@ public:
 	void Load(const DataNode &node);
 
 	WormholeStrategy WormholeStrat() const;
-	bool AssumesJumpDrive() const;
+	bool             AssumesJumpDrive() const;
 
 
 private:
 	enum WormholeStrategy wormholeStrategy = WormholeStrategy::NONE;
-	bool assumesJumpDrive = false;
+	bool                  assumesJumpDrive = false;
 };

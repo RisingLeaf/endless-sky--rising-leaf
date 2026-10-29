@@ -39,19 +39,21 @@ public:
 	// Turn this buffer on as a render target. The render target is restored if
 	// the Activation object goes out of scope.
 	[[nodiscard]] GraphicsTypes::CommandBufferInstance *SetTarget();
-	void Deactivate();
+	void                                                Deactivate();
 
 	// Draw the contents of this buffer at the specified position.
 	void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &position);
 	// Draw the contents of this buffer at the specified position, clipping the contents.
-	void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &position, const Point &clipsize,
-	          const Point &srcposition = Point());
+	void Draw(GraphicsTypes::CommandBufferInstance *cb,
+	          const Point                          &position,
+	          const Point                          &clipsize,
+	          const Point                          &srcposition = Point());
 
 	[[nodiscard]] double Top() const;
 	[[nodiscard]] double Bottom() const;
 	[[nodiscard]] double Left() const;
 	[[nodiscard]] double Right() const;
-	[[nodiscard]] Point Dimensions() const;
+	[[nodiscard]] Point  Dimensions() const;
 	[[nodiscard]] double Height() const;
 	[[nodiscard]] double Width() const;
 
@@ -59,10 +61,10 @@ public:
 
 private:
 	std::unique_ptr<GraphicsTypes::CommandBufferInstance> RenderCmd;
-	graphics_layer::FrameBufferHandle framebuffer;
-	gm::ivec2 size;
-	gm::ivec2 last_dimensions;
-	float fadePadding[4] = {};
+	graphics_layer::FrameBufferHandle                     framebuffer;
+	gm::ivec2                                             size;
+	gm::ivec2                                             last_dimensions;
+	float                                                 fadePadding[4] = {};
 
 	Point multiplier;
 };

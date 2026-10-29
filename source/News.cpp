@@ -25,12 +25,14 @@ using namespace std;
 
 
 
-void News::Load(const DataNode &node, const ConditionsStore *playerConditions,
-                const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+void News::Load(const DataNode            &node,
+                const ConditionsStore     *playerConditions,
+                const set<const System *> *visitedSystems,
+                const set<const Planet *> *visitedPlanets)
 {
 	for(const DataNode &child : node)
 	{
-		const bool add = (child.Token(0) == "add");
+		const bool add    = (child.Token(0) == "add");
 		const bool remove = (child.Token(0) == "remove");
 		if((add || remove) && child.Size() < 2)
 		{
@@ -39,9 +41,9 @@ void News::Load(const DataNode &node, const ConditionsStore *playerConditions,
 		}
 
 		// Get the key and value (if any).
-		const string &tag = child.Token((add || remove) ? 1 : 0);
-		const int valueIndex = (add || remove) ? 2 : 1;
-		const bool hasValue = child.Size() > valueIndex;
+		const string &tag        = child.Token((add || remove) ? 1 : 0);
+		const int     valueIndex = (add || remove) ? 2 : 1;
+		const bool    hasValue   = child.Size() > valueIndex;
 
 		if(tag == "location")
 		{
@@ -79,7 +81,8 @@ void News::Load(const DataNode &node, const ConditionsStore *playerConditions,
 					toRemove.emplace(SpriteSet::Get(child.Token(i)));
 
 				// Erase them in unison.
-				portraits.erase(remove_if(portraits.begin(), portraits.end(),
+				portraits.erase(remove_if(portraits.begin(),
+				                          portraits.end(),
 				                          [&toRemove](const Sprite *sprite) {
 					                          return toRemove.find(sprite) != toRemove.end();
 				                          }),

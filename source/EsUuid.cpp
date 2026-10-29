@@ -39,7 +39,7 @@ namespace {
 	{
 		EsUuid::UuidType value;
 #ifdef _WIN32
-		auto data = Utf8::ToUTF16(str, false);
+		auto       data   = Utf8::ToUTF16(str, false);
 		RPC_STATUS status = UuidFromStringW(reinterpret_cast<RPC_WSTR>(&data[0]), &value.id);
 		if(status == RPC_S_INVALID_STRING_UUID)
 			throw invalid_argument("Cannot convert \"" + str + "\" into a UUID");
@@ -71,7 +71,7 @@ namespace {
 #ifdef _WIN32
 	string Serialize(const UUID &id)
 	{
-		wchar_t *buf = nullptr;
+		wchar_t   *buf    = nullptr;
 		RPC_STATUS status = UuidToStringW(&id, reinterpret_cast<RPC_WSTR *>(&buf));
 
 		string result = (status == RPC_S_OK) ? Utf8::ToUTF8(buf) : string{};
@@ -95,7 +95,7 @@ namespace {
 	{
 #ifdef _WIN32
 		RPC_STATUS status;
-		auto result = UuidCompare(const_cast<UUID *>(&a.id), const_cast<UUID *>(&b.id), &status);
+		auto       result = UuidCompare(const_cast<UUID *>(&a.id), const_cast<UUID *>(&b.id), &status);
 		if(status != RPC_S_OK)
 			throw runtime_error("Fatal error comparing UUIDs \"" + Serialize(a.id) + "\" and \"" + Serialize(b.id) +
 			                    "\"");

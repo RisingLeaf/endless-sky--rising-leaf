@@ -41,8 +41,8 @@ Drawable::Drawable(const Sprite *sprite, double zoom, Point scale, double alpha)
 // Constructor, based on the animation from another Drawable object.
 Drawable::Drawable(const Drawable &other, double zoom, Point scale, double alpha)
 {
-	*this = other;
-	this->zoom = zoom;
+	*this       = other;
+	this->zoom  = zoom;
 	this->scale = scale * other.Scale();
 	this->alpha = alpha * other.alpha;
 }
@@ -159,8 +159,8 @@ void Drawable::LoadSprite(const DataNode &node)
 	// to do that unless it is repeating endlessly.
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "frame rate" && hasValue && child.Value(1) >= 0.)
 			frameRate = child.Value(1) / 60.;
 		else if(key == "frame time" && hasValue && child.Value(1) > 0.)
@@ -170,7 +170,7 @@ void Drawable::LoadSprite(const DataNode &node)
 		else if(key == "scale" && hasValue && child.Value(1) > 0.)
 		{
 			double scaleY = (child.Size() >= 3 && child.Value(2) > 0.) ? child.Value(2) : child.Value(1);
-			scale = Point(child.Value(1), scaleY);
+			scale         = Point(child.Value(1), scaleY);
 		}
 		else if(key == "start frame" && hasValue)
 		{
@@ -181,7 +181,7 @@ void Drawable::LoadSprite(const DataNode &node)
 			randomize = true;
 		else if(key == "no repeat")
 		{
-			repeat = false;
+			repeat      = false;
 			startAtZero = true;
 		}
 		else if(key == "rewind")
@@ -238,7 +238,7 @@ void Drawable::SaveSprite(DataWriter &out, const string &tag) const
 void Drawable::SetSprite(const Sprite *sprite)
 {
 	this->sprite = sprite;
-	currentStep = -1;
+	currentStep  = -1;
 }
 
 

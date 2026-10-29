@@ -47,9 +47,9 @@ void Sale<Item>::Load(const DataNode &node, const Set<Item> &items, bool prevent
 template <class Item>
 void Sale<Item>::LoadSingle(const DataNode &child, const Set<Item> &items, bool preventModifiers)
 {
-	const std::string &token = child.Token(0);
-	bool remove = (token == "clear" || token == "remove");
-	bool add = (token == "add");
+	const std::string &token  = child.Token(0);
+	bool               remove = (token == "clear" || token == "remove");
+	bool               add    = (token == "add");
 	if((remove || add) && preventModifiers)
 	{
 		child.PrintTrace("Cannot \"add\" or \"remove\" inside a \"stock\" node:");

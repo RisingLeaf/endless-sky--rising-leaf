@@ -62,7 +62,7 @@ public:
 
 
 public:
-	ConditionSet() = default;
+	ConditionSet()                     = default;
 	ConditionSet(const ConditionSet &) = default;
 
 	ConditionSet &operator=(const ConditionSet &&other) noexcept;

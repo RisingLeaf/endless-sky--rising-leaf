@@ -237,13 +237,9 @@ bool MainPanel::Click(int x, int y, MouseButton button, int clicks)
 	switch(button)
 	{
 	case MouseButton::MIDDLE:
-	case MouseButton::RIGHT:
-		engine.RightOrMiddleClick(Point(x, y), button);
-		return true;
-	case MouseButton::LEFT:
-		break;
-	default:
-		return false;
+	case MouseButton::RIGHT:  engine.RightOrMiddleClick(Point(x, y), button); return true;
+	case MouseButton::LEFT:   break;
+	default:                  return false;
 	}
 
 	// Don't respond to clicks if another panel is active.
@@ -253,11 +249,11 @@ bool MainPanel::Click(int x, int y, MouseButton button, int clicks)
 	canDrag = true;
 
 	dragSource = Point(x, y);
-	dragPoint = dragSource;
+	dragPoint  = dragSource;
 
 	SDL_Keymod mod = SDL_GetModState();
-	hasShift = (mod & SDL_KMOD_SHIFT);
-	hasControl = (mod & SDL_KMOD_CTRL);
+	hasShift       = (mod & SDL_KMOD_SHIFT);
+	hasControl     = (mod & SDL_KMOD_CTRL);
 
 	engine.Click(dragSource, dragSource, hasShift, hasControl);
 
@@ -314,7 +310,7 @@ bool MainPanel::Scroll(double dx, double dy)
 void MainPanel::ShowScanDialog(const ShipEvent &event)
 {
 	const shared_ptr<Ship> &target = event.Target();
-	string name = target->DisplayModelName();
+	string                  name   = target->DisplayModelName();
 	if(!target->GivenName().empty())
 		name += " \"" + target->GivenName() + "\"";
 
@@ -363,7 +359,7 @@ void MainPanel::ShowScanDialog(const ShipEvent &event)
 		vector<string> categories;
 		for(const auto &category : GameData::GetCategory(CategoryType::OUTFIT))
 			categories.push_back(category.Name());
-		auto comparator = ByGivenOrder<string>(categories);
+		auto                                                      comparator = ByGivenOrder<string>(categories);
 		map<string, map<const string, int>, ByGivenOrder<string>> outfitsByCategory(comparator);
 		for(const auto &[outfit, count] : target->Outfits())
 		{
@@ -396,7 +392,7 @@ void MainPanel::ShowScanDialog(const ShipEvent &event)
 					int &pluralValue = count[bay.ship->PluralModelName()];
 					if(!pluralValue)
 					{
-						value = -1;
+						value       = -1;
 						pluralValue = 1;
 					}
 					++pluralValue;
@@ -606,7 +602,7 @@ void MainPanel::StepEvents(bool &isActive)
 {
 	while(isActive && !eventQueue.empty())
 	{
-		const ShipEvent &event = eventQueue.front();
+		const ShipEvent  &event = eventQueue.front();
 		const Government *actor = event.ActorGovernment();
 
 		// Pass this event to the player, to update conditions and make
@@ -615,7 +611,7 @@ void MainPanel::StepEvents(bool &isActive)
 		if(!handledFront)
 			player.HandleEvent(event, GetUI());
 		handledFront = true;
-		isActive = (GetUI().Top().get() == this);
+		isActive     = (GetUI().Top().get() == this);
 
 		// If we can't safely display a new UI element (i.e. an active
 		// mission created a UI element), then stop processing events
@@ -639,8 +635,8 @@ void MainPanel::StepEvents(bool &isActive)
 		if((event.Type() & (ShipEvent::BOARD | ShipEvent::ASSIST)) && actor->IsPlayer() &&
 		   !event.Target()->IsDestroyed() && flagship && event.Actor().get() == flagship)
 		{
-			auto boardedShip = event.Target();
-			Mission *mission = player.BoardingMission(boardedShip);
+			auto     boardedShip = event.Target();
+			Mission *mission     = player.BoardingMission(boardedShip);
 			if(mission && mission->HasSpace(*flagship))
 				mission->Do(Mission::OFFER, player, &GetUI(), boardedShip);
 			else if(mission)

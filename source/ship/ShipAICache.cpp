@@ -30,18 +30,18 @@ using namespace std;
 
 void ShipAICache::Calibrate(const Ship &ship)
 {
-	mass = ship.Mass();
-	hasWeapons = false;
-	canFight = false;
-	double totalDPS = 0.;
-	double splashDPS = 0.;
+	mass                = ship.Mass();
+	hasWeapons          = false;
+	canFight            = false;
+	double totalDPS     = 0.;
+	double splashDPS    = 0.;
 	double artilleryDPS = 0.;
-	turretRange = 0.;
-	gunRange = 0.;
+	turretRange         = 0.;
+	gunRange            = 0.;
 
-	shortestRange = 4000.;
+	shortestRange     = 4000.;
 	shortestArtillery = 4000.;
-	minSafeDistance = 0.;
+	minSafeDistance   = 0.;
 
 	for(const Hardpoint &hardpoint : ship.Weapons())
 	{
@@ -49,7 +49,7 @@ void ShipAICache::Calibrate(const Ship &ship)
 		if(!weapon || hardpoint.IsSpecial())
 			continue;
 
-		hasWeapons = true;
+		hasWeapons       = true;
 		bool lackingAmmo = (weapon->Ammo() && weapon->AmmoUsage() && !ship.OutfitCount(weapon->Ammo()));
 		// Weapons without ammo might as well not exist, so don't even consider them
 		if(lackingAmmo)
@@ -72,9 +72,9 @@ void ShipAICache::Calibrate(const Ship &ship)
 		}
 
 		// The artillery AI should be applied at 1000 pixels range, or 500 if the weapon is homing.
-		double range = weapon->Range();
+		double range  = weapon->Range();
 		shortestRange = min(range, shortestRange);
-		longestRange = max(range, longestRange);
+		longestRange  = max(range, longestRange);
 		if(range >= 1000. || (weapon->Homing() && range >= 500.))
 		{
 			shortestArtillery = min(range, shortestArtillery);
@@ -85,15 +85,15 @@ void ShipAICache::Calibrate(const Ship &ship)
 	// Calculate this ship's "turning radius"; that is, the smallest circle it
 	// can make while at full speed.
 	double stepsInHalfTurn = 180. / ship.TurnRate();
-	double circumference = stepsInHalfTurn * ship.MaxVelocity();
-	maxTurningRadius = circumference / PI;
+	double circumference   = stepsInHalfTurn * ship.MaxVelocity();
+	maxTurningRadius       = circumference / PI;
 
 	// If this ship was using the artillery AI to run away and bombard its
 	// target from a distance, have it stop running once it is out of ammo. This
 	// is not realistic, but it's less annoying for the player.
 	if(hasWeapons && !canFight && !ship.IsYours())
 	{
-		shortestRange = 0.;
+		shortestRange     = 0.;
 		shortestArtillery = 0.;
 	}
 	else if(hasWeapons)

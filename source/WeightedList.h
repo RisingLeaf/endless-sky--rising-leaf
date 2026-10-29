@@ -33,7 +33,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 // the weight of the object over the sum of the weights of all objects in the list.
 template <class Type>
 class WeightedList {
-	using iterator = typename std::vector<Type>::iterator;
+	using iterator       = typename std::vector<Type>::iterator;
 	using const_iterator = typename std::vector<Type>::const_iterator;
 
 public:
@@ -113,9 +113,9 @@ private:
 
 
 private:
-	std::vector<Type> choices;
+	std::vector<Type>        choices;
 	std::vector<std::size_t> weights;
-	std::size_t total = 0;
+	std::size_t              total = 0;
 };
 
 
@@ -133,8 +133,8 @@ std::size_t erase(WeightedList<T> &list, const T &item)
 template <class T, class UnaryPredicate>
 std::size_t erase_if(WeightedList<T> &list, UnaryPredicate pred)
 {
-	std::size_t erased = 0;
-	unsigned available = list.choices.size() - 1;
+	std::size_t erased    = 0;
+	unsigned    available = list.choices.size() - 1;
 	for(unsigned index = 0; index < list.choices.size() - erased; ++index)
 		if(pred(list.choices[index]))
 		{
@@ -226,7 +226,7 @@ typename std::vector<Type>::iterator WeightedList<Type>::erase(typename std::vec
                                                                typename std::vector<Type>::iterator last) noexcept
 {
 	auto firstWeight = std::next(weights.begin(), std::distance(choices.begin(), first));
-	auto lastWeight = std::next(weights.begin(), std::distance(choices.begin(), last));
+	auto lastWeight  = std::next(weights.begin(), std::distance(choices.begin(), last));
 	weights.erase(firstWeight, lastWeight);
 	RecalculateWeight();
 	return choices.erase(first, last);

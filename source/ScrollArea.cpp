@@ -42,15 +42,14 @@ ScrollArea::ScrollArea(const Rectangle &r) : ScrollArea()
 
 
 // Stub destructor, so that unique_ptrs are destructed in the correct scope.
-ScrollArea::~ScrollArea()
-= default;
+ScrollArea::~ScrollArea() = default;
 
 
 
 void ScrollArea::SetRect(const Rectangle &r)
 {
 	position = r.Center();
-	size = r.Dimensions();
+	size     = r.Dimensions();
 	buffer.reset();
 	scroll.SetDisplaySize(r.Height());
 	scrollBar.displaySizeFraction = static_cast<float>(scroll.DisplaySize() / scroll.MaxValue());
@@ -105,7 +104,7 @@ void ScrollArea::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	{
 		scroll.Step();
 
-		const auto target = buffer->SetTarget();
+		const auto  target = buffer->SetTarget();
 		const Point topLeft(buffer->Left(), buffer->Top() - scroll.AnimatedValue());
 		DrawText(target, topLeft);
 		buffer->Deactivate();
@@ -173,7 +172,7 @@ bool ScrollArea::Release(int x, int y, MouseButton button)
 		return false;
 
 	const bool ret = dragging;
-	dragging = false;
+	dragging       = false;
 	return ret;
 }
 
@@ -218,6 +217,6 @@ void ScrollArea::SyncScroll(bool animated)
 
 void ScrollArea::Invalidate()
 {
-	bufferIsValid = false;
+	bufferIsValid   = false;
 	contentsIsValid = false;
 }

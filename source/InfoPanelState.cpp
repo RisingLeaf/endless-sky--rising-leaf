@@ -86,7 +86,7 @@ bool InfoPanelState::Deselect(int index)
 	if(index == selectedIndex && !allSelected.empty())
 	{
 		const auto &ind = allSelected.upper_bound(index);
-		selectedIndex = ind == allSelected.end() ? *allSelected.rbegin() : *ind;
+		selectedIndex   = ind == allSelected.end() ? *allSelected.rbegin() : *ind;
 	}
 	return erased;
 }

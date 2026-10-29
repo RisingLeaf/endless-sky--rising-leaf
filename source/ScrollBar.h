@@ -35,8 +35,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 // Check existing uses for more in-depth examples.
 class ScrollBar : public Panel {
 public:
-	ScrollBar(float fraction, float displaySizeFraction, const Point &from, const Point &to, float tabWidth,
-	          float lineWidth, const Color &color, const Color &innerColor) noexcept;
+	ScrollBar(float        fraction,
+	          float        displaySizeFraction,
+	          const Point &from,
+	          const Point &to,
+	          float        tabWidth,
+	          float        lineWidth,
+	          const Color &color,
+	          const Color &innerColor) noexcept;
 
 	ScrollBar() noexcept;
 
@@ -56,8 +62,11 @@ public:
 	void SyncInto(ScrollVar<T> &scroll, int steps = 5);
 	// Draw a scrollbar with a start, end, and state, syncing automatically.
 	template <typename T>
-	void SyncDraw(GraphicsTypes::CommandBufferInstance *cb, const ScrollVar<T> &scroll, const Point &from,
-	              const Point &to, bool animated = true);
+	void SyncDraw(GraphicsTypes::CommandBufferInstance *cb,
+	              const ScrollVar<T>                   &scroll,
+	              const Point                          &from,
+	              const Point                          &to,
+	              bool                                  animated = true);
 	// Handle a click event, automatically syncing into the given ScrollVar if anything changed.
 	template <typename T>
 	bool SyncClick(ScrollVar<T> &scroll, int x, int y, MouseButton button, int clicks);
@@ -75,8 +84,8 @@ public:
 	float lineWidth;
 	Color color;
 	Color innerColor;
-	bool highlighted = false;
-	bool innerHighlighted = false;
+	bool  highlighted      = false;
+	bool  innerHighlighted = false;
 };
 
 
@@ -85,9 +94,9 @@ template <typename T>
 void ScrollBar::SyncFrom(const ScrollVar<T> &scroll, const Point &from, const Point &to, bool animated)
 {
 	this->displaySizeFraction = scroll.DisplaySize() / scroll.MaxValue();
-	this->fraction = animated ? scroll.AnimatedScrollFraction() : scroll.ScrollFraction();
-	this->from = from;
-	this->to = to;
+	this->fraction            = animated ? scroll.AnimatedScrollFraction() : scroll.ScrollFraction();
+	this->from                = from;
+	this->to                  = to;
 }
 
 
@@ -101,8 +110,11 @@ void ScrollBar::SyncInto(ScrollVar<T> &scroll, int steps)
 
 
 template <typename T>
-void ScrollBar::SyncDraw(GraphicsTypes::CommandBufferInstance *cb, const ScrollVar<T> &scroll, const Point &from,
-                         const Point &to, bool animated)
+void ScrollBar::SyncDraw(GraphicsTypes::CommandBufferInstance *cb,
+                         const ScrollVar<T>                   &scroll,
+                         const Point                          &from,
+                         const Point                          &to,
+                         bool                                  animated)
 {
 	SyncFrom(scroll, from, to);
 	Draw(cb);

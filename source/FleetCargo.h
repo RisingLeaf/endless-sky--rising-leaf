@@ -33,7 +33,7 @@ public:
 
 private:
 	// The number of different items this object can assign to ships.
-	int cargo = 3;
-	std::vector<std::string> commodities;
+	int                            cargo = 3;
+	std::vector<std::string>       commodities;
 	std::set<const Shop<Outfit> *> outfitters;
 };

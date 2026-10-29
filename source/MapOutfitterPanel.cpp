@@ -135,7 +135,7 @@ double MapOutfitterPanel::SystemValue(const System *system) const
 		return numeric_limits<double>::quiet_NaN();
 
 	// Visiting a system is sufficient to know what ports are available on its planets.
-	double value = -1.;
+	double      value         = -1.;
 	const auto &planetStorage = player.PlanetaryStorage();
 	for(const StellarObject &object : system->Objects())
 		if(object.HasSprite() && object.HasValidPlanet())
@@ -157,14 +157,14 @@ double MapOutfitterPanel::SystemValue(const System *system) const
 int MapOutfitterPanel::FindItem(const string &text) const
 {
 	int bestIndex = 9999;
-	int bestItem = -1;
+	int bestItem  = -1;
 	for(unsigned i = 0; i < list.size(); ++i)
 	{
 		int index = Format::Search(list[i]->DisplayName(), text);
 		if(index >= 0 && index < bestIndex)
 		{
 			bestIndex = index;
-			bestItem = i;
+			bestItem  = i;
 			if(!index)
 				return i;
 		}
@@ -195,7 +195,7 @@ void MapOutfitterPanel::DrawItems(GraphicsTypes::CommandBufferInstance *cb)
 	for(const auto &cat : categories)
 	{
 		const string &category = cat.Name();
-		auto it = catalog.find(category);
+		auto          it       = catalog.find(category);
 		if(it == catalog.end())
 			continue;
 
@@ -206,7 +206,7 @@ void MapOutfitterPanel::DrawItems(GraphicsTypes::CommandBufferInstance *cb)
 		for(const string &name : it->second)
 		{
 			const Outfit *outfit = GameData::Outfits().Get(name);
-			string price = Format::CreditString(outfit->Cost());
+			string        price  = Format::CreditString(outfit->Cost());
 
 			string info;
 			if(outfit->Get("minable") > 0.)
@@ -214,12 +214,12 @@ void MapOutfitterPanel::DrawItems(GraphicsTypes::CommandBufferInstance *cb)
 			else if(outfit->Get("installable") < 0.)
 			{
 				double space = outfit->Mass();
-				info = Format::CargoString(space, "space");
+				info         = Format::CargoString(space, "space");
 			}
 			else
 			{
 				double space = -outfit->Get("outfit space");
-				info = Format::MassString(space);
+				info         = Format::MassString(space);
 				if(space && -outfit->Get("weapon capacity") == space)
 					info += " of weapon space";
 				else if(space && -outfit->Get("engine capacity") == space)
@@ -228,11 +228,11 @@ void MapOutfitterPanel::DrawItems(GraphicsTypes::CommandBufferInstance *cb)
 					info += " of outfit space";
 			}
 
-			bool isForSale = true;
+			bool     isForSale      = true;
 			unsigned storedInSystem = 0;
 			if(player.CanView(*selectedSystem))
 			{
-				isForSale = false;
+				isForSale           = false;
 				const auto &storage = player.PlanetaryStorage();
 
 				for(const StellarObject &object : selectedSystem->Objects())
@@ -260,10 +260,19 @@ void MapOutfitterPanel::DrawItems(GraphicsTypes::CommandBufferInstance *cb)
 				continue;
 
 			const string storage_details = onlyShowSoldHere || storedInSystem == 0 ? ""
-			                               : storedInSystem == 1 ? "1 unit in storage"
-			                                                     : Format::Number(storedInSystem) + " units in storage";
-			Draw(cb, corner, outfit->Thumbnail(), Swizzle::None(), isForSale, outfit == selected, outfit->DisplayName(),
-			     "", price, info, storage_details);
+			                             : storedInSystem == 1 ? "1 unit in storage"
+			                                                   : Format::Number(storedInSystem) + " units in storage";
+			Draw(cb,
+			     corner,
+			     outfit->Thumbnail(),
+			     Swizzle::None(),
+			     isForSale,
+			     outfit == selected,
+			     outfit->DisplayName(),
+			     "",
+			     price,
+			     info,
+			     storage_details);
 			list.push_back(outfit);
 		}
 	}

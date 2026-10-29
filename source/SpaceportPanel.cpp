@@ -158,8 +158,8 @@ void SpaceportPanel::ResizeNewsTextArea() const
 		return;
 	// TODO: Allow Interface to handle wrapped text directly.
 	const Interface *newsUi = GameData::Interfaces().Get(Screen::Width() < 1280 ? "news (small screen)" : "news");
-	Rectangle portraitWidth = newsUi->GetBox("message portrait");
-	Rectangle normalWidth = newsUi->GetBox("message");
+	Rectangle        portraitWidth = newsUi->GetBox("message portrait");
+	Rectangle        normalWidth   = newsUi->GetBox("message");
 	newsMessage->SetRect(hasPortrait ? portraitWidth : normalWidth);
 }
 
@@ -173,7 +173,7 @@ const News *SpaceportPanel::PickNews() const
 		return nullptr;
 
 	vector<const News *> matches;
-	const Planet *planet = player.GetPlanet();
+	const Planet        *planet = player.GetPlanet();
 	for(const auto &it : GameData::SpaceportNews())
 		if(!it.second.IsEmpty() && it.second.Matches(planet))
 			matches.push_back(&it.second);

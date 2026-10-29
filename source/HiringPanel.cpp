@@ -47,21 +47,21 @@ void HiringPanel::Step()
 
 void HiringPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 {
-	const Ship *flagship = player.Flagship();
-	const Interface *hiring = GameData::Interfaces().Get(Screen::Width() < 1280 ? "hiring (small screen)" : "hiring");
-	Information info;
+	const Ship      *flagship = player.Flagship();
+	const Interface *hiring   = GameData::Interfaces().Get(Screen::Width() < 1280 ? "hiring (small screen)" : "hiring");
+	Information      info;
 
-	int flagshipBunks = 0;
+	int flagshipBunks    = 0;
 	int flagshipRequired = 0;
-	int flagshipExtra = 0;
-	int flagshipUnused = 0;
+	int flagshipExtra    = 0;
+	int flagshipUnused   = 0;
 
 	if(flagship)
 	{
-		flagshipBunks = flagship->Attributes().Get("bunks");
+		flagshipBunks    = flagship->Attributes().Get("bunks");
 		flagshipRequired = flagship->RequiredCrew();
-		flagshipExtra = flagship->Crew() - flagshipRequired;
-		flagshipUnused = flagshipBunks - flagship->Crew();
+		flagshipExtra    = flagship->Crew() - flagshipRequired;
+		flagshipUnused   = flagshipBunks - flagship->Crew();
 	}
 
 	info.SetString("flagship bunks", to_string(flagshipBunks));
@@ -71,7 +71,7 @@ void HiringPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 
 	// Sum up the statistics for all your ships. You still pay the crew of
 	// disabled or out-of-system ships, but any parked ships have no crew costs.
-	int fleetBunks = 0;
+	int fleetBunks    = 0;
 	int fleetRequired = 0;
 	for(const shared_ptr<Ship> &ship : player.Ships())
 		if(!ship->IsParked())
@@ -79,7 +79,7 @@ void HiringPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 			fleetBunks += static_cast<int>(ship->Attributes().Get("bunks"));
 			fleetRequired += ship->RequiredCrew();
 		}
-	int passengers = player.Cargo().Passengers();
+	int passengers  = player.Cargo().Passengers();
 	int fleetUnused = fleetBunks - fleetRequired - flagshipExtra;
 	info.SetString("fleet bunks", to_string(fleetBunks));
 	info.SetString("fleet required", to_string(fleetRequired));
@@ -87,8 +87,8 @@ void HiringPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	info.SetString("passengers", to_string(passengers));
 
 	static const int DAILY_SALARY = 100;
-	int salary = DAILY_SALARY * (fleetRequired - (flagship ? 1 : 0));
-	int extraSalary = DAILY_SALARY * flagshipExtra;
+	int              salary       = DAILY_SALARY * (fleetRequired - (flagship ? 1 : 0));
+	int              extraSalary  = DAILY_SALARY * flagshipExtra;
 	info.SetString("salary required", to_string(salary));
 	info.SetString("salary extra", to_string(extraSalary));
 

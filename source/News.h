@@ -33,8 +33,10 @@ class System;
 // news. One specification can contain many possible portraits and messages.
 class News {
 public:
-	void Load(const DataNode &node, const ConditionsStore *playerConditions,
-	          const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	void Load(const DataNode                 &node,
+	          const ConditionsStore          *playerConditions,
+	          const std::set<const System *> *visitedSystems,
+	          const std::set<const Planet *> *visitedPlanets);
 
 	// Check whether this news item has anything to say.
 	bool IsEmpty() const;
@@ -51,9 +53,9 @@ public:
 
 private:
 	LocationFilter location;
-	ConditionSet toShow;
+	ConditionSet   toShow;
 
-	Phrase speakerNames;
+	Phrase                      speakerNames;
 	std::vector<const Sprite *> portraits;
-	Phrase messages;
+	Phrase                      messages;
 };

@@ -92,8 +92,8 @@ BookEntry BookEntry::Instantiate(const map<string, string> &subs) const
 		else
 			newEntry.items.emplace_back(item);
 	}
-	newEntry.scenes = scenes;
-	newEntry.markSystems = markSystems;
+	newEntry.scenes        = scenes;
+	newEntry.markSystems   = markSystems;
 	newEntry.circleSystems = circleSystems;
 	return newEntry;
 }
@@ -148,8 +148,10 @@ const set<const Sprite *> &BookEntry::GetScenes() const
 
 
 
-int BookEntry::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft, WrappedText &wrap,
-                    const Color &color) const
+int BookEntry::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                    const Point                          &topLeft,
+                    WrappedText                          &wrap,
+                    const Color                          &color) const
 {
 	Point drawPoint = topLeft;
 	for(const Item &item : items)
@@ -163,7 +165,7 @@ int BookEntry::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &topLe
 		else
 		{
 			const Sprite *scene = std::get<const Sprite *>(item);
-			const Point sceneOffset(scene->Width() / 2, scene->Height() / 2);
+			const Point   sceneOffset(scene->Width() / 2, scene->Height() / 2);
 			SpriteShader::Draw(cb, scene, drawPoint + sceneOffset);
 			drawPoint.Y() += scene->Height();
 		}

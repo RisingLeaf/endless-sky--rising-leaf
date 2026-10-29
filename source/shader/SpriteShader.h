@@ -41,15 +41,15 @@ public:
 	public:
 		const graphics_layer::TextureHandle *texture;
 		const graphics_layer::TextureHandle *swizzleMask;
-		const Swizzle *swizzle = nullptr;
-		float frame = 0.f;
-		float frameCount = 1.f;
-		bool uniqueSwizzleMaskFrames = false;
-		gm::vec2 position = {0.f, 0.f};
-		gm::padded_mat2 transform = {0.f, 0.f, 0.f, 0.f};
-		gm::vec2 blur = {0.f, 0.f};
-		float clip = 1.f;
-		float alpha = 1.f;
+		const Swizzle                       *swizzle                 = nullptr;
+		float                                frame                   = 0.f;
+		float                                frameCount              = 1.f;
+		bool                                 uniqueSwizzleMaskFrames = false;
+		gm::vec2                             position                = {0.f, 0.f};
+		gm::padded_mat2                      transform               = {0.f, 0.f, 0.f, 0.f};
+		gm::vec2                             blur                    = {0.f, 0.f};
+		float                                clip                    = 1.f;
+		float                                alpha                   = 1.f;
 	};
 
 
@@ -61,12 +61,19 @@ public:
 	// resulting in a black rectangle with the sprite's dimensions. The caller should check if the sprite is loaded
 	// first if it wants to avoid drawing a black rectangle. (Not having the SpriteShader check if the sprite is loaded
 	// makes it obvious if the reason the sprite isn't displaying properly is because the caller forgot to load it.)
-	static void Draw(GraphicsTypes::CommandBufferInstance *cb, const Sprite *sprite, const Point &position,
-	                 float zoom = 1.f, const Swizzle *swizzle = Swizzle::None(), float frame = 0.f,
-	                 const Point &unit = Point(0., -1.));
-	static Item Prepare(const Sprite *sprite, const Point &position, float zoom = 1.f,
-	                    const Swizzle *swizzle = Swizzle::None(), float frame = 0.f,
-	                    const Point &unit = Point(0., -1.));
+	static void Draw(GraphicsTypes::CommandBufferInstance *cb,
+	                 const Sprite                         *sprite,
+	                 const Point                          &position,
+	                 float                                 zoom    = 1.f,
+	                 const Swizzle                        *swizzle = Swizzle::None(),
+	                 float                                 frame   = 0.f,
+	                 const Point                          &unit    = Point(0., -1.));
+	static Item Prepare(const Sprite  *sprite,
+	                    const Point   &position,
+	                    float          zoom    = 1.f,
+	                    const Swizzle *swizzle = Swizzle::None(),
+	                    float          frame   = 0.f,
+	                    const Point   &unit    = Point(0., -1.));
 
 	static void Bind(GraphicsTypes::CommandBufferInstance *cb);
 	static void Add(GraphicsTypes::CommandBufferInstance *cb, const Item &item, bool withBlur = false);

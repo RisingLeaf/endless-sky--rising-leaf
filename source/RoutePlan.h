@@ -56,5 +56,5 @@ private:
 private:
 	// The final planned route. plan.front() is the destination.
 	std::vector<std::pair<const System *, RouteEdge>> plan;
-	bool hasRoute = false;
+	bool                                              hasRoute = false;
 };

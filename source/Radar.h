@@ -55,8 +55,11 @@ public:
 	void AddViewportBoundary(const Point &vertex);
 
 	// Draw the radar display at the given coordinates.
-	void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &center, double scale, double radius,
-	          double pointerRadius) const;
+	void Draw(GraphicsTypes::CommandBufferInstance *cb,
+	          const Point                          &center,
+	          double                                scale,
+	          double                                radius,
+	          double                                pointerRadius) const;
 
 	// Get the color for the given status.
 	static const Color &GetColor(int type);
@@ -67,8 +70,8 @@ private:
 	public:
 		Object(const Color &color, const Point &pos, double out, double in);
 
-		Color color;
-		Point position;
+		Color  color;
+		Point  position;
 		double outer;
 		double inner;
 	};
@@ -91,8 +94,8 @@ private:
 	};
 
 private:
-	Point center;
-	std::vector<Object> objects;
+	Point                center;
+	std::vector<Object>  objects;
 	std::vector<Pointer> pointers;
-	std::vector<Line> lines;
+	std::vector<Line>    lines;
 };

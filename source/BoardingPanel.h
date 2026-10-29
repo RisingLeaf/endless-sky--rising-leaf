@@ -92,17 +92,17 @@ private:
 		void Take(int count);
 
 	private:
-		void UpdateStrings();
+		void   UpdateStrings();
 		double UnitMass() const;
 
 	private:
-		bool inCargo = false;
-		std::string name;
+		bool          inCargo = false;
+		std::string   name;
 		const Outfit *outfit;
-		int count;
-		int64_t unitValue;
-		std::string size;
-		std::string value;
+		int           count;
+		int64_t       unitValue;
+		std::string   size;
+		std::string   value;
 	};
 
 
@@ -123,29 +123,29 @@ private:
 
 
 private:
-	PlayerInfo &player;
+	PlayerInfo           &player;
 	std::shared_ptr<Ship> you;
 	std::shared_ptr<Ship> victim;
 
 	// List of items you can plunder.
 	std::vector<Plunder> plunder;
-	int selected = 0;
-	ScrollVar<double> scroll;
-	ScrollBar scrollBar;
+	int                  selected = 0;
+	ScrollVar<double>    scroll;
+	ScrollBar            scrollBar;
 	// Initialize mouse point to something off-screen to not
 	// make the game think the player is hovering on something.
-	Point hoverPoint = Point(-10000., -10000.);
+	Point   hoverPoint = Point(-10000., -10000.);
 	Tooltip tooltip;
 
-	bool playerDied = false;
-	bool isCapturing = false;
+	bool playerDied           = false;
+	bool isCapturing          = false;
 	bool isFirstCaptureAction = true;
 	// Calculating the odds of combat success, and the expected casualties, is
 	// non-trivial. So, cache the results for all crew amounts up to full.
 	CaptureOdds attackOdds;
 	CaptureOdds defenseOdds;
 	// These messages are shown to report the results of hand to hand combat.
-	std::string messages;
+	std::string               messages;
 	std::shared_ptr<TextArea> messageDisplay;
 
 	// Whether or not the ship can be captured.

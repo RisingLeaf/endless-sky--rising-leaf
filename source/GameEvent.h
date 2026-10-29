@@ -59,7 +59,7 @@ public:
 	void Disable();
 
 	const std::string &TrueName() const;
-	void SetTrueName(const std::string &name);
+	void               SetTrueName(const std::string &name);
 
 	// Check if this GameEvent has been loaded (vs. simply referred to) and
 	// if it references any items that have not been defined.
@@ -67,14 +67,14 @@ public:
 	std::string IsValid() const;
 
 	const Date &GetDate() const;
-	void SetDate(const Date &date);
+	void        SetDate(const Date &date);
 
 	// Apply this event's changes to the player. Returns a list of data changes that need to
 	// be applied in a batch with other events that are applied at the same time.
 	std::list<DataNode> Apply(PlayerInfo &player, bool onlyDataChanges = false);
 
 	const ConditionAssignments &Conditions() const;
-	const std::list<DataNode> &Changes() const;
+	const std::list<DataNode>  &Changes() const;
 
 	bool SaveRawChanges() const;
 
@@ -82,14 +82,14 @@ public:
 	bool operator<(const GameEvent &other) const;
 
 private:
-	Date date;
+	Date        date;
 	std::string trueName;
-	bool isDisabled = false;
-	bool isDefined = false;
-	bool saveRawChanges = false;
+	bool        isDisabled     = false;
+	bool        isDefined      = false;
+	bool        saveRawChanges = false;
 
-	ConditionAssignments conditionsToApply;
-	std::list<DataNode> changes;
+	ConditionAssignments        conditionsToApply;
+	std::list<DataNode>         changes;
 	std::vector<const System *> systemsToVisit;
 	std::vector<const Planet *> planetsToVisit;
 	std::vector<const System *> systemsToUnvisit;

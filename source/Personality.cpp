@@ -74,48 +74,52 @@ namespace {
 		LAST_ITEM_IN_PERSONALITY_TRAIT_ENUM
 	};
 
-	const map<string, PersonalityTrait> TOKEN = {{"pacifist", PACIFIST},
-	                                             {"forbearing", FORBEARING},
-	                                             {"timid", TIMID},
-	                                             {"disables", DISABLES},
-	                                             {"plunders", PLUNDERS},
-	                                             {"hunting", HUNTING},
-	                                             {"staying", STAYING},
-	                                             {"entering", ENTERING},
-	                                             {"nemesis", NEMESIS},
-	                                             {"surveillance", SURVEILLANCE},
-	                                             {"uninterested", UNINTERESTED},
-	                                             {"waiting", WAITING},
-	                                             {"derelict", DERELICT},
-	                                             {"fleeing", FLEEING},
-	                                             {"escort", ESCORT},
-	                                             {"frugal", FRUGAL},
-	                                             {"coward", COWARD},
-	                                             {"vindictive", VINDICTIVE},
-	                                             {"swarming", SWARMING},
-	                                             {"unconstrained", UNCONSTRAINED},
-	                                             {"mining", MINING},
-	                                             {"harvests", HARVESTS},
-	                                             {"appeasing", APPEASING},
-	                                             {"mute", MUTE},
-	                                             {"opportunistic", OPPORTUNISTIC},
-	                                             {"merciful", MERCIFUL},
-	                                             {"target", TARGET},
-	                                             {"marked", MARKED},
-	                                             {"tracked", TRACKED},
-	                                             {"launching", LAUNCHING},
-	                                             {"lingering", LINGERING},
-	                                             {"daring", DARING},
-	                                             {"secretive", SECRETIVE},
-	                                             {"ramming", RAMMING},
-	                                             {"unrestricted", UNRESTRICTED},
-	                                             {"restricted", RESTRICTED},
-	                                             {"decloaked", DECLOAKED},
-	                                             {"quiet", QUIET},
-	                                             {"getaway", GETAWAY}};
+	const map<string, PersonalityTrait> TOKEN = {
+	    {     "pacifist",      PACIFIST},
+	    {   "forbearing",    FORBEARING},
+	    {        "timid",         TIMID},
+	    {     "disables",      DISABLES},
+	    {     "plunders",      PLUNDERS},
+	    {      "hunting",       HUNTING},
+	    {      "staying",       STAYING},
+	    {     "entering",      ENTERING},
+	    {      "nemesis",       NEMESIS},
+	    { "surveillance",  SURVEILLANCE},
+	    { "uninterested",  UNINTERESTED},
+	    {      "waiting",       WAITING},
+	    {     "derelict",      DERELICT},
+	    {      "fleeing",       FLEEING},
+	    {       "escort",        ESCORT},
+	    {       "frugal",        FRUGAL},
+	    {       "coward",        COWARD},
+	    {   "vindictive",    VINDICTIVE},
+	    {     "swarming",      SWARMING},
+	    {"unconstrained", UNCONSTRAINED},
+	    {       "mining",        MINING},
+	    {     "harvests",      HARVESTS},
+	    {    "appeasing",     APPEASING},
+	    {         "mute",          MUTE},
+	    {"opportunistic", OPPORTUNISTIC},
+	    {     "merciful",      MERCIFUL},
+	    {       "target",        TARGET},
+	    {       "marked",        MARKED},
+	    {      "tracked",       TRACKED},
+	    {    "launching",     LAUNCHING},
+	    {    "lingering",     LINGERING},
+	    {       "daring",        DARING},
+	    {    "secretive",     SECRETIVE},
+	    {      "ramming",       RAMMING},
+	    { "unrestricted",  UNRESTRICTED},
+	    {   "restricted",    RESTRICTED},
+	    {    "decloaked",     DECLOAKED},
+	    {        "quiet",         QUIET},
+	    {      "getaway",       GETAWAY}
+    };
 
 	// Tokens that combine two or more flags.
-	const map<string, vector<PersonalityTrait>> COMPOSITE_TOKEN = {{"heroic", {DARING, HUNTING}}};
+	const map<string, vector<PersonalityTrait>> COMPOSITE_TOKEN = {
+	    {"heroic", {DARING, HUNTING}}
+    };
 } // namespace
 
 
@@ -131,7 +135,7 @@ Personality::Personality() noexcept : flags(1LL << DISABLES)
 
 void Personality::Load(const DataNode &node)
 {
-	bool add = (node.Token(0) == "add");
+	bool add    = (node.Token(0) == "add");
 	bool remove = (node.Token(0) == "remove");
 	if(!(add || remove))
 		flags.reset();

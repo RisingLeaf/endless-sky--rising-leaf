@@ -49,7 +49,7 @@ public:
 
 	// Get the text of this dialog, evaluating any conditions.
 	std::string Text() const;
-	bool IsEmpty() const;
+	bool        IsEmpty() const;
 
 
 private:
@@ -61,8 +61,8 @@ private:
 		DialogLine(const std::string &text, const ConditionSet &condition);
 		DialogLine(const DataNode &node, const ConditionsStore *playerConditions);
 
-		std::string text;
-		ConditionSet condition;
+		std::string           text;
+		ConditionSet          condition;
 		ExclusiveItem<Phrase> phrase;
 	};
 

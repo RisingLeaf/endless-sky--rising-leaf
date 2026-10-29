@@ -124,8 +124,8 @@ void CollisionSet::Finish()
 	// Now, perform a radix sort.
 	for(const Entry &entry : added)
 	{
-		auto gx = entry.x & WRAP_MASK;
-		auto gy = entry.y & WRAP_MASK;
+		auto gx    = entry.x & WRAP_MASK;
+		auto gy    = entry.y & WRAP_MASK;
 		auto index = gy * CELLS + gx + 1;
 
 		sorted[counts[index]++] = entry;
@@ -144,7 +144,7 @@ void CollisionSet::Line(const Projectile &projectile, vector<Collision> &result)
 
 	// Convert the projectile to a line represented by its start and end points.
 	Point from = projectile.Position();
-	Point to = from + projectile.Velocity();
+	Point to   = from + projectile.Velocity();
 	Line(from, to, result, pGov, projectile.Target());
 }
 
@@ -152,17 +152,17 @@ void CollisionSet::Line(const Projectile &projectile, vector<Collision> &result)
 
 // Get all possible collisions along a line. Collisions are not necessarily sorted by
 // distance.
-void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &lineResult, const Government *pGov,
-                        const Body *target) const
+void CollisionSet::Line(
+    const Point &from, const Point &to, vector<Collision> &lineResult, const Government *pGov, const Body *target) const
 {
-	const int x = from.X();
-	const int y = from.Y();
+	const int x    = from.X();
+	const int y    = from.Y();
 	const int endX = to.X();
 	const int endY = to.Y();
 
 	// Figure out which grid cell the line starts and ends in.
-	int gx = x >> SHIFT;
-	int gy = y >> SHIFT;
+	int       gx    = x >> SHIFT;
+	int       gy    = y >> SHIFT;
 	const int endGX = endX >> SHIFT;
 	const int endGY = endY >> SHIFT;
 
@@ -171,9 +171,9 @@ void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &l
 	if(gx == endGX && gy == endGY)
 	{
 		// Examine all objects in the current grid cell.
-		const auto index = (gy & WRAP_MASK) * CELLS + (gx & WRAP_MASK);
-		vector<Entry>::const_iterator it = sorted.begin() + counts[index];
-		vector<Entry>::const_iterator end = sorted.begin() + counts[index + 1];
+		const auto                    index = (gy & WRAP_MASK) * CELLS + (gx & WRAP_MASK);
+		vector<Entry>::const_iterator it    = sorted.begin() + counts[index];
+		vector<Entry>::const_iterator end   = sorted.begin() + counts[index + 1];
 		for(; it != end; ++it)
 		{
 			// Skip objects that were put in this same grid cell only because
@@ -187,9 +187,9 @@ void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &l
 			if(it->body != target && iGov && pGov && !iGov->IsEnemy(pGov))
 				continue;
 
-			const Mask &mask = it->body->GetMask(step);
-			Point offset = from - it->body->Position();
-			const double range = mask.Collide(offset, to - from, it->body->Facing());
+			const Mask  &mask   = it->body->GetMask(step);
+			Point        offset = from - it->body->Position();
+			const double range  = mask.Collide(offset, to - from, it->body->Facing());
 
 			if(range < 1.)
 				lineResult.emplace_back(it->body, collisionType, range);
@@ -222,7 +222,7 @@ void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &l
 	const uint64_t my = abs(endY - y);
 	// Behave as if each grid cell has this width and height. This guarantees
 	// that we only need to work with integer coordinates.
-	const uint64_t scale = max<uint64_t>(mx, 1) * max<uint64_t>(my, 1);
+	const uint64_t scale     = max<uint64_t>(mx, 1) * max<uint64_t>(my, 1);
 	const uint64_t fullScale = CELL_SIZE * scale;
 
 	// Get the "remainder" distance that we must travel in x and y in order to
@@ -241,8 +241,8 @@ void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &l
 	while(true)
 	{
 		// Examine all objects in the current grid cell.
-		auto i = (gy & WRAP_MASK) * CELLS + (gx & WRAP_MASK);
-		vector<Entry>::const_iterator it = sorted.begin() + counts[i];
+		auto                          i   = (gy & WRAP_MASK) * CELLS + (gx & WRAP_MASK);
+		vector<Entry>::const_iterator it  = sorted.begin() + counts[i];
 		vector<Entry>::const_iterator end = sorted.begin() + counts[i + 1];
 		for(; it != end; ++it)
 		{
@@ -261,9 +261,9 @@ void CollisionSet::Line(const Point &from, const Point &to, vector<Collision> &l
 			if(it->body != target && iGov && pGov && !iGov->IsEnemy(pGov))
 				continue;
 
-			const Mask &mask = it->body->GetMask(step);
-			Point offset = from - it->body->Position();
-			const double range = mask.Collide(offset, to - from, it->body->Facing());
+			const Mask  &mask   = it->body->GetMask(step);
+			Point        offset = from - it->body->Position();
+			const double range  = mask.Collide(offset, to - from, it->body->Facing());
 
 			if(range < 1.)
 				lineResult.emplace_back(it->body, collisionType, range);
@@ -335,10 +335,10 @@ void CollisionSet::Ring(const Point &center, double inner, double outer, vector<
 		const auto gy = y & WRAP_MASK;
 		for(int x = minX; x <= maxX; ++x)
 		{
-			const auto gx = x & WRAP_MASK;
-			const auto index = gy * CELLS + gx;
-			vector<Entry>::const_iterator it = sorted.begin() + counts[index];
-			vector<Entry>::const_iterator end = sorted.begin() + counts[index + 1];
+			const auto                    gx    = x & WRAP_MASK;
+			const auto                    index = gy * CELLS + gx;
+			vector<Entry>::const_iterator it    = sorted.begin() + counts[index];
+			vector<Entry>::const_iterator end   = sorted.begin() + counts[index + 1];
 
 			for(; it != end; ++it)
 			{
@@ -351,8 +351,8 @@ void CollisionSet::Ring(const Point &center, double inner, double outer, vector<
 					continue;
 				seen[it->seenIndex] = true;
 
-				const Mask &mask = it->body->GetMask(step);
-				Point offset = center - it->body->Position();
+				const Mask  &mask   = it->body->GetMask(step);
+				Point        offset = center - it->body->Position();
 				const double length = offset.Length();
 				if((length <= outer && length >= inner) || mask.WithinRing(offset, it->body->Facing(), inner, outer))
 					circleResult.push_back(it->body);

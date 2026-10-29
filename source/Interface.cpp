@@ -86,8 +86,8 @@ void Interface::Load(const DataNode &node)
 	string activeIf;
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "anchor")
 			anchor = ParseAlignment(child);
 		else if(key == "value" && child.Size() >= 3)
@@ -199,7 +199,7 @@ double Interface::GetValue(const string &name) const
 const vector<double> &Interface::GetList(const string &name) const
 {
 	static vector<double> EMPTY;
-	auto it = lists.find(name);
+	auto                  it = lists.find(name);
 	return (it == lists.end() ? EMPTY : it->second);
 }
 
@@ -226,7 +226,7 @@ Point Interface::AnchoredPoint::Get(const Information &info) const
 void Interface::AnchoredPoint::Set(const Point &position, const Point &anchor)
 {
 	this->position = position;
-	this->anchor = anchor;
+	this->anchor   = anchor;
 }
 
 
@@ -239,7 +239,7 @@ void Interface::Element::Load(const DataNode &node, const Point &globalAnchor)
 {
 	// A location can be specified as:
 	// center (+ dimensions):
-	bool hasCenter = false;
+	bool  hasCenter = false;
 	Point dimensions;
 
 	// from (+ dimensions):
@@ -247,15 +247,15 @@ void Interface::Element::Load(const DataNode &node, const Point &globalAnchor)
 	Point fromAnchor = globalAnchor;
 
 	// from + to:
-	bool hasTo = false;
+	bool  hasTo = false;
 	Point toPoint;
 	Point toAnchor = globalAnchor;
 
 	// Assume that the subclass constructor already parsed this line of data.
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "align" && hasValue)
 			alignment = ParseAlignment(child);
 		else if(key == "dimensions" && child.Size() >= 3)
@@ -272,7 +272,7 @@ void Interface::Element::Load(const DataNode &node, const Point &globalAnchor)
 			// The "center" key implies "align center."
 			alignment = Point();
 			fromPoint = toPoint = Point(child.Value(1), child.Value(2));
-			hasCenter = true;
+			hasCenter           = true;
 		}
 		else if(key == "from" && child.Size() >= 6 && child.Token(3) == "to")
 		{
@@ -281,8 +281,8 @@ void Interface::Element::Load(const DataNode &node, const Point &globalAnchor)
 				fromAnchor = toAnchor = ParseAlignment(child, 6);
 
 			fromPoint = Point(child.Value(1), child.Value(2));
-			toPoint = Point(child.Value(4), child.Value(5));
-			hasTo = true;
+			toPoint   = Point(child.Value(4), child.Value(5));
+			hasTo     = true;
 		}
 		else if(key == "from" && child.Size() >= 3)
 		{
@@ -299,7 +299,7 @@ void Interface::Element::Load(const DataNode &node, const Point &globalAnchor)
 				toAnchor = ParseAlignment(child, 3);
 
 			toPoint = Point(child.Value(1), child.Value(2));
-			hasTo = true;
+			hasTo   = true;
 		}
 		else if(key == "pad" && child.Size() >= 3)
 		{
@@ -321,7 +321,7 @@ void Interface::Element::Load(const DataNode &node, const Point &globalAnchor)
 	else if(!hasTo)
 	{
 		// From alone or from + dimensions.
-		toPoint = fromPoint + dimensions;
+		toPoint  = fromPoint + dimensions;
 		toAnchor = fromAnchor;
 	}
 	from.Set(fromPoint, fromAnchor);
@@ -349,8 +349,8 @@ void Interface::Element::Draw(GraphicsTypes::CommandBufferInstance *cb, const In
 		Place(box, panel);
 
 	// Figure out how the element should be aligned within its bounding box.
-	Point nativeDimensions = NativeDimensions(info, state);
-	Point slack = .5 * (box.Dimensions() - nativeDimensions) - padding;
+	Point     nativeDimensions = NativeDimensions(info, state);
+	Point     slack            = .5 * (box.Dimensions() - nativeDimensions) - padding;
 	Rectangle rect(box.Center() + alignment * slack, nativeDimensions);
 
 	Draw(cb, rect, info, state);
@@ -363,7 +363,7 @@ void Interface::Element::Draw(GraphicsTypes::CommandBufferInstance *cb, const In
 void Interface::Element::SetConditions(const string &visible, const string &active)
 {
 	visibleIf = visible;
-	activeIf = active;
+	activeIf  = active;
 }
 
 
@@ -401,8 +401,10 @@ Point Interface::Element::NativeDimensions(const Information &info, int state) c
 
 
 // Draw this element in the given rectangle.
-void Interface::Element::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect, const Information &info,
-                              int state) const
+void Interface::Element::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                              const Rectangle                      &rect,
+                              const Information                    &info,
+                              int                                   state) const
 {
 }
 
@@ -455,8 +457,8 @@ bool Interface::ImageElement::ParseLine(const DataNode &node)
 {
 	// The "inactive" and "hover" sprite only applies to non-dynamic images.
 	// The "colored" tag only applies to outlines.
-	const string &key = node.Token(0);
-	bool hasValue = node.Size() >= 2;
+	const string &key      = node.Token(0);
+	bool          hasValue = node.Size() >= 2;
 	if(key == "inactive" && hasValue && name.empty())
 		sprite[Element::INACTIVE] = SpriteSet::Get(node.Token(1));
 	else if(key == "hover" && hasValue && name.empty())
@@ -478,7 +480,7 @@ Point Interface::ImageElement::NativeDimensions(const Information &info, int sta
 	if(!sprite || !sprite->Width() || !sprite->Height())
 		return Point();
 
-	Point size(sprite->Width(), sprite->Height());
+	Point     size(sprite->Width(), sprite->Height());
 	Rectangle bounds = Bounds();
 	if(!bounds.Dimensions())
 		return size;
@@ -493,15 +495,17 @@ Point Interface::ImageElement::NativeDimensions(const Information &info, int sta
 
 
 // Draw this element in the given rectangle.
-void Interface::ImageElement::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect,
-                                   const Information &info, int state) const
+void Interface::ImageElement::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                                   const Rectangle                      &rect,
+                                   const Information                    &info,
+                                   int                                   state) const
 {
 	const Sprite *sprite = GetSprite(info, state);
 	if(!sprite || !sprite->Width() || !sprite->Height())
 		return;
 
 	float frame = info.GetSpriteFrame(name);
-	Point unit = info.GetSpriteUnit(name);
+	Point unit  = info.GetSpriteUnit(name);
 	if(isOutline)
 	{
 		Color color = (isColored ? info.GetOutlineColor() : Color(1.f, 1.f));
@@ -532,7 +536,7 @@ Interface::TextElement::TextElement(const DataNode &node, const Point &globalAnc
 		return;
 
 	const string &key = node.Token(0);
-	isDynamic = (key.ends_with("string") || key.ends_with("dynamic button"));
+	isDynamic         = (key.ends_with("string") || key.ends_with("dynamic button"));
 	if(key.ends_with("button") || key.ends_with("dynamic button"))
 	{
 		buttonKey = node.Token(1).front();
@@ -549,8 +553,8 @@ Interface::TextElement::TextElement(const DataNode &node, const Point &globalAnc
 // itself. This returns false if it does not recognize the line, either.
 bool Interface::TextElement::ParseLine(const DataNode &node)
 {
-	const string &key = node.Token(0);
-	bool hasValue = node.Size() >= 2;
+	const string &key      = node.Token(0);
+	bool          hasValue = node.Size() >= 2;
 	if(key == "size" && hasValue)
 		fontSize = node.Value(1);
 	else if(key == "color" && hasValue)
@@ -644,16 +648,18 @@ Interface::BasicTextElement::BasicTextElement(const DataNode &node, const Point 
 // Report the actual dimensions of the object that will be drawn.
 Point Interface::BasicTextElement::NativeDimensions(const Information &info, int state) const
 {
-	const Font &font = FontSet::Get(fontSize);
-	const auto layout = Layout(static_cast<int>(Bounds().Width() - padding.X()), truncate);
+	const Font &font   = FontSet::Get(fontSize);
+	const auto  layout = Layout(static_cast<int>(Bounds().Width() - padding.X()), truncate);
 	return Point(font.FormattedWidth({GetString(info), layout}), font.Height());
 }
 
 
 
 // Draw this element in the given rectangle.
-void Interface::BasicTextElement::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect,
-                                       const Information &info, int state) const
+void Interface::BasicTextElement::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                                       const Rectangle                      &rect,
+                                       const Information                    &info,
+                                       int                                   state) const
 {
 	// Avoid crashes for malformed interface elements that are not fully loaded.
 	if(!color[state])
@@ -723,8 +729,10 @@ Point Interface::WrappedTextElement::NativeDimensions(const Information &info, i
 
 
 // Draw this element in the given rectangle.
-void Interface::WrappedTextElement::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect,
-                                         const Information &info, int state) const
+void Interface::WrappedTextElement::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                                         const Rectangle                      &rect,
+                                         const Information                    &info,
+                                         int                                   state) const
 {
 	// The text has already been wrapped in NativeDimensions called by Element::Draw.
 	text.Draw(cb, rect.TopLeft(), *color[state]);
@@ -741,7 +749,7 @@ Interface::BarElement::BarElement(const DataNode &node, const Point &globalAncho
 		return;
 
 	// Get the name of the element and find out what type it is (bar or ring).
-	name = node.Token(1);
+	name   = node.Token(1);
 	isRing = (node.Token(0) == "ring");
 
 	// This function will call ParseLine() for any line it does not recognize.
@@ -758,12 +766,12 @@ Interface::BarElement::BarElement(const DataNode &node, const Point &globalAncho
 // itself. This returns false if it does not recognize the line, either.
 bool Interface::BarElement::ParseLine(const DataNode &node)
 {
-	const string &key = node.Token(0);
-	bool hasValue = node.Size() >= 2;
+	const string &key      = node.Token(0);
+	bool          hasValue = node.Size() >= 2;
 	if(key == "color" && hasValue)
 	{
 		fromColor = GameData::Colors().Get(node.Token(1));
-		toColor = node.Size() >= 3 ? GameData::Colors().Get(node.Token(2)) : fromColor;
+		toColor   = node.Size() >= 3 ? GameData::Colors().Get(node.Token(2)) : fromColor;
 	}
 	else if(key == "size" && hasValue)
 		width = node.Value(1);
@@ -782,11 +790,13 @@ bool Interface::BarElement::ParseLine(const DataNode &node)
 
 
 // Draw this element in the given rectangle.
-void Interface::BarElement::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect,
-                                 const Information &info, int state) const
+void Interface::BarElement::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                                 const Rectangle                      &rect,
+                                 const Information                    &info,
+                                 int                                   state) const
 {
 	// Get the current settings for this bar or ring.
-	double value = info.BarValue(name);
+	double value    = info.BarValue(name);
 	double segments = info.BarSegments(name);
 	if(segments <= 1.)
 		segments = 0.;
@@ -808,15 +818,15 @@ void Interface::BarElement::Draw(GraphicsTypes::CommandBufferInstance *cb, const
 		// Figure out where the line should be drawn from and to.
 		// Note: the default start position is the bottom right.
 		// If "reversed" was specified, the top left will be used instead.
-		Point start = reversed ? rect.TopLeft() : rect.BottomRight();
+		Point start      = reversed ? rect.TopLeft() : rect.BottomRight();
 		Point dimensions = -rect.Dimensions();
 		if(reversed)
 			dimensions *= -1.;
 		double length = dimensions.Length();
-		Point unit = dimensions.Unit();
+		Point  unit   = dimensions.Unit();
 
 		// We will have (segments - 1) gaps between the segments.
-		double empty = segments ? (width / length) : 0.;
+		double empty  = segments ? (width / length) : 0.;
 		double filled = segments ? (1. - empty * (segments - 1.)) / segments : 1.;
 
 		// Draw segments until we've drawn the desired length.
@@ -824,15 +834,15 @@ void Interface::BarElement::Draw(GraphicsTypes::CommandBufferInstance *cb, const
 		while(v < value)
 		{
 			Color nFromColor = Color::Combine(1 - v, *fromColor, v, *toColor);
-			Point from = start + v * dimensions;
+			Point from       = start + v * dimensions;
 			v += filled;
-			double lim = min(v, value);
-			Point to = start + lim * dimensions;
-			Color nToColor = Color::Combine(1 - lim, *fromColor, lim, *toColor);
+			double lim      = min(v, value);
+			Point  to       = start + lim * dimensions;
+			Color  nToColor = Color::Combine(1 - lim, *fromColor, lim, *toColor);
 			v += empty;
 
 			// Rounded lines have a bit of padding, so account for that here.
-			float d = (to - from).Length() / 2.;
+			float d      = (to - from).Length() / 2.;
 			float twidth = d < width ? width * d / 2. : width;
 			from += unit * twidth;
 			to -= unit * twidth;
@@ -866,8 +876,8 @@ Interface::PointerElement::PointerElement(const DataNode &node, const Point &glo
 // itself. This returns false if it does not recognize the line, either.
 bool Interface::PointerElement::ParseLine(const DataNode &node)
 {
-	const string &key = node.Token(0);
-	bool hasValue = node.Size() >= 2;
+	const string &key      = node.Token(0);
+	bool          hasValue = node.Size() >= 2;
 	if(key == "color" && hasValue)
 		color = GameData::Colors().Get(node.Token(1));
 	else if(key == "orientation angle" && hasValue)
@@ -888,11 +898,13 @@ bool Interface::PointerElement::ParseLine(const DataNode &node)
 
 
 
-void Interface::PointerElement::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect,
-                                     const Information &info, int state) const
+void Interface::PointerElement::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                                     const Rectangle                      &rect,
+                                     const Information                    &info,
+                                     int                                   state) const
 {
 	const Point center = rect.Center();
-	const float width = rect.Width();
+	const float width  = rect.Width();
 	const float height = rect.Height();
 	PointerShader::Draw(cb, center, orientation, width, height, 0.f, *color);
 }
@@ -929,8 +941,10 @@ bool Interface::FillElement::ParseLine(const DataNode &node)
 
 
 // Draw this element in the given rectangle.
-void Interface::FillElement::Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect,
-                                  const Information &info, int state) const
+void Interface::FillElement::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                                  const Rectangle                      &rect,
+                                  const Information                    &info,
+                                  int                                   state) const
 {
 	// Avoid crashes for malformed interface elements that are not fully loaded.
 	if(!from.Get() && !to.Get())

@@ -29,9 +29,9 @@ class Trade {
 public:
 	class Commodity {
 	public:
-		std::string name;
-		int low = 0;
-		int high = 0;
+		std::string              name;
+		int                      low  = 0;
+		int                      high = 0;
 		std::vector<std::string> items;
 	};
 

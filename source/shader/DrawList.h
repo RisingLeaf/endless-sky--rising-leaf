@@ -51,11 +51,17 @@ public:
 	bool AddUnblurred(const Drawable &drawable, Point position, const Angle &facing);
 	// Add an object using a specific swizzle (rather than its own).
 	bool AddSwizzled(const Body &body, const Swizzle *swizzle, double cloak = 0.);
-	bool AddSwizzled(const Drawable &drawable, Point position, const Angle &facing, const Swizzle *swizzle,
-	                 double cloak = 0.);
+	bool AddSwizzled(
+	    const Drawable &drawable, Point position, const Angle &facing, const Swizzle *swizzle, double cloak = 0.);
 
-	void PushRaw(const Sprite *sprite, float frame, float xpos, float ypos, Angle facing, float alpha,
-	             const Point &scale, const Swizzle *swizzle);
+	void PushRaw(const Sprite  *sprite,
+	             float          frame,
+	             float          xpos,
+	             float          ypos,
+	             Angle          facing,
+	             float          alpha,
+	             const Point   &scale,
+	             const Swizzle *swizzle);
 
 	// Draw all the items in this list.
 	void Draw(GraphicsTypes::CommandBufferInstance *cb) const;
@@ -70,13 +76,18 @@ private:
 	// Determine if the given object should be drawn at all.
 	bool Cull(const Drawable &drawable, const Point &position, const Angle &facing, const Point &blur) const;
 
-	void Push(const Drawable &drawable, const Point &pos, const Angle &facing, Point blur, double alpha, double cloak,
-	          const Swizzle *swizzle);
+	void Push(const Drawable &drawable,
+	          const Point    &pos,
+	          const Angle    &facing,
+	          Point           blur,
+	          double          alpha,
+	          double          cloak,
+	          const Swizzle  *swizzle);
 
 
 private:
-	int step = 0;
-	double zoom = 1.;
+	int                                     step = 0;
+	double                                  zoom = 1.;
 	mutable std::vector<SpriteShader::Item> items;
 
 	Point center;

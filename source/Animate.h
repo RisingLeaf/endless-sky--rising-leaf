@@ -50,8 +50,8 @@ public:
 
 private:
 	int steps = 0;
-	T current{};
-	T target{};
+	T   current{};
+	T   target{};
 };
 
 
@@ -59,7 +59,7 @@ private:
 template <typename T>
 void Animate<T>::Set(const T &current, int steps)
 {
-	this->steps = steps;
+	this->steps  = steps;
 	this->target = current;
 }
 

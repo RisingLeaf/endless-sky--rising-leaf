@@ -49,12 +49,12 @@ SavedGame::SavedGame(const PlayerInfo &player)
 		system = player.GetSystem()->DisplayName();
 	if(player.GetPlanet())
 		planet = player.GetPlanet()->DisplayName();
-	playTime = Format::PlayTime(player.GetPlayTime());
+	playTime             = Format::PlayTime(player.GetPlayTime());
 	const Ship *flagship = player.Flagship();
 	if(flagship)
 	{
 		shipSprite = flagship->GetSprite();
-		shipName = flagship->GivenName();
+		shipName   = flagship->GivenName();
 	}
 	credits = Format::AbbreviatedNumber(player.Accounts().Credits());
 }
@@ -69,26 +69,26 @@ void SavedGame::Load(const filesystem::path &path)
 		this->path = path;
 
 	int flagshipIterator = -1;
-	int flagshipTarget = 0;
+	int flagshipTarget   = 0;
 
 	for(const DataNode &node : file)
 	{
-		const string &key = node.Token(0);
-		bool hasValue = node.Size() >= 2;
+		const string &key      = node.Token(0);
+		bool          hasValue = node.Size() >= 2;
 		if(key == "pilot" && node.Size() >= 3)
 			name = node.Token(1) + " " + node.Token(2);
 		else if(key == "date" && node.Size() >= 4)
 			date = Date(node.Value(1), node.Value(2), node.Value(3)).ToString();
 		else if(key == "system" && hasValue)
 		{
-			system = node.Token(1);
+			system                    = node.Token(1);
 			const System *savedSystem = GameData::Systems().Find(system);
 			if(savedSystem && savedSystem->IsValid())
 				system = savedSystem->DisplayName();
 		}
 		else if(key == "planet" && hasValue)
 		{
-			planet = node.Token(1);
+			planet                    = node.Token(1);
 			const Planet *savedPlanet = GameData::Planets().Find(planet);
 			if(savedPlanet && savedPlanet->IsValid())
 				planet = savedPlanet->DisplayName();
@@ -110,8 +110,8 @@ void SavedGame::Load(const filesystem::path &path)
 		{
 			for(const DataNode &child : node)
 			{
-				const string &childKey = child.Token(0);
-				bool childHasValue = child.Size() >= 2;
+				const string &childKey      = child.Token(0);
+				bool          childHasValue = child.Size() >= 2;
 				if(childKey == "name" && childHasValue)
 					shipName = child.Token(1);
 				else if(childKey == "sprite" && childHasValue)
@@ -185,7 +185,7 @@ const filesystem::path &SavedGame::Path() const
 string SavedGame::Identifier() const
 {
 	string name = Files::NameNoExtension(path);
-	size_t pos = name.find('~');
+	size_t pos  = name.find('~');
 	if(pos != string::npos)
 		return name.substr(0, pos);
 	return name;

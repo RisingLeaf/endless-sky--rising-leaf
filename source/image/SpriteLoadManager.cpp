@@ -36,10 +36,10 @@ namespace {
 
 	// Tracks the progress of loading the sprites when the game starts.
 	std::atomic<bool> queuedAllImages = false;
-	std::atomic<int> spritesLoaded = 0;
-	std::atomic<int> totalSprites = 0;
+	std::atomic<int>  spritesLoaded   = 0;
+	std::atomic<int>  totalSprites    = 0;
 	// List of image sets that are waiting to be loaded at game start.
-	mutex imageQueueMutex;
+	mutex                       imageQueueMutex;
 	queue<shared_ptr<ImageSet>> imageQueue;
 
 	// The root folders (starting from the images folder) that use deferred loading.
@@ -47,11 +47,11 @@ namespace {
 	// The sprites that use deferred loading.
 	map<const Sprite *, shared_ptr<ImageSet>> deferred;
 	// Up to 20 landscape images will be preloaded at a time, with the oldest being culled to make room for new ones.
-	const int LANDSCAPE_LIMIT = 20;
+	const int                LANDSCAPE_LIMIT = 20;
 	map<const Sprite *, int> preloadedLandscapes;
 	// Stellar objects and thumbnails remain loaded for up to 100 in-game days before they're culled. This prevents
 	// us from repeatedly reloading sprites that the player is frequently encountering.
-	const int DAY_LIMIT = 100;
+	const int                DAY_LIMIT = 100;
 	map<const Sprite *, int> loadedStellarObjects;
 	map<const Sprite *, int> loadedThumbnails;
 	// Scenes remain loaded for only one in-game day before they're culled, as they are not commonly requested.
@@ -61,7 +61,7 @@ namespace {
 	// The code that makes these changes may not have access to the TaskQueue in UI, so they
 	// instead send a message to the SpriteLoadManager to tell the current Panel to recheck which
 	// sprites should be loaded.
-	bool recheckThumbnails = false;
+	bool recheckThumbnails     = false;
 	bool recheckStellarObjects = false;
 
 	// Determine whether the given path or name is for a sprite whose loading
@@ -237,7 +237,7 @@ void SpriteLoadManager::LoadDeferred(TaskQueue &queue, const Sprite *sprite)
 	if(!sprite || dit == deferred.end())
 		return;
 
-	const string &name = sprite->Name();
+	const string               &name  = sprite->Name();
 	const shared_ptr<ImageSet> &image = dit->second;
 	if(name.starts_with("land/"))
 		LoadLandscape(queue, sprite, image);
@@ -287,7 +287,7 @@ void SpriteLoadManager::SetRecheckThumbnails()
 bool SpriteLoadManager::RecheckThumbnails()
 {
 
-	bool ret = recheckThumbnails;
+	bool ret          = recheckThumbnails;
 	recheckThumbnails = false;
 	return ret;
 }
@@ -303,7 +303,7 @@ void SpriteLoadManager::SetRecheckStellarObjects()
 
 bool SpriteLoadManager::RecheckStellarObjects()
 {
-	bool ret = recheckStellarObjects;
+	bool ret              = recheckStellarObjects;
 	recheckStellarObjects = false;
 	return ret;
 }

@@ -29,8 +29,14 @@ namespace {
 
 
 
-ScrollBar::ScrollBar(float fraction, float displaySizeFraction, const Point &from, const Point &to, float tabWidth,
-                     float lineWidth, const Color &color, const Color &innerColor) noexcept
+ScrollBar::ScrollBar(float        fraction,
+                     float        displaySizeFraction,
+                     const Point &from,
+                     const Point &to,
+                     float        tabWidth,
+                     float        lineWidth,
+                     const Color &color,
+                     const Color &innerColor) noexcept
     : fraction(fraction), displaySizeFraction(displaySizeFraction), from(from), to(to), tabWidth(tabWidth),
       lineWidth(lineWidth), color(color), innerColor(innerColor)
 {
@@ -54,12 +60,15 @@ void ScrollBar::Draw(GraphicsTypes::CommandBufferInstance *cb)
 void ScrollBar::DrawAt(GraphicsTypes::CommandBufferInstance *cb, const Point &from)
 {
 	Point delta = to - this->from;
-	LineShader::Draw(cb, from, from + delta, lineWidth,
-	                 innerHighlighted ? innerColor : Color::Multiply(.5, innerColor));
+	LineShader::Draw(
+	    cb, from, from + delta, lineWidth, innerHighlighted ? innerColor : Color::Multiply(.5, innerColor));
 
 	Point deltaOffset = delta * displaySizeFraction;
-	Point offset = delta * (1 - displaySizeFraction) * fraction;
-	LineShader::Draw(cb, from + offset + deltaOffset, from + offset, tabWidth,
+	Point offset      = delta * (1 - displaySizeFraction) * fraction;
+	LineShader::Draw(cb,
+	                 from + offset + deltaOffset,
+	                 from + offset,
+	                 tabWidth,
 	                 highlighted ? color : Color::Combine(.5, color, .5, innerColor));
 
 	PointerShader::Draw(cb, from, Point(0., -1.), lineWidth * 3., 10.f, 5.f, fraction > 0. ? color : innerColor);
@@ -70,7 +79,7 @@ void ScrollBar::DrawAt(GraphicsTypes::CommandBufferInstance *cb, const Point &fr
 
 bool ScrollBar::Hover(int x, int y)
 {
-	Point delta = to - from;
+	Point delta  = to - from;
 	Point offset = delta * (1.0 - displaySizeFraction) * fraction;
 
 	// Find the distance from a point (p) to the line segment a->b
@@ -90,7 +99,7 @@ bool ScrollBar::Hover(int x, int y)
 
 	Point p(x, y);
 
-	highlighted = LineSDF(a, b, p) <= tabWidth + SCROLLBAR_MOUSE_ADDITIONAL_RANGE;
+	highlighted      = LineSDF(a, b, p) <= tabWidth + SCROLLBAR_MOUSE_ADDITIONAL_RANGE;
 	innerHighlighted = LineSDF(from, to, p) <= lineWidth + SCROLLBAR_MOUSE_ADDITIONAL_RANGE;
 
 	return false;
@@ -135,7 +144,7 @@ bool ScrollBar::Click(int x, int y, MouseButton button, int clicks)
 	if(innerHighlighted && !highlighted)
 	{
 		Point cursorVector = clickPos - from;
-		Point thisVector = to - from;
+		Point thisVector   = to - from;
 
 		double scalarProjectionOverLength = thisVector.Dot(cursorVector) / thisVector.LengthSquared();
 

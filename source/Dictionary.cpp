@@ -30,13 +30,13 @@ namespace {
 	pair<size_t, bool> Search(const char *key, const vector<pair<const char *, Type>> &v)
 	{
 		// At each step of the search, we know the key is in [low, high).
-		size_t low = 0;
+		size_t low  = 0;
 		size_t high = v.size();
 
 		while(low != high)
 		{
 			size_t mid = (low + high) / 2;
-			int cmp = strcmp(key, v[mid].first);
+			int    cmp = strcmp(key, v[mid].first);
 			if(!cmp)
 				return make_pair(mid, true);
 

@@ -54,5 +54,5 @@ protected:
 private:
 	WrappedText wrappedText;
 	std::string text;
-	Color color;
+	Color       color;
 };

@@ -36,11 +36,17 @@ template <class Item>
 class Shop {
 public:
 	Shop();
-	Shop(const DataNode &node, const Set<Item> &items, const ConditionsStore *playerConditions,
-	     const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	Shop(const DataNode                 &node,
+	     const Set<Item>                &items,
+	     const ConditionsStore          *playerConditions,
+	     const std::set<const System *> *visitedSystems,
+	     const std::set<const Planet *> *visitedPlanets);
 
-	void Load(const DataNode &node, const Set<Item> &items, const ConditionsStore *playerConditions,
-	          const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	void Load(const DataNode                 &node,
+	          const Set<Item>                &items,
+	          const ConditionsStore          *playerConditions,
+	          const std::set<const System *> *visitedSystems,
+	          const std::set<const Planet *> *visitedPlanets);
 
 	// This shop's name.
 	const std::string &Name() const;
@@ -54,9 +60,9 @@ public:
 
 private:
 	std::string name;
-	Sale<Item> stock;
+	Sale<Item>  stock;
 
-	ConditionSet toSell;
+	ConditionSet   toSell;
 	LocationFilter location;
 };
 
@@ -70,8 +76,11 @@ Shop<Item>::Shop()
 
 
 template <class Item>
-Shop<Item>::Shop(const DataNode &node, const Set<Item> &items, const ConditionsStore *playerConditions,
-                 const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
+Shop<Item>::Shop(const DataNode                 &node,
+                 const Set<Item>                &items,
+                 const ConditionsStore          *playerConditions,
+                 const std::set<const System *> *visitedSystems,
+                 const std::set<const Planet *> *visitedPlanets)
 {
 	Load(node, items, playerConditions, visitedSystems, visitedPlanets);
 }
@@ -79,8 +88,11 @@ Shop<Item>::Shop(const DataNode &node, const Set<Item> &items, const ConditionsS
 
 
 template <class Item>
-void Shop<Item>::Load(const DataNode &node, const Set<Item> &items, const ConditionsStore *playerConditions,
-                      const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets)
+void Shop<Item>::Load(const DataNode                 &node,
+                      const Set<Item>                &items,
+                      const ConditionsStore          *playerConditions,
+                      const std::set<const System *> *visitedSystems,
+                      const std::set<const Planet *> *visitedPlanets)
 {
 	name = node.Token(1);
 	// If an event or second definition updates this shop, clear the stock
@@ -89,12 +101,12 @@ void Shop<Item>::Load(const DataNode &node, const Set<Item> &items, const Condit
 
 	for(const DataNode &child : node)
 	{
-		const bool add = (child.Token(0) == "add");
+		const bool add    = (child.Token(0) == "add");
 		const bool remove = (child.Token(0) == "remove");
 
-		const std::string &key = child.Token((add || remove) ? 1 : 0);
-		const int valueIndex = (add || remove) ? 2 : 1;
-		const bool hasValue = child.Size() > valueIndex;
+		const std::string &key        = child.Token((add || remove) ? 1 : 0);
+		const int          valueIndex = (add || remove) ? 2 : 1;
+		const bool         hasValue   = child.Size() > valueIndex;
 
 		if(key == "to" && hasValue && child.Token(valueIndex) == "sell")
 		{

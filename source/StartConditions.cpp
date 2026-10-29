@@ -41,7 +41,8 @@ namespace {
 
 
 
-StartConditions::StartConditions(const DataNode &node, const ConditionsStore *globalConditions,
+StartConditions::StartConditions(const DataNode        &node,
+                                 const ConditionsStore *globalConditions,
                                  const ConditionsStore *playerConditions)
 {
 	Load(node, globalConditions, playerConditions);
@@ -49,19 +50,20 @@ StartConditions::StartConditions(const DataNode &node, const ConditionsStore *gl
 
 
 
-void StartConditions::Load(const DataNode &node, const ConditionsStore *globalConditions,
+void StartConditions::Load(const DataNode        &node,
+                           const ConditionsStore *globalConditions,
                            const ConditionsStore *playerConditions)
 {
 	// When a plugin modifies an existing starting condition, default to
 	// clearing the previously-defined description text. The plugin may
 	// amend it by using "add description"
-	StartInfo &unlocked = infoByState[StartState::UNLOCKED];
-	bool clearDescription = !unlocked.description.empty();
+	StartInfo &unlocked         = infoByState[StartState::UNLOCKED];
+	bool       clearDescription = !unlocked.description.empty();
 
 	for(const DataNode &child : node)
 	{
 		// Check for the "add" or "remove" keyword.
-		bool add = (child.Token(0) == "add");
+		bool add    = (child.Token(0) == "add");
 		bool remove = (child.Token(0) == "remove");
 		if((add || remove) && child.Size() < 2)
 		{
@@ -75,10 +77,10 @@ void StartConditions::Load(const DataNode &node, const ConditionsStore *globalCo
 			continue;
 
 		// Otherwise, we should try to parse it.
-		const string &key = child.Token((add || remove) ? 1 : 0);
-		int valueIndex = (add || remove) ? 2 : 1;
-		bool hasValue = (child.Size() > valueIndex);
-		const string &value = child.Token(hasValue ? valueIndex : 0);
+		const string &key        = child.Token((add || remove) ? 1 : 0);
+		int           valueIndex = (add || remove) ? 2 : 1;
+		bool          hasValue   = (child.Size() > valueIndex);
+		const string &value      = child.Token(hasValue ? valueIndex : 0);
 
 		if(remove)
 		{
@@ -179,11 +181,11 @@ void StartConditions::FinishLoading()
 	// may now be invalid, meaning the CoreStartData would actually send the start to New Boston instead
 	// of what was displayed.
 	StartInfo &unlocked = infoByState[StartState::UNLOCKED];
-	unlocked.planet = GetPlanet().DisplayName();
-	unlocked.system = GetSystem().DisplayName();
-	unlocked.date = GetDate();
-	unlocked.credits = Format::AbbreviatedNumber(GetAccounts().Credits());
-	unlocked.debt = Format::AbbreviatedNumber(GetAccounts().TotalDebt());
+	unlocked.planet     = GetPlanet().DisplayName();
+	unlocked.system     = GetSystem().DisplayName();
+	unlocked.date       = GetDate();
+	unlocked.credits    = Format::AbbreviatedNumber(GetAccounts().Credits());
+	unlocked.debt       = Format::AbbreviatedNumber(GetAccounts().TotalDebt());
 
 	if(!conversation)
 	{
@@ -236,8 +238,8 @@ void StartConditions::InstantiateShips(const PlayerInfo &player, vector<shared_p
 {
 	map<string, string> subs;
 	player.AddPlayerSubstitutions(subs);
-	const Phrase *phrase = GameData::Phrases().Get("civilian");
-	auto nameFunc = [phrase](const shared_ptr<Ship> &) -> string {
+	const Phrase *phrase   = GameData::Phrases().Get("civilian");
+	auto          nameFunc = [phrase](const shared_ptr<Ship> &) -> string {
 		return phrase->Get();
 	};
 	ships.Instantiate(playerShips, nameFunc, &subs);
@@ -366,8 +368,8 @@ bool StartConditions::IsUnlocked() const
 
 void StartConditions::LoadState(const DataNode &node, StartState state)
 {
-	StartInfo &info = infoByState[state];
-	bool clearDescription = !info.description.empty();
+	StartInfo &info             = infoByState[state];
+	bool       clearDescription = !info.description.empty();
 	for(const auto &child : node)
 		LoadStateChild(child, info, clearDescription, false);
 }
@@ -376,10 +378,10 @@ void StartConditions::LoadState(const DataNode &node, StartState state)
 
 bool StartConditions::LoadStateChild(const DataNode &child, StartInfo &info, bool &clearDescription, bool isAdd)
 {
-	const string &key = child.Token(isAdd ? 1 : 0);
-	int valueIndex = (isAdd) ? 2 : 1;
-	bool hasValue = (child.Size() > valueIndex);
-	const string &value = child.Token(hasValue ? valueIndex : 0);
+	const string &key        = child.Token(isAdd ? 1 : 0);
+	int           valueIndex = (isAdd) ? 2 : 1;
+	bool          hasValue   = (child.Size() > valueIndex);
+	const string &value      = child.Token(hasValue ? valueIndex : 0);
 
 	if(key == "name" && hasValue)
 		info.displayName = value;

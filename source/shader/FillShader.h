@@ -32,8 +32,8 @@ class FillShader {
 public:
 	static void Init(const GraphicsTypes::GraphicsInstance *graphics_instance);
 	static void Fill(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &area, const Color &color);
-	static void Fill(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &size,
-	                 const Color &color);
+	static void
+	Fill(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &size, const Color &color);
 
 	static void Clear();
 };

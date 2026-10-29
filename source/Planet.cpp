@@ -36,13 +36,13 @@ using namespace std;
 
 namespace {
 	const string WORMHOLE = "wormhole";
-	const string PLANET = "planet";
+	const string PLANET   = "planet";
 
 	// Planet attributes in the form "requires: <attribute>" restrict the ability of ships to land
 	// unless the ship has all required attributes.
 	void SetRequiredAttributes(const set<string> &attributes, set<string> &required)
 	{
-		static const string PREFIX = "requires: ";
+		static const string PREFIX     = "requires: ";
 		static const string PREFIX_END = "requires:!";
 		required.clear();
 		for_each(attributes.lower_bound(PREFIX), attributes.lower_bound(PREFIX_END), [&](const string &attribute) {
@@ -70,7 +70,7 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 	for(const DataNode &child : node)
 	{
 		// Check for the "add" or "remove" keyword.
-		bool add = (child.Token(0) == "add");
+		bool add    = (child.Token(0) == "add");
 		bool remove = (child.Token(0) == "remove");
 		if((add || remove) && child.Size() < 2)
 		{
@@ -79,10 +79,10 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 		}
 
 		// Get the key and value (if any).
-		const string &key = child.Token((add || remove) ? 1 : 0);
-		int valueIndex = (add || remove) ? 2 : 1;
-		bool hasValue = (child.Size() > valueIndex);
-		const string &value = child.Token(hasValue ? valueIndex : 0);
+		const string &key        = child.Token((add || remove) ? 1 : 0);
+		int           valueIndex = (add || remove) ? 2 : 1;
+		bool          hasValue   = (child.Size() > valueIndex);
+		const string &value      = child.Token(hasValue ? valueIndex : 0);
 
 		// Check for conditions that require clearing this key's current value.
 		// "remove <key>" means to clear the key's previous contents.
@@ -133,19 +133,19 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 				security = 0.;
 			else if(key == "tribute")
 			{
-				tribute = 0;
+				tribute          = 0;
 				defenseThreshold = 4000;
 				defenseFleets.clear();
 				ResetDefense();
 			}
 			else if(key == "tribute hails")
 			{
-				tributeAlreadyPaying = nullptr;
-				tributeUndefined = nullptr;
-				tributeUnworthy = nullptr;
+				tributeAlreadyPaying   = nullptr;
+				tributeUndefined       = nullptr;
+				tributeUnworthy        = nullptr;
 				tributeFleetUndefeated = nullptr;
-				tributeFleetLaunching = nullptr;
-				tributeSurrendered = nullptr;
+				tributeFleetLaunching  = nullptr;
+				tributeSurrendered     = nullptr;
 			}
 			else if(key == "wormhole")
 				wormhole = nullptr;
@@ -210,8 +210,8 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 					grand.PrintTrace("Skipping unrecognized attribute:");
 					continue;
 				}
-				bool removeTributePhrase = grand.Token(0) == "remove";
-				const string &grandKey = grand.Token(remove);
+				bool          removeTributePhrase = grand.Token(0) == "remove";
+				const string &grandKey            = grand.Token(remove);
 				if(grandKey == "already paying")
 					tributeAlreadyPaying = removeTributePhrase ? nullptr : GameData::Phrases().Get(grand.Token(1));
 				else if(grandKey == "undefined")
@@ -285,16 +285,16 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 		else if(key == "security")
 		{
 			customSecurity = true;
-			security = child.Value(valueIndex);
+			security       = child.Value(valueIndex);
 		}
 		else if(key == "tribute")
 		{
-			tribute = child.Value(valueIndex);
+			tribute          = child.Value(valueIndex);
 			bool resetFleets = !defenseFleets.empty();
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
-				bool grandHasValue = grand.Size() >= 2;
+				const string &grandKey      = grand.Token(0);
+				bool          grandHasValue = grand.Size() >= 2;
 				if(grandKey == "threshold" && grandHasValue)
 					defenseThreshold = grand.Value(1);
 				else if(grandKey == "fleet")
@@ -307,7 +307,8 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 							defenseFleets.clear();
 							resetFleets = false;
 						}
-						defenseFleets.insert(defenseFleets.end(), grand.Size() >= 3 ? grand.Value(2) : 1,
+						defenseFleets.insert(defenseFleets.end(),
+						                     grand.Size() >= 3 ? grand.Value(2) : 1,
 						                     GameData::Fleets().Get(grand.Token(1)));
 					}
 					else
@@ -360,13 +361,20 @@ void Planet::Load(const DataNode &node, Set<Wormhole> &wormholes, const Conditio
 
 	// Apply any auto-attributes to this planet depending on what it has.
 	static const vector<string> AUTO_ATTRIBUTES = {
-	    "spaceport",         "port",
-	    "shipyard",          "outfitter",
-	    "service: trading",  "service: jobs",
-	    "service: bank",     "service: crew",
-	    "service: missions", "recharges: shields",
-	    "recharges: hull",   "recharges: energy",
-	    "recharges: fuel",   "spaceport news",
+	    "spaceport",
+	    "port",
+	    "shipyard",
+	    "outfitter",
+	    "service: trading",
+	    "service: jobs",
+	    "service: bank",
+	    "service: crew",
+	    "service: missions",
+	    "recharges: shields",
+	    "recharges: hull",
+	    "recharges: energy",
+	    "recharges: fuel",
+	    "spaceport news",
 	};
 	bool autoValues[14] = {
 	    port.HasService(Port::ServicesType::All, false) && port.CanRecharge(Port::RechargeType::All, false) &&
@@ -902,7 +910,10 @@ string Planet::DemandTribute(PlayerInfo &player) const
 		surrenderMessage = government->TributeSurrendered()->Get();
 	else
 		surrenderMessage = "We surrender. We will pay you <credits> per day to leave us alone.";
-	return Format::Replace(surrenderMessage, {{"<credits>", Format::CreditString(tribute)}});
+	return Format::Replace(surrenderMessage,
+	                       {
+	                           {"<credits>", Format::CreditString(tribute)}
+    });
 }
 
 
@@ -922,7 +933,7 @@ void Planet::DeployDefense(list<shared_ptr<Ship>> &ships) const
 
 	// All defenders use a special personality.
 	Personality defenderPersonality = Personality::Defender();
-	Personality fighterPersonality = Personality::DefenderFighter();
+	Personality fighterPersonality  = Personality::DefenderFighter();
 	for(auto it = defenders.begin(); it != end; ++it)
 	{
 		(**it).SetPersonality(defenderPersonality);
@@ -939,7 +950,7 @@ void Planet::DeployDefense(list<shared_ptr<Ship>> &ships) const
 
 void Planet::ResetDefense() const
 {
-	isDefending = false;
+	isDefending     = false;
 	defenseDeployed = 0;
 	defenders.clear();
 }

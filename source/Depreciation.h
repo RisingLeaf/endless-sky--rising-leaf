@@ -83,6 +83,6 @@ private:
 	// Check if any data has been loaded.
 	bool isLoaded = false;
 
-	std::map<const Ship *, std::map<int, int>> ships;
+	std::map<const Ship *, std::map<int, int>>   ships;
 	std::map<const Outfit *, std::map<int, int>> outfits;
 };

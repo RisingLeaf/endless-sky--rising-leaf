@@ -50,7 +50,7 @@ public:
 		    : weapon(weapon), count(count) {};
 
 		const std::shared_ptr<const Weapon> &weapon;
-		std::size_t count = 0;
+		std::size_t                          count = 0;
 		// The angular offset from the source projectile, relative to its current facing.
 		Angle facing;
 		// The base offset from the source projectile's position, relative to its current facing.
@@ -71,9 +71,9 @@ public:
 	// Get assets used by this weapon.
 	const Drawable &ProjectileSprite() const;
 	const Drawable &HardpointSprite() const;
-	const Sound *WeaponSound() const;
-	const Sound *EmptySound() const;
-	const Sprite *Icon() const;
+	const Sound    *WeaponSound() const;
+	const Sound    *EmptySound() const;
+	const Sprite   *Icon() const;
 
 	// Effects to be created at the start or end of the weapon's lifetime.
 	const std::map<const Effect *, int> &FireEffects() const;
@@ -81,22 +81,22 @@ public:
 	const std::map<const Effect *, int> &HitEffects() const;
 	const std::map<const Effect *, int> &TargetEffects() const;
 	const std::map<const Effect *, int> &DieEffects() const;
-	const std::vector<Submunition> &Submunitions() const;
+	const std::vector<Submunition>      &Submunitions() const;
 
 	// Accessor functions for various attributes.
-	int Lifetime() const;
-	int RandomLifetime() const;
-	int FadeOut() const;
+	int    Lifetime() const;
+	int    RandomLifetime() const;
+	int    FadeOut() const;
 	double Reload() const;
 	double BurstReload() const;
-	int BurstCount() const;
+	int    BurstCount() const;
 
 	const Outfit *Ammo() const;
-	int AmmoUsage() const;
+	int           AmmoUsage() const;
 
-	int MissileStrength() const;
-	int AntiMissile() const;
-	double TractorBeam() const;
+	int      MissileStrength() const;
+	int      AntiMissile() const;
+	double   TractorBeam() const;
 	uint16_t PenetrationCount() const noexcept;
 	// Weapons of the same type will alternate firing (streaming) rather than
 	// firing all at once (clustering) if the weapon is not an anti-missile and
@@ -104,18 +104,18 @@ public:
 	bool IsStreamed() const;
 	bool IsParallel() const;
 
-	double Velocity() const;
-	double RandomVelocity() const;
-	double WeightedVelocity() const;
-	double Acceleration() const;
-	double Drag() const;
+	double       Velocity() const;
+	double       RandomVelocity() const;
+	double       WeightedVelocity() const;
+	double       Acceleration() const;
+	double       Drag() const;
 	const Point &HardpointOffset() const;
 
-	double Turn() const;
-	double Inaccuracy() const;
+	double                              Turn() const;
+	double                              Inaccuracy() const;
 	std::pair<Distribution::Type, bool> InaccuracyDistribution() const;
-	double TurretTurn() const;
-	double Arc() const;
+	double                              TurretTurn() const;
+	double                              Arc() const;
 
 	double Tracking() const;
 	double OpticalTracking() const;
@@ -231,19 +231,19 @@ private:
 
 
 private:
-	bool isLoaded = false;
-	bool safeRangeOverriden = false;
-	bool disabledDamageSet = false;
-	bool minableDamageSet = false;
+	bool isLoaded                  = false;
+	bool safeRangeOverriden        = false;
+	bool disabledDamageSet         = false;
+	bool minableDamageSet          = false;
 	bool relativeDisabledDamageSet = false;
-	bool relativeMinableDamageSet = false;
+	bool relativeMinableDamageSet  = false;
 
 	// Sprites and sounds.
-	Drawable projectileSprite;
-	Drawable hardpointSprite;
-	const Sound *sound = nullptr;
-	const Sound *emptySound = nullptr;
-	const Sprite *icon = nullptr;
+	Drawable      projectileSprite;
+	Drawable      hardpointSprite;
+	const Sound  *sound      = nullptr;
+	const Sound  *emptySound = nullptr;
+	const Sprite *icon       = nullptr;
 
 	// Fire, die and hit effects.
 	std::map<const Effect *, int> fireEffects;
@@ -251,21 +251,21 @@ private:
 	std::map<const Effect *, int> hitEffects;
 	std::map<const Effect *, int> targetEffects;
 	std::map<const Effect *, int> dieEffects;
-	std::vector<Submunition> submunitions;
+	std::vector<Submunition>      submunitions;
 	// Whether the damage dealt by this weapon's submunitions are
 	// included in the damage of its projectiles when colliding
 	// with a target.
 	bool includeSubmunitionDamage = true;
 
-	bool isStreamed = false;
-	bool isSafe = false;
-	bool isPhasing = false;
-	bool isDamageScaled = true;
-	bool isGravitational = false;
-	bool isFused = false;
-	bool canCollideShips = true;
+	bool isStreamed          = false;
+	bool isSafe              = false;
+	bool isPhasing           = false;
+	bool isDamageScaled      = true;
+	bool isGravitational     = false;
+	bool isFused             = false;
+	bool canCollideShips     = true;
 	bool canCollideAsteroids = true;
-	bool canCollideMinables = true;
+	bool canCollideMinables  = true;
 	// Guns and missiles are by default aimed a converged point at the
 	// maximum weapons range in front of the ship. When either the installed
 	// weapon or the gun-port (or both) have the isParallel attribute set
@@ -273,120 +273,120 @@ private:
 	// be aimed directly in the gunport angle/direction.
 	bool isParallel = false;
 	// Attributes for homing.
-	bool homing = false;
-	bool blindspot = false;
+	bool homing          = false;
+	bool blindspot       = false;
 	bool throttleControl = false;
-	bool leading = false;
+	bool leading         = false;
 
 	// Attributes.
-	int lifetime = 0;
-	int randomLifetime = 0;
-	int fadeOut = 0;
-	double reload = 1.;
-	double burstReload = 1.;
-	int burstCount = 1;
+	int    lifetime       = 0;
+	int    randomLifetime = 0;
+	int    fadeOut        = 0;
+	double reload         = 1.;
+	double burstReload    = 1.;
+	int    burstCount     = 1;
 
 	// A pair representing the outfit that is consumed as ammo and the number
 	// of that outfit consumed upon fire.
 	std::pair<const Outfit *, int> ammo;
 
-	int missileStrength = 0;
-	int antiMissile = 0;
-	double tractorBeam = 0.;
+	int    missileStrength = 0;
+	int    antiMissile     = 0;
+	double tractorBeam     = 0.;
 	// Use of an unsigned integer allows explicit penetration count values of 0
 	// to result in a projectile that will hit 65k targets before being destroyed
 	// (which is effectively infinite under any reasonable balance).
 	uint16_t penetrationCount = 1U;
 
-	double velocity = 0.;
-	double randomVelocity = 0.;
-	double acceleration = 0.;
-	double drag = 0.;
-	Point hardpointOffset = {0., 0.};
+	double velocity        = 0.;
+	double randomVelocity  = 0.;
+	double acceleration    = 0.;
+	double drag            = 0.;
+	Point  hardpointOffset = {0., 0.};
 
-	double turn = 0.;
+	double turn       = 0.;
 	double inaccuracy = 0.;
 	// A pair representing the distribution type of this weapon's inaccuracy
 	// and whether it is inverted
 	std::pair<Distribution::Type, bool> inaccuracyDistribution = {Distribution::Type::Triangular, false};
-	double turretTurn = 0.;
-	double maxAngle = 360.;
+	double                              turretTurn             = 0.;
+	double                              maxAngle               = 360.;
 
-	double tracking = 0.;
-	double opticalTracking = 0.;
+	double tracking         = 0.;
+	double opticalTracking  = 0.;
 	double infraredTracking = 0.;
-	double radarTracking = 0.;
+	double radarTracking    = 0.;
 
-	double firingEnergy = 0.;
-	double firingForce = 0.;
-	double firingFuel = 0.;
-	double firingHeat = 0.;
-	double firingHull = 0.;
-	double firingShields = 0.;
-	double firingIon = 0.;
-	double firingScramble = 0.;
-	double firingSlowing = 0.;
+	double firingEnergy     = 0.;
+	double firingForce      = 0.;
+	double firingFuel       = 0.;
+	double firingHeat       = 0.;
+	double firingHull       = 0.;
+	double firingShields    = 0.;
+	double firingIon        = 0.;
+	double firingScramble   = 0.;
+	double firingSlowing    = 0.;
 	double firingDisruption = 0.;
-	double firingDischarge = 0.;
-	double firingCorrosion = 0.;
-	double firingLeak = 0.;
-	double firingBurn = 0.;
+	double firingDischarge  = 0.;
+	double firingCorrosion  = 0.;
+	double firingLeak       = 0.;
+	double firingBurn       = 0.;
 
-	double relativeFiringEnergy = 0.;
-	double relativeFiringHeat = 0.;
-	double relativeFiringFuel = 0.;
-	double relativeFiringHull = 0.;
+	double relativeFiringEnergy  = 0.;
+	double relativeFiringHeat    = 0.;
+	double relativeFiringFuel    = 0.;
+	double relativeFiringHull    = 0.;
 	double relativeFiringShields = 0.;
 
-	double splitRange = 0.;
+	double splitRange    = 0.;
 	double triggerRadius = 0.;
-	double blastRadius = 0.;
-	double safeRange = 0.;
+	double blastRadius   = 0.;
+	double safeRange     = 0.;
 
 	static const int DAMAGE_TYPES = 23;
-	static const int HIT_FORCE = 0;
+	static const int HIT_FORCE    = 0;
 	// Normal damage types:
-	static const int SHIELD_DAMAGE = 1;
-	static const int HULL_DAMAGE = 2;
+	static const int SHIELD_DAMAGE   = 1;
+	static const int HULL_DAMAGE     = 2;
 	static const int DISABLED_DAMAGE = 3;
-	static const int MINABLE_DAMAGE = 4;
-	static const int FUEL_DAMAGE = 5;
-	static const int HEAT_DAMAGE = 6;
-	static const int ENERGY_DAMAGE = 7;
+	static const int MINABLE_DAMAGE  = 4;
+	static const int FUEL_DAMAGE     = 5;
+	static const int HEAT_DAMAGE     = 6;
+	static const int ENERGY_DAMAGE   = 7;
 	// Status effects:
-	static const int ION_DAMAGE = 8;
+	static const int ION_DAMAGE            = 8;
 	static const int WEAPON_JAMMING_DAMAGE = 9;
-	static const int DISRUPTION_DAMAGE = 10;
-	static const int SLOWING_DAMAGE = 11;
-	static const int DISCHARGE_DAMAGE = 12;
-	static const int CORROSION_DAMAGE = 13;
-	static const int LEAK_DAMAGE = 14;
-	static const int BURN_DAMAGE = 15;
+	static const int DISRUPTION_DAMAGE     = 10;
+	static const int SLOWING_DAMAGE        = 11;
+	static const int DISCHARGE_DAMAGE      = 12;
+	static const int CORROSION_DAMAGE      = 13;
+	static const int LEAK_DAMAGE           = 14;
+	static const int BURN_DAMAGE           = 15;
 	// Relative damage types:
-	static const int RELATIVE_SHIELD_DAMAGE = 16;
-	static const int RELATIVE_HULL_DAMAGE = 17;
+	static const int RELATIVE_SHIELD_DAMAGE   = 16;
+	static const int RELATIVE_HULL_DAMAGE     = 17;
 	static const int RELATIVE_DISABLED_DAMAGE = 18;
-	static const int RELATIVE_MINABLE_DAMAGE = 19;
-	static const int RELATIVE_FUEL_DAMAGE = 20;
-	static const int RELATIVE_HEAT_DAMAGE = 21;
-	static const int RELATIVE_ENERGY_DAMAGE = 22;
-	mutable double damage[DAMAGE_TYPES] = {};
+	static const int RELATIVE_MINABLE_DAMAGE  = 19;
+	static const int RELATIVE_FUEL_DAMAGE     = 20;
+	static const int RELATIVE_HEAT_DAMAGE     = 21;
+	static const int RELATIVE_ENERGY_DAMAGE   = 22;
+	mutable double   damage[DAMAGE_TYPES]     = {};
 
 	double piercing = 0.;
 
 	double prospecting = 0.;
 
-	double rangeOverride = 0.;
+	double rangeOverride    = 0.;
 	double velocityOverride = 0.;
 
-	bool hasDamageDropoff = false;
+	bool                      hasDamageDropoff = false;
 	std::pair<double, double> damageDropoffRange;
-	double damageDropoffModifier = 1.;
+	double                    damageDropoffModifier = 1.;
 
 	// Cache the calculation of these values, for faster access.
-	mutable bool calculatedDamage = true;
-	mutable bool doesDamage = false;
-	mutable double totalLifetime = -1.;
+	mutable bool   calculatedDamage = true;
+	mutable bool   doesDamage       = false;
+	mutable double totalLifetime    = -1.;
 
 	bool triggersNukeAlert = false;
 };

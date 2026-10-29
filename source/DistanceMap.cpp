@@ -39,8 +39,8 @@ DistanceMap::DistanceMap(const System *center, int maxSystems, int maxDays)
 
 // Constructor that allows configuring the use of wormholes and jump drive travel.
 // Since no ship instance is available, we use the base game's default fuel for jump travel.
-DistanceMap::DistanceMap(const System *center, WormholeStrategy wormholeStrategy, bool useJumpDrive, int maxSystems,
-                         int maxDays)
+DistanceMap::DistanceMap(
+    const System *center, WormholeStrategy wormholeStrategy, bool useJumpDrive, int maxSystems, int maxDays)
     : center(center), maxSystems(maxSystems), maxDays(maxDays), wormholeStrategy(wormholeStrategy),
       jumpRangeMax(useJumpDrive ? System::DEFAULT_NEIGHBOR_DISTANCE : 0.)
 {
@@ -274,14 +274,14 @@ bool DistanceMap::Propagate(const RouteEdge &curEdge)
 		// Copy the edge to be used for this link, and build upon its fields.
 		RouteEdge nextEdge = curEdge;
 
-		bool linked = links.contains(link);
-		bool useJump = false; // Only matters for players
+		bool   linked   = links.contains(link);
+		bool   useJump  = false; // Only matters for players
 		double fuelCost = 0;
 		if(ship)
 		{
 			auto jumpType = ship->JumpNavigation().GetCheapestJumpType(currentSystem, link);
-			useJump = jumpType.first == JumpType::JUMP_DRIVE;
-			fuelCost = jumpType.second;
+			useJump       = jumpType.first == JumpType::JUMP_DRIVE;
+			fuelCost      = jumpType.second;
 		}
 		else
 			fuelCost = linked ? Outfit::DEFAULT_HYPERDRIVE_COST : Outfit::DEFAULT_JUMP_DRIVE_COST;

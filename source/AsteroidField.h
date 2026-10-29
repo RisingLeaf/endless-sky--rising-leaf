@@ -86,7 +86,7 @@ private:
 
 
 private:
-	std::vector<Asteroid> asteroids;
+	std::vector<Asteroid>               asteroids;
 	std::list<std::shared_ptr<Minable>> minables;
 
 	CollisionSet asteroidCollisions;

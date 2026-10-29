@@ -85,18 +85,18 @@ public:
 private:
 	const Planet *planet;
 
-	double distance;
-	double speed;
-	bool explicitPeriodSet = false;
-	double offset;
+	double                           distance;
+	double                           speed;
+	bool                             explicitPeriodSet = false;
+	double                           offset;
 	std::vector<RandomEvent<Hazard>> hazards;
-	int index;
-	int parent;
+	int                              index;
+	int                              parent;
 
 	const std::string *message;
-	bool isStar;
-	bool isStation;
-	bool isMoon;
+	bool               isStar;
+	bool               isStation;
+	bool               isMoon;
 
 	// Let System handle setting all the values of an Object.
 	friend class System;

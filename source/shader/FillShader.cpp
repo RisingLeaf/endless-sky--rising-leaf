@@ -29,7 +29,7 @@ using namespace std;
 
 namespace {
 	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
-	ShaderInfo info;
+	ShaderInfo                                     info;
 
 	graphics_layer::ObjectHandle geometry;
 } // namespace
@@ -62,20 +62,22 @@ void FillShader::Fill(GraphicsTypes::CommandBufferInstance *cb, const Rectangle 
 
 
 
-void FillShader::Fill(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &size,
-                      const Color &color)
+void FillShader::Fill(GraphicsTypes::CommandBufferInstance *cb,
+                      const Point                          &center,
+                      const Point                          &size,
+                      const Color                          &color)
 {
 	if(!shader)
 		throw runtime_error("FillShader: Draw() called before Init().");
 
 	cb->BindShader(shader.get());
 
-	const gm::vec2 scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
+	const gm::vec2 scale   = {2.f / Screen::Width(), -2.f / Screen::Height()};
 	const gm::vec2 centerV = {static_cast<float>(center.X()), static_cast<float>(center.Y())};
-	const gm::vec2 sizeV = {static_cast<float>(size.X()), static_cast<float>(size.Y())};
+	const gm::vec2 sizeV   = {static_cast<float>(size.X()), static_cast<float>(size.Y())};
 
 	std::vector<unsigned char> data_cp(info.GetUniformSize());
-	int i = -1;
+	int                        i = -1;
 	info.CopyUniformEntryToBuffer(data_cp.data(), &scale, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &centerV, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &sizeV, ++i);

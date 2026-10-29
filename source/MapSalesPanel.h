@@ -52,30 +52,41 @@ protected:
 	virtual bool Drag(double dx, double dy) override;
 	virtual bool Scroll(double dx, double dy) override;
 
-	virtual const Drawable &SelectedSprite() const = 0;
-	virtual const Drawable &CompareSprite() const = 0;
-	virtual const Swizzle *SelectedSpriteSwizzle() const;
-	virtual const Swizzle *CompareSpriteSwizzle() const;
+	virtual const Drawable        &SelectedSprite() const = 0;
+	virtual const Drawable        &CompareSprite() const  = 0;
+	virtual const Swizzle         *SelectedSpriteSwizzle() const;
+	virtual const Swizzle         *CompareSpriteSwizzle() const;
 	virtual const ItemInfoDisplay &SelectedInfo() const = 0;
-	virtual const ItemInfoDisplay &CompareInfo() const = 0;
+	virtual const ItemInfoDisplay &CompareInfo() const  = 0;
 
-	virtual void Select(int index) = 0;
-	virtual void Compare(int index) = 0;
+	virtual void   Select(int index)                                = 0;
+	virtual void   Compare(int index)                               = 0;
 	virtual double SystemValue(const System *system) const override = 0;
-	virtual int FindItem(const std::string &text) const = 0;
+	virtual int    FindItem(const std::string &text) const          = 0;
 
 	virtual void DrawItems(GraphicsTypes::CommandBufferInstance *cb) = 0;
 
 	virtual void DrawSalesKey(GraphicsTypes::CommandBufferInstance *cb, Information &info) const;
-	void DrawPanel(GraphicsTypes::CommandBufferInstance *cb) const;
-	void DrawInfo(GraphicsTypes::CommandBufferInstance *cb) const;
+	void         DrawPanel(GraphicsTypes::CommandBufferInstance *cb) const;
+	void         DrawInfo(GraphicsTypes::CommandBufferInstance *cb) const;
 
 	bool DrawHeader(GraphicsTypes::CommandBufferInstance *cb, Point &corner, const std::string &category);
-	void DrawSprite(GraphicsTypes::CommandBufferInstance *cb, const Point &corner, const Drawable &drawable,
-	                bool animate, const Swizzle *swizzle) const;
-	void Draw(GraphicsTypes::CommandBufferInstance *cb, Point &corner, const Drawable &drawable, const Swizzle *swizzle,
-	          bool isForSale, bool isSelected, const std::string &name, const std::string &variantName,
-	          const std::string &price, const std::string &info, const std::string &storage);
+	void DrawSprite(GraphicsTypes::CommandBufferInstance *cb,
+	                const Point                          &corner,
+	                const Drawable                       &drawable,
+	                bool                                  animate,
+	                const Swizzle                        *swizzle) const;
+	void Draw(GraphicsTypes::CommandBufferInstance *cb,
+	          Point                                &corner,
+	          const Drawable                       &drawable,
+	          const Swizzle                        *swizzle,
+	          bool                                  isForSale,
+	          bool                                  isSelected,
+	          const std::string                    &name,
+	          const std::string                    &variantName,
+	          const std::string                    &price,
+	          const std::string                    &info,
+	          const std::string                    &storage);
 
 	void DoFind(const std::string &text);
 	void ScrollTo(int index);
@@ -85,33 +96,33 @@ protected:
 protected:
 	static const double ICON_HEIGHT;
 	static const double PAD;
-	static const int WIDTH;
+	static const int    WIDTH;
 
 
 protected:
 	// Step count for animations.
-	int step = 0;
-	double scroll = 0.;
+	int    step      = 0;
+	double scroll    = 0.;
 	double maxScroll = 0.;
 
 	std::map<std::string, std::vector<std::string>> catalog;
-	const CategoryList &categories;
-	bool onlyShowSoldHere = false;
-	bool onlyShowStorageHere = false;
+	const CategoryList                             &categories;
+	bool                                            onlyShowSoldHere    = false;
+	bool                                            onlyShowStorageHere = false;
 	// Whether this panel has preloaded the thumbnails from the catalog yet.
 	bool hasLoadedThumbnails = false;
 
 
 private:
-	bool isDragging = false;
+	bool isDragging   = false;
 	bool isOutfitters = false;
 
-	bool hidPrevious = true;
+	bool                   hidPrevious = true;
 	std::set<std::string> &collapsed;
 
 	std::vector<ClickZone<int>> zones;
-	int selected = -1;
-	int compare = -1;
+	int                         selected = -1;
+	int                         compare  = -1;
 
 	LoadingCircle loadingCircle;
 };

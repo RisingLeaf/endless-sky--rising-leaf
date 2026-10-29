@@ -81,22 +81,22 @@ private:
 
 private:
 	std::unique_ptr<GraphicsTypes::CommandBufferInstance> PreRenderCmd;
-	PlayerInfo &player;
+	PlayerInfo                                           &player;
 	// Determine if the player's mission deadlines need to be recached when
 	// this panel is closed due to the deadline blink preference changing.
 	bool recacheDeadlines = false;
 
-	int editing = -1;
+	int editing  = -1;
 	int selected = 0;
-	int hover = -1;
+	int hover    = -1;
 	int oldSelected;
 	int oldHover;
 	int latest;
 	// Which page of the preferences we're on.
 	char page = 'c';
 
-	Point hoverPoint;
-	Tooltip tooltip;
+	Point       hoverPoint;
+	Tooltip     tooltip;
 	std::string selectedItem;
 	std::string hoverItem;
 
@@ -105,12 +105,12 @@ private:
 
 	std::string selectedPlugin;
 
-	std::vector<ClickZone<Command>> zones;
+	std::vector<ClickZone<Command>>     zones;
 	std::vector<ClickZone<std::string>> prefZones;
 	std::vector<ClickZone<std::string>> pluginZones;
 
 	std::unique_ptr<RenderBuffer> pluginListClip;
 	std::unique_ptr<RenderBuffer> pluginDescriptionBuffer;
-	ScrollVar<double> pluginListScroll;
-	ScrollVar<double> pluginDescriptionScroll;
+	ScrollVar<double>             pluginListScroll;
+	ScrollVar<double>             pluginDescriptionScroll;
 };

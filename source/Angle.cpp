@@ -30,10 +30,10 @@ namespace {
 	// turning 6 degrees per time step. If the Angle lookup is 2^16 steps, then 6
 	// degrees is 1092 steps, and your turn speed is accurate to +- 0.05%. That seems
 	// plenty accurate to me. At that step size, the lookup table is exactly 1 MB.
-	constexpr int32_t STEPS = 0x10000;
-	constexpr int32_t MASK = STEPS - 1;
-	constexpr double DEG_TO_STEP = STEPS / 360.;
-	constexpr double STEP_TO_RAD = PI / (STEPS / 2);
+	constexpr int32_t STEPS       = 0x10000;
+	constexpr int32_t MASK        = STEPS - 1;
+	constexpr double  DEG_TO_STEP = STEPS / 360.;
+	constexpr double  STEP_TO_RAD = PI / (STEPS / 2);
 
 	vector<Point> InitUnitCache()
 	{
@@ -194,7 +194,7 @@ bool Angle::IsInRange(const Angle &base, const Angle &limit) const
 {
 	// Choose an edge of the arc as the reference angle (base) and
 	// compare relative angles to decide whether this is in the range.
-	Angle normalizedLimit = limit - base;
+	Angle normalizedLimit  = limit - base;
 	Angle normalizedTarget = *this - base;
 	return normalizedTarget.angle <= normalizedLimit.angle;
 }

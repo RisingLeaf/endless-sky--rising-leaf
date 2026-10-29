@@ -39,7 +39,7 @@ class UI;
 class PilotProfile {
 public:
 	// Read the profiles and saves directories to construct all known PilotProfiles.
-	static void LoadProfiles();
+	static void                                        LoadProfiles();
 	static std::vector<std::shared_ptr<PilotProfile>> &GetProfiles();
 	// Get a map of identifier to pilot profile, optionally excluding pilots with no save files.
 	static std::map<std::string, std::shared_ptr<PilotProfile>> GetProfileMap(bool excludeEmpty = true);
@@ -62,11 +62,11 @@ public:
 public:
 	PilotProfile() = default;
 	// Don't allow copying this class.
-	PilotProfile(const PilotProfile &) = delete;
+	PilotProfile(const PilotProfile &)            = delete;
 	PilotProfile &operator=(const PilotProfile &) = delete;
-	PilotProfile(PilotProfile &&) = delete;
-	PilotProfile &operator=(PilotProfile &&) = default;
-	~PilotProfile() noexcept = default;
+	PilotProfile(PilotProfile &&)                 = delete;
+	PilotProfile &operator=(PilotProfile &&)      = default;
+	~PilotProfile() noexcept                      = default;
 
 	// Make a new pilot.
 	void New(const Gamerules &gamerules);
@@ -77,11 +77,11 @@ public:
 	void Save();
 
 	const std::string &Path() const;
-	std::string Identifier() const;
-	void SetIdentifier(const std::string &pilotName);
+	std::string        Identifier() const;
+	void               SetIdentifier(const std::string &pilotName);
 
 	// Get the individual save files of this pilot.
-	std::vector<std::pair<std::string, std::filesystem::file_time_type>> &Files();
+	std::vector<std::pair<std::string, std::filesystem::file_time_type>>       &Files();
 	const std::vector<std::pair<std::string, std::filesystem::file_time_type>> &Files() const;
 	bool HasFile(const std::string &fileName) const;
 
@@ -93,13 +93,13 @@ public:
 	void SetLock(bool lock = true);
 	bool IsLocked() const;
 	// Minimal info about the latest loaded save file from this pilot.
-	void SetMomentOfDeath(const PlayerInfo &player);
+	void             SetMomentOfDeath(const PlayerInfo &player);
 	const SavedGame &MomentOfDeath() const;
 	// The conditions shared across all save files for this pilot.
-	ConditionsStore &Conditions();
+	ConditionsStore       &Conditions();
 	const ConditionsStore &Conditions() const;
 	// The gamerules that this pilot plays by.
-	Gamerules &GetGamerules();
+	Gamerules       &GetGamerules();
 	const Gamerules &GetGamerules() const;
 	// Update GameData to use the gamerules from this pilot.
 	void ApplyGamerules() const;
@@ -107,7 +107,7 @@ public:
 
 private:
 	std::string filePath;
-	bool isLoaded = false;
+	bool        isLoaded = false;
 
 	// The individual save files that make up this pilot.
 	std::vector<std::pair<std::string, std::filesystem::file_time_type>> files;

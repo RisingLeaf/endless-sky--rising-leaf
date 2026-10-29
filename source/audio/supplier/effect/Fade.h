@@ -41,15 +41,15 @@ public:
 	void Set3x(bool is3x) override;
 
 	// Inherited pure virtual methods
-	size_t MaxChunks() const override;
-	size_t AvailableChunks() const override;
+	size_t                MaxChunks() const override;
+	size_t                AvailableChunks() const override;
 	std::vector<sample_t> NextDataChunk() override;
 
 
 private:
 	/// Cross-fades two sources. The faded result is stored in the fadeIn input.
-	static void CrossFade(const std::vector<sample_t> &fadeOut, std::vector<sample_t> &fadeIn, size_t &fade,
-	                      size_t fadePerFrame);
+	static void
+	CrossFade(const std::vector<sample_t> &fadeOut, std::vector<sample_t> &fadeIn, size_t &fade, size_t fadePerFrame);
 
 
 private:

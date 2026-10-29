@@ -176,14 +176,14 @@ double MapShipyardPanel::SystemValue(const System *system) const
 int MapShipyardPanel::FindItem(const string &text) const
 {
 	int bestIndex = 9999;
-	int bestItem = -1;
+	int bestItem  = -1;
 	for(unsigned i = 0; i < list.size(); ++i)
 	{
 		int index = Format::Search(list[i]->DisplayModelName(), text);
 		if(index >= 0 && index < bestIndex)
 		{
 			bestIndex = index;
-			bestItem = i;
+			bestItem  = i;
 			if(!index)
 				return i;
 		}
@@ -211,7 +211,7 @@ void MapShipyardPanel::DrawItems(GraphicsTypes::CommandBufferInstance *cb)
 	for(const auto &cat : categories)
 	{
 		const string &category = cat.Name();
-		auto it = catalog.find(category);
+		auto          it       = catalog.find(category);
 		if(it == catalog.end())
 			continue;
 
@@ -221,13 +221,13 @@ void MapShipyardPanel::DrawItems(GraphicsTypes::CommandBufferInstance *cb)
 
 		for(const string &name : it->second)
 		{
-			const Ship *ship = GameData::Ships().Get(name);
-			string price = Format::CreditString(ship->Cost());
+			const Ship *ship  = GameData::Ships().Get(name);
+			string      price = Format::CreditString(ship->Cost());
 
 			string info = Format::Number(ship->MaxShields()) + " shields / ";
 			info += Format::Number(ship->MaxHull()) + " hull";
 
-			bool isForSale = true;
+			bool     isForSale      = true;
 			unsigned parkedInSystem = 0;
 			if(player.CanView(*selectedSystem))
 			{
@@ -253,10 +253,19 @@ void MapShipyardPanel::DrawItems(GraphicsTypes::CommandBufferInstance *cb)
 				continue;
 
 			const string parking_details = onlyShowSoldHere || parkedInSystem == 0 ? ""
-			                               : parkedInSystem == 1 ? "1 ship parked"
-			                                                     : Format::Number(parkedInSystem) + " ships parked";
-			Draw(cb, corner, ship->Thumbnail(), ship->CustomSwizzle(), isForSale, ship == selected,
-			     ship->DisplayModelName(), ship->VariantMapShopName(), price, info, parking_details);
+			                             : parkedInSystem == 1 ? "1 ship parked"
+			                                                   : Format::Number(parkedInSystem) + " ships parked";
+			Draw(cb,
+			     corner,
+			     ship->Thumbnail(),
+			     ship->CustomSwizzle(),
+			     isForSale,
+			     ship == selected,
+			     ship->DisplayModelName(),
+			     ship->VariantMapShopName(),
+			     price,
+			     info,
+			     parking_details);
 			list.push_back(ship);
 		}
 	}

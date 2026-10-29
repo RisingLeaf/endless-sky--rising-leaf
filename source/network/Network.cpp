@@ -28,15 +28,15 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 namespace {
 	std::atomic NETWORKING_AVAILABLE{false};
 
-	constexpr std::size_t MAX_CLIENTS = 4;
+	constexpr std::size_t MAX_CLIENTS  = 4;
 	constexpr std::size_t MAX_CHANNELS = 2;
 
 	constexpr enet_uint32 EVENT_TIMEOUT_MS = 50;
-	constexpr enet_uint16 DEFAULT_PORT = 55542;
+	constexpr enet_uint16 DEFAULT_PORT     = 55542;
 
-	constexpr std::size_t MAX_PACKET_SIZE = 4096;
+	constexpr std::size_t MAX_PACKET_SIZE   = 4096;
 	constexpr std::size_t MAX_QUEUED_EVENTS = 4096;
-	constexpr std::size_t MAX_DRAWABLES = 2048;
+	constexpr std::size_t MAX_DRAWABLES     = 2048;
 
 	constexpr asl::uint8 ALL_FIELD_MASK = Network::FIELD_SPRITE | Network::FIELD_FRAME | Network::FIELD_POSITION |
 	                                      Network::FIELD_ANGLE | Network::FIELD_ALPHA | Network::FIELD_SWIZZLE |
@@ -57,10 +57,8 @@ namespace {
 		case Network::EventType::UPDATE_INPUT_STATE:
 		case Network::EventType::PUSH_SPRITE:
 		case Network::EventType::SET_DRAWABLE:
-		case Network::EventType::FREE_DRAWABLES:
-			return true;
-		case Network::EventType::INVALID:
-			return false;
+		case Network::EventType::FREE_DRAWABLES:     return true;
+		case Network::EventType::INVALID:            return false;
 		}
 
 		return false;
@@ -118,7 +116,8 @@ namespace {
 
 	template <std::size_t N>
 	using uint_of_size = std::conditional_t<
-	    N == 1, std::uint8_t,
+	    N == 1,
+	    std::uint8_t,
 	    std::conditional_t<N == 2, std::uint16_t, std::conditional_t<N == 4, std::uint32_t, std::uint64_t>>>;
 
 	template <typename T>
@@ -131,7 +130,7 @@ namespace {
 	    requires IsSupportedSerializedType<Type>
 	void WriteSerialized(std::vector<unsigned char> &out, Type value)
 	{
-		using U = uint_of_size<sizeof(Type)>;
+		using U      = uint_of_size<sizeof(Type)>;
 		const U bits = std::bit_cast<U>(value);
 
 		for(std::size_t i = 0; i < sizeof(Type); ++i)
@@ -200,7 +199,7 @@ std::optional<Command> Network::DeserializeCommand(const Event &event)
 
 
 	std::uint64_t state{};
-	double turn{};
+	double        turn{};
 
 	std::size_t offset = 0;
 	if(!ReadSerialized(event.Data, offset, state))
@@ -329,9 +328,7 @@ bool Network::NetworkInterface::ProcessEvents()
 
 	switch(event.type)
 	{
-	case ENET_EVENT_TYPE_CONNECT:
-		OnPeerConnected(event.peer);
-		break;
+	case ENET_EVENT_TYPE_CONNECT: OnPeerConnected(event.peer); break;
 
 	case ENET_EVENT_TYPE_RECEIVE: {
 		const std::unique_ptr<ENetPacket, decltype(&enet_packet_destroy)> packet(event.packet, &enet_packet_destroy);
@@ -368,8 +365,7 @@ bool Network::NetworkInterface::ProcessEvents()
 		event.peer->data = nullptr;
 		break;
 
-	case ENET_EVENT_TYPE_NONE:
-		break;
+	case ENET_EVENT_TYPE_NONE: break;
 	}
 
 	return true;
@@ -446,7 +442,7 @@ void Network::Server::SendSprite(const Sprite *const sprite)
 asl::uint64 Network::Server::PushSprite(const Sprite *const sprite)
 {
 	const asl::uint64 spriteID = SpriteIDs.size();
-	SpriteIDs[sprite] = spriteID;
+	SpriteIDs[sprite]          = spriteID;
 
 	SpriteByID.emplace_back(sprite);
 
@@ -471,8 +467,8 @@ asl::uint16 Network::Server::PackSwizzle(const BodyInfo &info)
 	return swizzlePacked;
 }
 
-Network::Event Network::Server::GenerateBodyEvent(const asl::uint64 spriteID, const BodyInfo &info,
-                                                  const asl::uint8 mask)
+Network::Event
+Network::Server::GenerateBodyEvent(const asl::uint64 spriteID, const BodyInfo &info, const asl::uint8 mask)
 {
 	Event updateBodyEvent;
 	updateBodyEvent.Type = EventType::SET_DRAWABLE;
@@ -518,11 +514,11 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 
 	BodyInfo info{.Active = true,
 	              .sprite = body.GetSprite(),
-	              .frame = body.GetFrame(step),
-	              .xpos = static_cast<asl::float32>(position.X()),
-	              .ypos = static_cast<asl::float32>(position.Y()),
-	              .angle = body.Facing().Raw(),
-	              .alpha = static_cast<float>(1.0 - cloak),
+	              .frame  = body.GetFrame(step),
+	              .xpos   = static_cast<asl::float32>(position.X()),
+	              .ypos   = static_cast<asl::float32>(position.Y()),
+	              .angle  = body.Facing().Raw(),
+	              .alpha  = static_cast<float>(1.0 - cloak),
 	              .xscale = static_cast<float>(0.5 * body.Zoom() * body.Scale().X()),
 	              .yscale = static_cast<float>(0.5 * body.Zoom() * body.Scale().Y())};
 	for(int i = 0; i < 16; i++)
@@ -535,7 +531,7 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 		updateBodyEvent.Type = EventType::SET_DRAWABLE;
 
 		const auto existing = it->second;
-		info.Index = existing.Index;
+		info.Index          = existing.Index;
 
 		// Reserve mask space upfront
 		asl::uint8 mask = 0;
@@ -731,7 +727,7 @@ std::optional<std::string_view> Network::Client::Connect(const std::string_view 
 	if(address.size() > 253)
 		return "Address is too long.";
 
-	auto command = std::make_unique<ConnectCommand>();
+	auto command     = std::make_unique<ConnectCommand>();
 	command->address = std::string(address);
 
 	auto future = command->result.get_future();
@@ -761,8 +757,14 @@ void Network::Client::AddGhosts(DrawList &draws)
 		if(!body.Active)
 			continue;
 
-		draws.PushRaw(body.sprite, body.frame, body.xpos, body.ypos, Angle::FromRaw(body.angle), body.alpha * 0.1f,
-		              Point(body.xscale, body.yscale), &Swizzles[body.Index]);
+		draws.PushRaw(body.sprite,
+		              body.frame,
+		              body.xpos,
+		              body.ypos,
+		              Angle::FromRaw(body.angle),
+		              body.alpha * 0.1f,
+		              Point(body.xscale, body.yscale),
+		              &Swizzles[body.Index]);
 	}
 }
 
@@ -788,7 +790,7 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 	{
 		std::string name;
 		std::size_t offset = 0;
-		char c;
+		char        c;
 		while(ReadSerialized(event.Data, offset, c))
 			name += c;
 
@@ -805,7 +807,7 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 	{
 		std::size_t offset = 0;
 
-		asl::uint8 mask = 0;
+		asl::uint8  mask  = 0;
 		asl::uint64 index = 0;
 
 		if(!ReadSerialized(event.Data, offset, mask) || !ReadSerialized(event.Data, offset, index))
@@ -931,7 +933,7 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 				body.alpha = info.alpha;
 			if(mask & FIELD_SWIZZLE)
 			{
-				body.swizzle = info.swizzle;
+				body.swizzle    = info.swizzle;
 				Swizzles[index] = Swizzle(body.swizzle);
 			}
 			if(mask & FIELD_SCALE)

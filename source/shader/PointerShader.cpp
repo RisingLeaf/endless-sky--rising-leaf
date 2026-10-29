@@ -29,7 +29,7 @@ using namespace std;
 
 namespace {
 	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
-	ShaderInfo info;
+	ShaderInfo                                     info;
 
 	graphics_layer::ObjectHandle geometry;
 } // namespace
@@ -52,15 +52,25 @@ void PointerShader::Init(const GraphicsTypes::GraphicsInstance *graphics_instanc
 	graphics_instance->CreateShader(shader, info, shader_code, "pointer");
 
 	constexpr float vertexData[] = {
-	    0.f, 0.f, 0.f, 1.f, 1.f, 0.f,
+	    0.f,
+	    0.f,
+	    0.f,
+	    1.f,
+	    1.f,
+	    0.f,
 	};
 	geometry = graphics_layer::ObjectHandle(graphics_instance, 3, 2 * sizeof(float), vertexData, {}, "pointer");
 }
 
 
 
-void PointerShader::Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &angle,
-                         const float width, const float height, const float offset, const Color &color)
+void PointerShader::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                         const Point                          &center,
+                         const Point                          &angle,
+                         const float                           width,
+                         const float                           height,
+                         const float                           offset,
+                         const Color                          &color)
 {
 	Bind(cb);
 
@@ -79,16 +89,21 @@ void PointerShader::Bind(GraphicsTypes::CommandBufferInstance *cb)
 
 
 
-void PointerShader::Add(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &angle,
-                        const float width, const float height, float offset, const Color &color)
+void PointerShader::Add(GraphicsTypes::CommandBufferInstance *cb,
+                        const Point                          &center,
+                        const Point                          &angle,
+                        const float                           width,
+                        const float                           height,
+                        float                                 offset,
+                        const Color                          &color)
 {
 	const gm::vec2 scale = {2.f / Screen::Width(), -2.f / Screen::Height()};
-	const gm::vec2 c = {static_cast<float>(center.X()), static_cast<float>(center.Y())};
-	const gm::vec2 a = {static_cast<float>(angle.X()), static_cast<float>(angle.Y())};
-	const gm::vec2 size = {width, height};
+	const gm::vec2 c     = {static_cast<float>(center.X()), static_cast<float>(center.Y())};
+	const gm::vec2 a     = {static_cast<float>(angle.X()), static_cast<float>(angle.Y())};
+	const gm::vec2 size  = {width, height};
 
 	std::vector<unsigned char> data_cp(info.GetUniformSize());
-	int i = -1;
+	int                        i = -1;
 	info.CopyUniformEntryToBuffer(data_cp.data(), &scale, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &c, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &a, ++i);

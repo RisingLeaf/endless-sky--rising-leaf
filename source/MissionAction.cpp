@@ -61,16 +61,20 @@ namespace {
 
 
 // Construct and Load() at the same time.
-MissionAction::MissionAction(const DataNode &node, const ConditionsStore *playerConditions,
-                             const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+MissionAction::MissionAction(const DataNode            &node,
+                             const ConditionsStore     *playerConditions,
+                             const set<const System *> *visitedSystems,
+                             const set<const Planet *> *visitedPlanets)
 {
 	Load(node, playerConditions, visitedSystems, visitedPlanets);
 }
 
 
 
-void MissionAction::Load(const DataNode &node, const ConditionsStore *playerConditions,
-                         const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+void MissionAction::Load(const DataNode            &node,
+                         const ConditionsStore     *playerConditions,
+                         const set<const System *> *visitedSystems,
+                         const set<const Planet *> *visitedPlanets)
 {
 	if(node.Size() >= 2)
 		trigger = node.Token(1);
@@ -83,11 +87,13 @@ void MissionAction::Load(const DataNode &node, const ConditionsStore *playerCond
 
 
 
-void MissionAction::LoadSingle(const DataNode &child, const ConditionsStore *playerConditions,
-                               const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+void MissionAction::LoadSingle(const DataNode            &child,
+                               const ConditionsStore     *playerConditions,
+                               const set<const System *> *visitedSystems,
+                               const set<const Planet *> *visitedPlanets)
 {
-	const string &key = child.Token(0);
-	bool hasValue = child.Size() >= 2;
+	const string &key      = child.Token(0);
+	bool          hasValue = child.Size() >= 2;
 
 	if(key == "dialog")
 		dialog.Load(child, playerConditions);
@@ -220,7 +226,9 @@ string MissionAction::DialogText() const
 
 // Check if this action can be completed right now. It cannot be completed
 // if it takes away money or outfits that the player does not have.
-bool MissionAction::CanBeDone(const PlayerInfo &player, bool isFailed, bool executeWhenLanded,
+bool MissionAction::CanBeDone(const PlayerInfo       &player,
+                              bool                    isFailed,
+                              bool                    executeWhenLanded,
                               const shared_ptr<Ship> &boardingShip) const
 {
 	if(isFailed && !runsWhenFailed && trigger != "fail")
@@ -312,8 +320,12 @@ bool MissionAction::RequiresGiftedShip(const string &shipId) const
 
 
 
-void MissionAction::Do(PlayerInfo &player, UI *ui, const Mission *caller, const System *destination,
-                       const shared_ptr<Ship> &ship, const bool isUnique) const
+void MissionAction::Do(PlayerInfo             &player,
+                       UI                     *ui,
+                       const Mission          *caller,
+                       const System           *destination,
+                       const shared_ptr<Ship> &ship,
+                       const bool              isUnique) const
 {
 	if(ui)
 	{
@@ -358,11 +370,11 @@ void MissionAction::Do(PlayerInfo &player, UI *ui, const Mission *caller, const 
 
 
 // Convert this validated template into a populated action.
-MissionAction MissionAction::Instantiate(map<string, string> &subs, const System *origin, int jumps,
-                                         int64_t payload) const
+MissionAction
+MissionAction::Instantiate(map<string, string> &subs, const System *origin, int jumps, int64_t payload) const
 {
 	MissionAction result;
-	result.trigger = trigger;
+	result.trigger  = trigger;
 	result.location = location;
 	// Convert any "distance" specifiers into "near <system>" specifiers.
 	result.systemFilter = systemFilter.SetOrigin(origin);
@@ -371,8 +383,8 @@ MissionAction MissionAction::Instantiate(map<string, string> &subs, const System
 	result.requiredOutfits = requiredOutfits;
 
 	string previousPayment = subs["<payment>"];
-	string previousFine = subs["<fine>"];
-	result.action = action.Instantiate(subs, jumps, payload);
+	string previousFine    = subs["<fine>"];
+	result.action          = action.Instantiate(subs, jumps, payload);
 
 	// Create any associated dialog text from phrases, or use the directly specified text.
 	result.dialog = dialog.Instantiate(subs);

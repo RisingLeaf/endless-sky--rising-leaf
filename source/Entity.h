@@ -85,13 +85,13 @@ public:
 	double HullLevelUntilDisabled() const;
 	// Whether this entity is currently disabled or destroyed.
 	virtual bool IsDisabled() const;
-	bool IsDestroyed() const;
+	bool         IsDestroyed() const;
 
 	// Whether this entity can be targeted by ships and projectiles.
 	virtual bool IsTargetable() const;
 	// The cloaking progress of this entity, and whether it is fully cloaked.
 	virtual double Cloaking() const;
-	virtual bool IsCloaked() const;
+	virtual bool   IsCloaked() const;
 
 	// Attributes that influence projectiles tracking this entity.
 	double OpticalSize() const;
@@ -100,14 +100,14 @@ public:
 
 	// Attributes that influence how this entity takes damage.
 	const ResourceLevels &DamageProtection() const;
-	double PiercingProtection() const;
-	double PiercingResistance() const;
-	double HighShieldPermeability() const;
-	double LowShieldPermeability() const;
-	double CloakedShieldPermeability() const;
-	double CloakedHullProtection() const;
-	double CloakedShieldProtection() const;
-	double ForceProtection() const;
+	double                PiercingProtection() const;
+	double                PiercingResistance() const;
+	double                HighShieldPermeability() const;
+	double                LowShieldPermeability() const;
+	double                CloakedShieldPermeability() const;
+	double                CloakedHullProtection() const;
+	double                CloakedShieldProtection() const;
+	double                ForceProtection() const;
 
 	// Kill this entity. Set all of its resource levels to 0 and its hull to -1.
 	void Kill();
@@ -134,8 +134,8 @@ protected:
 	virtual void CacheAttributes();
 	// TakeDamage logic that is specific to the Entity type.
 	// wasDisabled and wasDestroyed record the state prior to the damage being applied.
-	virtual int DoTakeDamage(const DamageDealt &damage, const Government *hitBy, bool wasDisabled,
-	                         bool wasDestroyed) = 0;
+	virtual int
+	DoTakeDamage(const DamageDealt &damage, const Government *hitBy, bool wasDisabled, bool wasDestroyed) = 0;
 
 
 protected:
@@ -143,7 +143,7 @@ protected:
 
 
 protected:
-	Type entityType = Type::SHIP;
+	Type   entityType = Type::SHIP;
 	Outfit attributes;
 
 	// A counter of how many frames this entity has been out of system.
@@ -163,41 +163,41 @@ protected:
 
 	// Whether this entity is allowed to become disabled, and if it is disabled now.
 	bool neverDisabled = false;
-	bool isDisabled = false;
+	bool isDisabled    = false;
 
 	double heatDissipation = 0.;
 
 	// Attributes that influence projectiles tracking this entity.
-	double opticalSize = 0.;
+	double opticalSize    = 0.;
 	double opticalJamming = 0.;
-	double radarJamming = 0.;
+	double radarJamming   = 0.;
 
 	// Cached damage-related attributes.
 	ResourceLevels damageProtection;
-	double piercingProtection = 1.;
-	double piercingResistance = 0.;
-	double highShieldPermeability = 0.;
-	double lowShieldPermeability = 0.;
-	double cloakedShieldPermeability = 0.;
-	double cloakedHullProtection = 0.;
-	double cloakedShieldProtection = 0.;
-	double forceProtection = 1.;
+	double         piercingProtection        = 1.;
+	double         piercingResistance        = 0.;
+	double         highShieldPermeability    = 0.;
+	double         lowShieldPermeability     = 0.;
+	double         cloakedShieldPermeability = 0.;
+	double         cloakedHullProtection     = 0.;
+	double         cloakedShieldProtection   = 0.;
+	double         forceProtection           = 1.;
 
 	// Cached status effect resistance and cost values.
-	double corrosionResistance = 0.;
+	double         corrosionResistance = 0.;
 	ResourceLevels corrosionResistCost;
-	double dischargeResistance = 0.;
+	double         dischargeResistance = 0.;
 	ResourceLevels dischargeResistCost;
-	double ionizationResistance = 0.;
+	double         ionizationResistance = 0.;
 	ResourceLevels ionizationResistCost;
-	double scramblingResistance = 0.;
+	double         scramblingResistance = 0.;
 	ResourceLevels scramblingResistCost;
-	double burnResistance = 0.;
+	double         burnResistance = 0.;
 	ResourceLevels burnResistCost;
-	double leakResistance = 0.;
+	double         leakResistance = 0.;
 	ResourceLevels leakageResistCost;
-	double disruptionResistance = 0.;
+	double         disruptionResistance = 0.;
 	ResourceLevels disruptionResistCost;
-	double slowingResistance = 0.;
+	double         slowingResistance = 0.;
 	ResourceLevels slownessResistCost;
 };

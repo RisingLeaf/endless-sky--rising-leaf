@@ -52,16 +52,16 @@ public:
 
 private:
 	std::string name;
-	int period = 1;
-	int minDuration = 1;
-	int maxDuration = 1;
-	double minStrength = 1.;
-	double maxStrength = 1.;
-	double minRange = 0.;
+	int         period      = 1;
+	int         minDuration = 1;
+	int         maxDuration = 1;
+	double      minStrength = 1.;
+	double      maxStrength = 1.;
+	double      minRange    = 0.;
 	// Hazards given no range only extend out to the invisible fence defined in AI.cpp.
-	double maxRange = 10000.;
-	bool systemWide = false;
-	bool deviates = true;
+	double maxRange   = 10000.;
+	bool   systemWide = false;
+	bool   deviates   = true;
 
 	std::map<const Effect *, float> environmentalEffects;
 };

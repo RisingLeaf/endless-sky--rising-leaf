@@ -58,7 +58,7 @@ public:
 	static std::string PlayTime(double timeVal);
 	// Convert a time point to a human-readable time and date.
 	static std::string TimestampString(std::chrono::time_point<std::chrono::system_clock> time,
-	                                   bool ignorePreferences = false);
+	                                   bool                                               ignorePreferences = false);
 	static std::string TimestampString(std::filesystem::file_time_type time);
 	// Convert an ammo count into a short string for use in the ammo display.
 	// Only the absolute value of a negative number is considered.
@@ -70,16 +70,16 @@ public:
 	// magnitudes less than 1k will show two decimal places.
 	// Otherwise, the exact given number of decimal places will be used.
 	// Capable of handling infinity and nan double values.
-	static std::string Number(double value, std::optional<int> decimalPlaces = std::nullopt,
-	                          bool trimTrailingZeros = true);
+	static std::string
+	Number(double value, std::optional<int> decimalPlaces = std::nullopt, bool trimTrailingZeros = true);
 	// Convert the given integer to a string with thousands separators.
 	static std::string Number(unsigned value);
 	static std::string Number(int value);
 	static std::string Number(int64_t value);
 	// Format the given value as a percentage, with an optional additional number of
 	// decimal places. An input value of 1 will be formatted as 100%.
-	static std::string Percentage(double value, std::optional<int> decimalPlaces = std::nullopt,
-	                              bool trimTrailingZeros = true);
+	static std::string
+	Percentage(double value, std::optional<int> decimalPlaces = std::nullopt, bool trimTrailingZeros = true);
 	// Strip the commas from the given text. Typically used for stripping thousands separators from
 	// numeric string values so that they can be provided to a dialog as a valid numeric input.
 	static std::string StripCommas(const std::string &text);
@@ -116,13 +116,13 @@ public:
 
 	// Return a string containing the elements separated with commas and "and" where needed.
 	template <template <class...> class C, class... T>
-	static std::string List(const C<T...> &elements,
+	static std::string List(const C<T...>                                                &elements,
 	                        std::function<std::string(typename C<T...>::const_reference)> toString);
 
 	// Return a string containing the elements separated by new lines, with each line being indented,
 	// up to a maximum number of lines. Overflow elements will be summarized with "and X more."
 	template <template <class...> class C, class... T>
-	static std::string IndentedList(const C<T...> &elements,
+	static std::string IndentedList(const C<T...>                                                &elements,
 	                                std::function<std::string(typename C<T...>::const_reference)> toString,
 	                                std::optional<int> maxLines = std::nullopt);
 };
@@ -130,14 +130,14 @@ public:
 
 
 template <template <class...> class C, class... T>
-std::string Format::List(const C<T...> &elements,
+std::string Format::List(const C<T...>                                                &elements,
                          std::function<std::string(typename C<T...>::const_reference)> toString)
 {
 	std::string result;
 	if(elements.empty())
 		return result;
 	auto it = elements.begin();
-	result = toString(*it);
+	result  = toString(*it);
 	std::advance(it, 1);
 	if(it == elements.end())
 		return result;
@@ -151,15 +151,15 @@ std::string Format::List(const C<T...> &elements,
 
 
 template <template <class...> class C, class... T>
-std::string Format::IndentedList(const C<T...> &elements,
+std::string Format::IndentedList(const C<T...>                                                &elements,
                                  std::function<std::string(typename C<T...>::const_reference)> toString,
-                                 std::optional<int> maxLines)
+                                 std::optional<int>                                            maxLines)
 {
 	std::string result;
 	if(elements.empty())
 		return result;
-	auto it = elements.begin();
-	int lines = 0;
+	auto it    = elements.begin();
+	int  lines = 0;
 	while(it != elements.end() && (!maxLines.has_value() || ++lines < maxLines.value()))
 	{
 		result += "\t" + toString(*it) + "\n";

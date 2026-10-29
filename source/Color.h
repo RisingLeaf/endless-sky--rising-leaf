@@ -37,8 +37,8 @@ public:
 	// Set this color to the given RGBA values.
 	void Load(double r, double g, double b, double a);
 	// Check if Load() has been called for this color.
-	bool IsLoaded() const;
-	void SetTrueName(const std::string &name);
+	bool               IsLoaded() const;
+	void               SetTrueName(const std::string &name);
 	const std::string &TrueName() const;
 	// Get the color as a float std::vector, suitable for use by OpenGL.
 	const float *Get() const;
@@ -65,5 +65,5 @@ private:
 	float color[4];
 
 	std::string trueName;
-	bool isLoaded = false;
+	bool        isLoaded = false;
 };

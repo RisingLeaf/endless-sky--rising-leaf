@@ -112,8 +112,8 @@ public:
 	// a combination of more than one command, an empty string is returned.
 	[[nodiscard]] const std::string &Description() const;
 	[[nodiscard]] const std::string &KeyName() const;
-	[[nodiscard]] bool HasBinding() const;
-	[[nodiscard]] bool HasConflict() const;
+	[[nodiscard]] bool               HasBinding() const;
+	[[nodiscard]] bool               HasConflict() const;
 
 	// Load this command from an input file (for testing or scripted missions).
 	void Load(const DataNode &node);
@@ -121,8 +121,8 @@ public:
 	// Reset this to an empty command.
 	void Clear();
 	// Clear, set, or check the given bits. This ignores the turn field.
-	void Clear(Command command);
-	void Set(Command command);
+	void               Clear(Command command);
+	void               Set(Command command);
 	[[nodiscard]] bool Has(Command command) const;
 	// Get the commands that are set in this and in the given command.
 	[[nodiscard]] Command And(Command command) const;
@@ -131,20 +131,23 @@ public:
 
 	// Get or set the turn amount. The amount must be between -1 and 1, but it
 	// can be a fractional value to allow finer control.
-	void SetTurn(double amount);
+	void                 SetTurn(double amount);
 	[[nodiscard]] double Turn() const;
 
 	// Check if any bits are set in this command (including a nonzero turn).
 	explicit operator bool() const;
-	bool operator!() const;
+	bool     operator!() const;
 	// This operator is just provided to allow commands to be used in a map.
 	bool operator<(const Command &command) const;
 
 	// Get the commands that are set in either of these commands.
-	Command operator|(const Command &command) const;
+	Command  operator|(const Command &command) const;
 	Command &operator|=(const Command &command);
 
-	[[nodiscard]] uint64_t State() const { return state; }
+	[[nodiscard]] uint64_t State() const
+	{
+		return state;
+	}
 
 private:
 	explicit Command(uint64_t state);

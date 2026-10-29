@@ -52,11 +52,11 @@ private:
 	friend class DamageProfile;
 
 	const Weapon *weapon;
-	double scaling;
+	double        scaling;
 
 	ResourceLevels levels;
-	Point forcePoint;
-	double prospecting = 0.;
+	Point          forcePoint;
+	double         prospecting = 0.;
 };
 
 inline const Weapon &DamageDealt::GetWeapon() const noexcept

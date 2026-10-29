@@ -39,9 +39,9 @@ Weapon::Weapon(const DataNode &node)
 void Weapon::Load(const DataNode &node)
 {
 	bool isClustered = isLoaded ? !isStreamed : false;
-	isLoaded = true;
+	isLoaded         = true;
 	calculatedDamage = false;
-	doesDamage = false;
+	doesDamage       = false;
 
 	for(const DataNode &child : node)
 	{
@@ -58,7 +58,7 @@ void Weapon::Load(const DataNode &node)
 			// Phasing projectiles implicitly have no asteroid collisions
 			// for reverse compatibility.
 			canCollideAsteroids = false;
-			canCollideMinables = false;
+			canCollideMinables  = false;
 		}
 		else if(key == "no damage scaling")
 			isDamageScaled = false;
@@ -126,7 +126,7 @@ void Weapon::Load(const DataNode &node)
 		else if(key == "ammo")
 		{
 			int usage = (child.Size() >= 3) ? child.Value(2) : 1;
-			ammo = make_pair(GameData::Outfits().Get(child.Token(1)), max(0, usage));
+			ammo      = make_pair(GameData::Outfits().Get(child.Token(1)), max(0, usage));
 		}
 		else if(key == "icon")
 			icon = SpriteSet::Get(child.Token(1));
@@ -161,8 +161,8 @@ void Weapon::Load(const DataNode &node)
 			                          (child.Size() >= 3) ? child.Value(2) : 1);
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
-				bool grandHasValue = grand.Size() >= 2;
+				const string &grandKey      = grand.Token(0);
+				bool          grandHasValue = grand.Size() >= 2;
 				if(grandKey == "facing" && grandHasValue)
 					submunitions.back().facing = Angle(grand.Value(1));
 				else if(grandKey == "offset" && grand.Size() >= 3)
@@ -317,7 +317,7 @@ void Weapon::Load(const DataNode &node)
 				blastRadius = max(0., value);
 			else if(key == "safe range override")
 			{
-				safeRange = max(0., value);
+				safeRange          = max(0., value);
 				safeRangeOverriden = true;
 			}
 			else if(key == "shield damage")
@@ -327,12 +327,12 @@ void Weapon::Load(const DataNode &node)
 			else if(key == "disabled damage")
 			{
 				damage[DISABLED_DAMAGE] = value;
-				disabledDamageSet = true;
+				disabledDamageSet       = true;
 			}
 			else if(key == "minable damage")
 			{
 				damage[MINABLE_DAMAGE] = value;
-				minableDamageSet = true;
+				minableDamageSet       = true;
 			}
 			else if(key == "fuel damage")
 				damage[FUEL_DAMAGE] = value;
@@ -363,12 +363,12 @@ void Weapon::Load(const DataNode &node)
 			else if(key == "relative disabled damage")
 			{
 				damage[RELATIVE_DISABLED_DAMAGE] = value;
-				relativeDisabledDamageSet = true;
+				relativeDisabledDamageSet        = true;
 			}
 			else if(key == "relative minable damage")
 			{
 				damage[RELATIVE_MINABLE_DAMAGE] = value;
-				relativeMinableDamageSet = true;
+				relativeMinableDamageSet        = true;
 			}
 			else if(key == "relative fuel damage")
 				damage[RELATIVE_FUEL_DAMAGE] = value;
@@ -388,8 +388,8 @@ void Weapon::Load(const DataNode &node)
 				velocityOverride = max(0., value);
 			else if(key == "damage dropoff")
 			{
-				hasDamageDropoff = true;
-				double maxDropoff = (child.Size() >= 3) ? child.Value(2) : 0.;
+				hasDamageDropoff   = true;
+				double maxDropoff  = (child.Size() >= 3) ? child.Value(2) : 0.;
 				damageDropoffRange = make_pair(max(0., value), maxDropoff);
 			}
 			else if(key == "dropoff modifier")

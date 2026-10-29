@@ -107,5 +107,5 @@ private:
 	bool isDefined = false;
 
 	std::bitset<PERSONALITY_COUNT> flags;
-	ExclusiveItem<Confusion> confusion;
+	ExclusiveItem<Confusion>       confusion;
 };

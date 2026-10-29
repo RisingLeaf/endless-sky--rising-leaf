@@ -34,9 +34,9 @@ public:
 
 	// A negative width implies infinite width is allowed (e.g. a wrappable string, or
 	// one which we can guarantee will not overflow its drawing bounds).
-	int width = -1;
-	Alignment align = Alignment::LEFT;
-	Truncate truncate = Truncate::NONE;
+	int       width    = -1;
+	Alignment align    = Alignment::LEFT;
+	Truncate  truncate = Truncate::NONE;
 };
 
 

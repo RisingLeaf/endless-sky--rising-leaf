@@ -61,8 +61,8 @@ bool UI::Handle(const SDL_Event &event)
 		}
 		else if(event.type == SDL_EVENT_MOUSE_BUTTON_UP)
 		{
-			int x = Screen::Left() + event.button.x * 100 / Screen::Zoom();
-			int y = Screen::Top() + event.button.y * 100 / Screen::Zoom();
+			int x   = Screen::Left() + event.button.x * 100 / Screen::Zoom();
+			int y   = Screen::Top() + event.button.y * 100 / Screen::Zoom();
 			handled = (*it)->DoRelease(x, y, static_cast<MouseButton>(event.button.button));
 		}
 		else if(event.type == SDL_EVENT_MOUSE_WHEEL)
@@ -315,23 +315,12 @@ void UI::PlaySound(UISound sound)
 	string name;
 	switch(sound)
 	{
-	case UISound::NORMAL:
-		name = "ui/click";
-		break;
-	case UISound::SOFT:
-		name = "ui/click soft";
-		break;
-	case UISound::SOFT_BUZZ:
-		name = "ui/buzz soft";
-		break;
-	case UISound::TARGET:
-		name = "ui/target";
-		break;
-	case UISound::FAILURE:
-		name = "ui/fail";
-		break;
-	default:
-		return;
+	case UISound::NORMAL:    name = "ui/click"; break;
+	case UISound::SOFT:      name = "ui/click soft"; break;
+	case UISound::SOFT_BUZZ: name = "ui/buzz soft"; break;
+	case UISound::TARGET:    name = "ui/target"; break;
+	case UISound::FAILURE:   name = "ui/fail"; break;
+	default:                 return;
 	}
 	Audio::Play(Audio::Get(name), SoundCategory::UI);
 }

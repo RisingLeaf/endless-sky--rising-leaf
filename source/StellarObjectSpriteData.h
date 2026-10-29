@@ -33,18 +33,18 @@ public:
 	void SetMass(double mass);
 
 	const std::string &LandingMessage() const;
-	double SolarPower() const;
-	double SolarWind() const;
-	const Sprite *StarIcon() const;
-	double HabitableDistance() const;
-	double Mass() const;
+	double             SolarPower() const;
+	double             SolarWind() const;
+	const Sprite      *StarIcon() const;
+	double             HabitableDistance() const;
+	double             Mass() const;
 
 
 private:
-	std::string landingMessage;
-	double solarPower = 0.;
-	double solarWind = 0.;
-	const Sprite *starIcon = nullptr;
-	double habitable = 0.;
-	double mass = 0.;
+	std::string   landingMessage;
+	double        solarPower = 0.;
+	double        solarWind  = 0.;
+	const Sprite *starIcon   = nullptr;
+	double        habitable  = 0.;
+	double        mass       = 0.;
 };

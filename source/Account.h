@@ -37,30 +37,30 @@ public:
 
 	// Get or change the player's credits.
 	int64_t Credits() const;
-	void AddCredits(int64_t value);
-	void PayExtra(int mortgage, int64_t amount);
+	void    AddCredits(int64_t value);
+	void    PayExtra(int mortgage, int64_t amount);
 
 	// Step forward one day, and return a string summarizing payments made.
 	std::string Step(int64_t assets, int64_t salaries, int64_t maintenance);
 
 	// Structural income.
 	const std::map<std::string, int64_t> &SalariesIncome() const;
-	int64_t SalariesIncomeTotal() const;
-	void SetSalaryIncome(const std::string &name, int64_t amount);
+	int64_t                               SalariesIncomeTotal() const;
+	void                                  SetSalaryIncome(const std::string &name, int64_t amount);
 
 	// Overdue crew salaries:
 	int64_t CrewSalariesOwed() const;
-	void PaySalaries(int64_t amount);
+	void    PaySalaries(int64_t amount);
 	// Overdue maintenance costs:
 	int64_t MaintenanceDue() const;
-	void PayMaintenance(int64_t amount);
+	void    PayMaintenance(int64_t amount);
 
 	// Liabilities:
 	const std::vector<Mortgage> &Mortgages() const;
-	void AddMortgage(int64_t principal);
-	void AddFine(int64_t amount);
-	void AddDebt(int64_t amount, std::optional<double> interest, int term);
-	int64_t Prequalify() const;
+	void                         AddMortgage(int64_t principal);
+	void                         AddFine(int64_t amount);
+	void                         AddDebt(int64_t amount, std::optional<double> interest, int term);
+	int64_t                      Prequalify() const;
 	// Assets:
 	int64_t NetWorth() const;
 
@@ -82,7 +82,7 @@ private:
 	// If back salaries and maintenance cannot be paid, they pile up rather
 	// than being ignored.
 	int64_t crewSalariesOwed = 0;
-	int64_t maintenanceDue = 0;
+	int64_t maintenanceDue   = 0;
 	// Your credit score determines the interest rate on your mortgages.
 	int creditScore = 400;
 

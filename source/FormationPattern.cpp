@@ -75,13 +75,13 @@ void FormationPattern::PositionIterator::MoveToValidPosition()
 	// If we cannot calculate any new positions, then just return center point.
 	if(atEnd || lines < 1)
 	{
-		atEnd = true;
+		atEnd        = true;
 		currentPoint = Point();
 		return;
 	}
 
-	unsigned int ringsScanned = 0;
-	unsigned int startingRing = ring;
+	unsigned int ringsScanned        = 0;
+	unsigned int startingRing        = ring;
 	unsigned int lineRepeatPositions = pattern.Positions(ring, line, repeat);
 
 	while(position >= lineRepeatPositions && !atEnd)
@@ -93,24 +93,24 @@ void FormationPattern::PositionIterator::MoveToValidPosition()
 		{
 			// First check if we are on a valid line and have another repeat section.
 			++repeat;
-			position = 0;
+			position            = 0;
 			lineRepeatPositions = pattern.Positions(ring, line, repeat);
 		}
 		else if(line < lines - 1)
 		{
 			// If we don't have another repeat section, then check for a next line.
 			++line;
-			repeat = 0;
-			position = 0;
+			repeat              = 0;
+			position            = 0;
 			lineRepeatPositions = pattern.Positions(ring, line, repeat);
 		}
 		else
 		{
 			// If we checked all lines and repeat sections, then go for the next ring.
 			++ring;
-			line = 0;
-			repeat = 0;
-			position = 0;
+			line                = 0;
+			repeat              = 0;
+			position            = 0;
 			lineRepeatPositions = pattern.Positions(ring, line, repeat);
 
 			// If we scanned more than 5 rings without finding a new position, then we have an empty pattern.
@@ -118,7 +118,7 @@ void FormationPattern::PositionIterator::MoveToValidPosition()
 			if(ringsScanned > 5)
 			{
 				// Restore starting ring and indicate that there are no more positions.
-				ring = startingRing;
+				ring  = startingRing;
 				atEnd = true;
 			}
 		}
@@ -150,8 +150,8 @@ void FormationPattern::Load(const DataNode &node)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "flippable" && hasValue)
 		{
 			for(int i = 1; i < child.Size(); ++i)
@@ -196,8 +196,8 @@ void FormationPattern::Load(const DataNode &node)
 
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
-				bool grandHasValue = grand.Size() >= 2;
+				const string &grandKey      = grand.Token(0);
+				bool          grandHasValue = grand.Size() >= 2;
 				if(grandKey == "start" && grand.Size() >= 3)
 					line.start.Set(grand.Value(1), grand.Value(2));
 				else if(grandKey == "end" && grand.Size() >= 3 && !line.isArc)
@@ -225,8 +225,8 @@ void FormationPattern::Load(const DataNode &node)
 					LineRepeat &repeat = line.repeats.emplace_back();
 					for(const DataNode &great : grand)
 					{
-						const string &greatKey = great.Token(0);
-						bool greatHasValue = great.Size() >= 2;
+						const string &greatKey      = great.Token(0);
+						bool          greatHasValue = great.Size() >= 2;
 						if(greatKey == "start" && great.Size() >= 3)
 							repeat.repeatStart.Set(great.Value(1), great.Value(2));
 						else if(greatKey == "end" && great.Size() >= 3 && !line.isArc)
@@ -328,7 +328,9 @@ unsigned int FormationPattern::Positions(unsigned int ring, unsigned int lineNr,
 
 
 // Get a formation position based on ring, line (or arc)-number and position on the line.
-Point FormationPattern::Position(unsigned int ring, unsigned int lineNr, unsigned int repeatNr,
+Point FormationPattern::Position(unsigned int ring,
+                                 unsigned int lineNr,
+                                 unsigned int repeatNr,
                                  unsigned int linePosition) const
 {
 	// First check if the inputs result in a valid line or arc position.
@@ -339,7 +341,7 @@ Point FormationPattern::Position(unsigned int ring, unsigned int lineNr, unsigne
 		return Point();
 
 	// Perform common start and end/anchor position calculations in pixels.
-	Point startPx = line.start;
+	Point startPx       = line.start;
 	Point endOrAnchorPx = line.endOrAnchor;
 
 	// Get the number of positions for this line or arc.
@@ -363,8 +365,8 @@ Point FormationPattern::Position(unsigned int ring, unsigned int lineNr, unsigne
 	{
 		// Calculate angles and radius from anchor to start.
 		double startAngle = Angle(startPx).Degrees();
-		double endAngle = line.angle;
-		double radius = startPx.Length();
+		double endAngle   = line.angle;
+		double radius     = startPx.Length();
 
 		// Apply repeat section for endAngle, startAngle and anchor were already done before.
 		if(repeat)

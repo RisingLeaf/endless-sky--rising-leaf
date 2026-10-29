@@ -42,9 +42,9 @@ public:
 	int AttributesHeight() const;
 
 	// Draw each of the panels.
-	void DrawDescription(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft) const;
+	void         DrawDescription(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft) const;
 	virtual void DrawAttributes(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft) const;
-	void DrawTooltips(GraphicsTypes::CommandBufferInstance *cb) const;
+	void         DrawTooltips(GraphicsTypes::CommandBufferInstance *cb) const;
 
 	// Update the location where the mouse is hovering.
 	void Hover(const Point &point);
@@ -52,28 +52,30 @@ public:
 
 
 protected:
-	void UpdateDescription(const std::string &text, const std::vector<std::string> &licenses, bool isShip);
-	Point Draw(GraphicsTypes::CommandBufferInstance *cb, Point point, const std::vector<std::string> &labels,
-	           const std::vector<std::string> &values) const;
-	void CheckHover(const Table &table, const std::string &label) const;
+	void  UpdateDescription(const std::string &text, const std::vector<std::string> &licenses, bool isShip);
+	Point Draw(GraphicsTypes::CommandBufferInstance *cb,
+	           Point                                 point,
+	           const std::vector<std::string>       &labels,
+	           const std::vector<std::string>       &values) const;
+	void  CheckHover(const Table &table, const std::string &label) const;
 
 
 protected:
 	static const int WIDTH = 250;
 
 	WrappedText description;
-	int descriptionHeight = 0;
+	int         descriptionHeight = 0;
 
 	std::vector<std::string> attributeLabels;
 	std::vector<std::string> attributeValues;
-	int attributesHeight = 0;
+	int                      attributesHeight = 0;
 
 	int maximumHeight = 0;
 
 	// For tooltips:
-	Point hoverPoint;
+	Point               hoverPoint;
 	mutable std::string hover;
-	mutable Tooltip tooltip;
-	bool hasHover = false;
-	mutable bool hoveringTooltip = false;
+	mutable Tooltip     tooltip;
+	bool                hasHover        = false;
+	mutable bool        hoveringTooltip = false;
 };

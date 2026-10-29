@@ -30,7 +30,7 @@ class DataNode;
 class Paragraphs {
 public:
 	using ConditionalText = std::vector<std::pair<ConditionSet, std::string>>;
-	using ConstIterator = ConditionalText::const_iterator;
+	using ConstIterator   = ConditionalText::const_iterator;
 
 
 public:

@@ -47,15 +47,15 @@ using namespace std;
 
 namespace {
 	// The minimal screen resolution requirements.
-	constexpr int minWidth = 1024;
+	constexpr int minWidth  = 1024;
 	constexpr int minHeight = 768;
 
-	SDL_Window *mainWindow = nullptr;
+	SDL_Window                                      *mainWindow = nullptr;
 	std::unique_ptr<GraphicsTypes::GraphicsInstance> graphics_instance;
-	int width = 0;
-	int height = 0;
-	int drawWidth = 0;
-	int drawHeight = 0;
+	int                                              width      = 0;
+	int                                              height     = 0;
+	int                                              drawWidth  = 0;
+	int                                              drawHeight = 0;
 
 	// Logs SDL errors and returns true if found
 	bool checkSDLerror()
@@ -98,7 +98,7 @@ namespace {
 string GameWindow::SDLVersions()
 {
 #ifdef ES_USE_SDL3
-	int built = SDL_VERSION;
+	int built  = SDL_VERSION;
 	int linked = SDL_GetVersion();
 
 	auto toString = [](int v) -> string {
@@ -180,7 +180,7 @@ bool GameWindow::Init(bool headless)
 		            Logger::Level::WARNING);
 
 	// Make the window just slightly smaller than the monitor resolution.
-	int maxWidth = mode.w;
+	int maxWidth  = mode.w;
 	int maxHeight = mode.h;
 	if(maxWidth < minWidth || maxHeight < minHeight)
 		Logger::Log("Monitor resolution is too small! Minimal requirement is " + to_string(minWidth) + 'x' +
@@ -188,14 +188,14 @@ bool GameWindow::Init(bool headless)
 		                to_string(maxHeight) + '.',
 		            Logger::Level::WARNING);
 
-	int windowWidth = maxWidth - 100;
+	int windowWidth  = maxWidth - 100;
 	int windowHeight = maxHeight - 100;
 
 	// Decide how big the window should be.
 	if(Screen::RawWidth() && Screen::RawHeight())
 	{
 		// Load the previously saved window dimensions.
-		windowWidth = min(windowWidth, Screen::RawWidth());
+		windowWidth  = min(windowWidth, Screen::RawWidth());
 		windowHeight = min(windowHeight, Screen::RawHeight());
 	}
 
@@ -222,7 +222,7 @@ bool GameWindow::Init(bool headless)
 	// Bail out early if we are in headless mode; no need to initialize all the OpenGL stuff.
 	if(headless)
 	{
-		width = windowWidth;
+		width  = windowWidth;
 		height = windowHeight;
 		Screen::SetRaw(width, height, true);
 		return true;
@@ -302,13 +302,13 @@ void GameWindow::AdjustViewport(bool noResizeEvent)
 	// Only save the window size when not in fullscreen mode.
 	if(!GameWindow::IsFullscreen())
 	{
-		width = windowWidth;
+		width  = windowWidth;
 		height = windowHeight;
 	}
 
 	// Round the window size up to a multiple of 2, even if this
 	// means one pixel of the display will be clipped.
-	int roundWidth = (windowWidth + 1) & ~1;
+	int roundWidth  = (windowWidth + 1) & ~1;
 	int roundHeight = (windowHeight + 1) & ~1;
 	Screen::SetRaw(roundWidth, roundHeight, noResizeEvent);
 
@@ -318,7 +318,7 @@ void GameWindow::AdjustViewport(bool noResizeEvent)
 
 	// Set the viewport to go off the edge of the window, if necessary, to get
 	// everything pixel-aligned.
-	drawWidth = (drawWidth * roundWidth) / windowWidth;
+	drawWidth  = (drawWidth * roundWidth) / windowWidth;
 	drawHeight = (drawHeight * roundHeight) / windowHeight;
 }
 
@@ -426,10 +426,10 @@ void GameWindow::ExitWithError(const string &message, bool doPopUp)
 	if(doPopUp)
 	{
 		SDL_MessageBoxData box;
-		box.flags = SDL_MESSAGEBOX_ERROR;
-		box.window = nullptr;
-		box.title = "Endless Sky: Error";
-		box.message = message.c_str();
+		box.flags       = SDL_MESSAGEBOX_ERROR;
+		box.window      = nullptr;
+		box.title       = "Endless Sky: Error";
+		box.message     = message.c_str();
 		box.colorScheme = nullptr;
 
 		SDL_MessageBoxButtonData button;
@@ -439,9 +439,9 @@ void GameWindow::ExitWithError(const string &message, bool doPopUp)
 #else
 		button.buttonid = 0;
 #endif
-		button.text = "OK";
+		button.text    = "OK";
 		box.numbuttons = 1;
-		box.buttons = &button;
+		box.buttons    = &button;
 
 		int result = 0;
 		SDL_ShowMessageBox(&box, &result);

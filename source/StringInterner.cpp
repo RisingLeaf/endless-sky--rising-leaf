@@ -28,13 +28,13 @@ using namespace std;
 // given string but has static storage duration.
 const char *StringInterner::Intern(const char *key)
 {
-	static set<string> interned;
+	static set<string>  interned;
 	static shared_mutex m;
 
 	// Search using a shared lock, allows parallel access by multiple threads.
 	{
 		shared_lock readLock(m);
-		auto it = interned.find(key);
+		auto        it = interned.find(key);
 		if(it != interned.end())
 			return it->c_str();
 	}

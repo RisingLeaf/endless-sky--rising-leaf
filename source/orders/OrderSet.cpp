@@ -39,22 +39,24 @@ namespace {
 	// Orders not included in the bitset should be removed when the given order is issued.
 	constexpr array<bitset<static_cast<size_t>(Orders::Types::TYPES_COUNT)>,
 	                static_cast<size_t>(Orders::Types::TYPES_COUNT)>
-	    SIMULTANEOUS{{
-	        {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // HOLD_POSITION
-	        {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // HOLD_ACTIVE
-	        {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // MOVE_TO
-	        {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // KEEP_STATION
-	        {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // GATHER
-	        {},                                                  // ATTACK
-	        {},                                                  // FINISH_OFF
-	        {(1 << static_cast<int>(Orders::Types::HOLD_POSITION)) +
-			 (1 << static_cast<int>(Orders::Types::HOLD_ACTIVE)) + (1 << static_cast<int>(Orders::Types::MOVE_TO)) +
-			 (1 << static_cast<int>(Orders::Types::KEEP_STATION)) + (1 << static_cast<int>(Orders::Types::GATHER)) +
-			 (1 << static_cast<int>(Orders::Types::HARVEST))},   // HOLD_FIRE
-	        {},                                                  // MINE
-	        {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // HARVEST
-	        {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // SCAN
-	    }};
+	    SIMULTANEOUS{
+	        {
+	         {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // HOLD_POSITION
+	            {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // HOLD_ACTIVE
+	            {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // MOVE_TO
+	            {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // KEEP_STATION
+	            {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // GATHER
+	            {},                                                  // ATTACK
+	            {},                                                  // FINISH_OFF
+	            {(1 << static_cast<int>(Orders::Types::HOLD_POSITION)) +
+				 (1 << static_cast<int>(Orders::Types::HOLD_ACTIVE)) + (1 << static_cast<int>(Orders::Types::MOVE_TO)) +
+				 (1 << static_cast<int>(Orders::Types::KEEP_STATION)) + (1 << static_cast<int>(Orders::Types::GATHER)) +
+				 (1 << static_cast<int>(Orders::Types::HARVEST))},   // HOLD_FIRE
+	            {},                                                  // MINE
+	            {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // HARVEST
+	            {(1 << static_cast<int>(Orders::Types::HOLD_FIRE))}, // SCAN
+	        }
+    };
 } // namespace
 
 
@@ -80,12 +82,12 @@ void OrderSet::Add(const OrderSingle &newOrder, bool *hasMismatch, bool *already
 	if(Has(Types::HOLD_ACTIVE))
 		Set(Types::HOLD_POSITION);
 
-	shared_ptr<Ship> newTargetShip = newOrder.GetTargetShip();
-	bool newTargetShipRelevant = HAS_TARGET_SHIP[static_cast<size_t>(newOrder.type)] ||
-	                             HAS_TARGET_SHIP_OR_ASTEROID[static_cast<size_t>(newOrder.type)];
-	shared_ptr<Minable> newTargetAsteroid = newOrder.GetTargetAsteroid();
-	bool newTargetAsteroidRelevant = HAS_TARGET_ASTEROID[static_cast<size_t>(newOrder.type)] ||
-	                                 HAS_TARGET_SHIP_OR_ASTEROID[static_cast<size_t>(newOrder.type)];
+	shared_ptr<Ship>    newTargetShip             = newOrder.GetTargetShip();
+	bool                newTargetShipRelevant     = HAS_TARGET_SHIP[static_cast<size_t>(newOrder.type)] ||
+	                                                HAS_TARGET_SHIP_OR_ASTEROID[static_cast<size_t>(newOrder.type)];
+	shared_ptr<Minable> newTargetAsteroid         = newOrder.GetTargetAsteroid();
+	bool                newTargetAsteroidRelevant = HAS_TARGET_ASTEROID[static_cast<size_t>(newOrder.type)] ||
+	                                                HAS_TARGET_SHIP_OR_ASTEROID[static_cast<size_t>(newOrder.type)];
 
 	bool individualHasMismatch = !Has(newOrder.type) || (newTargetShipRelevant && GetTargetShip() != newTargetShip) ||
 	                             (newTargetAsteroidRelevant && GetTargetAsteroid() != newTargetAsteroid);
@@ -129,12 +131,12 @@ void OrderSet::Validate(const Ship *ship, const PlayerInfo &player)
 		return;
 	}
 
-	bool targetShipInvalid = false;
+	bool targetShipInvalid     = false;
 	bool targetAsteroidInvalid = false;
 	if((types & (HAS_TARGET_SHIP | HAS_TARGET_SHIP_OR_ASTEROID)).any())
 	{
-		const System *playerSystem = player.GetSystem();
-		shared_ptr<Ship> tShip = GetTargetShip();
+		const System    *playerSystem = player.GetSystem();
+		shared_ptr<Ship> tShip        = GetTargetShip();
 		// Check if the target ship itself is targetable, or if it is one of your ship that you targeted.
 		// If there's an attack order, make sure its type is correct.
 		// Finally check if the target ship is in a system where we can target. This check only checks
@@ -147,7 +149,7 @@ void OrderSet::Validate(const Ship *ship, const PlayerInfo &player)
 		// this ship doesn't have scanners or the target is done being scanned.
 		if(!targetShipInvalid && Has(Types::SCAN))
 		{
-			bool cargo = ship->CargoScanPower();
+			bool cargo  = ship->CargoScanPower();
 			bool outfit = ship->OutfitScanPower();
 			targetShipInvalid |= (!cargo || player.CargoScanFraction(tShip) >= 1.) &&
 			                     (!outfit || player.OutfitScanFraction(tShip) >= 1.);

@@ -67,12 +67,12 @@ double Depreciation::Full()
 void Depreciation::Load(const DataNode &node)
 {
 	// Check if this is fleet or stock depreciation.
-	isStock = (node.Token(0) == NAME[1]);
+	isStock  = (node.Token(0) == NAME[1]);
 	isLoaded = true;
 
 	for(const DataNode &child : node)
 	{
-		bool isShip = (child.Token(0) == "ship");
+		bool isShip   = (child.Token(0) == "ship");
 		bool isOutfit = (child.Token(0) == "outfit");
 		if(!(isShip || isOutfit) || child.Size() < 2)
 			continue;
@@ -232,7 +232,7 @@ void Depreciation::Buy(const Outfit *outfit, int day, Depreciation *source)
 // Get the value of an entire fleet.
 int64_t Depreciation::Value(const vector<shared_ptr<Ship>> &fleet, int day, bool chassisOnly) const
 {
-	map<const Ship *, int> shipCount;
+	map<const Ship *, int>   shipCount;
 	map<const Outfit *, int> outfitCount;
 
 	for(const shared_ptr<Ship> &ship : fleet)
@@ -271,7 +271,7 @@ int64_t Depreciation::Value(const Ship *ship, int day, int count) const
 {
 	// Check whether a record exists for this ship. If not, its value is full
 	// if this is  planet's stock, or fully depreciated if this is the player.
-	ship = GameData::Ships().Get(ship->TrueModelName());
+	ship          = GameData::Ships().Get(ship->TrueModelName());
 	auto recordIt = ships.find(ship);
 	if(recordIt == ships.end() || recordIt->second.empty())
 		return DefaultDepreciation() * count * ship->ChassisCost();
@@ -303,8 +303,8 @@ int64_t Depreciation::Value(const Outfit *outfit, int day, int count) const
 int Depreciation::Sell(map<int, int> &record) const
 {
 	// If we're a planet, we start by selling the oldest, cheapest thing.
-	auto it = (isStock ? record.begin() : --record.end());
-	int day = it->first;
+	auto it  = (isStock ? record.begin() : --record.end());
+	int  day = it->first;
 
 	// Remove one record from the source. If necessary, delete this
 	// record line or the entire record for this outfit.
@@ -369,9 +369,9 @@ double Depreciation::Depreciate(int age) const
 	if(age >= MaxAge())
 		return Min();
 
-	int effectiveAge = age - GracePeriod();
-	double daily = pow(Daily(), effectiveAge);
-	double linear = static_cast<double>(MaxAge() - effectiveAge) / MaxAge();
+	int    effectiveAge = age - GracePeriod();
+	double daily        = pow(Daily(), effectiveAge);
+	double linear       = static_cast<double>(MaxAge() - effectiveAge) / MaxAge();
 	return Min() + (1. - Min()) * daily * linear;
 }
 

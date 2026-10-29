@@ -36,7 +36,8 @@ class TextArea;
 // to bribe a planet to allow you to land there.
 class HailPanel : public Panel {
 public:
-	HailPanel(PlayerInfo &player, const std::shared_ptr<Ship> &ship,
+	HailPanel(PlayerInfo                             &player,
+	          const std::shared_ptr<Ship>            &ship,
 	          std::function<void(const Government *)> bribeCallback);
 	HailPanel(PlayerInfo &player, const StellarObject *object);
 
@@ -56,24 +57,24 @@ private:
 
 
 private:
-	PlayerInfo &player;
-	std::shared_ptr<Ship> ship = nullptr;
+	PlayerInfo                             &player;
+	std::shared_ptr<Ship>                   ship          = nullptr;
 	std::function<void(const Government *)> bribeCallback = nullptr;
-	const StellarObject *object = nullptr;
-	const Planet *planet = nullptr;
-	Angle facing;
-	int step = 0;
+	const StellarObject                    *object        = nullptr;
+	const Planet                           *planet        = nullptr;
+	Angle                                   facing;
+	int                                     step = 0;
 
-	std::string header;
+	std::string               header;
 	std::shared_ptr<TextArea> message;
 
-	int64_t bribe = 0;
-	const Government *bribed = nullptr;
-	bool playerNeedsHelp = false;
-	bool canAssistPlayer = true;
-	bool canGiveFuel = false;
-	bool canGiveEnergy = false;
-	bool canRepair = false;
-	bool hasLanguage = true;
-	bool requestedToBribeShip = false;
+	int64_t           bribe                = 0;
+	const Government *bribed               = nullptr;
+	bool              playerNeedsHelp      = false;
+	bool              canAssistPlayer      = true;
+	bool              canGiveFuel          = false;
+	bool              canGiveEnergy        = false;
+	bool              canRepair            = false;
+	bool              hasLanguage          = true;
+	bool              requestedToBribeShip = false;
 };

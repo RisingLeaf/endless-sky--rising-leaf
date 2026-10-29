@@ -67,8 +67,8 @@ void MiniMap::Step(const shared_ptr<Ship> &flagship)
 	current = flagshipSystem;
 
 	// If the flagship is jumping into a system, that is the target.
-	const System *next = nullptr;
-	bool enteringHyperspace = flagship->IsEnteringHyperspace();
+	const System *next               = nullptr;
+	bool          enteringHyperspace = flagship->IsEnteringHyperspace();
 	if(enteringHyperspace || flagship->Commands().Has(Command::JUMP))
 	{
 		next = flagship->GetTargetSystem();
@@ -81,7 +81,7 @@ void MiniMap::Step(const shared_ptr<Ship> &flagship)
 	else if(!flagship->IsHyperspacing())
 	{
 		const vector<const System *> &plan = player.TravelPlan();
-		next = plan.empty() ? nullptr : plan.back();
+		next                               = plan.empty() ? nullptr : plan.back();
 	}
 
 	// Update the target if a new target is available. If there is no new target,
@@ -92,7 +92,7 @@ void MiniMap::Step(const shared_ptr<Ship> &flagship)
 	if(next != target && (next || !displayMinimap))
 	{
 		retargetCenter = true;
-		target = next;
+		target         = next;
 	}
 	// The target might not have updated, but the player could have moved
 	// to the target. If this is the case, clear the target. We don't need to recenter
@@ -130,8 +130,8 @@ void MiniMap::Step(const shared_ptr<Ship> &flagship)
 	// lerping toward its previous target.
 	else if(enteringHyperspace && targetCenter != target->Position() && lerpCount >= LERP_DURATION)
 	{
-		lerpCount = 0;
-		oldCenter = center;
+		lerpCount    = 0;
+		oldCenter    = center;
 		targetCenter = target->Position();
 	}
 
@@ -166,20 +166,20 @@ void MiniMap::Draw(GraphicsTypes::CommandBufferInstance *cb, int step) const
 	set<const System *> drawnSystems;
 
 	const Font &font = FontSet::Get(Preferences::GetFontSize());
-	Color lineColor(alpha, 0.f);
-	Color brightColor(.4f * alpha, 0.f);
+	Color       lineColor(alpha, 0.f);
+	Color       brightColor(.4f * alpha, 0.f);
 
-	const Point &drawPos = GameData::Interfaces().Get("hud")->GetPoint("mini-map");
-	const Set<Color> &colors = GameData::Colors();
-	const Color &currentColor = colors.Get("active mission")->Additive(alpha * 2.f);
-	const Color &blockedColor = colors.Get("blocked mission")->Additive(alpha * 2.f);
-	const Color &waypointColor = colors.Get("waypoint")->Additive(alpha * 2.f);
+	const Point      &drawPos       = GameData::Interfaces().Get("hud")->GetPoint("mini-map");
+	const Set<Color> &colors        = GameData::Colors();
+	const Color      &currentColor  = colors.Get("active mission")->Additive(alpha * 2.f);
+	const Color      &blockedColor  = colors.Get("blocked mission")->Additive(alpha * 2.f);
+	const Color      &waypointColor = colors.Get("waypoint")->Additive(alpha * 2.f);
 
 	auto drawSystemLinks = [&](const System &system) -> void {
 		static const string UNKNOWN_SYSTEM = "Unexplored System";
-		const Government *gov = system.GetGovernment();
-		Point from = system.Position() - center + drawPos;
-		const string &name = player.KnowsName(system) ? system.DisplayName() : UNKNOWN_SYSTEM;
+		const Government   *gov            = system.GetGovernment();
+		Point               from           = system.Position() - center + drawPos;
+		const string       &name           = player.KnowsName(system) ? system.DisplayName() : UNKNOWN_SYSTEM;
 		font.Draw(cb, name, from + Point(MapPanel::OUTER, -.5 * font.Height()), lineColor);
 
 		// Draw the origin and destination systems, since they
@@ -201,7 +201,7 @@ void MiniMap::Draw(GraphicsTypes::CommandBufferInstance *cb, int step) const
 
 			// Draw the system link. This will double-draw the jump
 			// path if it is via hyperlink, to increase brightness.
-			Point to = link->Position() - center + drawPos;
+			Point to   = link->Position() - center + drawPos;
 			Point unit = (from - to).Unit() * MapPanel::LINK_OFFSET;
 			LineShader::Draw(cb, from - unit, to + unit, MapPanel::LINK_WIDTH, lineColor);
 
@@ -209,7 +209,7 @@ void MiniMap::Draw(GraphicsTypes::CommandBufferInstance *cb, int step) const
 				continue;
 			drawnSystems.insert(link);
 
-			gov = link->GetGovernment();
+			gov         = link->GetGovernment();
 			Color color = Color(.5f * alpha, 0.f);
 			if(player.CanView(*link) && link->IsInhabited(flagship) && gov)
 				color = gov->GetColor().Additive(alpha);
@@ -279,7 +279,7 @@ void MiniMap::Draw(GraphicsTypes::CommandBufferInstance *cb, int step) const
 	// Draw the directional arrow. If this is a normal jump,
 	// the stem was already drawn above.
 	Point from = current->Position() - center + drawPos;
-	Point to = target->Position() - center + drawPos;
+	Point to   = target->Position() - center + drawPos;
 	Point unit = (to - from).Unit();
 	from += MapPanel::LINK_OFFSET * unit;
 	to -= MapPanel::LINK_OFFSET * unit;

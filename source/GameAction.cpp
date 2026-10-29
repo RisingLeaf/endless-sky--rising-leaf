@@ -50,9 +50,9 @@ namespace {
 			return;
 		}
 
-		Ship *flagship = player.Flagship();
-		bool isSingle = (abs(count) == 1);
-		string nameWas = (isSingle ? outfit->DisplayName() : outfit->PluralName());
+		Ship  *flagship = player.Flagship();
+		bool   isSingle = (abs(count) == 1);
+		string nameWas  = (isSingle ? outfit->DisplayName() : outfit->PluralName());
 		if(!flagship || !count || nameWas.empty())
 			return;
 
@@ -60,9 +60,9 @@ namespace {
 		string message;
 		if(isSingle)
 		{
-			char c = tolower(static_cast<unsigned char>(nameWas.front()));
+			char c       = tolower(static_cast<unsigned char>(nameWas.front()));
 			bool isVowel = (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u');
-			message = (isVowel ? "An " : "A ");
+			message      = (isVowel ? "An " : "A ");
 		}
 		else
 			message = to_string(abs(count)) + " ";
@@ -74,10 +74,10 @@ namespace {
 			message += " removed from your ";
 
 		bool didCargo = false;
-		bool didShip = false;
+		bool didShip  = false;
 		// If not landed, transfers must be done into the flagship's CargoHold.
-		CargoHold &cargo = (player.GetPlanet() ? player.Cargo() : flagship->Cargo());
-		int cargoCount = cargo.Get(outfit);
+		CargoHold &cargo      = (player.GetPlanet() ? player.Cargo() : flagship->Cargo());
+		int        cargoCount = cargo.Get(outfit);
 		if(count < 0 && cargoCount)
 		{
 			int moved = min(cargoCount, -count);
@@ -144,8 +144,8 @@ void GameAction::LoadSingle(const DataNode &child, const ConditionsStore *player
 {
 	isEmpty = false;
 
-	const string &key = child.Token(0);
-	bool hasValue = child.Size() >= 2;
+	const string &key      = child.Token(0);
+	bool          hasValue = child.Size() >= 2;
 
 	if(key == "remove" && child.Size() >= 3 && child.Token(1) == "log")
 	{
@@ -201,8 +201,8 @@ void GameAction::LoadSingle(const DataNode &child, const ConditionsStore *player
 		GameAction::Debt &debtEntry = debt.emplace_back(max<int64_t>(0, child.Value(1)));
 		for(const DataNode &grand : child)
 		{
-			const string &grandKey = grand.Token(0);
-			bool grandHasValue = grand.Size() >= 2;
+			const string &grandKey      = grand.Token(0);
+			bool          grandHasValue = grand.Size() >= 2;
 			if(grandKey == "term" && grandHasValue)
 				debtEntry.term = max<int>(1, grand.Value(1));
 			else if(grandKey == "interest" && grandHasValue)
@@ -534,7 +534,7 @@ GameAction GameAction::Instantiate(map<string, string> &subs, int jumps, int pay
 		// Allow randomization of event times. The second value in the pair is
 		// always greater than or equal to the first, so Random::Int() will
 		// never be called with a value less than 1.
-		int day = it.second.first + Random::Int(it.second.second - it.second.first + 1);
+		int day                 = it.second.first + Random::Int(it.second.second - it.second.first + 1);
 		result.events[it.first] = make_pair(day, day);
 	}
 
@@ -560,7 +560,7 @@ GameAction GameAction::Instantiate(map<string, string> &subs, int jumps, int pay
 			result.specialLogEntries[category][heading] = specialLogEntry.Instantiate(subs);
 	result.specialLogClear = specialLogClear;
 
-	result.fail = fail;
+	result.fail       = fail;
 	result.failCaller = failCaller;
 
 	for(const auto &it : messages)
@@ -568,14 +568,16 @@ GameAction GameAction::Instantiate(map<string, string> &subs, int jumps, int pay
 		if(it->IsPhrase())
 			result.messages.push_back(it);
 		else
-			result.messages.push_back(ExclusiveItem<Message>{{it->Text(subs), it->GetCategory()}});
+			result.messages.push_back(ExclusiveItem<Message>{
+			    {it->Text(subs), it->GetCategory()}
+            });
 	}
 
 	result.conditions = conditions;
 
-	result.mark = mark;
-	result.markOther = markOther;
-	result.unmark = unmark;
+	result.mark        = mark;
+	result.markOther   = markOther;
+	result.unmark      = unmark;
 	result.unmarkOther = unmarkOther;
 
 	return result;

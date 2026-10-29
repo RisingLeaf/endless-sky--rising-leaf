@@ -48,15 +48,15 @@ public:
 	double Radius() const;
 	// Which color swizzle should be applied to the sprite?
 	const Swizzle *GetSwizzle() const;
-	bool InheritsParentSwizzle() const;
+	bool           InheritsParentSwizzle() const;
 	// Get the sprite frame for the given time step.
 	float GetFrame(int step = -1) const;
-	void PauseAnimation() const;
-	void UnpauseAnimation() const;
+	void  PauseAnimation() const;
+	void  UnpauseAnimation() const;
 
 	// Positional attributes.
 	double Zoom() const;
-	Point Scale() const;
+	Point  Scale() const;
 
 	// Sprite serialization.
 	void LoadSprite(const DataNode &node);
@@ -81,13 +81,13 @@ protected:
 protected:
 	// Animation parameters.
 	const Sprite *sprite = nullptr;
-	mutable float frame = 0.f;
+	mutable float frame  = 0.f;
 
 	// The point that is considered to be the center of the sprite.
 	Point center;
 	// A zoom of 1 means the sprite should be drawn at half size. For objects
 	// whose sprites should be full size, use zoom = 2.
-	float zoom = 1.f;
+	float zoom  = 1.f;
 	Point scale = Point{1., 1.};
 
 	double alpha = 1.;
@@ -95,19 +95,19 @@ protected:
 
 private:
 	// Allow objects based on this one to adjust their frame rate and swizzle.
-	const Swizzle *swizzle = Swizzle::None();
-	bool inheritsParentSwizzle = false;
+	const Swizzle *swizzle               = Swizzle::None();
+	bool           inheritsParentSwizzle = false;
 
 	float frameRate = 2.f / 60.f;
-	int delay = 0;
+	int   delay     = 0;
 	// The chosen frame will be (step * frameRate) + frameOffset.
-	mutable float frameOffset = 0.f;
-	mutable bool startAtZero = false;
-	mutable bool randomize = false;
-	bool repeat = true;
-	bool rewind = false;
-	bool noFrameTweening = false;
-	mutable int pause = 0;
+	mutable float frameOffset     = 0.f;
+	mutable bool  startAtZero     = false;
+	mutable bool  randomize       = false;
+	bool          repeat          = true;
+	bool          rewind          = false;
+	bool          noFrameTweening = false;
+	mutable int   pause           = 0;
 
 	// Cache the frame calculation so it doesn't have to be repeated if given
 	// the same step over and over again.

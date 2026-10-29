@@ -46,16 +46,20 @@ public:
 
 public:
 	MissionTimer() = default;
-	MissionTimer(const DataNode &node, const ConditionsStore *playerConditions,
-	             const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	MissionTimer(const DataNode                 &node,
+	             const ConditionsStore          *playerConditions,
+	             const std::set<const System *> *visitedSystems,
+	             const std::set<const Planet *> *visitedPlanets);
 	// Set up the timer from its data file node.
-	void Load(const DataNode &node, const ConditionsStore *playerConditions,
-	          const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	void Load(const DataNode                 &node,
+	          const ConditionsStore          *playerConditions,
+	          const std::set<const System *> *visitedSystems,
+	          const std::set<const Planet *> *visitedPlanets);
 	void Save(DataWriter &out) const;
 
 	// Calculate the total time to wait, including any random value.
-	MissionTimer Instantiate(std::map<std::string, std::string> &subs, const System *origin, int jumps,
-	                         int64_t payload) const;
+	MissionTimer
+	Instantiate(std::map<std::string, std::string> &subs, const System *origin, int jumps, int64_t payload) const;
 
 	// Get whether the timer is optional to complete.
 	bool IsOptional() const;
@@ -75,7 +79,7 @@ private:
 
 private:
 	// The base number of frames to wait, with an optional maximum random added value.
-	int waitTime = 0;
+	int waitTime       = 0;
 	int randomWaitTime = 0;
 	// If set, the timer is not a necessary objective for the completion of its mission.
 	bool optional = false;
@@ -93,7 +97,7 @@ private:
 	bool requirePeaceful = false;
 	// Whether the timer requires the player to be uncloaked or cloaked.
 	bool requireUncloaked = false;
-	bool requireCloaked = false;
+	bool requireCloaked   = false;
 	// Whether the player's flagship must be the only ship in their fleet in the system.
 	bool requireSolo = false;
 

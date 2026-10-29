@@ -33,8 +33,8 @@ public:
 
 	const std::string &Name() const;
 
-	bool IsIdentity() const;
-	bool OverrideMask() const;
+	bool         IsIdentity() const;
+	bool         OverrideMask() const;
 	const float *MatrixPtr() const;
 
 	Color Apply(const Color &to) const;
@@ -51,8 +51,8 @@ private:
 
 	std::string name;
 	// Special case for when a swizzle does not actually need to be calculated.
-	bool identity = true;
-	bool loaded = false;
+	bool identity     = true;
+	bool loaded       = false;
 	bool overrideMask = false;
 
 	std::array<float, 16> matrix = IDENTITY_MATRIX;

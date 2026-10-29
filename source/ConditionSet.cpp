@@ -40,58 +40,58 @@ namespace {
 		// "Apply" operators return the value that the condition should have
 		// after applying the expression.
 		static const map<ConditionSet::ExpressionOp, BinFun> opMap = {
-		    {ConditionSet::ExpressionOp::EQ,
+		    { ConditionSet::ExpressionOp::EQ,
 			 [](int64_t a, int64_t b) -> int64_t {
-			     return a == b;
-		     }},
-		    {ConditionSet::ExpressionOp::NE,
+ return a == b;
+ }},
+		    { ConditionSet::ExpressionOp::NE,
 			 [](int64_t a, int64_t b) -> int64_t {
-			     return a != b;
-		     }},
-		    {ConditionSet::ExpressionOp::LT,
+ return a != b;
+ }},
+		    { ConditionSet::ExpressionOp::LT,
 			 [](int64_t a, int64_t b) -> int64_t {
-			     return a < b;
-		     }},
-		    {ConditionSet::ExpressionOp::GT,
+ return a < b;
+ }},
+		    { ConditionSet::ExpressionOp::GT,
 			 [](int64_t a, int64_t b) -> int64_t {
-			     return a > b;
-		     }},
-		    {ConditionSet::ExpressionOp::LE,
+ return a > b;
+ }},
+		    { ConditionSet::ExpressionOp::LE,
 			 [](int64_t a, int64_t b) -> int64_t {
-			     return a <= b;
-		     }},
-		    {ConditionSet::ExpressionOp::GE,
+ return a <= b;
+ }},
+		    { ConditionSet::ExpressionOp::GE,
 			 [](int64_t a, int64_t b) -> int64_t {
-			     return a >= b;
-		     }},
+ return a >= b;
+ }},
 		    {ConditionSet::ExpressionOp::MOD,
 			 [](int64_t a, int64_t b) {
-			     return b ? a % b : a;
-		     }},
+ return b ? a % b : a;
+ }},
 		    {ConditionSet::ExpressionOp::MUL,
 			 [](int64_t a, int64_t b) {
-			     return a * b;
-		     }},
+ return a * b;
+ }},
 		    {ConditionSet::ExpressionOp::ADD,
 			 [](int64_t a, int64_t b) {
-			     return a + b;
-		     }},
+ return a + b;
+ }},
 		    {ConditionSet::ExpressionOp::SUB,
 			 [](int64_t a, int64_t b) {
-			     return a - b;
-		     }},
+ return a - b;
+ }},
 		    {ConditionSet::ExpressionOp::DIV,
 			 [](int64_t a, int64_t b) {
-			     return b ? a / b : numeric_limits<int64_t>::max();
-		     }},
+ return b ? a / b : numeric_limits<int64_t>::max();
+ }},
 		    {ConditionSet::ExpressionOp::MAX,
 			 [](int64_t a, int64_t b) {
-			     return max(a, b);
-		     }},
+ return max(a, b);
+ }},
 		    {ConditionSet::ExpressionOp::MIN,
 			 [](int64_t a, int64_t b) {
-			     return min(a, b);
-		     }},
+ return min(a, b);
+ }},
 		};
 
 		auto it = opMap.find(op);
@@ -99,32 +99,32 @@ namespace {
 	}
 
 	// Expressions that define how operators should be parsed and written
-	constexpr uint64_t ONE = 1;
-	constexpr uint64_t SINGLE_PARENT = ONE << 0;     ///< Can be a single keyword in a node, with child-nodes.
-	constexpr uint64_t INFIX_OPERATOR = ONE << 1;    ///< Operator parsed and written as infix inbetween terminals.
+	constexpr uint64_t ONE               = 1;
+	constexpr uint64_t SINGLE_PARENT     = ONE << 0; ///< Can be a single keyword in a node, with child-nodes.
+	constexpr uint64_t INFIX_OPERATOR    = ONE << 1; ///< Operator parsed and written as infix inbetween terminals.
 	constexpr uint64_t FUNCTION_OPERATOR = ONE << 2; ///< Operator parsed and written as a function.
 	constexpr uint64_t TERMINAL = ONE << 3; ///< Operator indicating a terminal node (number or condition variable).
 
 	/// Map string tokens internal operators.
 	const auto CS_TOKEN_CONVERSION = map<const string, pair<ConditionSet::ExpressionOp, uint64_t>>{
 	    // Infix arithmetic multiply, divide and modulo have a higher precedence than add and subtract.
-	    {"*", {ConditionSet::ExpressionOp::MUL, INFIX_OPERATOR}},
-	    {"/", {ConditionSet::ExpressionOp::DIV, INFIX_OPERATOR}},
-	    {"%", {ConditionSet::ExpressionOp::MOD, INFIX_OPERATOR}},
+	    {  "*",                    {ConditionSet::ExpressionOp::MUL, INFIX_OPERATOR}},
+	    {  "/",                    {ConditionSet::ExpressionOp::DIV, INFIX_OPERATOR}},
+	    {  "%",                    {ConditionSet::ExpressionOp::MOD, INFIX_OPERATOR}},
 	    // Infix arithmetic operators add and subtract have the same precedence.
-	    {"+", {ConditionSet::ExpressionOp::ADD, INFIX_OPERATOR}},
-	    {"-", {ConditionSet::ExpressionOp::SUB, INFIX_OPERATOR}},
+	    {  "+",                    {ConditionSet::ExpressionOp::ADD, INFIX_OPERATOR}},
+	    {  "-",                    {ConditionSet::ExpressionOp::SUB, INFIX_OPERATOR}},
 	    // Infix boolean equality operators have a lower precedence than their arithmetic counterparts.
-	    {"==", {ConditionSet::ExpressionOp::EQ, INFIX_OPERATOR}},
-	    {"!=", {ConditionSet::ExpressionOp::NE, INFIX_OPERATOR}},
-	    {">", {ConditionSet::ExpressionOp::GT, INFIX_OPERATOR}},
-	    {"<", {ConditionSet::ExpressionOp::LT, INFIX_OPERATOR}},
-	    {">=", {ConditionSet::ExpressionOp::GE, INFIX_OPERATOR}},
-	    {"<=", {ConditionSet::ExpressionOp::LE, INFIX_OPERATOR}},
+	    { "==",                     {ConditionSet::ExpressionOp::EQ, INFIX_OPERATOR}},
+	    { "!=",                     {ConditionSet::ExpressionOp::NE, INFIX_OPERATOR}},
+	    {  ">",                     {ConditionSet::ExpressionOp::GT, INFIX_OPERATOR}},
+	    {  "<",                     {ConditionSet::ExpressionOp::LT, INFIX_OPERATOR}},
+	    { ">=",                     {ConditionSet::ExpressionOp::GE, INFIX_OPERATOR}},
+	    { "<=",                     {ConditionSet::ExpressionOp::LE, INFIX_OPERATOR}},
 	    // Parent-type operators have a low precedence in Endless-Sky, because they are on outer parent/child sections.
 	    // and, or, max and min can exist as infix-operators and as single parents.
-	    {"and", {ConditionSet::ExpressionOp::AND, INFIX_OPERATOR | SINGLE_PARENT}},
-	    {"or", {ConditionSet::ExpressionOp::OR, INFIX_OPERATOR | SINGLE_PARENT}},
+	    {"and",    {ConditionSet::ExpressionOp::AND, INFIX_OPERATOR | SINGLE_PARENT}},
+	    { "or",     {ConditionSet::ExpressionOp::OR, INFIX_OPERATOR | SINGLE_PARENT}},
 	    {"max", {ConditionSet::ExpressionOp::MAX, FUNCTION_OPERATOR | SINGLE_PARENT}},
 	    {"min", {ConditionSet::ExpressionOp::MIN, FUNCTION_OPERATOR | SINGLE_PARENT}},
 	};
@@ -135,25 +135,20 @@ namespace {
 	{
 		switch(op)
 		{
-		case ConditionSet::ExpressionOp::INVALID:
-			return 9;
+		case ConditionSet::ExpressionOp::INVALID: return 9;
 		case ConditionSet::ExpressionOp::LIT:
-		case ConditionSet::ExpressionOp::VAR:
-			return 8;
+		case ConditionSet::ExpressionOp::VAR:     return 8;
 		case ConditionSet::ExpressionOp::MUL:
 		case ConditionSet::ExpressionOp::DIV:
-		case ConditionSet::ExpressionOp::MOD:
-			return 6;
+		case ConditionSet::ExpressionOp::MOD:     return 6;
 		case ConditionSet::ExpressionOp::ADD:
-		case ConditionSet::ExpressionOp::SUB:
-			return 5;
+		case ConditionSet::ExpressionOp::SUB:     return 5;
 		case ConditionSet::ExpressionOp::EQ:
 		case ConditionSet::ExpressionOp::NE:
 		case ConditionSet::ExpressionOp::GT:
 		case ConditionSet::ExpressionOp::LT:
 		case ConditionSet::ExpressionOp::GE:
-		case ConditionSet::ExpressionOp::LE:
-			return 3;
+		case ConditionSet::ExpressionOp::LE:      return 3;
 		default:
 			// Precedence for AND, OR, MAX and MIN and functions
 			return 0;
@@ -202,8 +197,8 @@ ConditionSet::ConditionSet(const DataNode &node, const ConditionsStore *conditio
 ConditionSet::ConditionSet(int64_t newLiteral, const ConditionsStore *conditions)
 {
 	expressionOperator = ExpressionOp::LIT;
-	literal = newLiteral;
-	this->conditions = conditions;
+	literal            = newLiteral;
+	this->conditions   = conditions;
 }
 
 
@@ -221,10 +216,10 @@ ConditionSet &ConditionSet::operator=(const ConditionSet &&other) noexcept
 
 	// Then move over all content.
 	expressionOperator = other.expressionOperator;
-	literal = other.literal;
-	conditionName = std::move(other.conditionName);
-	children = std::move(other.children);
-	conditions = other.conditions;
+	literal            = other.literal;
+	conditionName      = std::move(other.conditionName);
+	children           = std::move(other.children);
+	conditions         = other.conditions;
 
 	return *this;
 }
@@ -244,10 +239,10 @@ ConditionSet &ConditionSet::operator=(const ConditionSet &other)
 
 	// Then copy over all content.
 	expressionOperator = other.expressionOperator;
-	literal = other.literal;
-	conditionName = other.conditionName;
-	children = other.children;
-	conditions = other.conditions;
+	literal            = other.literal;
+	conditionName      = other.conditionName;
+	children           = other.children;
+	conditions         = other.conditions;
 
 	return *this;
 }
@@ -286,7 +281,8 @@ void ConditionSet::Save(DataWriter &out) const
 
 void ConditionSet::SaveAsTree(DataWriter &out) const
 {
-	auto it = find_if(CS_TOKEN_CONVERSION.begin(), CS_TOKEN_CONVERSION.end(),
+	auto it = find_if(CS_TOKEN_CONVERSION.begin(),
+	                  CS_TOKEN_CONVERSION.end(),
 	                  [this](const std::pair<const string, pair<ConditionSet::ExpressionOp, uint64_t>> &e) {
 		                  return e.second.first == expressionOperator;
 	                  });
@@ -320,21 +316,15 @@ void ConditionSet::SaveInline(DataWriter &out) const
 	// Handle terminals and invalid.
 	switch(expressionOperator)
 	{
-	case ExpressionOp::INVALID:
-		out.WriteToken("never");
-		return;
-	case ExpressionOp::VAR:
-		out.WriteToken(conditionName);
-		return;
-	case ExpressionOp::LIT:
-		out.WriteToken(literal);
-		return;
-	default:
-		break;
+	case ExpressionOp::INVALID: out.WriteToken("never"); return;
+	case ExpressionOp::VAR:     out.WriteToken(conditionName); return;
+	case ExpressionOp::LIT:     out.WriteToken(literal); return;
+	default:                    break;
 	}
 
 	// Lookup the operator to get the operator text and parsing/writing style
-	auto it = find_if(CS_TOKEN_CONVERSION.begin(), CS_TOKEN_CONVERSION.end(),
+	auto it = find_if(CS_TOKEN_CONVERSION.begin(),
+	                  CS_TOKEN_CONVERSION.end(),
 	                  [this](const std::pair<const string, pair<ConditionSet::ExpressionOp, uint64_t>> &e) {
 		                  return e.second.first == expressionOperator;
 	                  });
@@ -387,7 +377,7 @@ void ConditionSet::MakeNever()
 {
 	children.clear();
 	expressionOperator = ExpressionOp::LIT;
-	literal = 0;
+	literal            = 0;
 }
 
 
@@ -429,8 +419,7 @@ int64_t ConditionSet::Evaluate() const
 			                    "\" in ConditionSet without a pointer to a ConditionsStore!");
 		return conditions->Get(conditionName);
 	}
-	case ExpressionOp::LIT:
-		return literal;
+	case ExpressionOp::LIT: return literal;
 	case ExpressionOp::AND: {
 		// An empty AND section returns true.
 		if(children.empty())
@@ -457,15 +446,16 @@ int64_t ConditionSet::Evaluate() const
 				return childResult;
 		}
 		return 0;
-	default:
-		break;
+	default: break;
 	}
 
 	// If we have an accumulator function and children, then let's use the accumulator on the children.
 	// MAX and MIN are also handled by the accumulator.
 	BinFun accumulatorOp = Op(expressionOperator);
 	if(accumulatorOp != nullptr && !children.empty())
-		return accumulate(next(children.begin()), children.end(), children[0].Evaluate(),
+		return accumulate(next(children.begin()),
+		                  children.end(),
+		                  children[0].Evaluate(),
 		                  [&accumulatorOp](int64_t accumulated, const ConditionSet &b) -> int64_t {
 			                  return accumulatorOp(accumulated, b.Evaluate());
 		                  });
@@ -534,7 +524,7 @@ bool ConditionSet::ParseFromStart(const DataNode &node)
 			return FailParse(node, "Tokens found after never keyword");
 
 		expressionOperator = ExpressionOp::LIT;
-		literal = 0;
+		literal            = 0;
 		return true;
 	}
 	if(key == "has")
@@ -544,7 +534,7 @@ bool ConditionSet::ParseFromStart(const DataNode &node)
 
 		// Convert has keyword directly to the variable.
 		expressionOperator = ExpressionOp::VAR;
-		conditionName = node.Token(1);
+		conditionName      = node.Token(1);
 		return true;
 	}
 	if(key == "not")
@@ -556,7 +546,7 @@ bool ConditionSet::ParseFromStart(const DataNode &node)
 		expressionOperator = ExpressionOp::EQ;
 		children.emplace_back(conditions);
 		children.back().expressionOperator = ExpressionOp::VAR;
-		children.back().conditionName = node.Token(1);
+		children.back().conditionName      = node.Token(1);
 		children.emplace_back(0, conditions);
 		return true;
 	}
@@ -630,8 +620,7 @@ bool ConditionSet::Optimize(const DataNode &node)
 
 	case ExpressionOp::LIT:
 	case ExpressionOp::VAR:
-	case ExpressionOp::INVALID:
-		break;
+	case ExpressionOp::INVALID: break;
 	}
 	return returnValue;
 }
@@ -696,7 +685,7 @@ bool ConditionSet::ParseMini(const DataNode &node, int &tokenNr)
 	}
 
 	pair<ExpressionOp, uint64_t> opAndType = ConvertToken(node.Token(tokenNr));
-	expressionOperator = opAndType.first;
+	expressionOperator                     = opAndType.first;
 
 	// If we have a function operator, then parse the function.
 	if(opAndType.second & FUNCTION_OPERATOR)
@@ -716,8 +705,7 @@ bool ConditionSet::ParseMini(const DataNode &node, int &tokenNr)
 		conditionName = node.Token(tokenNr);
 		++tokenNr;
 		break;
-	default:
-		return FailParse(node, "Expected terminal or open-bracket");
+	default: return FailParse(node, "Expected terminal or open-bracket");
 	}
 
 	return true;

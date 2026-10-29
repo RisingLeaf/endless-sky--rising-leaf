@@ -29,12 +29,9 @@ public:
 			return true;
 		switch(GameData::GetGamerules().FightersHitWhenDisabled())
 		{
-		case Gamerules::FighterDodgePolicy::ALL:
-			return false;
-		case Gamerules::FighterDodgePolicy::NONE:
-			return true;
-		case Gamerules::FighterDodgePolicy::ONLY_PLAYER:
-			return !ship->IsYours();
+		case Gamerules::FighterDodgePolicy::ALL:         return false;
+		case Gamerules::FighterDodgePolicy::NONE:        return true;
+		case Gamerules::FighterDodgePolicy::ONLY_PLAYER: return !ship->IsYours();
 		}
 		return false;
 	}

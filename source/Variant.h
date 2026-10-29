@@ -35,7 +35,7 @@ public:
 	// Determine if this variant template uses well-defined data.
 	bool IsValid() const;
 
-	int Weight() const;
+	int                              Weight() const;
 	const std::vector<const Ship *> &Ships() const;
 
 	// The strength of a variant is the sum of the cost of its ships.
@@ -46,6 +46,6 @@ public:
 
 
 private:
-	int weight = 1;
+	int                       weight = 1;
 	std::vector<const Ship *> ships;
 };

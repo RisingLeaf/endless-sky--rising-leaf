@@ -31,9 +31,9 @@ class Gamerules {
 public:
 	// Defines which disabled fighters can dodge stray projectiles.
 	enum class FighterDodgePolicy {
-		NONE = 0,
+		NONE        = 0,
 		ONLY_PLAYER = 1,
-		ALL = 2,
+		ALL         = 2,
 	};
 
 	// Defines how big the player's active fleet can get.
@@ -85,7 +85,7 @@ public:
 
 	const std::string &Name() const;
 	const std::string &Description() const;
-	const Sprite *Thumbnail() const;
+	const Sprite      *Thumbnail() const;
 
 	void SetLockGamerules(bool value);
 	void SetUniversalRamscoopActive(bool value);
@@ -116,31 +116,31 @@ public:
 
 	int GetValue(const std::string &rule) const;
 
-	bool LockGamerules() const;
-	bool UniversalRamscoopActive() const;
-	int PersonSpawnPeriod() const;
-	int NoPersonSpawnWeight() const;
-	int NPCMaxMiningTime() const;
-	double UniversalFrugalThreshold() const;
-	double DepreciationMin() const;
-	double DepreciationDaily() const;
-	int DepreciationGracePeriod() const;
-	int DepreciationMaxAge() const;
-	FighterDodgePolicy FightersHitWhenDisabled() const;
-	double SystemDepartureMin() const;
+	bool                  LockGamerules() const;
+	bool                  UniversalRamscoopActive() const;
+	int                   PersonSpawnPeriod() const;
+	int                   NoPersonSpawnWeight() const;
+	int                   NPCMaxMiningTime() const;
+	double                UniversalFrugalThreshold() const;
+	double                DepreciationMin() const;
+	double                DepreciationDaily() const;
+	int                   DepreciationGracePeriod() const;
+	int                   DepreciationMaxAge() const;
+	FighterDodgePolicy    FightersHitWhenDisabled() const;
+	double                SystemDepartureMin() const;
 	std::optional<double> SystemArrivalMin() const;
-	bool HabitableBasedArrivalDistance() const;
+	bool                  HabitableBasedArrivalDistance() const;
 	std::optional<double> HabitableArrivalMin() const;
 	std::optional<double> HabitableArrivalMax() const;
-	double FleetMultiplier() const;
-	bool SpawnRaidFleets() const;
-	FleetSizeLimitation GetFleetSizeLimitation() const;
-	int GetDefaultMaxEscortCount() const;
-	int GetDefaultMaxEscortCrew() const;
-	int GetDefaultAdminCap() const;
-	PermadeathMode GetPermadeathMode() const;
-	bool SingleSaveFile() const;
-	bool RestrictedSaveLoading() const;
+	double                FleetMultiplier() const;
+	bool                  SpawnRaidFleets() const;
+	FleetSizeLimitation   GetFleetSizeLimitation() const;
+	int                   GetDefaultMaxEscortCount() const;
+	int                   GetDefaultMaxEscortCrew() const;
+	int                   GetDefaultAdminCap() const;
+	PermadeathMode        GetPermadeathMode() const;
+	bool                  SingleSaveFile() const;
+	bool                  RestrictedSaveLoading() const;
 
 	bool operator==(const Gamerules &other) const;
 
@@ -153,25 +153,25 @@ private:
 		bool operator==(const Storage &other) const = default;
 
 	public:
-		bool lockGamerules = true;
-		bool universalRamscoop = true;
-		int personSpawnPeriod = 36000;
-		int noPersonSpawnWeight = 1000;
-		int npcMaxMiningTime = 3600;
-		double universalFrugalThreshold = .75;
-		double depreciationMin = .25;
-		double depreciationDaily = .997;
-		int depreciationGracePeriod = 7;
-		int depreciationMaxAge = 1000;
-		FighterDodgePolicy fighterHitPolicy = FighterDodgePolicy::ALL;
-		double systemDepartureMin = 0.;
+		bool                  lockGamerules            = true;
+		bool                  universalRamscoop        = true;
+		int                   personSpawnPeriod        = 36000;
+		int                   noPersonSpawnWeight      = 1000;
+		int                   npcMaxMiningTime         = 3600;
+		double                universalFrugalThreshold = .75;
+		double                depreciationMin          = .25;
+		double                depreciationDaily        = .997;
+		int                   depreciationGracePeriod  = 7;
+		int                   depreciationMaxAge       = 1000;
+		FighterDodgePolicy    fighterHitPolicy         = FighterDodgePolicy::ALL;
+		double                systemDepartureMin       = 0.;
 		std::optional<double> systemArrivalMin;
-		bool habitableBasedArrivalDistance = true;
-		std::optional<double> habitableArrivalMin = 500.;
-		std::optional<double> habitableArrivalMax = 5000.;
-		double fleetMultiplier = 1.;
-		bool spawnRaidFleets = true;
-		FleetSizeLimitation fleetSizeLimitation = FleetSizeLimitation::NONE;
+		bool                  habitableBasedArrivalDistance = true;
+		std::optional<double> habitableArrivalMin           = 500.;
+		std::optional<double> habitableArrivalMax           = 5000.;
+		double                fleetMultiplier               = 1.;
+		bool                  spawnRaidFleets               = true;
+		FleetSizeLimitation   fleetSizeLimitation           = FleetSizeLimitation::NONE;
 		// The player can only have up to this many escorts active at once. Carried ships are excluded.
 		// This value can be increased for a pilot through gameplay.
 		int defaultMaxEscortCount = 6;
@@ -180,10 +180,10 @@ private:
 		int defaultMaxEscortCrew = 1000;
 		// The administrative capacity of the player's fleet. Different ships will have different admin costs.
 		// This value can be increased for a pilot through gameplay.
-		int defaultAdminCap = 25;
-		PermadeathMode permadeathMode = PermadeathMode::OFF;
-		bool singleSaveFile = false;
-		bool restrictedSaveLoading = false;
+		int            defaultAdminCap       = 25;
+		PermadeathMode permadeathMode        = PermadeathMode::OFF;
+		bool           singleSaveFile        = false;
+		bool           restrictedSaveLoading = false;
 
 		// Miscellaneous rules that are only used by the game data and not by the engine.
 		std::map<std::string, int> miscRules;
@@ -191,8 +191,8 @@ private:
 
 
 private:
-	std::string name;
-	std::string description;
+	std::string   name;
+	std::string   description;
 	const Sprite *thumbnail = nullptr;
-	Storage storage;
+	Storage       storage;
 };

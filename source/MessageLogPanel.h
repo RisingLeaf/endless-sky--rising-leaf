@@ -40,8 +40,8 @@ private:
 	const std::deque<std::pair<std::string, const Message::Category *>> &messages;
 
 	const double width;
-	bool importantOnly = false;
+	bool         importantOnly = false;
 	// Current scroll:
-	double scroll = 0.;
+	double scroll    = 0.;
 	double maxScroll = 0.;
 };

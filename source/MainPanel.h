@@ -72,19 +72,19 @@ private:
 
 	// These are the pending ShipEvents that have yet to be processed.
 	std::list<ShipEvent> eventQueue;
-	bool handledFront = false;
+	bool                 handledFront = false;
 
 	Command show;
 
 	// Keep track of how long a starting player has spent drifting in deep space.
-	int lostness = 0;
+	int lostness  = 0;
 	int lostCount = 0;
 
 	Point dragSource;
 	Point dragPoint;
-	bool isDragging = false;
-	bool hasShift = false;
-	bool hasControl = false;
-	bool canClick = false;
-	bool canDrag = false;
+	bool  isDragging = false;
+	bool  hasShift   = false;
+	bool  hasControl = false;
+	bool  canClick   = false;
+	bool  canDrag    = false;
 };

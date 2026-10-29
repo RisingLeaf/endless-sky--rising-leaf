@@ -39,7 +39,7 @@ bool Sound::Load(const filesystem::path &path, const string &name)
 		return false;
 	this->name = name;
 
-	isLooped = path.stem().string().ends_with('~');
+	isLooped    = path.stem().string().ends_with('~');
 	bool isFast = isLooped ? path.stem().string().ends_with("@3x~") : path.stem().string().ends_with("@3x");
 	vector<AudioSupplier::sample_t> &buf = isFast ? buffer3x : buffer;
 
@@ -62,7 +62,7 @@ bool Sound::Load(const filesystem::path &path, const string &name)
 	buf.resize(2 * data.size() / sizeof(AudioSupplier::sample_t));
 	for(size_t i = 0; i < buf.size() / 2; ++i)
 	{
-		buf[2 * i] = reinterpret_cast<AudioSupplier::sample_t *>(data.data())[i];
+		buf[2 * i]     = reinterpret_cast<AudioSupplier::sample_t *>(data.data())[i];
 		buf[2 * i + 1] = reinterpret_cast<AudioSupplier::sample_t *>(data.data())[i];
 	}
 	return true;
@@ -95,7 +95,9 @@ bool Sound::IsLooping() const
 
 unique_ptr<AudioSupplier> Sound::CreateSupplier() const
 {
-	return unique_ptr<AudioSupplier>{new WavSupplier{*this, false, IsLooping()}};
+	return unique_ptr<AudioSupplier>{
+	    new WavSupplier{*this, false, IsLooping()}
+    };
 }
 
 
@@ -118,7 +120,7 @@ namespace {
 		bool foundHeader = false;
 		while(true)
 		{
-			uint32_t subchunkID = Read4(in);
+			uint32_t subchunkID   = Read4(in);
 			uint32_t subchunkSize = Read4(in);
 
 			if(subchunkID == 0x20746d66) // "fmt "
@@ -127,11 +129,11 @@ namespace {
 				if(subchunkSize < 16)
 					return 0;
 
-				uint16_t audioFormat = Read2(in);
-				uint16_t numChannels = Read2(in);
+				uint16_t audioFormat   = Read2(in);
+				uint16_t numChannels   = Read2(in);
 				uint32_t fileFrequency = Read4(in);
-				uint32_t byteRate = Read4(in);
-				uint32_t blockAlign = Read2(in);
+				uint32_t byteRate      = Read4(in);
+				uint32_t blockAlign    = Read2(in);
 				uint32_t bitsPerSample = Read2(in);
 
 				// Skip any further bytes in this chunk.
@@ -159,8 +161,8 @@ namespace {
 			}
 			else
 				in->seekg(subchunkSize, ios::cur);
-			}
 		}
+	}
 
 
 

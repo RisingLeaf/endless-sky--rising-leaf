@@ -260,7 +260,7 @@ void Gamerules::Save(DataWriter &out, const Gamerules &preset) const
 
 void Gamerules::Replace(const Gamerules &rules)
 {
-	name = rules.name;
+	name    = rules.name;
 	storage = rules.storage;
 }
 

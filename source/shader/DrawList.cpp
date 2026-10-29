@@ -43,7 +43,7 @@ void DrawList::Clear(int step, double zoom)
 
 void DrawList::SetCenter(const Point &center, const Point &centerVelocity)
 {
-	this->center = center;
+	this->center         = center;
 	this->centerVelocity = centerVelocity;
 }
 
@@ -112,7 +112,7 @@ bool DrawList::AddUnblurred(const Drawable &drawable, Point position, const Angl
 bool DrawList::AddSwizzled(const Body &body, const Swizzle *swizzle, double cloak)
 {
 	Point position = body.Position() - center;
-	Point blur = body.Velocity() - centerVelocity;
+	Point blur     = body.Velocity() - centerVelocity;
 	if(Cull(body, position, body.Facing(), blur))
 		return false;
 
@@ -122,8 +122,8 @@ bool DrawList::AddSwizzled(const Body &body, const Swizzle *swizzle, double cloa
 
 
 
-bool DrawList::AddSwizzled(const Drawable &drawable, Point position, const Angle &facing, const Swizzle *swizzle,
-                           double cloak)
+bool DrawList::AddSwizzled(
+    const Drawable &drawable, Point position, const Angle &facing, const Swizzle *swizzle, double cloak)
 {
 	position -= center;
 	Point blur = -centerVelocity;
@@ -162,7 +162,7 @@ bool DrawList::Cull(const Drawable &drawable, const Point &position, const Angle
 	// calls that we issue (which may be the bottleneck on some systems).
 	const Point size(0.5 * (fabs(unit.X() * drawable.Height()) + fabs(unit.Y() * drawable.Width()) + fabs(blur.X())),
 	                 0.5 * (fabs(unit.X() * drawable.Width()) + fabs(unit.Y() * drawable.Height()) + fabs(blur.Y())));
-	const Point topLeft = (position - size) * zoom;
+	const Point topLeft     = (position - size) * zoom;
 	const Point bottomRight = (position + size) * zoom;
 	if(bottomRight.X() < Screen::Left() || bottomRight.Y() < Screen::Top())
 		return true;
@@ -174,25 +174,30 @@ bool DrawList::Cull(const Drawable &drawable, const Point &position, const Angle
 
 
 
-void DrawList::Push(const Drawable &drawable, const Point &pos, const Angle &facing, Point blur, const double alpha,
-                    const double cloak, const Swizzle *swizzle)
+void DrawList::Push(const Drawable &drawable,
+                    const Point    &pos,
+                    const Angle    &facing,
+                    Point           blur,
+                    const double    alpha,
+                    const double    cloak,
+                    const Swizzle  *swizzle)
 {
-	SpriteShader::Item item{.texture = drawable.GetSprite()->Texture(),
+	SpriteShader::Item item{.texture     = drawable.GetSprite()->Texture(),
 	                        .swizzleMask = drawable.GetSprite()->SwizzleMask()};
 
-	item.frame = drawable.GetFrame(step);
-	item.frameCount = drawable.GetSprite()->Frames();
+	item.frame                   = drawable.GetFrame(step);
+	item.frameCount              = drawable.GetSprite()->Frames();
 	item.uniqueSwizzleMaskFrames = drawable.GetSprite()->SwizzleMaskFrames() > 1;
 
 	item.position[0] = static_cast<float>(pos.X() * zoom);
 	item.position[1] = static_cast<float>(pos.Y() * zoom);
 
 	// Get unit vectors in the direction of the object's width and height.
-	const double width = drawable.Width();
+	const double width  = drawable.Width();
 	const double height = drawable.Height();
-	const Point unit = facing.Unit();
-	Point uw = unit * width;
-	Point uh = unit * height;
+	const Point  unit   = facing.Unit();
+	Point        uw     = unit * width;
+	Point        uh     = unit * height;
 
 	// (0, -1) means a zero-degree rotation (since negative Y is up).
 	uw *= zoom;
@@ -207,22 +212,28 @@ void DrawList::Push(const Drawable &drawable, const Point &pos, const Angle &fac
 	item.blur[0] = unit.Cross(blur) / (width * 4.);
 	item.blur[1] = -unit.Dot(blur) / (height * 4.);
 
-	item.alpha = (1. - cloak) * alpha;
+	item.alpha   = (1. - cloak) * alpha;
 	item.swizzle = swizzle;
-	item.clip = 1.;
+	item.clip    = 1.;
 
 	items.push_back(item);
 }
 
-void DrawList::PushRaw(const Sprite *sprite, const float frame, const float xpos, const float ypos, const Angle facing,
-                       const float alpha, const Point &scale, const Swizzle *swizzle)
+void DrawList::PushRaw(const Sprite  *sprite,
+                       const float    frame,
+                       const float    xpos,
+                       const float    ypos,
+                       const Angle    facing,
+                       const float    alpha,
+                       const Point   &scale,
+                       const Swizzle *swizzle)
 {
 	if(!sprite)
 		return;
 	SpriteShader::Item item{.texture = sprite->Texture(), .swizzleMask = sprite->SwizzleMask()};
 
-	item.frame = frame;
-	item.frameCount = sprite->Frames();
+	item.frame                   = frame;
+	item.frameCount              = sprite->Frames();
 	item.uniqueSwizzleMaskFrames = sprite->SwizzleMaskFrames() > 1;
 
 	item.position[0] = static_cast<float>((xpos - center.X()) * zoom);
@@ -231,9 +242,9 @@ void DrawList::PushRaw(const Sprite *sprite, const float frame, const float xpos
 	// Get unit vectors in the direction of the object's width and height.
 	const double width  = scale.X() * sprite->Width();
 	const double height = scale.Y() * sprite->Height();
-	const Point unit = facing.Unit();
-	Point uw = unit * width;
-	Point uh = unit * height;
+	const Point  unit   = facing.Unit();
+	Point        uw     = unit * width;
+	Point        uh     = unit * height;
 
 	// (0, -1) means a zero-degree rotation (since negative Y is up).
 	uw *= zoom;
@@ -246,9 +257,9 @@ void DrawList::PushRaw(const Sprite *sprite, const float frame, const float xpos
 	item.blur[0] = 0.0f;
 	item.blur[1] = 0.0f;
 
-	item.alpha = alpha;
+	item.alpha   = alpha;
 	item.swizzle = swizzle;
-	item.clip = 1.;
+	item.clip    = 1.;
 
 	items.push_back(item);
 }

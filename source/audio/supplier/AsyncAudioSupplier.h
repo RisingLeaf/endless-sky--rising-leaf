@@ -30,8 +30,8 @@ public:
 	~AsyncAudioSupplier() override;
 
 	// Inherited pure virtual methods
-	size_t MaxChunks() const override;
-	size_t AvailableChunks() const override;
+	size_t                MaxChunks() const override;
+	size_t                AvailableChunks() const override;
 	std::vector<sample_t> NextDataChunk() override;
 
 
@@ -54,7 +54,7 @@ protected:
 
 
 protected:
-	bool done = false;
+	bool       done = false;
 	const bool looping;
 
 	std::shared_ptr<std::iostream> data;
@@ -67,7 +67,7 @@ private:
 	std::vector<sample_t> buffer;
 
 	// Sync management
-	std::thread audioThread;
-	std::mutex bufferMutex;
+	std::thread             audioThread;
+	std::mutex              bufferMutex;
 	std::condition_variable bufferCondition;
 };

@@ -46,47 +46,76 @@ namespace {
 	// Map any conceivable numeric keypad keys to their ASCII values. Most of
 	// these will presumably only exist on special programming keyboards.
 	const map<SDL_Keycode, char> KEY_MAP = {
-	    {SDLK_KP_0, '0'},      {SDLK_KP_1, '1'},          {SDLK_KP_2, '2'},          {SDLK_KP_3, '3'},
-	    {SDLK_KP_4, '4'},      {SDLK_KP_5, '5'},          {SDLK_KP_6, '6'},          {SDLK_KP_7, '7'},
-	    {SDLK_KP_8, '8'},      {SDLK_KP_9, '9'},          {SDLK_KP_AMPERSAND, '&'},  {SDLK_KP_AT, '@'},
-	    {SDLK_KP_A, 'a'},      {SDLK_KP_B, 'b'},          {SDLK_KP_C, 'c'},          {SDLK_KP_D, 'd'},
-	    {SDLK_KP_E, 'e'},      {SDLK_KP_F, 'f'},          {SDLK_KP_COLON, ':'},      {SDLK_KP_COMMA, ','},
-	    {SDLK_KP_DIVIDE, '/'}, {SDLK_KP_EQUALS, '='},     {SDLK_KP_EXCLAM, '!'},     {SDLK_KP_GREATER, '>'},
-	    {SDLK_KP_HASH, '#'},   {SDLK_KP_LEFTBRACE, '{'},  {SDLK_KP_LEFTPAREN, '('},  {SDLK_KP_LESS, '<'},
-	    {SDLK_KP_MINUS, '-'},  {SDLK_KP_MULTIPLY, '*'},   {SDLK_KP_PERCENT, '%'},    {SDLK_KP_PERIOD, '.'},
-	    {SDLK_KP_PLUS, '+'},   {SDLK_KP_POWER, '^'},      {SDLK_KP_RIGHTBRACE, '}'}, {SDLK_KP_RIGHTPAREN, ')'},
-	    {SDLK_KP_SPACE, ' '},  {SDLK_KP_VERTICALBAR, '|'}};
+	    {          SDLK_KP_0, '0'},
+        {          SDLK_KP_1, '1'},
+        {          SDLK_KP_2, '2'},
+        {          SDLK_KP_3, '3'},
+	    {          SDLK_KP_4, '4'},
+        {          SDLK_KP_5, '5'},
+        {          SDLK_KP_6, '6'},
+        {          SDLK_KP_7, '7'},
+	    {          SDLK_KP_8, '8'},
+        {          SDLK_KP_9, '9'},
+        {  SDLK_KP_AMPERSAND, '&'},
+        {         SDLK_KP_AT, '@'},
+	    {          SDLK_KP_A, 'a'},
+        {          SDLK_KP_B, 'b'},
+        {          SDLK_KP_C, 'c'},
+        {          SDLK_KP_D, 'd'},
+	    {          SDLK_KP_E, 'e'},
+        {          SDLK_KP_F, 'f'},
+        {      SDLK_KP_COLON, ':'},
+        {      SDLK_KP_COMMA, ','},
+	    {     SDLK_KP_DIVIDE, '/'},
+        {     SDLK_KP_EQUALS, '='},
+        {     SDLK_KP_EXCLAM, '!'},
+        {    SDLK_KP_GREATER, '>'},
+	    {       SDLK_KP_HASH, '#'},
+        {  SDLK_KP_LEFTBRACE, '{'},
+        {  SDLK_KP_LEFTPAREN, '('},
+        {       SDLK_KP_LESS, '<'},
+	    {      SDLK_KP_MINUS, '-'},
+        {   SDLK_KP_MULTIPLY, '*'},
+        {    SDLK_KP_PERCENT, '%'},
+        {     SDLK_KP_PERIOD, '.'},
+	    {       SDLK_KP_PLUS, '+'},
+        {      SDLK_KP_POWER, '^'},
+        { SDLK_KP_RIGHTBRACE, '}'},
+        { SDLK_KP_RIGHTPAREN, ')'},
+	    {      SDLK_KP_SPACE, ' '},
+        {SDLK_KP_VERTICALBAR, '|'}
+    };
 
 	// The width of the margin on the right/left sides of the dialog. This area is part of the sprite,
 	// but shouldn't have any text or other graphics rendered over it. (It's mostly transparent.)
-	constexpr double LEFT_MARGIN = 20;
-	constexpr double RIGHT_MARGIN = 20;
+	constexpr double LEFT_MARGIN       = 20;
+	constexpr double RIGHT_MARGIN      = 20;
 	constexpr double HORIZONTAL_MARGIN = LEFT_MARGIN + RIGHT_MARGIN;
 	// The margin on the right/left sides of the button sprite. The bottom segment also includes a button
 	// that uses the same value.
-	constexpr double BUTTON_LEFT_MARGIN = 10;
-	constexpr double BUTTON_RIGHT_MARGIN = 10;
+	constexpr double BUTTON_LEFT_MARGIN       = 10;
+	constexpr double BUTTON_RIGHT_MARGIN      = 10;
 	constexpr double BUTTON_HORIZONTAL_MARGIN = BUTTON_LEFT_MARGIN + BUTTON_RIGHT_MARGIN;
 	// The margin on the top/bottom sides of the button sprite. The bottom segment also includes a button
 	// that uses the same value.
-	constexpr double BUTTON_TOP_MARGIN = 10;
-	constexpr double BUTTON_BOTTOM_MARGIN = 10;
+	constexpr double BUTTON_TOP_MARGIN      = 10;
+	constexpr double BUTTON_BOTTOM_MARGIN   = 10;
 	constexpr double BUTTON_VERTICAL_MARGIN = BUTTON_TOP_MARGIN + BUTTON_BOTTOM_MARGIN;
 	// The width of the padding used on the left/right sides of each segment, in pixels.
-	constexpr double LEFT_PADDING = 10;
-	constexpr double RIGHT_PADDING = 10;
+	constexpr double LEFT_PADDING       = 10;
+	constexpr double RIGHT_PADDING      = 10;
 	constexpr double HORIZONTAL_PADDING = RIGHT_PADDING + LEFT_PADDING;
 	// The height of the padding used by the top/bottom segment, in pixels.
-	constexpr double TOP_PADDING = 10;
-	constexpr double BOTTOM_PADDING = 10;
+	constexpr double TOP_PADDING      = 10;
+	constexpr double BOTTOM_PADDING   = 10;
 	constexpr double VERTICAL_PADDING = TOP_PADDING + BOTTOM_PADDING;
 	// The width of the padding at the beginning/end of an input field.
-	constexpr double INPUT_LEFT_PADDING = 5;
-	constexpr double INPUT_RIGHT_PADDING = 5;
+	constexpr double INPUT_LEFT_PADDING       = 5;
+	constexpr double INPUT_RIGHT_PADDING      = 5;
 	constexpr double INPUT_HORIZONTAL_PADDING = INPUT_LEFT_PADDING + INPUT_RIGHT_PADDING;
 	// The height of the padding at the top/bottom of an input field.
-	constexpr double INPUT_TOP_PADDING = 2;
-	constexpr double INPUT_BOTTOM_PADDING = 2;
+	constexpr double INPUT_TOP_PADDING      = 2;
+	constexpr double INPUT_BOTTOM_PADDING   = 2;
 	constexpr double INPUT_VERTICAL_PADDING = INPUT_TOP_PADDING + INPUT_BOTTOM_PADDING;
 	// The height of an input field in pixels.
 	constexpr double INPUT_HEIGHT = 20;
@@ -104,53 +133,56 @@ DialogPanel::~DialogPanel()
 DialogPanel *DialogPanel::Info(std::string message, Truncate truncate, bool allowsFastForward)
 {
 	DialogInit init;
-	init.message = std::move(message);
-	init.canCancel = false;
-	init.truncate = truncate;
+	init.message           = std::move(message);
+	init.canCancel         = false;
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
 
 
 
-DialogPanel *DialogPanel::CallFunctionIfOk(std::function<void()> okFunction, std::string message, int activeButton,
-                                           Truncate truncate, bool allowsFastForward)
+DialogPanel *DialogPanel::CallFunctionIfOk(
+    std::function<void()> okFunction, std::string message, int activeButton, Truncate truncate, bool allowsFastForward)
 {
 	DialogInit init;
-	init.voidFun = std::move(okFunction);
-	init.message = std::move(message);
-	init.activeButton = activeButton;
-	init.truncate = truncate;
+	init.voidFun           = std::move(okFunction);
+	init.message           = std::move(message);
+	init.activeButton      = activeButton;
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
 
 
 
-DialogPanel *DialogPanel::MissionOfferDialog(std::string message, PlayerInfo &player, const System *system,
-                                             Truncate truncate, bool allowsFastForward)
+DialogPanel *DialogPanel::MissionOfferDialog(
+    std::string message, PlayerInfo &player, const System *system, Truncate truncate, bool allowsFastForward)
 {
 	DialogInit init;
-	init.message = std::move(message);
-	init.intFun = bind(&PlayerInfo::MissionCallback, &player, placeholders::_1);
-	init.system = system;
-	init.player = &player;
-	init.canCancel = true;
-	init.isMission = true;
-	init.truncate = truncate;
+	init.message           = std::move(message);
+	init.intFun            = bind(&PlayerInfo::MissionCallback, &player, placeholders::_1);
+	init.system            = system;
+	init.player            = &player;
+	init.canCancel         = true;
+	init.isMission         = true;
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
 
 
-DialogPanel *DialogPanel::RequestString(std::function<void(const std::string &)> callback, std::string message,
-                                        std::string initialValue, Truncate truncate, bool allowsFastForward)
+DialogPanel *DialogPanel::RequestString(std::function<void(const std::string &)> callback,
+                                        std::string                              message,
+                                        std::string                              initialValue,
+                                        Truncate                                 truncate,
+                                        bool                                     allowsFastForward)
 {
 	DialogInit init;
-	init.message = std::move(message);
-	init.initialValue = std::move(initialValue);
-	init.stringFun = std::move(callback);
-	init.truncate = truncate;
+	init.message           = std::move(message);
+	init.initialValue      = std::move(initialValue);
+	init.stringFun         = std::move(callback);
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
@@ -162,10 +194,10 @@ void DialogPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 {
 	DrawBackdrop(cb);
 
-	const Sprite *top = SpriteSet::Get(isWide ? "ui/dialog top wide" : "ui/dialog top");
-	const Sprite *middle = SpriteSet::Get(isWide ? "ui/dialog middle wide" : "ui/dialog middle");
-	const Sprite *bottom = SpriteSet::Get(isWide ? "ui/dialog bottom wide" : "ui/dialog bottom");
-	const Sprite *cancel = SpriteSet::Get("ui/dialog cancel");
+	const Sprite *top               = SpriteSet::Get(isWide ? "ui/dialog top wide" : "ui/dialog top");
+	const Sprite *middle            = SpriteSet::Get(isWide ? "ui/dialog middle wide" : "ui/dialog middle");
+	const Sprite *bottom            = SpriteSet::Get(isWide ? "ui/dialog bottom wide" : "ui/dialog bottom");
+	const Sprite *cancel            = SpriteSet::Get("ui/dialog cancel");
 	const Sprite *thirdButtonSprite = SpriteSet::Get("ui/wide button");
 
 	// Get the position of the top of this dialog, and of the input.
@@ -192,11 +224,11 @@ void DialogPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	pos.Y() += (bottom->Height() - cancel->Height()) * .5;
 
 	// Draw the buttons, including optionally the cancel button.
-	const Color &bright = *GameData::Colors().Get("bright");
-	const Color &dim = *GameData::Colors().Get("medium");
-	const Color &back = *GameData::Colors().Get("faint");
+	const Color &bright   = *GameData::Colors().Get("bright");
+	const Color &dim      = *GameData::Colors().Get("medium");
+	const Color &back     = *GameData::Colors().Get("faint");
 	const Color &inactive = *GameData::Colors().Get("inactive");
-	okPos = pos + Point((top->Width() - RIGHT_MARGIN - cancel->Width()) * .5, 0.);
+	okPos                 = pos + Point((top->Width() - RIGHT_MARGIN - cancel->Width()) * .5, 0.);
 	Point labelPos(okPos.X() - .5 * font.Width(okText), okPos.Y() - .5 * font.Height());
 	font.Draw(cb, okText, labelPos, isOkDisabled ? inactive : (activeButton == 1 ? bright : dim));
 	if(canCancel)
@@ -221,13 +253,13 @@ void DialogPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	// Draw the input, if any.
 	if(AcceptsInput())
 	{
-		FillShader::Fill(cb, inputPos, Point(Width() - HORIZONTAL_PADDING, INPUT_HEIGHT),
-		                 (flickerTime % 6 > 3) ? dim : back);
+		FillShader::Fill(
+		    cb, inputPos, Point(Width() - HORIZONTAL_PADDING, INPUT_HEIGHT), (flickerTime % 6 > 3) ? dim : back);
 		if(flickerTime)
 			--flickerTime;
 
-		Point stringPos(inputPos.X() - (Width() - HORIZONTAL_PADDING) * .5 + INPUT_LEFT_PADDING,
-		                inputPos.Y() - .5 * font.Height());
+		Point      stringPos(inputPos.X() - (Width() - HORIZONTAL_PADDING) * .5 + INPUT_LEFT_PADDING,
+		                     inputPos.Y() - .5 * font.Height());
 		const auto inputText = DisplayText(
 		    input, {static_cast<int>(Width() - HORIZONTAL_PADDING - INPUT_HORIZONTAL_PADDING), Truncate::FRONT});
 		font.Draw(cb, inputText, stringPos, bright);
@@ -266,14 +298,14 @@ DialogPanel::DialogPanel(DialogInit &init)
 	Audio::Pause();
 	SetInterruptible(isMission);
 
-	isWide = false;
+	isWide     = false;
 	numButtons = canCancel ? (!buttonThree.buttonLabel.empty() ? 3 : 2) : 1;
 
 	if(buttonOne.buttonLabel.empty())
 		okText = isMission ? "Accept" : "OK";
 	else
 	{
-		okText = buttonOne.buttonLabel;
+		okText    = buttonOne.buttonLabel;
 		stringFun = buttonOne.buttonAction;
 	}
 	cancelText = isMission ? "Decline" : "Cancel";
@@ -302,7 +334,7 @@ void DialogPanel::Resize()
 	if(text->GetTextHeight(false) > maxHeight)
 	{
 		textRectSize.Y() = maxHeight;
-		isWide = true;
+		isWide           = true;
 		// Re-wrap with the new width
 		textRectSize.X() = Width() - HORIZONTAL_PADDING;
 		text->SetRect(Rectangle(Point{}, textRectSize));
@@ -311,7 +343,7 @@ void DialogPanel::Resize()
 		{
 			// Formatted text is long and skinny (e.g. scan result dialog). Go back
 			// to using the default width, since the wide width doesn't help.
-			isWide = false;
+			isWide           = false;
 			textRectSize.X() = Width() - HORIZONTAL_PADDING;
 			text->SetRect(Rectangle(Point{}, textRectSize));
 		}
@@ -319,7 +351,7 @@ void DialogPanel::Resize()
 	else
 		textRectSize.Y() = text->GetTextHeight(false);
 
-	top = SpriteSet::Get(isWide ? "ui/dialog top wide" : "ui/dialog top");
+	top                  = SpriteSet::Get(isWide ? "ui/dialog top wide" : "ui/dialog top");
 	const Sprite *middle = SpriteSet::Get(isWide ? "ui/dialog middle wide" : "ui/dialog middle");
 	const Sprite *bottom = SpriteSet::Get(isWide ? "ui/dialog bottom wide" : "ui/dialog bottom");
 	const Sprite *cancel = SpriteSet::Get("ui/dialog cancel");
@@ -357,7 +389,7 @@ bool DialogPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, b
 		flickerTime = 18;
 	};
 
-	auto it = KEY_MAP.find(key);
+	auto it             = KEY_MAP.find(key);
 	bool isCloseRequest = key == SDLK_ESCAPE || (key == 'w' && (mod & (SDL_KMOD_CTRL | SDL_KMOD_GUI)));
 	if(stringFun && Clipboard::KeyDown(input, key, mod))
 	{
@@ -365,8 +397,8 @@ bool DialogPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, b
 	}
 	else if((it != KEY_MAP.end() || (key >= ' ' && key <= '~')) && AcceptsInput() && !isCloseRequest)
 	{
-		int ascii = (it != KEY_MAP.end()) ? it->second : key;
-		char c = ((mod & SDL_KMOD_SHIFT) ? SHIFT[ascii] : ascii);
+		int  ascii = (it != KEY_MAP.end()) ? it->second : key;
+		char c     = ((mod & SDL_KMOD_SHIFT) ? SHIFT[ascii] : ascii);
 		// Caps lock should shift letters, but not any other keys.
 		if((mod & SDL_KMOD_CAPS) && c >= 'a' && c <= 'z')
 			c += 'A' - 'a';
@@ -466,9 +498,9 @@ bool DialogPanel::Click(int x, int y, MouseButton button, int clicks)
 		return false;
 	Point clickPos(x, y);
 
-	const Sprite *sprite = SpriteSet::Get("ui/dialog cancel");
-	double toleranceX = (sprite->Width() - BUTTON_HORIZONTAL_MARGIN) / 2.;
-	double toleranceY = (sprite->Height() - BUTTON_VERTICAL_MARGIN) / 2.;
+	const Sprite *sprite     = SpriteSet::Get("ui/dialog cancel");
+	double        toleranceX = (sprite->Width() - BUTTON_HORIZONTAL_MARGIN) / 2.;
+	double        toleranceY = (sprite->Height() - BUTTON_VERTICAL_MARGIN) / 2.;
 
 	Point ok = clickPos - okPos;
 	if(fabs(ok.X()) < toleranceX && fabs(ok.Y()) < toleranceY)
@@ -489,10 +521,10 @@ bool DialogPanel::Click(int x, int y, MouseButton button, int clicks)
 
 	if(numButtons == 3)
 	{
-		Point cancel = clickPos - thirdPos;
+		Point         cancel  = clickPos - thirdPos;
 		const Sprite *sprite3 = SpriteSet::Get("ui/wide button");
-		toleranceX = (sprite3->Width() - BUTTON_HORIZONTAL_MARGIN) / 2.;
-		toleranceY = (sprite3->Height() - BUTTON_VERTICAL_MARGIN) / 2.;
+		toleranceX            = (sprite3->Width() - BUTTON_HORIZONTAL_MARGIN) / 2.;
+		toleranceY            = (sprite3->Height() - BUTTON_VERTICAL_MARGIN) / 2.;
 		if(fabs(cancel.X()) < toleranceX && fabs(cancel.Y()) < toleranceY)
 		{
 			activeButton = 3;

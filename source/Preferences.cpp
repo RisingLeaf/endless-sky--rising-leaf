@@ -39,48 +39,50 @@ using namespace std;
 
 namespace {
 	map<string, bool> settings;
-	int scrollSpeed = 60;
-	int tooltipActivation = 60;
+	int               scrollSpeed       = 60;
+	int               tooltipActivation = 60;
 
 	// Strings for ammo expenditure:
-	const string EXPEND_AMMO = "Escorts expend ammo";
+	const string EXPEND_AMMO    = "Escorts expend ammo";
 	const string FRUGAL_ESCORTS = "Escorts use ammo frugally";
 
 	const vector<string> DATEFMT_OPTIONS = {"dd/mm/yyyy", "mm/dd/yyyy", "yyyy-mm-dd"};
-	int dateFormatIndex = 0;
+	int                  dateFormatIndex = 0;
 
-	const vector<string> NOTIF_OPTIONS = {"off", "message", "both"};
-	int notifOptionsIndex = 1;
+	const vector<string> NOTIF_OPTIONS     = {"off", "message", "both"};
+	int                  notifOptionsIndex = 1;
 
-	size_t zoomIndex = 4;
+	size_t           zoomIndex    = 4;
 	constexpr double VOLUME_SCALE = .25;
 
 	// Default to fullscreen.
-	int screenModeIndex = 1;
+	int                  screenModeIndex      = 1;
 	const vector<string> SCREEN_MODE_SETTINGS = {"windowed", "fullscreen"};
 
 	// Enable standard VSync by default.
 	const vector<string> VSYNC_SETTINGS = {"off", "on", "adaptive"};
-	int vsyncIndex = 1;
+	int                  vsyncIndex     = 1;
 
 	const vector<string> CAMERA_ACCELERATION_SETTINGS = {"off", "on", "reversed"};
-	int cameraAccelerationIndex = 0;
+	int                  cameraAccelerationIndex      = 0;
 
-	const map<string, SoundCategory> VOLUME_SETTINGS = {{"volume", SoundCategory::MASTER},
-	                                                    {"music volume", SoundCategory::MUSIC},
-	                                                    {"ui volume", SoundCategory::UI},
-	                                                    {"anti-missile volume", SoundCategory::ANTI_MISSILE},
-	                                                    {"weapon volume", SoundCategory::WEAPON},
-	                                                    {"engine volume", SoundCategory::ENGINE},
-	                                                    {"afterburner volume", SoundCategory::AFTERBURNER},
-	                                                    {"jump volume", SoundCategory::JUMP},
-	                                                    {"explosion volume", SoundCategory::EXPLOSION},
-	                                                    {"scan volume", SoundCategory::SCAN},
-	                                                    {"environment volume", SoundCategory::ENVIRONMENT},
-	                                                    {"alert volume", SoundCategory::ALERT}};
+	const map<string, SoundCategory> VOLUME_SETTINGS = {
+	    {             "volume",       SoundCategory::MASTER},
+	    {       "music volume",        SoundCategory::MUSIC},
+	    {          "ui volume",           SoundCategory::UI},
+	    {"anti-missile volume", SoundCategory::ANTI_MISSILE},
+	    {      "weapon volume",       SoundCategory::WEAPON},
+	    {      "engine volume",       SoundCategory::ENGINE},
+	    { "afterburner volume",  SoundCategory::AFTERBURNER},
+	    {        "jump volume",         SoundCategory::JUMP},
+	    {   "explosion volume",    SoundCategory::EXPLOSION},
+	    {        "scan volume",         SoundCategory::SCAN},
+	    { "environment volume",  SoundCategory::ENVIRONMENT},
+	    {       "alert volume",        SoundCategory::ALERT}
+    };
 
 	const vector<string> FAST_FORWARD_CAPSLOCK_SYNC_SETTINGS = {"default", "never", "always"};
-	int fastForwardCapsLockSyncIndex = 0;
+	int                  fastForwardCapsLockSyncIndex        = 0;
 
 
 	class OverlaySetting {
@@ -121,21 +123,11 @@ namespace {
 		{
 			switch(state)
 			{
-			case Preferences::OverlayState::OFF:
-				state = Preferences::OverlayState::ON;
-				break;
-			case Preferences::OverlayState::ON:
-				state = Preferences::OverlayState::DAMAGED;
-				break;
-			case Preferences::OverlayState::DAMAGED:
-				state = Preferences::OverlayState::ON_HIT;
-				break;
-			case Preferences::OverlayState::ON_HIT:
-				state = Preferences::OverlayState::OFF;
-				break;
-			case Preferences::OverlayState::DISABLED:
-				state = Preferences::OverlayState::OFF;
-				break;
+			case Preferences::OverlayState::OFF:      state = Preferences::OverlayState::ON; break;
+			case Preferences::OverlayState::ON:       state = Preferences::OverlayState::DAMAGED; break;
+			case Preferences::OverlayState::DAMAGED:  state = Preferences::OverlayState::ON_HIT; break;
+			case Preferences::OverlayState::ON_HIT:   state = Preferences::OverlayState::OFF; break;
+			case Preferences::OverlayState::DISABLED: state = Preferences::OverlayState::OFF; break;
 			}
 		}
 
@@ -151,76 +143,76 @@ namespace {
 	const vector<string> OverlaySetting::OVERLAY_SETTINGS = {"off", "always on", "damaged", "--", "on hit"};
 
 	map<Preferences::OverlayType, OverlaySetting> statusOverlaySettings = {
-	    {Preferences::OverlayType::ALL, Preferences::OverlayState::OFF},
-	    {Preferences::OverlayType::FLAGSHIP, Preferences::OverlayState::ON},
-	    {Preferences::OverlayType::ESCORT, Preferences::OverlayState::ON},
-	    {Preferences::OverlayType::ENEMY, Preferences::OverlayState::ON},
-	    {Preferences::OverlayType::NEUTRAL, Preferences::OverlayState::OFF},
+	    {     Preferences::OverlayType::ALL, Preferences::OverlayState::OFF},
+	    {Preferences::OverlayType::FLAGSHIP,  Preferences::OverlayState::ON},
+	    {  Preferences::OverlayType::ESCORT,  Preferences::OverlayState::ON},
+	    {   Preferences::OverlayType::ENEMY,  Preferences::OverlayState::ON},
+	    { Preferences::OverlayType::NEUTRAL, Preferences::OverlayState::OFF},
 	};
 
 	const vector<string> TURRET_OVERLAYS_SETTINGS = {"off", "always on", "blindspots only"};
-	int turretOverlaysIndex = 2;
+	int                  turretOverlaysIndex      = 2;
 
 	const vector<string> HIGHLIGHT_SHIPS_SETTINGS = {"off", "flagship", "owned ships", "all"};
-	int highlightShipsIndex = 0;
+	int                  highlightShipsIndex      = 0;
 
 	const vector<string> AUTO_AIM_SETTINGS = {"off", "always on", "when firing"};
-	int autoAimIndex = 2;
+	int                  autoAimIndex      = 2;
 
 	const vector<string> AUTO_FIRE_SETTINGS = {"off", "on", "guns only", "turrets only"};
-	int autoFireIndex = 0;
+	int                  autoFireIndex      = 0;
 
 	const vector<string> BOARDING_SETTINGS = {"proximity", "value", "mixed"};
-	int boardingIndex = 0;
+	int                  boardingIndex     = 0;
 
 	const vector<string> FLOTSAM_SETTINGS = {"off", "on", "flagship only", "escorts only"};
-	int flotsamIndex = 1;
+	int                  flotsamIndex     = 1;
 
 	// Enable "fast" parallax by default. "fancy" is too GPU heavy, especially for low-end hardware.
 	const vector<string> PARALLAX_SETTINGS = {"off", "fancy", "fast"};
-	int parallaxIndex = 2;
+	int                  parallaxIndex     = 2;
 
 	const vector<string> EXTENDED_JUMP_EFFECT_SETTINGS = {"off", "medium", "heavy"};
-	int extendedJumpEffectIndex = 0;
+	int                  extendedJumpEffectIndex       = 0;
 
 	const vector<string> ALERT_INDICATOR_SETTING = {"off", "audio", "visual", "both"};
-	int alertIndicatorIndex = 3;
+	int                  alertIndicatorIndex     = 3;
 
 	const vector<string> MINIMAP_DISPLAY_SETTING = {"off", "when jumping", "always on"};
-	int minimapDisplayIndex = 1;
+	int                  minimapDisplayIndex     = 1;
 
 	const vector<string> FLAGSHIP_SPACE_PRIORITY_SETTINGS = {"none", "passengers", "cargo", "both"};
-	int flagshipSpacePriorityIndex = 1;
+	int                  flagshipSpacePriorityIndex       = 1;
 
 	const vector<string> LARGE_GRAPHICS_REDUCTION_SETTINGS = {"off", "largest only", "all"};
-	int largeGraphicsReductionIndex = 0;
+	int                  largeGraphicsReductionIndex       = 0;
 
 	const vector<string> TRIBUTE_CONFIRMATION_SETTINGS = {"off", "friendly only", "always"};
-	int tributeConfirmationIndex = 1;
+	int                  tributeConfirmationIndex      = 1;
 
 	const vector<string> AMMO_REFILL_SETTINGS = {"never", "ask", "when free", "always"};
-	int ammoRefillIndex = 1;
+	int                  ammoRefillIndex      = 1;
 
 	const vector<string> TEXT_ALIGNMENT_SETTINGS = {"left", "center", "right", "justified"};
-	int textAlignmentIndex = 3;
+	int                  textAlignmentIndex      = 3;
 
 	const string BLOCK_SCREEN_SAVER = "Block screen saver";
 
 	const vector<string> TARGET_ASTEROID_SETTINGS = {"proximity", "expected value", "quality"};
-	int targetAsteroidIndex = 0;
+	int                  targetAsteroidIndex      = 0;
 
 	int previousSaveCount = 3;
 
 	// The font size to be used for various UI panels that can support displaying larger text than the default.
-	const vector<int> FONT_SIZES = {14, 18};
-	int fontSizeIndex = 0;
+	const vector<int> FONT_SIZES    = {14, 18};
+	int               fontSizeIndex = 0;
 
 #ifdef _WIN32
 	const vector<string> TITLE_BAR_THEME_SETTINGS = {"system default", "light", "dark"};
-	int titleBarThemeIndex = 0;
+	int                  titleBarThemeIndex       = 0;
 
 	const vector<string> WINDOW_ROUNDING_SETTINGS = {"system default", "off", "large", "small"};
-	int windowRoundingIndex = 0;
+	int                  windowRoundingIndex      = 0;
 #endif
 } // namespace
 
@@ -230,34 +222,34 @@ void Preferences::Load()
 {
 	// These settings should be on by default. There is no need to specify
 	// values for settings that are off by default.
-	settings["Render motion blur"] = true;
-	settings["Cloaked ship outlines"] = true;
-	settings[FRUGAL_ESCORTS] = true;
-	settings[EXPEND_AMMO] = true;
-	settings["Damaged fighters retreat"] = true;
-	settings["Show escort systems on map"] = true;
-	settings["Show stored outfits on map"] = true;
-	settings["Show planet labels"] = true;
-	settings["Show asteroid scanner overlay"] = true;
-	settings["Draw background haze"] = true;
-	settings["Draw starfield"] = true;
-	settings["Animate main menu background"] = true;
-	settings["Texture filtering"] = true;
-	settings["Hide unexplored map regions"] = true;
-	settings["Turrets focus fire"] = true;
-	settings["Ship outlines in shops"] = true;
-	settings["Ship outlines in HUD"] = true;
-	settings["Extra fleet status messages"] = true;
-	settings["Deadline blink by distance"] = true;
-	settings["Confirm selling outfits"] = true;
-	settings["Confirm selling minables"] = true;
+	settings["Render motion blur"]             = true;
+	settings["Cloaked ship outlines"]          = true;
+	settings[FRUGAL_ESCORTS]                   = true;
+	settings[EXPEND_AMMO]                      = true;
+	settings["Damaged fighters retreat"]       = true;
+	settings["Show escort systems on map"]     = true;
+	settings["Show stored outfits on map"]     = true;
+	settings["Show planet labels"]             = true;
+	settings["Show asteroid scanner overlay"]  = true;
+	settings["Draw background haze"]           = true;
+	settings["Draw starfield"]                 = true;
+	settings["Animate main menu background"]   = true;
+	settings["Texture filtering"]              = true;
+	settings["Hide unexplored map regions"]    = true;
+	settings["Turrets focus fire"]             = true;
+	settings["Ship outlines in shops"]         = true;
+	settings["Ship outlines in HUD"]           = true;
+	settings["Extra fleet status messages"]    = true;
+	settings["Deadline blink by distance"]     = true;
+	settings["Confirm selling outfits"]        = true;
+	settings["Confirm selling minables"]       = true;
 	settings["Sell outfits without outfitter"] = true;
 
 	DataFile prefs(Files::Config() / "preferences.txt");
 	for(const DataNode &node : prefs)
 	{
-		const string &key = node.Token(0);
-		bool hasValue = node.Size() >= 2;
+		const string &key      = node.Token(0);
+		bool          hasValue = node.Size() >= 2;
 		if(key == "window size" && node.Size() >= 3)
 			Screen::SetRaw(node.Value(1), node.Value(2), true);
 		else if(key == "zoom" && hasValue)
@@ -388,7 +380,8 @@ void Preferences::Load()
 	    {{"'Sell Outfits' without outfitter", "Sell outfits without outfitter"},
 		 {"Confirm 'Sell Outfits' button", "Confirm selling outfits"},
 		 {"Confirm 'Sell Minables' button", "Confirm selling minables"},
-		 {"Show parenthesis", "Parenthesize trade profits"}}};
+		 {"Show parenthesis", "Parenthesize trade profits"}}
+    };
 	for(const auto &[oldName, newName] : RENAMED_BOOLEAN_SETTINGS)
 	{
 		it = settings.find(oldName);
@@ -622,7 +615,7 @@ double Preferences::MaxViewZoom()
 const vector<double> &Preferences::Zooms()
 {
 	static vector<double> DEFAULT_ZOOMS{1.};
-	const auto &zooms = GameData::Interfaces().Get("main view")->GetList("zooms");
+	const auto           &zooms = GameData::Interfaces().Get("main view")->GetList("zooms");
 	return zooms.empty() ? DEFAULT_ZOOMS : zooms;
 }
 

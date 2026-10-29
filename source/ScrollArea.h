@@ -37,8 +37,8 @@ public:
 	virtual ~ScrollArea() override;
 
 	virtual void SetRect(const Rectangle &r);
-	void SetScrollbarOffset(int offset);
-	void SetPointerOffset(int offset);
+	void         SetScrollbarOffset(int offset);
+	void         SetPointerOffset(int offset);
 
 	void SnapToTop();
 	void SnapToBottom();
@@ -60,18 +60,18 @@ protected:
 
 
 protected:
-	bool bufferIsValid = false;
-	bool contentsIsValid = false;
+	bool                          bufferIsValid   = false;
+	bool                          contentsIsValid = false;
 	std::shared_ptr<RenderBuffer> buffer;
-	Point position;
-	Point size;
+	Point                         position;
+	Point                         size;
 
 	ScrollVar<double> scroll;
-	bool dragging = false;
-	bool hovering = false;
+	bool              dragging = false;
+	bool              hovering = false;
 
 	ScrollBar scrollBar;
-	int scrollbarOffset = 5;
-	int pointerOffset = 5;
-	bool scrollHeightIncludesTrailingBreak = false;
+	int       scrollbarOffset                   = 5;
+	int       pointerOffset                     = 5;
+	bool      scrollHeightIncludesTrailingBreak = false;
 };

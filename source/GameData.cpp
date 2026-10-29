@@ -78,17 +78,17 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	UniverseObjects objects;
-	Set<Fleet> defaultFleets;
-	Set<Government> defaultGovernments;
-	Set<Planet> defaultPlanets;
-	Set<System> defaultSystems;
-	Set<Galaxy> defaultGalaxies;
-	Set<Shop<Ship>> defaultShipSales;
+	UniverseObjects   objects;
+	Set<Fleet>        defaultFleets;
+	Set<Government>   defaultGovernments;
+	Set<Planet>       defaultPlanets;
+	Set<System>       defaultSystems;
+	Set<Galaxy>       defaultGalaxies;
+	Set<Shop<Ship>>   defaultShipSales;
 	Set<Shop<Outfit>> defaultOutfitSales;
-	Set<Wormhole> defaultWormholes;
-	Set<Person> defaultPersons;
-	TextReplacements defaultSubstitutions;
+	Set<Wormhole>     defaultWormholes;
+	Set<Person>       defaultPersons;
+	TextReplacements  defaultSubstitutions;
 
 	const Gamerules *activeGamerules = nullptr;
 
@@ -100,7 +100,7 @@ namespace {
 
 	MaskManager maskManager;
 
-	const Government *playerGovernment = nullptr;
+	const Government                     *playerGovernment = nullptr;
 	map<const System *, map<string, int>> purchases;
 
 	ConditionsStore globalConditions;
@@ -150,8 +150,8 @@ namespace {
 
 
 
-shared_future<void> GameData::BeginLoad(TaskQueue &queue, const PlayerInfo &player, bool onlyLoadData, bool debugMode,
-                                        bool preventUpload)
+shared_future<void>
+GameData::BeginLoad(TaskQueue &queue, const PlayerInfo &player, bool onlyLoadData, bool debugMode, bool preventUpload)
 {
 	if(preventUpload)
 		SpriteLoadManager::PreventSpriteUpload();
@@ -177,18 +177,18 @@ shared_future<void> GameData::BeginLoad(TaskQueue &queue, const PlayerInfo &play
 void GameData::FinishLoading()
 {
 	// Store the current state, to revert back to later.
-	defaultFleets = objects.fleets;
-	defaultGovernments = objects.governments;
-	defaultPlanets = objects.planets;
-	defaultSystems = objects.systems;
-	defaultGalaxies = objects.galaxies;
-	defaultShipSales = objects.shipSales;
-	defaultOutfitSales = objects.outfitSales;
-	defaultWormholes = objects.wormholes;
-	defaultPersons = objects.persons;
+	defaultFleets        = objects.fleets;
+	defaultGovernments   = objects.governments;
+	defaultPlanets       = objects.planets;
+	defaultSystems       = objects.systems;
+	defaultGalaxies      = objects.galaxies;
+	defaultShipSales     = objects.shipSales;
+	defaultOutfitSales   = objects.outfitSales;
+	defaultWormholes     = objects.wormholes;
+	defaultPersons       = objects.persons;
 	defaultSubstitutions = objects.substitutions;
 
-	activeGamerules = objects.gamerulesPresets.Get("Default");
+	activeGamerules  = objects.gamerulesPresets.Get("Default");
 	playerGovernment = objects.governments.Get("Escort");
 
 	politics.Reset();
@@ -774,7 +774,7 @@ const vector<Trade::Commodity> &GameData::SpecialCommodities()
 const StellarObjectSpriteData &GameData::ObjectSpriteData(const Sprite *sprite)
 {
 	static const StellarObjectSpriteData EMPTY;
-	auto it = objects.objectSpriteData.find(sprite);
+	auto                                 it = objects.objectSpriteData.find(sprite);
 	return (it == objects.objectSpriteData.end() ? EMPTY : it->second);
 }
 
@@ -784,7 +784,7 @@ const StellarObjectSpriteData &GameData::ObjectSpriteData(const Sprite *sprite)
 const string &GameData::Rating(const string &type, int level)
 {
 	static const string EMPTY;
-	auto it = objects.ratings.find(type);
+	auto                it = objects.ratings.find(type);
 	if(it == objects.ratings.end() || it->second.empty())
 		return EMPTY;
 
@@ -847,7 +847,7 @@ void GameData::SetHaze(const Sprite *sprite, bool allowAnimation)
 const string &GameData::Tooltip(const string &label)
 {
 	static const string EMPTY;
-	auto it = objects.tooltips.find(label);
+	auto                it = objects.tooltips.find(label);
 	// Special case: the "cost" and "sells for" labels include the percentage of
 	// the full price, so they will not match exactly.
 	if(it == objects.tooltips.end() && label.starts_with("cost"))
@@ -862,7 +862,7 @@ const string &GameData::Tooltip(const string &label)
 string GameData::HelpMessage(const string &name)
 {
 	static const string EMPTY;
-	auto it = objects.helpMessages.find(name);
+	auto                it = objects.helpMessages.find(name);
 	return Command::ReplaceNamesWithKeys(it == objects.helpMessages.end() ? EMPTY : it->second);
 }
 

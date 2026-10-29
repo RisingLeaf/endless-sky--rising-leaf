@@ -75,16 +75,16 @@ public:
 	ShipEvent(const std::shared_ptr<Ship> &actor, const std::shared_ptr<Ship> &target, int type);
 
 	const std::shared_ptr<Ship> &Actor() const;
-	const Government *ActorGovernment() const;
+	const Government            *ActorGovernment() const;
 	const std::shared_ptr<Ship> &Target() const;
-	const Government *TargetGovernment() const;
-	int Type() const;
+	const Government            *TargetGovernment() const;
+	int                          Type() const;
 
 
 private:
 	std::shared_ptr<Ship> actor;
-	const Government *actorGovernment = nullptr;
+	const Government     *actorGovernment = nullptr;
 	std::shared_ptr<Ship> target;
-	const Government *targetGovernment = nullptr;
-	int type;
+	const Government     *targetGovernment = nullptr;
+	int                   type;
 };

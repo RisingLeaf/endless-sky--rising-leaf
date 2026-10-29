@@ -43,20 +43,20 @@ class System;
 class MapPanel : public Panel {
 public:
 	// Enumeration for how the systems should be colored:
-	static constexpr int SHOW_SHIPYARD = -1;
-	static constexpr int SHOW_OUTFITTER = -2;
-	static constexpr int SHOW_VISITED = -3;
-	static constexpr int SHOW_SPECIAL = -4;
+	static constexpr int SHOW_SHIPYARD   = -1;
+	static constexpr int SHOW_OUTFITTER  = -2;
+	static constexpr int SHOW_VISITED    = -3;
+	static constexpr int SHOW_SPECIAL    = -4;
 	static constexpr int SHOW_GOVERNMENT = -5;
 	static constexpr int SHOW_REPUTATION = -6;
-	static constexpr int SHOW_DANGER = -7;
-	static constexpr int SHOW_STARS = -8;
+	static constexpr int SHOW_DANGER     = -7;
+	static constexpr int SHOW_STARS      = -8;
 
 	static const unsigned MAX_MISSION_POINTERS_DRAWN;
-	static const float OUTER;
-	static const float INNER;
-	static const float LINK_WIDTH;
-	static const float LINK_OFFSET;
+	static const float    OUTER;
+	static const float    INNER;
+	static const float    LINK_WIDTH;
+	static const float    LINK_OFFSET;
 
 	class SystemTooltipData {
 	public:
@@ -70,14 +70,20 @@ public:
 
 
 public:
-	static void DrawPointer(GraphicsTypes::CommandBufferInstance *cb, Point position, unsigned &systemCount,
-	                        const Color &color, bool drawBack = true, bool bigger = false);
+	static void                  DrawPointer(GraphicsTypes::CommandBufferInstance *cb,
+	                                         Point                                 position,
+	                                         unsigned                             &systemCount,
+	                                         const Color                          &color,
+	                                         bool                                  drawBack = true,
+	                                         bool                                  bigger   = false);
 	static std::pair<bool, bool> BlinkMissionIndicator(const PlayerInfo &player, const Mission &mission, int step);
 
 
 public:
-	explicit MapPanel(PlayerInfo &player, int commodity = SHOW_REPUTATION, const System *special = nullptr,
-	                  bool fromMission = false);
+	explicit MapPanel(PlayerInfo   &player,
+	                  int           commodity   = SHOW_REPUTATION,
+	                  const System *special     = nullptr,
+	                  bool          fromMission = false);
 	virtual ~MapPanel() override;
 
 	virtual void Step() override;
@@ -118,19 +124,24 @@ protected:
 	virtual double SystemValue(const System *system) const;
 
 	const System *ClickedSystem(int x, int y) const;
-	void Select(const System *system);
-	void Find(const std::string &name);
+	void          Select(const System *system);
+	void          Find(const std::string &name);
 
 	double Zoom() const;
 
 	// Check whether the NPC and waypoint conditions of the given mission have
 	// been satisfied.
-	bool IsSatisfied(const Mission &mission) const;
+	bool        IsSatisfied(const Mission &mission) const;
 	static bool IsSatisfied(const PlayerInfo &player, const Mission &mission);
 
 	// Returns if previous->next can be done with a known travel type.
-	bool GetTravelInfo(const System *previous, const System *next, double jumpRange, bool &isJump, bool &isWormhole,
-	                   bool &isMappable, Color *wormholeColor) const;
+	bool GetTravelInfo(const System *previous,
+	                   const System *next,
+	                   double        jumpRange,
+	                   bool         &isJump,
+	                   bool         &isWormhole,
+	                   bool         &isMappable,
+	                   Color        *wormholeColor) const;
 
 
 protected:
@@ -149,13 +160,13 @@ protected:
 
 	double playerJumpDistance;
 
-	Point center;
-	Point recenterVector;
-	int recentering = 0;
+	Point           center;
+	Point           recenterVector;
+	int             recentering = 0;
 	Animate<double> zoom;
-	int commodity;
-	int step = 0;
-	std::string buttonCondition;
+	int             commodity;
+	int             step = 0;
+	std::string     buttonCondition;
 
 	// Default display scaling for orbits within the currently displayed system.
 	double scale = .03;
@@ -177,7 +188,7 @@ protected:
 
 	// For tooltips:
 	const System *hoverSystem = nullptr;
-	Tooltip tooltip;
+	Tooltip       tooltip;
 
 	bool fromMission = false;
 	// A simplified map panel shows less buttons and has less features.
@@ -188,18 +199,22 @@ protected:
 private:
 	class Node {
 	public:
-		Node(const Point &position, const Color &color, const std::string &name, const Color &nameColor,
-		     const Government *government, const std::vector<const Sprite *> &mapIcons)
+		Node(const Point                       &position,
+		     const Color                       &color,
+		     const std::string                 &name,
+		     const Color                       &nameColor,
+		     const Government                  *government,
+		     const std::vector<const Sprite *> &mapIcons)
 		    : position(position), color(color), name(name), nameColor(nameColor), government(government),
 		      mapIcons(mapIcons)
 		{
 		}
 
-		Point position;
-		Color color;
-		std::string name;
-		Color nameColor;
-		const Government *government;
+		Point                       position;
+		Color                       color;
+		std::string                 name;
+		Color                       nameColor;
+		const Government           *government;
 		std::vector<const Sprite *> mapIcons;
 	};
 
@@ -227,8 +242,12 @@ private:
 	void DrawSystems(GraphicsTypes::CommandBufferInstance *cb);
 	void DrawNames(GraphicsTypes::CommandBufferInstance *cb);
 	void DrawMissions(GraphicsTypes::CommandBufferInstance *cb);
-	void DrawPointer(GraphicsTypes::CommandBufferInstance *cb, const System *system, unsigned &systemCount,
-	                 unsigned max, const Color &color, bool bigger = false);
+	void DrawPointer(GraphicsTypes::CommandBufferInstance *cb,
+	                 const System                         *system,
+	                 unsigned                             &systemCount,
+	                 unsigned                              max,
+	                 const Color                          &color,
+	                 bool                                  bigger = false);
 
 	void IncrementZoom();
 	void DecrementZoom();

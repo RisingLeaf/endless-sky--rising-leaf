@@ -80,9 +80,13 @@ public:
 
 	// Draw two columns as a pair with opposite alignments. If needed, truncate the given
 	// column based on the width of the non-truncated column's value.
-	void DrawTruncatedPair(GraphicsTypes::CommandBufferInstance *cb, const std::string &left, const Color &leftColor,
-	                       const std::string &right, const Color &rightColor, Truncate strategy,
-	                       bool truncateRightColumn) const;
+	void DrawTruncatedPair(GraphicsTypes::CommandBufferInstance *cb,
+	                       const std::string                    &left,
+	                       const Color                          &leftColor,
+	                       const std::string                    &right,
+	                       const Color                          &rightColor,
+	                       Truncate                              strategy,
+	                       bool                                  truncateRightColumn) const;
 
 	// Draw an underline under the text for the current row.
 	void DrawUnderline(GraphicsTypes::CommandBufferInstance *cb) const;
@@ -102,8 +106,8 @@ public:
 
 	// Get the center and size of the current row. This can be used to define
 	// what screen region constitutes a mouse click on this particular row.
-	Point GetCenterPoint() const;
-	Point GetRowSize() const;
+	Point     GetCenterPoint() const;
+	Point     GetRowSize() const;
 	Rectangle GetRowBounds() const;
 
 
@@ -121,8 +125,10 @@ private:
 
 
 private:
-	void Draw(GraphicsTypes::CommandBufferInstance *cb, const std::string &text, const Layout *special,
-	          const Color &color) const;
+	void Draw(GraphicsTypes::CommandBufferInstance *cb,
+	          const std::string                    &text,
+	          const Layout                         *special,
+	          const Color                          &color) const;
 
 
 private:
@@ -134,10 +140,10 @@ private:
 	mutable Color color;
 
 	const Font *font = nullptr;
-	Point rowSize;
-	Point center;
-	Point lineSize;
-	Point lineOff;
+	Point       rowSize;
+	Point       center;
+	Point       lineSize;
+	Point       lineOff;
 
 	std::vector<Column> columns;
 };

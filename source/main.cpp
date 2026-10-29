@@ -89,10 +89,10 @@ using namespace std;
 
 void PrintHelp();
 void PrintVersion();
-void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversation, const string &testToRun,
-              bool debugMode);
+void GameLoop(
+    PlayerInfo &player, TaskQueue &queue, const Conversation &conversation, const string &testToRun, bool debugMode);
 Conversation LoadConversation(const PlayerInfo &player);
-void PrintTestsTable();
+void         PrintTestsTable();
 
 
 
@@ -105,16 +105,16 @@ int main(int argc, char *argv[])
 	if(argc > 1)
 		WinConsole::Init();
 #endif
-	PlayerInfo player;
+	PlayerInfo   player;
 	Conversation conversation;
-	bool debugMode = false;
-	bool loadOnly = false;
-	bool checkAssets = false;
-	bool printTests = false;
-	bool printData = false;
-	bool noTestMute = false;
-	uint64_t nWorkerThreads = 0;
-	string testToRunName;
+	bool         debugMode      = false;
+	bool         loadOnly       = false;
+	bool         checkAssets    = false;
+	bool         printTests     = false;
+	bool         printData      = false;
+	bool         noTestMute     = false;
+	uint64_t     nWorkerThreads = 0;
+	string       testToRunName;
 
 	// Whether the game has encountered errors while loading.
 	bool hasErrors = false;
@@ -163,8 +163,8 @@ int main(int argc, char *argv[])
 	Files::Init(argv);
 
 	// Whether we are running an integration test.
-	const bool isTesting = !testToRunName.empty();
-	bool isConsoleOnly = loadOnly || printTests || printData;
+	const bool isTesting     = !testToRunName.empty();
+	bool       isConsoleOnly = loadOnly || printTests || printData;
 
 	Logger::Session logSession{isConsoleOnly || isTesting};
 
@@ -177,8 +177,8 @@ int main(int argc, char *argv[])
 		TaskQueue queue;
 
 		// Begin loading the game data.
-		auto dataFuture = GameData::BeginLoad(queue, player, isConsoleOnly, debugMode,
-		                                      isConsoleOnly || checkAssets || (isTesting && !debugMode));
+		auto dataFuture = GameData::BeginLoad(
+		    queue, player, isConsoleOnly, debugMode, isConsoleOnly || checkAssets || (isTesting && !debugMode));
 
 		// If we are not using the UI, or performing some automated task, we should load
 		// all data now.
@@ -294,8 +294,8 @@ int main(int argc, char *argv[])
 
 
 
-void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversation, const string &testToRunName,
-              bool debugMode)
+void GameLoop(
+    PlayerInfo &player, TaskQueue &queue, const Conversation &conversation, const string &testToRunName, bool debugMode)
 {
 	// gamePanels is used for the main panel where you fly your spaceship.
 	// All other game content related dialogs are placed on top of the gamePanels.
@@ -313,12 +313,12 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 	bool dataFinishedLoading = false;
 	menuPanels.Push(new GameLoadingPanel(player, queue, conversation, gamePanels, dataFinishedLoading));
 
-	bool showCursor = true;
-	int cursorTime = 0;
-	int frameRate = 60;
+	bool       showCursor = true;
+	int        cursorTime = 0;
+	int        frameRate  = 60;
 	FrameTimer timer(frameRate);
-	bool isDebugPaused = false;
-	bool isFastForward = false;
+	bool       isDebugPaused = false;
+	bool       isFastForward = false;
 
 	std::unique_ptr<Network::Server> server;
 	std::unique_ptr<Network::Client> client;
@@ -335,10 +335,18 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 
 	const bool isHeadless = (testContext.CurrentTest() && !debugMode);
 
-	auto ProcessEvents = [&menuPanels, &gamePanels, &player, &cursorTime, &toggleTimeout, &debugMode, &isDebugPaused,
-	                      &isFastForward, &server, &client] {
+	auto ProcessEvents = [&menuPanels,
+	                      &gamePanels,
+	                      &player,
+	                      &cursorTime,
+	                      &toggleTimeout,
+	                      &debugMode,
+	                      &isDebugPaused,
+	                      &isFastForward,
+	                      &server,
+	                      &client] {
 		const Preferences::FastForwardCapsLockSync fastforwardCapsLockSync = Preferences::GetFastForwardCapsLockSync();
-		const bool fastForwardSyncToCapsLock =
+		const bool                                 fastForwardSyncToCapsLock =
 		    fastforwardCapsLockSync == Preferences::FastForwardCapsLockSync::ALWAYS ||
 		    (fastforwardCapsLockSync == Preferences::FastForwardCapsLockSync::DEFAULT &&
 			 Command(SDLK_CAPSLOCK).Has(Command::FASTFORWARD));
@@ -353,7 +361,7 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 				cursorTime = 0;
 
 			const SDL_Keycode eventKeyCode = event.key.key;
-			const SDL_Keymod eventKeyMod = event.key.mod;
+			const SDL_Keymod  eventKeyMod  = event.key.mod;
 			if(debugMode && event.type == SDL_EVENT_KEY_DOWN && eventKeyCode == SDLK_GRAVE)
 			{
 				isDebugPaused = !isDebugPaused;
@@ -458,13 +466,13 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 		// How much time in total was spent on calculations and drawing since the last
 		// load cache update (every 60 drawing frames; usually 1 second).
 		chrono::steady_clock::duration cpuLoadSum{};
-		string cpuLoadString;
+		string                         cpuLoadString;
 		chrono::steady_clock::duration gpuLoadSum{};
-		string gpuLoadString;
-		string memoryString;
-		bool isPerformanceDisplayReady = false;
-		int step = 0;
-		int drawStep = 0;
+		string                         gpuLoadString;
+		string                         memoryString;
+		bool                           isPerformanceDisplayReady = false;
+		int                            step                      = 0;
+		int                            drawStep                  = 0;
 
 		std::unique_ptr<GraphicsTypes::CommandBufferInstance> MainCommandBuffer;
 		GameWindow::GraphicsInstance()->CreateCommandBuffer(MainCommandBuffer);
@@ -517,11 +525,11 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 				{
 					if(event->Type == Network::EventType::TEXT)
 						Messages::Add({std::format("Received message length {}", event->Data.size()),
-									   GameData::MessageCategories().Get("normal")});
+						               GameData::MessageCategories().Get("normal")});
 				}
 
 				server->MarkUnused();
-				for (const auto &ship : mainPanel->GetEngine().Ships())
+				for(const auto &ship : mainPanel->GetEngine().Ships())
 					server->PushBody(*ship.get(), ship->Position(), ship->Cloaking(), mainPanel->GetEngine().GetStep());
 				server->FreeUnused();
 
@@ -537,7 +545,7 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 				{
 					if(e->Type == Network::EventType::TEXT)
 						Messages::Add({std::format("Received message length {}", e->Data.size()),
-									   GameData::MessageCategories().Get("normal")});
+						               GameData::MessageCategories().Get("normal")});
 				}
 				client->SendEvent(Network::SerializeCommand(mainPanel->GetEngine().ActiveCommands()), false);
 
@@ -589,11 +597,11 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 			(menuPanels.IsEmpty() ? gamePanels : menuPanels).DrawAll(MainCommandBuffer.get());
 
 			if(mainPanel && mainPanel->GetEngine().IsPaused())
-				SpriteShader::Draw(MainCommandBuffer.get(), SpriteSet::Get("ui/paused"),
-				                   Screen::TopLeft() + Point(10., 10.));
+				SpriteShader::Draw(
+				    MainCommandBuffer.get(), SpriteSet::Get("ui/paused"), Screen::TopLeft() + Point(10., 10.));
 			else if(isFastForward)
-				SpriteShader::Draw(MainCommandBuffer.get(), SpriteSet::Get("ui/fast forward"),
-				                   Screen::TopLeft() + Point(10., 10.));
+				SpriteShader::Draw(
+				    MainCommandBuffer.get(), SpriteSet::Get("ui/fast forward"), Screen::TopLeft() + Point(10., 10.));
 
 			gpuLoadSum += chrono::steady_clock::now() - drawStart;
 
@@ -619,11 +627,11 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 					cpuLoadString =
 					    "CPU: " + Format::Number(cpuNano / (isFastForward && inFlight ? 1.8e8 : 6e7), 2, false) +
 					    " ms (" + Format::Percentage(cpuNano / 1e9, 0) + ")";
-					cpuLoadSum = {};
-					auto gpuNano = chrono::duration_cast<chrono::nanoseconds>(gpuLoadSum).count();
+					cpuLoadSum    = {};
+					auto gpuNano  = chrono::duration_cast<chrono::nanoseconds>(gpuLoadSum).count();
 					gpuLoadString = "GPU: " + Format::Number(gpuNano / 6e7, 2, false) + " ms (" +
 					                Format::Percentage(gpuNano / 1e9, 0) + ")";
-					gpuLoadSum = {};
+					gpuLoadSum    = {};
 					// Get how much memory we have (in bytes).
 					static size_t virtualMemoryUse;
 #ifdef _WIN32
@@ -632,32 +640,32 @@ void GameLoop(PlayerInfo &player, TaskQueue &queue, const Conversation &conversa
 					virtualMemoryUse = info.PagefileUsage;
 #elif defined(__APPLE__)
 					static mach_task_basic_info_data_t info;
-					static mach_msg_type_number_t infoSize = MACH_TASK_BASIC_INFO_COUNT;
+					static mach_msg_type_number_t      infoSize = MACH_TASK_BASIC_INFO_COUNT;
 					task_info(mach_task_self(), MACH_TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&info), &infoSize);
 					virtualMemoryUse = info.virtual_size;
 #else
 					static string statmStr;
-					ifstream statm{"/proc/self/statm"};
+					ifstream      statm{"/proc/self/statm"};
 					getline(statm, statmStr, ' ');
 					virtualMemoryUse = stoul(statmStr) * getpagesize();
 #endif
 					// bytes / (1024 * 1024) = megabytes
-					memoryString = "MEM: " + Format::Number(virtualMemoryUse / 1048576., 2, false) + " MB";
+					memoryString              = "MEM: " + Format::Number(virtualMemoryUse / 1048576., 2, false) + " MB";
 					isPerformanceDisplayReady = true;
 				}
 			}
 			else
 			{
 				// Clear the values to avoid reading old data when the player re-enables the display.
-				drawStep = 0;
-				cpuLoadSum = {};
-				gpuLoadSum = {};
+				drawStep                  = 0;
+				cpuLoadSum                = {};
+				gpuLoadSum                = {};
 				isPerformanceDisplayReady = false;
 			}
 			MainCommandBuffer->EndRenderPass();
 			MainCommandBuffer->End();
-			GameWindow::GraphicsInstance()->EndDraw(MainCommandBuffer.get(), GameWindow::DrawWidth(),
-			                                        GameWindow::DrawHeight());
+			GameWindow::GraphicsInstance()->EndDraw(
+			    MainCommandBuffer.get(), GameWindow::DrawWidth(), GameWindow::DrawHeight());
 
 			GameWindow::Step();
 
@@ -782,8 +790,8 @@ void PrintVersion()
 Conversation LoadConversation(const PlayerInfo &player)
 {
 	const ConditionsStore *conditions = &player.Conditions();
-	Conversation conversation;
-	DataFile file(cin);
+	Conversation           conversation;
+	DataFile               file(cin);
 	for(const DataNode &node : file)
 		if(node.Token(0) == "conversation")
 		{
@@ -791,26 +799,28 @@ Conversation LoadConversation(const PlayerInfo &player)
 			break;
 		}
 
-	map<string, string> subs = {{"<bunks>", "[N]"},
-	                            {"<cargo>", "[N tons of Commodity]"},
-	                            {"<commodity>", "[Commodity]"},
-	                            {"<date>", "[Day Mon Year]"},
-	                            {"<day>", "[The Nth of Month]"},
-	                            {"<destination>", "[Planet in the Star system]"},
-	                            {"<fare>", "[N passengers]"},
-	                            {"<first>", "[First]"},
-	                            {"<last>", "[Last]"},
-	                            {"<original first>", "[Original First]"},
-	                            {"<original last>", "[Original Last]"},
-	                            {"<origin>", "[Origin Planet]"},
-	                            {"<passengers>", "[your passengers]"},
-	                            {"<planet>", "[Planet]"},
-	                            {"<ship>", "[Ship]"},
-	                            {"<model>", "[Ship Model]"},
-	                            {"<flagship>", "[Flagship]"},
-	                            {"<flagship model>", "[Flagship Model]"},
-	                            {"<system>", "[Star]"},
-	                            {"<tons>", "[N tons]"}};
+	map<string, string> subs = {
+	    {         "<bunks>",                         "[N]"},
+	    {         "<cargo>",       "[N tons of Commodity]"},
+	    {     "<commodity>",                 "[Commodity]"},
+	    {          "<date>",              "[Day Mon Year]"},
+	    {           "<day>",          "[The Nth of Month]"},
+	    {   "<destination>", "[Planet in the Star system]"},
+	    {          "<fare>",              "[N passengers]"},
+	    {         "<first>",                     "[First]"},
+	    {          "<last>",                      "[Last]"},
+	    {"<original first>",            "[Original First]"},
+	    { "<original last>",             "[Original Last]"},
+	    {        "<origin>",             "[Origin Planet]"},
+	    {    "<passengers>",           "[your passengers]"},
+	    {        "<planet>",                    "[Planet]"},
+	    {          "<ship>",                      "[Ship]"},
+	    {         "<model>",                "[Ship Model]"},
+	    {      "<flagship>",                  "[Flagship]"},
+	    {"<flagship model>",            "[Flagship Model]"},
+	    {        "<system>",                      "[Star]"},
+	    {          "<tons>",                    "[N tons]"}
+    };
 	return conversation.Instantiate(subs);
 }
 

@@ -36,8 +36,11 @@ public:
 	ShipInfoDisplay() = default;
 
 	// Call this every time the ship changes.
-	void Update(const Ship &ship, const PlayerInfo &player, bool hasFleetCapacity = false,
-	            bool descriptionCollapsed = true, bool scrollingPanel = false);
+	void Update(const Ship       &ship,
+	            const PlayerInfo &player,
+	            bool              hasFleetCapacity     = false,
+	            bool              descriptionCollapsed = true,
+	            bool              scrollingPanel       = false);
 
 	// Provided by ItemInfoDisplay:
 	// int PanelWidth();
@@ -51,12 +54,15 @@ public:
 	// void DrawDescription(const Point &topLeft) const;
 	virtual void DrawAttributes(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft) const override;
 	virtual void DrawAttributes(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft, const bool sale) const;
-	void DrawOutfits(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft) const;
+	void         DrawOutfits(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft) const;
 
 
 private:
-	void UpdateAttributes(const Ship &ship, const PlayerInfo &player, bool hasFleetCapacity, bool descriptionCollapsed,
-	                      bool scrollingPanel);
+	void UpdateAttributes(const Ship       &ship,
+	                      const PlayerInfo &player,
+	                      bool              hasFleetCapacity,
+	                      bool              descriptionCollapsed,
+	                      bool              scrollingPanel);
 	void UpdateOutfits(const Ship &ship, const PlayerInfo &player, const Depreciation &depreciation);
 
 
@@ -70,9 +76,9 @@ private:
 
 	std::vector<std::string> outfitLabels;
 	std::vector<std::string> outfitValues;
-	int outfitsHeight = 0;
+	int                      outfitsHeight = 0;
 
 	std::vector<std::string> saleLabels;
 	std::vector<std::string> saleValues;
-	int saleHeight = 0;
+	int                      saleHeight = 0;
 };

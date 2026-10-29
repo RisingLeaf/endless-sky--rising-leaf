@@ -70,11 +70,11 @@ public:
 	// Check if the given conversation node is a conditional branch.
 	bool IsBranch(int node) const;
 	// Check if the given conversation node performs an action.
-	bool IsAction(int node) const;
+	bool                IsAction(int node) const;
 	const ConditionSet &Conditions(int node) const;
-	const GameAction &GetAction(int node) const;
-	const std::string &Text(int node, int element = 0) const;
-	const Sprite *Scene(int node) const;
+	const GameAction   &GetAction(int node) const;
+	const std::string  &Text(int node, int element = 0) const;
+	const Sprite       *Scene(int node) const;
 	// Find out where the conversation goes if the given option is chosen.
 	int NextNodeForChoice(int node, int element = 0) const;
 	// Go to the next node of the conversation, ignoring any choices.
@@ -177,7 +177,7 @@ private:
 	// While parsing the conversation, keep track of what labels link to what
 	// nodes. If a name appears in a goto before that label appears, remember
 	// what node and what element it appeared at in order to link it up later.
-	std::map<std::string, int> labels;
+	std::map<std::string, int>                      labels;
 	std::multimap<std::string, std::pair<int, int>> unresolved;
 	// The actual conversation data:
 	std::vector<Node> nodes;

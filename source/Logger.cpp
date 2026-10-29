@@ -31,7 +31,7 @@ using namespace std;
 
 namespace {
 	function<void(const string &message, Logger::Level)> logCallback = nullptr;
-	mutex logMutex;
+	mutex                                                logMutex;
 } // namespace
 
 
@@ -71,8 +71,8 @@ void Logger::SetLogCallback(function<void(const string &message, Level)> callbac
 void Logger::Log(const string_view message, Level level)
 {
 	lock_guard<mutex> lock(logMutex);
-	const string formatted = Format::TimestampString(chrono::system_clock::now(), true) + " | " +
-	                         static_cast<char>(level) + " | " + string(message);
+	const string      formatted = Format::TimestampString(chrono::system_clock::now(), true) + " | " +
+	                              static_cast<char>(level) + " | " + string(message);
 	(level == Level::INFO ? cout : cerr) << formatted << endl;
 	// Perform additional logging through callback if any is registered.
 	if(logCallback)

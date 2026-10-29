@@ -26,8 +26,8 @@ namespace GraphicsTypes {
 class GameWindow {
 public:
 	static std::string SDLVersions();
-	static bool Init(bool headless);
-	static void Quit();
+	static bool        Init(bool headless);
+	static void        Quit();
 
 	// Paint the next frame in the main window.
 	static void Step();

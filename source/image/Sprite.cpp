@@ -25,8 +25,11 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	void AddBuffer(const GraphicsTypes::GraphicsInstance *graphics_instance, const string &name, ImageBuffer &buffer,
-	               graphics_layer::TextureHandle &target, const bool noReduction)
+	void AddBuffer(const GraphicsTypes::GraphicsInstance *graphics_instance,
+	               const string                          &name,
+	               ImageBuffer                           &buffer,
+	               graphics_layer::TextureHandle         &target,
+	               const bool                             noReduction)
 	{
 		// Check whether this sprite is large enough to require size reduction.
 		Preferences::LargeGraphicsReduction setting = Preferences::GetLargeGraphicsReduction();
@@ -34,7 +37,7 @@ namespace {
 		                    (setting == Preferences::LargeGraphicsReduction::LARGEST_ONLY &&
 		                     buffer.Width() * buffer.Height() >= 1000000)))
 			buffer.ShrinkToHalfSize();
-		const auto width = buffer.Width();
+		const auto width  = buffer.Width();
 		const auto height = buffer.Height();
 		const auto frames = buffer.Frames();
 		const auto pixels = buffer.Pixels();
@@ -47,12 +50,19 @@ namespace {
 		for(int i = 0; i < frames; ++i)
 			framePixels.emplace_back(pixels + i * pixelsPerFrame);
 
-		target = graphics_layer::TextureHandle(
-		    graphics_instance, name, framePixels, width, height, frames, GraphicsTypes::TextureType::TYPE_2D_ARRAY,
-		    GraphicsTypes::ImageFormat::RGBA_SRGB, GraphicsTypes::TextureTarget::READ,
-		    GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
-		    Preferences::Has("Texture filtering") ? GraphicsTypes::TextureFilter::LINEAR
-			                                      : GraphicsTypes::TextureFilter::NEAREST);
+		target = graphics_layer::TextureHandle(graphics_instance,
+		                                       name,
+		                                       framePixels,
+		                                       width,
+		                                       height,
+		                                       frames,
+		                                       GraphicsTypes::TextureType::TYPE_2D_ARRAY,
+		                                       GraphicsTypes::ImageFormat::RGBA_SRGB,
+		                                       GraphicsTypes::TextureTarget::READ,
+		                                       GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
+		                                       Preferences::Has("Texture filtering")
+		                                           ? GraphicsTypes::TextureFilter::LINEAR
+		                                           : GraphicsTypes::TextureFilter::NEAREST);
 
 		target.CreateMipMaps();
 
@@ -78,7 +88,7 @@ const string &Sprite::Name() const
 
 void Sprite::LoadDimensions(const ImageBuffer &buffer)
 {
-	width = buffer.Width();
+	width  = buffer.Width();
 	height = buffer.Height();
 	frames = buffer.Frames();
 }
@@ -93,15 +103,17 @@ bool Sprite::HasDimensions() const
 
 
 // Add the given frames, optionally uploading them. The given buffers will be cleared afterwards.
-void Sprite::AddFrames(const GraphicsTypes::GraphicsInstance *graphics_instance, ImageBuffer &buffer1x,
-                       ImageBuffer &buffer2x, const bool noReduction)
+void Sprite::AddFrames(const GraphicsTypes::GraphicsInstance *graphics_instance,
+                       ImageBuffer                           &buffer1x,
+                       ImageBuffer                           &buffer2x,
+                       const bool                             noReduction)
 {
 	isLoaded = true;
 	// The 1x image determines the dimensions of the sprite's size
 	// and its number of frames. ImageSet should ensure that either 1x
 	// and 2x buffers contain the same number of frames, or the 2x buffer
 	// is empty.
-	width = buffer1x.Width();
+	width  = buffer1x.Width();
 	height = buffer1x.Height();
 	frames = buffer1x.Frames();
 	// Do nothing else if the buffer is empty.
@@ -122,8 +134,10 @@ void Sprite::AddFrames(const GraphicsTypes::GraphicsInstance *graphics_instance,
 
 
 // Upload the given frames. The given buffers will be cleared afterwards.
-void Sprite::AddSwizzleMaskFrames(const GraphicsTypes::GraphicsInstance *graphics_instance, ImageBuffer &buffer1x,
-                                  ImageBuffer &buffer2x, const bool noReduction)
+void Sprite::AddSwizzleMaskFrames(const GraphicsTypes::GraphicsInstance *graphics_instance,
+                                  ImageBuffer                           &buffer1x,
+                                  ImageBuffer                           &buffer2x,
+                                  const bool                             noReduction)
 {
 	if(!swizzleMaskFrames)
 	{

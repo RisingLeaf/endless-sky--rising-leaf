@@ -34,24 +34,24 @@ public:
 	// The different ship properties that can be recharged by a port.
 	class RechargeType {
 	public:
-		static constexpr int None = 0;
+		static constexpr int None    = 0;
 		static constexpr int Shields = (1 << 0);
-		static constexpr int Hull = (1 << 1);
-		static constexpr int Energy = (1 << 2);
-		static constexpr int Fuel = (1 << 3);
-		static constexpr int All = Shields | Hull | Energy | Fuel;
+		static constexpr int Hull    = (1 << 1);
+		static constexpr int Energy  = (1 << 2);
+		static constexpr int Fuel    = (1 << 3);
+		static constexpr int All     = Shields | Hull | Energy | Fuel;
 	};
 
 	// The different services available on this port.
 	class ServicesType {
 	public:
-		static constexpr int None = 0;
-		static constexpr int Trading = (1 << 0);
-		static constexpr int JobBoard = (1 << 1);
-		static constexpr int Bank = (1 << 2);
-		static constexpr int HireCrew = (1 << 3);
+		static constexpr int None           = 0;
+		static constexpr int Trading        = (1 << 0);
+		static constexpr int JobBoard       = (1 << 1);
+		static constexpr int Bank           = (1 << 2);
+		static constexpr int HireCrew       = (1 << 3);
 		static constexpr int OffersMissions = (1 << 4);
-		static constexpr int All = Trading | JobBoard | Bank | HireCrew | OffersMissions;
+		static constexpr int All            = Trading | JobBoard | Bank | HireCrew | OffersMissions;
 	};
 
 
@@ -68,8 +68,8 @@ public:
 	bool CustomLoaded() const;
 
 	const std::string &DisplayName() const;
-	const Paragraphs &Description() const;
-	const Sprite *Landscape() const;
+	const Paragraphs  &Description() const;
+	const Sprite      *Landscape() const;
 
 	// Whether the player is required to bribe before landing due to their conditions.
 	bool RequiresBribe() const;
@@ -98,7 +98,7 @@ private:
 
 	// The description and graphic for this port. Shown when
 	// clicking on the Spaceport button on the planet panel.
-	Paragraphs description;
+	Paragraphs    description;
 	const Sprite *landscape = nullptr;
 
 	// What is recharged when landing on this port.
@@ -108,8 +108,8 @@ private:
 	int services = ServicesType::None;
 
 	// Conditions that determine how the player is allowed to interact with this port.
-	ConditionSet toRequireBribe;
-	ConditionSet toAccess;
+	ConditionSet                toRequireBribe;
+	ConditionSet                toAccess;
 	std::map<int, ConditionSet> toRecharge;
 	std::map<int, ConditionSet> toService;
 

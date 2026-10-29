@@ -45,15 +45,15 @@ public:
 	class StartInfo {
 	public:
 		const Sprite *thumbnail = nullptr;
-		std::string displayName;
-		std::string description;
+		std::string   displayName;
+		std::string   description;
 		// StartInfo stores the name of the provided system and planet instead of a pointer to them
 		// so that the names don't need to be actual systems or planets in the game for the VISIBLE
 		// and REVEALED states. The UNLOCKED state must have valid information, though.
 		std::string system;
 		std::string planet;
 
-		Date date;
+		Date        date;
 		std::string dateString;
 		std::string credits;
 		std::string debt;
@@ -62,7 +62,8 @@ public:
 
 public:
 	StartConditions() = default;
-	explicit StartConditions(const DataNode &node, const ConditionsStore *globalConditions,
+	explicit StartConditions(const DataNode        &node,
+	                         const ConditionsStore *globalConditions,
 	                         const ConditionsStore *playerConditions);
 
 	void Load(const DataNode &node, const ConditionsStore *globalConditions, const ConditionsStore *playerConditions);
@@ -80,7 +81,7 @@ public:
 	const Conversation *GetConversation() const;
 
 	// Information needed for the scenario picker.
-	const Sprite *GetThumbnail() const noexcept;
+	const Sprite      *GetThumbnail() const noexcept;
 	const std::string &GetDisplayName() const noexcept;
 	const std::string &GetDescription() const noexcept;
 	const std::string &GetPlanetName() const noexcept;
@@ -114,7 +115,7 @@ private:
 	ExclusiveItem<Conversation> conversation;
 
 	// The current state of this StartConditions and the StartInfo to be used for each state.
-	StartState state = StartState::HIDDEN;
+	StartState                      state = StartState::HIDDEN;
 	std::map<StartState, StartInfo> infoByState;
 
 	// ConditionSets which determine the StartState of this StartConditions.

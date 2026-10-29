@@ -81,11 +81,11 @@ public:
 
 
 	public:
-		Type stepType = Type::ASSERT;
+		Type        stepType = Type::ASSERT;
 		std::string nameOrLabel;
 		// Variables for travelpan/navigate steps.
 		std::vector<const System *> travelPlan;
-		const Planet *travelDestination = nullptr;
+		const Planet               *travelDestination = nullptr;
 		// For applying condition changes.
 		ConditionAssignments assignConditions;
 		// For branching based on conditions or checking asserts (similar to Conversations).
@@ -98,23 +98,23 @@ public:
 		std::string jumpOnFalseTarget;
 
 		// Input variables.
-		Command command;
+		Command               command;
 		std::set<std::string> inputKeys;
-		Uint16 modKeys = 0;
+		Uint16                modKeys = 0;
 
 		// Mouse/Pointer input variables.
-		int XValue = 0;
-		int YValue = 0;
-		bool clickLeft = false;
+		int  XValue      = 0;
+		int  YValue      = 0;
+		bool clickLeft   = false;
 		bool clickMiddle = false;
-		bool clickRight = false;
+		bool clickRight  = false;
 	};
 
 
 public:
-	const std::string &Name() const;
-	Status GetStatus() const;
-	const std::string &StatusText() const;
+	const std::string    &Name() const;
+	Status                GetStatus() const;
+	const std::string    &StatusText() const;
 	std::set<std::string> RelevantConditions() const;
 
 	// Check the game status and perform the next test action.
@@ -133,8 +133,8 @@ private:
 
 private:
 	std::string name;
-	Status status = Status::ACTIVE;
+	Status      status = Status::ACTIVE;
 	// Jump-table that specifies which labels map to which teststeps.
 	std::map<std::string, unsigned int> jumpTable;
-	std::vector<TestStep> steps;
+	std::vector<TestStep>               steps;
 };

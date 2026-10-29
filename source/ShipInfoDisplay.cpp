@@ -39,8 +39,8 @@ using namespace std;
 
 // Call this every time the ship changes.
 // Panels that have scrolling abilities are not limited by space, allowing more detailed attributes.
-void ShipInfoDisplay::Update(const Ship &ship, const PlayerInfo &player, bool hasFleetCapacity,
-                             bool descriptionCollapsed, bool scrollingPanel)
+void ShipInfoDisplay::Update(
+    const Ship &ship, const PlayerInfo &player, bool hasFleetCapacity, bool descriptionCollapsed, bool scrollingPanel)
 {
 	UpdateDescription(ship.Description(), ship.Attributes().Licenses(), true);
 	UpdateAttributes(ship, player, hasFleetCapacity, descriptionCollapsed, scrollingPanel);
@@ -74,8 +74,9 @@ void ShipInfoDisplay::DrawAttributes(GraphicsTypes::CommandBufferInstance *cb, c
 
 
 // Draw each of the panels.
-void ShipInfoDisplay::DrawAttributes(GraphicsTypes::CommandBufferInstance *cb, const Point &topLeft,
-                                     const bool sale) const
+void ShipInfoDisplay::DrawAttributes(GraphicsTypes::CommandBufferInstance *cb,
+                                     const Point                          &topLeft,
+                                     const bool                            sale) const
 {
 	// Header.
 	Point point = Draw(cb, topLeft, attributeHeaderLabels, attributeHeaderValues);
@@ -128,8 +129,8 @@ void ShipInfoDisplay::DrawOutfits(GraphicsTypes::CommandBufferInstance *cb, cons
 
 
 
-void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &player, bool hasFleetCapacity,
-                                       bool descriptionCollapsed, bool scrollingPanel)
+void ShipInfoDisplay::UpdateAttributes(
+    const Ship &ship, const PlayerInfo &player, bool hasFleetCapacity, bool descriptionCollapsed, bool scrollingPanel)
 {
 	bool isGeneric = ship.GivenName().empty() || ship.GetPlanet();
 
@@ -171,9 +172,9 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 			}
 		}
 
-	int64_t fullCost = ship.Cost();
+	int64_t             fullCost     = ship.Cost();
 	const Depreciation &depreciation = ship.IsYours() ? player.FleetDepreciation() : player.StockDepreciation();
-	int64_t depreciated = depreciation.Value(ship, player.GetDate().DaysSinceEpoch());
+	int64_t             depreciated  = depreciation.Value(ship, player.GetDate().DaysSinceEpoch());
 	if(depreciated == fullCost)
 		attributeLabels.push_back("cost:");
 	else
@@ -195,9 +196,9 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	attributeLabels.push_back(string());
 	attributeValues.push_back(string());
 	attributesHeight += 10;
-	double shieldRegen = (attributes.Get("shield generation") + attributes.Get("delayed shield generation")) *
-	                     (1. + attributes.Get("shield generation multiplier"));
-	bool hasShieldRegen = shieldRegen > 0.;
+	double shieldRegen    = (attributes.Get("shield generation") + attributes.Get("delayed shield generation")) *
+	                        (1. + attributes.Get("shield generation multiplier"));
+	bool   hasShieldRegen = shieldRegen > 0.;
 	if(hasShieldRegen)
 	{
 		attributeLabels.push_back("shields (charge):");
@@ -209,9 +210,9 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 		attributeValues.push_back(Format::Number(ship.MaxShields()));
 	}
 	attributesHeight += 20;
-	double hullRepair = (attributes.Get("hull repair rate") + attributes.Get("delayed hull repair rate")) *
-	                    (1. + attributes.Get("hull repair multiplier"));
-	bool hasHullRepair = hullRepair > 0.;
+	double hullRepair    = (attributes.Get("hull repair rate") + attributes.Get("delayed hull repair rate")) *
+	                       (1. + attributes.Get("hull repair multiplier"));
+	bool   hasHullRepair = hullRepair > 0.;
 	if(hasHullRepair)
 	{
 		attributeLabels.push_back("hull (repair):");
@@ -223,7 +224,7 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 		attributeValues.push_back(Format::Number(ship.MaxHull()));
 	}
 	attributesHeight += 20;
-	double emptyMass = attributes.Mass();
+	double emptyMass   = attributes.Mass();
 	double currentMass = ship.Mass();
 	attributeLabels.push_back(isGeneric ? "mass with no cargo:" : "mass:");
 	attributeValues.push_back(Format::Number(isGeneric ? emptyMass : currentMass) + " tons");
@@ -248,10 +249,10 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 
 	double fullMass = emptyMass + attributes.Get("cargo space");
 	isGeneric &= (fullMass != emptyMass);
-	double thrust = attributes.Get("thrust");
+	double thrust            = attributes.Get("thrust");
 	double afterburnerThrust = attributes.Get("afterburner thrust");
-	double mainThrust = thrust ? thrust : afterburnerThrust;
-	double allThrust = thrust + afterburnerThrust;
+	double mainThrust        = thrust ? thrust : afterburnerThrust;
+	double allThrust         = thrust + afterburnerThrust;
 	attributeLabels.push_back(string());
 	attributeValues.push_back(string());
 	attributesHeight += 10;
@@ -301,11 +302,17 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	attributesHeight += 20;
 
 	// Find out how much outfit, engine, and weapon space the chassis has.
-	map<string, double> chassis;
-	static const vector<string> NAMES = {
-	    "outfit space free:",   "outfit space",    "    weapon capacity:", "weapon capacity",
-	    "    engine capacity:", "engine capacity", "gun ports free:",      "gun ports",
-	    "turret mounts free:",  "turret mounts"};
+	map<string, double>         chassis;
+	static const vector<string> NAMES = {"outfit space free:",
+	                                     "outfit space",
+	                                     "    weapon capacity:",
+	                                     "weapon capacity",
+	                                     "    engine capacity:",
+	                                     "engine capacity",
+	                                     "gun ports free:",
+	                                     "gun ports",
+	                                     "turret mounts free:",
+	                                     "turret mounts"};
 	for(unsigned i = 1; i < NAMES.size(); i += 2)
 		chassis[NAMES[i]] = attributes.Get(NAMES[i]);
 	for(const auto &it : ship.Outfits())
@@ -326,8 +333,8 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	// Print the number of bays for each bay-type we have
 	for(const auto &category : GameData::GetCategory(CategoryType::BAY))
 	{
-		const string &bayType = category.Name();
-		int totalBays = ship.BaysTotal(bayType);
+		const string &bayType   = category.Name();
+		int           totalBays = ship.BaysTotal(bayType);
 		if(totalBays)
 		{
 			// make sure the label is printed in lower case
@@ -358,9 +365,9 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 
 	// Add energy and heat while moving to the table.
 	attributesHeight += 20;
-	double reverseThrust = attributes.Get("reverse thrust");
+	double reverseThrust        = attributes.Get("reverse thrust");
 	double movingEnergyPerFrame = attributes.Get("turning energy");
-	double movingHeatPerFrame = attributes.Get("turning heat");
+	double movingHeatPerFrame   = attributes.Get("turning heat");
 	if(mainThrust && reverseThrust)
 	{
 		movingEnergyPerFrame += max(attributes.Get("thrusting energy") + attributes.Get("afterburner energy"),
@@ -414,7 +421,7 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	// Add energy and heat while firing to the table.
 	attributesHeight += 20;
 	double firingEnergy = 0.;
-	double firingHeat = 0.;
+	double firingHeat   = 0.;
 	for(const auto &it : ship.Outfits())
 	{
 		const Weapon *weapon = it.first->GetWeapon().get();
@@ -431,12 +438,12 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	// Add energy and heat when doing shield and hull repair to the table.
 	attributesHeight += 20;
 	double shieldEnergy = (hasShieldRegen)
-	                          ? (attributes.Get("shield energy") + attributes.Get("delayed shield energy")) *
-	                                (1. + attributes.Get("shield energy multiplier"))
-	                          : 0.;
-	double hullEnergy = (hasHullRepair) ? (attributes.Get("hull energy") + attributes.Get("delayed hull energy")) *
-	                                          (1. + attributes.Get("hull energy multiplier"))
-	                                    : 0.;
+	                        ? (attributes.Get("shield energy") + attributes.Get("delayed shield energy")) *
+	                              (1. + attributes.Get("shield energy multiplier"))
+	                        : 0.;
+	double hullEnergy   = (hasHullRepair) ? (attributes.Get("hull energy") + attributes.Get("delayed hull energy")) *
+	                                            (1. + attributes.Get("hull energy multiplier"))
+	                                      : 0.;
 	tableLabels.push_back((shieldEnergy && hullEnergy) ? "shields / hull:"
 	                      : hullEnergy                 ? "repairing hull:"
 	                                                   : "charging shields:");
@@ -444,9 +451,9 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	double shieldHeat = (hasShieldRegen) ? (attributes.Get("shield heat") + attributes.Get("delayed shield heat")) *
 	                                           (1. + attributes.Get("shield heat multiplier"))
 	                                     : 0.;
-	double hullHeat = (hasHullRepair) ? (attributes.Get("hull heat") + attributes.Get("delayed hull heat")) *
-	                                        (1. + attributes.Get("hull heat multiplier"))
-	                                  : 0.;
+	double hullHeat   = (hasHullRepair) ? (attributes.Get("hull heat") + attributes.Get("delayed hull heat")) *
+	                                          (1. + attributes.Get("hull heat multiplier"))
+	                                    : 0.;
 	heatTable.push_back(Format::Number(60. * (shieldHeat + hullHeat)));
 
 	if(scrollingPanel)
@@ -464,7 +471,7 @@ void ShipInfoDisplay::UpdateAttributes(const Ship &ship, const PlayerInfo &playe
 	// Add maximum values of energy and heat to the table.
 	attributesHeight += 20;
 	const double maxEnergy = attributes.Get("energy capacity");
-	const double maxHeat = 60. * ship.HeatDissipation() * ship.MaxHeat();
+	const double maxHeat   = 60. * ship.HeatDissipation() * ship.MaxHeat();
 	tableLabels.push_back("capacity:");
 	energyTable.push_back(Format::Number(maxEnergy));
 	heatTable.push_back(Format::Number(maxHeat));

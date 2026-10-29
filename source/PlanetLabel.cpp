@@ -39,12 +39,12 @@ using namespace std;
 namespace {
 	// Label offset angles, in order of preference (non-negative only).
 	constexpr double LINE_ANGLES[] = {60., 120., 300., 240., 30., 150., 330., 210., 90., 270., 0., 180.};
-	constexpr double LINE_LENGTH = 60.;
-	constexpr double INNER_SPACE = 10.;
-	constexpr double LINE_GAP = 1.7;
-	constexpr double GAP = 6.;
-	constexpr double MIN_DISTANCE = 30.;
-	constexpr double BORDER = 2.;
+	constexpr double LINE_LENGTH   = 60.;
+	constexpr double INNER_SPACE   = 10.;
+	constexpr double LINE_GAP      = 1.7;
+	constexpr double GAP           = 6.;
+	constexpr double MIN_DISTANCE  = 30.;
+	constexpr double BORDER        = 2.;
 
 	// Find the intersection of a ray and a rectangle, both centered on the origin.
 	Point GetOffset(const Point &unit, const Point &dimensions)
@@ -79,12 +79,14 @@ PlanetLabel::PlanetLabel(const vector<PlanetLabel> &labels, const System &system
 
 
 
-void PlanetLabel::Update(const Point &center, const double zoom, const vector<PlanetLabel> &labels,
-                         const System &system)
+void PlanetLabel::Update(const Point               &center,
+                         const double               zoom,
+                         const vector<PlanetLabel> &labels,
+                         const System              &system)
 {
 	drawCenter = center;
-	position = (object->Position() - center) * zoom;
-	radius = object->Radius() * zoom;
+	position   = (object->Position() - center) * zoom;
+	radius     = object->Radius() * zoom;
 	UpdateData(labels, system);
 }
 
@@ -93,7 +95,7 @@ void PlanetLabel::Update(const Point &center, const double zoom, const vector<Pl
 void PlanetLabel::Draw(GraphicsTypes::CommandBufferInstance *cb) const
 {
 	// Don't draw if too far away from the center of the screen.
-	const double offset = position.Length() - radius;
+	const double offset              = position.Length() - radius;
 	const double objectDistanceAlpha = object->DistanceAlpha(drawCenter);
 	if(offset >= 600. || objectDistanceAlpha == 0.)
 		return;
@@ -108,7 +110,7 @@ void PlanetLabel::Draw(GraphicsTypes::CommandBufferInstance *cb) const
 	RingShader::Draw(cb, position, radius + INNER_SPACE + GAP, 1.3f, .6f, labelColor, 0.f, outerAngle);
 
 	const double barbRadius = radius + 25.;
-	Angle barbAngle(innerAngle + 36.);
+	Angle        barbAngle(innerAngle + 36.);
 	for(int i = 0; i < hostility; ++i)
 	{
 		barbAngle += Angle(800. / barbRadius);
@@ -120,13 +122,13 @@ void PlanetLabel::Draw(GraphicsTypes::CommandBufferInstance *cb) const
 	{
 		const Point unit = Angle(innerAngle).Unit();
 		const Point from = position + unit * (radius + INNER_SPACE + LINE_GAP);
-		const Point to = from + unit * LINE_LENGTH;
+		const Point to   = from + unit * LINE_LENGTH;
 		LineShader::Draw(cb, from, to, 1.3f, labelColor);
 
 		// Use non-rounding version to prevent labels from jittering.
 		FontSet::Get(18).DrawAliased(cb, name, to.X() + nameOffset.X(), to.Y() + nameOffset.Y(), labelColor);
-		FontSet::Get(14).DrawAliased(cb, government, to.X() + governmentOffset.X(), to.Y() + governmentOffset.Y(),
-		                             labelColor);
+		FontSet::Get(14).DrawAliased(
+		    cb, government, to.X() + governmentOffset.X(), to.Y() + governmentOffset.Y(), labelColor);
 	}
 }
 
@@ -134,8 +136,8 @@ void PlanetLabel::Draw(GraphicsTypes::CommandBufferInstance *cb) const
 
 void PlanetLabel::UpdateData(const vector<PlanetLabel> &labels, const System &system)
 {
-	bool reposition = false;
-	const Planet &planet = *object->GetPlanet();
+	bool          reposition = false;
+	const Planet &planet     = *object->GetPlanet();
 	if(planet.DisplayName() != name)
 		reposition = true;
 	name = planet.DisplayName();
@@ -147,7 +149,7 @@ void PlanetLabel::UpdateData(const vector<PlanetLabel> &labels, const System &sy
 		if(newGovernment != government)
 			reposition = true;
 		government = newGovernment;
-		color = Color::Combine(.5f, planet.GetGovernment()->GetColor(), 1.f, Color(.3f));
+		color      = Color::Combine(.5f, planet.GetGovernment()->GetColor(), 1.f, Color(.3f));
 		if(!planet.CanLand())
 			hostility = 3 + 2 * planet.GetGovernment()->IsEnemy();
 	}
@@ -163,12 +165,12 @@ void PlanetLabel::UpdateData(const vector<PlanetLabel> &labels, const System &sy
 		return;
 
 	// Figure out how big the label is.
-	const Font &font = FontSet::Get(14);
-	const Font &bigFont = FontSet::Get(18);
-	const double labelWidth = max(bigFont.Width(name), font.Width(government));
-	const double nameHeight = bigFont.Height();
-	const double labelHeight = nameHeight + (government.empty() ? 0. : 1. + font.Height());
-	const Point labelDimensions = {labelWidth + BORDER * 2., labelHeight + BORDER * 2.};
+	const Font  &font            = FontSet::Get(14);
+	const Font  &bigFont         = FontSet::Get(18);
+	const double labelWidth      = max(bigFont.Width(name), font.Width(government));
+	const double nameHeight      = bigFont.Height();
+	const double labelHeight     = nameHeight + (government.empty() ? 0. : 1. + font.Height());
+	const Point  labelDimensions = {labelWidth + BORDER * 2., labelHeight + BORDER * 2.};
 
 	// Try to find a label direction that is not overlapping under any zoom.
 	const vector<double> &allZooms = Preferences::Zooms();
@@ -192,11 +194,11 @@ void PlanetLabel::UpdateData(const vector<PlanetLabel> &labels, const System &sy
 	}
 
 	// Cache the offsets for both labels; center labels.
-	const Point offset = GetOffset(Angle(innerAngle).Unit(), labelDimensions) - labelDimensions * .5;
-	const double nameX = (labelDimensions.X() - bigFont.Width(name)) * .5;
-	nameOffset = Point(offset.X() + nameX, offset.Y() + BORDER);
+	const Point  offset      = GetOffset(Angle(innerAngle).Unit(), labelDimensions) - labelDimensions * .5;
+	const double nameX       = (labelDimensions.X() - bigFont.Width(name)) * .5;
+	nameOffset               = Point(offset.X() + nameX, offset.Y() + BORDER);
 	const double governmentX = (labelDimensions.X() - font.Width(government)) * .5;
-	governmentOffset = Point(offset.X() + governmentX, nameOffset.Y() + nameHeight + 1.);
+	governmentOffset         = Point(offset.X() + governmentX, nameOffset.Y() + nameHeight + 1.);
 }
 
 
@@ -204,7 +206,7 @@ void PlanetLabel::UpdateData(const vector<PlanetLabel> &labels, const System &sy
 void PlanetLabel::SetBoundingBox(const Point &labelDimensions, const double angle)
 {
 	const Point unit = Angle(angle).Unit();
-	zoomOffset = object->Position() + unit * object->Radius();
+	zoomOffset       = object->Position() + unit * object->Radius();
 	box = Rectangle(unit * (INNER_SPACE + LINE_GAP + LINE_LENGTH) + GetOffset(unit, labelDimensions), labelDimensions);
 }
 
@@ -219,8 +221,10 @@ Rectangle PlanetLabel::GetBoundingBox(const double zoom) const
 
 // Check if the label for the given stellar object overlaps
 // with any existing label or any other stellar object in the system.
-bool PlanetLabel::HasOverlaps(const vector<PlanetLabel> &labels, const System &system, const StellarObject &object,
-                              const double zoom) const
+bool PlanetLabel::HasOverlaps(const vector<PlanetLabel> &labels,
+                              const System              &system,
+                              const StellarObject       &object,
+                              const double               zoom) const
 {
 	const Rectangle boundingBox = GetBoundingBox(zoom);
 

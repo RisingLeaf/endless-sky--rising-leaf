@@ -22,7 +22,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	const double CAMERA_VELOCITY_TRACKING = 0.1;
+	const double CAMERA_VELOCITY_TRACKING  = 0.1;
 	const double CAMERA_POSITION_CENTERING = 0.01;
 } // namespace
 
@@ -33,12 +33,12 @@ void Camera::SnapTo(const Point &target, bool keepVelocity)
 	// If a player is jumping to a new system, preserve their velocity by offsetting oldTarget
 	// and center by the current velocity.
 	Point newTarget = keepVelocity ? target - velocity : target;
-	oldTarget = newTarget;
-	center = newTarget;
+	oldTarget       = newTarget;
+	center          = newTarget;
 	// Velocity is zeroed here even when keepVelocity is true, but it will be re-calculated
 	// when MoveTo is called later in this frame.
 	velocity = Point();
-	accel = Point();
+	accel    = Point();
 }
 
 
@@ -46,12 +46,12 @@ void Camera::SnapTo(const Point &target, bool keepVelocity)
 void Camera::MoveTo(const Point &target, double hyperspaceInfluence)
 {
 	Point baseVelocity = target - oldTarget;
-	oldTarget = target;
+	oldTarget          = target;
 	if(Preferences::CameraAcceleration() == Preferences::CameraAccel::OFF)
 	{
-		center = target;
+		center   = target;
 		velocity = baseVelocity;
-		accel = Point();
+		accel    = Point();
 		return;
 	}
 
@@ -60,7 +60,7 @@ void Camera::MoveTo(const Point &target, double hyperspaceInfluence)
 	// Flip the accel offset if accelMultiplier is negative to simplify logic.
 	const Point oldAbsAccel = baseVelocity.Lerp(accel, accelMultiplier);
 	const Point newAbsAccel = oldAbsAccel.Lerp(baseVelocity, CAMERA_VELOCITY_TRACKING);
-	Point newCenter = (center + newAbsAccel).Lerp(target, CAMERA_POSITION_CENTERING);
+	Point       newCenter   = (center + newAbsAccel).Lerp(target, CAMERA_POSITION_CENTERING);
 
 	// Increase the interpolation speed when traveling through hyperspace so that the camera doesn't lose focus
 	// on the target.
@@ -68,7 +68,7 @@ void Camera::MoveTo(const Point &target, double hyperspaceInfluence)
 		newCenter = newCenter.Lerp(target, pow(hyperspaceInfluence, .5));
 
 	velocity = newCenter - center;
-	center = newCenter;
+	center   = newCenter;
 	// Acceleration interpolation is disabled while in hyperspace.
 	// Flip the accel back over the baseVelocity when not in hyperspace.
 	accel = hyperspaceInfluence ? baseVelocity : baseVelocity.Lerp(newAbsAccel, accelMultiplier);

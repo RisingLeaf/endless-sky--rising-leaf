@@ -67,8 +67,8 @@ private:
 	void DrawCargo(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &bounds);
 
 	// Helper functions.
-	void DrawLine(GraphicsTypes::CommandBufferInstance *cb, const Point &from, const Point &to,
-	              const Color &color) const;
+	void
+	DrawLine(GraphicsTypes::CommandBufferInstance *cb, const Point &from, const Point &to, const Color &color) const;
 	bool Hover(const Point &point);
 	bool Rename(const std::string &name);
 	bool CanDump() const;
@@ -85,28 +85,28 @@ private:
 	std::vector<std::shared_ptr<Ship>>::const_iterator shipIt;
 
 	// Information about the currently selected ship.
-	ShipInfoDisplay info;
+	ShipInfoDisplay                                    info;
 	std::map<std::string, std::vector<const Outfit *>> outfits;
 
 	// Track all the clickable parts of the UI (other than the buttons).
-	std::vector<ClickZone<int>> zones;
-	std::vector<ClickZone<std::string>> commodityZones;
+	std::vector<ClickZone<int>>            zones;
+	std::vector<ClickZone<std::string>>    commodityZones;
 	std::vector<ClickZone<const Outfit *>> plunderZones;
 	std::vector<ClickZone<const Outfit *>> outfitZones;
 	// Keep track of which item the mouse is hovering over and which item is
 	// currently being dragged.
-	int hoverIndex = -1;
-	int draggingIndex = -1;
-	std::string hoverCommodity;
+	int           hoverIndex    = -1;
+	int           draggingIndex = -1;
+	std::string   hoverCommodity;
 	const Outfit *hoverPlunder = nullptr;
-	const Outfit *hoverOutfit = nullptr;
+	const Outfit *hoverOutfit  = nullptr;
 
 	InfoPanelState panelState;
 
 	// Track the current mouse location.
 	Point hoverPoint;
 	// Track whether a commodity, plundered outfit, or installed outfit is selected to jettison.
-	std::string selectedCommodity;
+	std::string   selectedCommodity;
 	const Outfit *selectedPlunder = nullptr;
-	const Outfit *selectedOutfit = nullptr;
+	const Outfit *selectedOutfit  = nullptr;
 };

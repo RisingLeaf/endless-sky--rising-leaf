@@ -36,7 +36,7 @@ namespace {
 	void PenaltyHelper(const DataNode &node, map<int, Government::PenaltyEffect> &penalties)
 	{
 		auto loadPenalty = [&penalties](const DataNode &child, int eventType) -> void {
-			double amount = child.Value(1);
+			double                     amount         = child.Value(1);
 			Government::SpecialPenalty specialPenalty = Government::SpecialPenalty::NONE;
 			// Reverse compatibility: transfer the provoke and atrocity events to their respective
 			// special penalties if one is not explicitly given to them.
@@ -128,15 +128,15 @@ namespace {
 Government::Government()
 {
 	// Default penalties:
-	penaltyFor[ShipEvent::ASSIST] = PenaltyEffect(-.1);
-	penaltyFor[ShipEvent::DISABLE] = PenaltyEffect(.5);
-	penaltyFor[ShipEvent::BOARD] = PenaltyEffect(.3);
-	penaltyFor[ShipEvent::CAPTURE] = PenaltyEffect(1.);
-	penaltyFor[ShipEvent::DESTROY] = PenaltyEffect(1.);
+	penaltyFor[ShipEvent::ASSIST]       = PenaltyEffect(-.1);
+	penaltyFor[ShipEvent::DISABLE]      = PenaltyEffect(.5);
+	penaltyFor[ShipEvent::BOARD]        = PenaltyEffect(.3);
+	penaltyFor[ShipEvent::CAPTURE]      = PenaltyEffect(1.);
+	penaltyFor[ShipEvent::DESTROY]      = PenaltyEffect(1.);
 	penaltyFor[ShipEvent::SCAN_OUTFITS] = PenaltyEffect(0.);
-	penaltyFor[ShipEvent::SCAN_CARGO] = PenaltyEffect(0.);
-	penaltyFor[ShipEvent::PROVOKE] = PenaltyEffect(0., SpecialPenalty::PROVOKE);
-	penaltyFor[ShipEvent::ATROCITY] = PenaltyEffect(10., SpecialPenalty::ATROCITY);
+	penaltyFor[ShipEvent::SCAN_CARGO]   = PenaltyEffect(0.);
+	penaltyFor[ShipEvent::PROVOKE]      = PenaltyEffect(0., SpecialPenalty::PROVOKE);
+	penaltyFor[ShipEvent::ATROCITY]     = PenaltyEffect(10., SpecialPenalty::ATROCITY);
 
 	id = nextID++;
 }
@@ -144,7 +144,8 @@ Government::Government()
 
 
 // Load a government's definition from a file.
-void Government::Load(const DataNode &node, const set<const System *> *visitedSystems,
+void Government::Load(const DataNode            &node,
+                      const set<const System *> *visitedSystems,
                       const set<const Planet *> *visitedPlanets)
 {
 	if(node.Size() >= 2)
@@ -162,16 +163,16 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 	for(const DataNode &child : node)
 	{
 		bool remove = child.Token(0) == "remove";
-		bool add = child.Token(0) == "add";
+		bool add    = child.Token(0) == "add";
 		if((add || remove) && child.Size() < 2)
 		{
 			child.PrintTrace("Skipping " + child.Token(0) + " with no key given:");
 			continue;
 		}
 
-		const string &key = child.Token((add || remove) ? 1 : 0);
-		int valueIndex = (add || remove) ? 2 : 1;
-		bool hasValue = child.Size() > valueIndex;
+		const string &key        = child.Token((add || remove) ? 1 : 0);
+		int           valueIndex = (add || remove) ? 2 : 1;
+		bool          hasValue   = child.Size() > valueIndex;
 
 		// Check for conditions that require clearing this key's current value.
 		// "remove <key>" means to clear the key's previous contents.
@@ -222,12 +223,12 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 				planetBribeRejectionHail = nullptr;
 			else if(key == "tribute hails")
 			{
-				tributeAlreadyPaying = nullptr;
-				tributeUndefined = nullptr;
-				tributeUnworthy = nullptr;
-				tributeFleetLaunching = nullptr;
+				tributeAlreadyPaying   = nullptr;
+				tributeUndefined       = nullptr;
+				tributeUnworthy        = nullptr;
+				tributeFleetLaunching  = nullptr;
 				tributeFleetUndefeated = nullptr;
-				tributeSurrendered = nullptr;
+				tributeSurrendered     = nullptr;
 			}
 			else if(key == "language")
 				language.clear();
@@ -293,8 +294,8 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 		{
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
-				bool hasGrandValue = grand.Size() >= 2;
+				const string &grandKey      = grand.Token(0);
+				bool          hasGrandValue = grand.Size() >= 2;
 				if(grandKey == "player reputation" && hasGrandValue)
 					initialPlayerReputation =
 					    add ? initialPlayerReputation + grand.Value(valueIndex) : grand.Value(valueIndex);
@@ -312,7 +313,7 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 			for(const DataNode &grand : child)
 			{
 				bool remove = grand.Token(0) == "remove";
-				bool add = grand.Token(0) == "add";
+				bool add    = grand.Token(0) == "add";
 				if((add || remove) && grand.Size() < 2)
 				{
 					grand.PrintTrace("Skipping invalid \"" + child.Token(0) + "\" tag:");
@@ -448,8 +449,8 @@ void Government::Load(const DataNode &node, const set<const System *> *visitedSy
 					grand.PrintTrace("Skipping unrecognized attribute:");
 					continue;
 				}
-				bool removeTributePhrase = grand.Token(0) == "remove";
-				const string &grandKey = grand.Token(remove);
+				bool          removeTributePhrase = grand.Token(0) == "remove";
+				const string &grandKey            = grand.Token(remove);
 				if(grandKey == "already paying")
 					tributeAlreadyPaying = removeTributePhrase ? nullptr : GameData::Phrases().Get(grand.Token(1));
 				else if(grandKey == "undefined")
@@ -622,7 +623,7 @@ Government::PenaltyEffect Government::PenaltyFor(int eventType, const Government
 	if(other == this)
 		return PenaltyHelper(eventType, penaltyFor);
 
-	const int id = other->id;
+	const int   id        = other->id;
 	const auto &penalties = useForeignPenaltiesFor.contains(id) ? other->penaltyFor : penaltyFor;
 
 	const auto it = customPenalties.find(id);
@@ -866,8 +867,8 @@ void Government::Bribe() const
 
 // Check to see if the player has done anything they should be fined for.
 // Each government can only fine you once per day.
-pair<const Conversation *, string> Government::Fine(PlayerInfo &player, int scan, const Ship *target,
-                                                    double security) const
+pair<const Conversation *, string>
+Government::Fine(PlayerInfo &player, int scan, const Ship *target, double security) const
 {
 	return GameData::GetPolitics().Fine(player, this, scan, target, security);
 }
@@ -878,8 +879,8 @@ Government::Atrocity Government::Condemns(const Outfit *outfit) const
 {
 	const auto it = atrocityOutfits.find(outfit);
 	return it != atrocityOutfits.cend()
-	           ? it->second
-			   : Atrocity{!IgnoresUniversalAtrocities() && outfit->Get("atrocity") > 0., nullptr};
+	         ? it->second
+	         : Atrocity{!IgnoresUniversalAtrocities() && outfit->Get("atrocity") > 0., nullptr};
 }
 
 
@@ -888,8 +889,8 @@ Government::Atrocity Government::Condemns(const Ship *ship) const
 {
 	const auto it = atrocityShips.find(ship->TrueModelName());
 	return it != atrocityShips.cend()
-	           ? it->second
-			   : Atrocity{!IgnoresUniversalAtrocities() && ship->BaseAttributes().Get("atrocity") > 0., nullptr};
+	         ? it->second
+	         : Atrocity{!IgnoresUniversalAtrocities() && ship->BaseAttributes().Get("atrocity") > 0., nullptr};
 }
 
 

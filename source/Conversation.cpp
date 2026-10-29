@@ -47,8 +47,8 @@ void Conversation::Load(const DataNode &node, const ConditionsStore *playerCondi
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "scene" && hasValue)
 		{
 			// A scene always starts a new text node.
@@ -205,8 +205,8 @@ void Conversation::Save(DataWriter &out) const
 				out.Write("scene", node.scene->Name());
 			if(IsBranch(i))
 			{
-				out.Write("branch", Endpoint::TokenName(node.elements[0].next),
-				          Endpoint::TokenName(node.elements[1].next));
+				out.Write(
+				    "branch", Endpoint::TokenName(node.elements[0].next), Endpoint::TokenName(node.elements[1].next));
 				// Write the condition set as a child of this node.
 				out.BeginChild();
 				{
@@ -542,13 +542,13 @@ bool Conversation::ElementIsValid(int node, int element) const
 // conditions were found.
 bool Conversation::LoadDestinations(const DataNode &node, const ConditionsStore *playerConditions)
 {
-	bool hasGoto = false;
-	bool hasDisplayCondition = false;
+	bool hasGoto                = false;
+	bool hasDisplayCondition    = false;
 	bool hasActivationCondition = false;
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		if(key == "goto" && hasValue)
 		{
 			if(hasGoto)
@@ -590,7 +590,7 @@ bool Conversation::LoadDestinations(const DataNode &node, const ConditionsStore 
 				else
 				{
 					nodes.back().elements.back().next = index;
-					hasGoto = true;
+					hasGoto                           = true;
 				}
 			}
 			else
@@ -644,7 +644,9 @@ void Conversation::Goto(const string &label, int node, int element)
 	auto it = labels.find(label);
 
 	if(it == labels.end())
-		unresolved.insert({label, {node, element}});
+		unresolved.insert({
+		    label, {node, element}
+        });
 	else
 		nodes[node].elements[element].next = it->second;
 }

@@ -42,7 +42,7 @@ public:
 	bool Click(const Rectangle &clickBox);
 
 private:
-	std::map<const Outfit *, int> ammo;
+	std::map<const Outfit *, int>                  ammo;
 	mutable std::vector<ClickZone<const Outfit *>> ammoIconZones;
-	PlayerInfo &player;
+	PlayerInfo                                    &player;
 };

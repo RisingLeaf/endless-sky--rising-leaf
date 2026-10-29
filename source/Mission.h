@@ -54,19 +54,23 @@ class Mission {
 public:
 	Mission() = default;
 	// Copying a mission instance isn't allowed.
-	Mission(const Mission &) = delete;
+	Mission(const Mission &)            = delete;
 	Mission &operator=(const Mission &) = delete;
-	Mission(Mission &&) = default;
-	Mission &operator=(Mission &&) = default;
-	~Mission() noexcept = default;
+	Mission(Mission &&)                 = default;
+	Mission &operator=(Mission &&)      = default;
+	~Mission() noexcept                 = default;
 
 	// Construct and Load() at the same time.
-	explicit Mission(const DataNode &node, const ConditionsStore *playerConditions,
-	                 const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	explicit Mission(const DataNode                 &node,
+	                 const ConditionsStore          *playerConditions,
+	                 const std::set<const System *> *visitedSystems,
+	                 const std::set<const Planet *> *visitedPlanets);
 
 	// Load a mission, either from the game data or from a saved game.
-	void Load(const DataNode &node, const ConditionsStore *playerConditions,
-	          const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	void Load(const DataNode                 &node,
+	          const ConditionsStore          *playerConditions,
+	          const std::set<const System *> *visitedSystems,
+	          const std::set<const Planet *> *visitedPlanets);
 	// Save a mission. It is safe to assume that any mission that is being saved
 	// is already "instantiated," so only a subset of the data must be saved.
 	void Save(DataWriter &out, const std::string &tag = "mission") const;
@@ -102,7 +106,7 @@ public:
 	// Check if this mission is a "minor" mission. Minor missions will only be
 	// offered if no other non-blocking missions (minor or otherwise) are being offered.
 	bool IsMinor() const;
-	int OfferPrecedence() const;
+	int  OfferPrecedence() const;
 
 	// Find out where this mission is offered.
 	enum Location {
@@ -120,8 +124,8 @@ public:
 	bool IsAtLocation(Location location) const;
 
 	// Information about what you are doing.
-	const Ship *SourceShip() const;
-	const Planet *Destination() const;
+	const Ship                     *SourceShip() const;
+	const Planet                   *Destination() const;
 	const std::set<const System *> &Waypoints() const;
 	const std::set<const System *> &VisitedWaypoints() const;
 	const std::set<const Planet *> &Stopovers() const;
@@ -129,20 +133,20 @@ public:
 	const std::set<const System *> &MarkedSystems() const;
 	const std::set<const System *> &UnmarkedSystems() const;
 	const std::set<const System *> &TrackedSystems() const;
-	void RecalculateTrackedSystems();
-	void Mark(const std::set<const System *> &systems) const;
-	void Unmark(const std::set<const System *> &system) const;
-	const std::string &Cargo() const;
-	int CargoSize() const;
-	int Fine() const;
-	std::string FineMessage() const;
-	bool FailIfDiscovered() const;
-	int Passengers() const;
-	int64_t DisplayedPayment() const;
+	void                            RecalculateTrackedSystems();
+	void                            Mark(const std::set<const System *> &systems) const;
+	void                            Unmark(const std::set<const System *> &system) const;
+	const std::string              &Cargo() const;
+	int                             CargoSize() const;
+	int                             Fine() const;
+	std::string                     FineMessage() const;
+	bool                            FailIfDiscovered() const;
+	int                             Passengers() const;
+	int64_t                         DisplayedPayment() const;
 	// The mission should take this many jumps.
 	// Only matters to available jobs (not saved to file)
 	const int ExpectedJumps() const;
-	int CalculateJumps(const System *const sourceSystem);
+	int       CalculateJumps(const System *const sourceSystem);
 	// The mission must be completed by this deadline (if there is a deadline).
 	const Date &Deadline() const;
 	// If this mission's deadline was before the given date and it has not been
@@ -235,7 +239,7 @@ private:
 	std::string displayName;
 	std::string description;
 	std::string blocked;
-	Location location = SPACEPORT;
+	Location    location = SPACEPORT;
 
 	// Colors that determine how this mission displays in the MissionPanel.
 	ExclusiveItem<Color> unavailable;
@@ -244,43 +248,43 @@ private:
 
 	EsUuid uuid;
 
-	bool hasFailed = false;
-	bool isVisible = true;
-	bool hasPriority = false;
+	bool hasFailed     = false;
+	bool isVisible     = true;
+	bool hasPriority   = false;
 	bool isNonBlocking = false;
-	bool isMinor = false;
+	bool isMinor       = false;
 	// By default, missions are offered in alphabetical order.
 	// Using a non-zero offer precedence changes the order that missions are offered in.
 	// Missions with a higher offer precedence are offered before missions with a lower
 	// precedence. Where two missions have the same offer precedence, they continue to
 	// offer in alphabetical order.
-	int offerPrecedence = 0;
-	bool autosave = false;
-	bool overridesCapture = false;
-	Date deadline;
-	int expectedJumps = 0;
-	int deadlineBase = 0;
-	int deadlineMultiplier = 0;
+	int                         offerPrecedence  = 0;
+	bool                        autosave         = false;
+	bool                        overridesCapture = false;
+	Date                        deadline;
+	int                         expectedJumps      = 0;
+	int                         deadlineBase       = 0;
+	int                         deadlineMultiplier = 0;
 	DistanceCalculationSettings distanceCalcSettings;
-	std::string clearance;
-	bool ignoreClearance = false;
-	LocationFilter clearanceFilter;
-	bool hasFullClearance = true;
-	LocationFilter completionFilter;
+	std::string                 clearance;
+	bool                        ignoreClearance = false;
+	LocationFilter              clearanceFilter;
+	bool                        hasFullClearance = true;
+	LocationFilter              completionFilter;
 
-	int repeat = 1;
+	int         repeat = 1;
 	std::string cargo;
-	int cargoSize = 0;
+	int         cargoSize = 0;
 	// Parameters for generating random cargo amounts:
-	int cargoLimit = 0;
-	double cargoProb = 0.;
-	int fine = 0;
+	int         cargoLimit = 0;
+	double      cargoProb  = 0.;
+	int         fine       = 0;
 	std::string fineMessage;
-	bool failIfDiscovered = false;
-	int passengers = 0;
+	bool        failIfDiscovered = false;
+	int         passengers       = 0;
 	// Parameters for generating random passenger amounts:
-	int passengerLimit = 0;
-	double passengerProb = 0.;
+	int     passengerLimit  = 0;
+	double  passengerProb   = 0.;
 	int64_t paymentApparent = 0;
 
 	ConditionSet toOffer;
@@ -290,23 +294,23 @@ private:
 
 	const Planet *source = nullptr;
 	// The ship this mission originated from, if it is a boarding mission.
-	const Ship *sourceShip = nullptr;
+	const Ship    *sourceShip = nullptr;
 	LocationFilter sourceFilter;
-	const Planet *destination = nullptr;
+	const Planet  *destination = nullptr;
 	LocationFilter destinationFilter;
 	// Systems that must be visited:
-	std::set<const System *> waypoints;
+	std::set<const System *>  waypoints;
 	std::list<LocationFilter> waypointFilters;
-	std::set<const Planet *> stopovers;
+	std::set<const Planet *>  stopovers;
 	std::list<LocationFilter> stopoverFilters;
-	std::set<const Planet *> visitedStopovers;
-	std::set<const System *> visitedWaypoints;
+	std::set<const Planet *>  visitedStopovers;
+	std::set<const System *>  visitedWaypoints;
 	// Systems that don't need to be visited, but which the mission still
 	// wants to highlight for the player.
 	mutable std::set<const System *> markedSystems;
 	mutable std::set<const System *> unmarkedSystems;
 	// Systems that are marked because a "tracked" mission NPC is in them.
-	bool hasTrackedNpcs = false;
+	bool                     hasTrackedNpcs = false;
 	std::set<const System *> trackedSystems;
 
 	// User-defined text replacements unique to this mission:
@@ -323,9 +327,9 @@ private:
 	// or rely on matching a LocationFilter in order to designate the matched
 	// system or planet.
 	std::map<const System *, MissionAction> onEnter;
-	std::list<MissionAction> genericOnEnter;
+	std::list<MissionAction>                genericOnEnter;
 	std::map<const Planet *, MissionAction> onLand;
-	std::list<MissionAction> genericOnLand;
+	std::list<MissionAction>                genericOnLand;
 	// Track which `on enter` and `on land` MissionActions have triggered.
 	std::set<const MissionAction *> didEnter;
 	std::set<const MissionAction *> didLand;

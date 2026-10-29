@@ -76,24 +76,24 @@ private:
 
 private:
 	int governmentY = 0;
-	int tradeY = 0;
+	int tradeY      = 0;
 
 	// Which panel is being hovered over and should be affected by up and down keys.
 	bool isPlanetViewSelected = false;
-	bool isStars = false;
+	bool isStars              = false;
 
 	ScrollVar<double> scroll;
-	ScrollBar scrollbar;
+	ScrollBar         scrollbar;
 
 	// The system currently displayed, it should be the same as the system selected at all times.
 	const System *shownSystem = nullptr;
 
-	static double planetPanelHeight;
+	static double              planetPanelHeight;
 	std::vector<MapPlanetCard> planetCards;
 
-	std::shared_ptr<TextArea> description = nullptr;
-	bool descriptionVisible = false;
-	int descriptionXOffset;
+	std::shared_ptr<TextArea> description        = nullptr;
+	bool                      descriptionVisible = false;
+	int                       descriptionXOffset;
 
 	std::vector<ClickZone<int>> clickZones;
 };

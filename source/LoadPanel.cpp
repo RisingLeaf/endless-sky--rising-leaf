@@ -52,14 +52,14 @@ namespace {
 	// Extract the date from this pilot's most recent save.
 	string FileDate(const filesystem::path &filename)
 	{
-		string date = "0000-00-00";
+		string   date = "0000-00-00";
 		DataFile file(filename);
 		for(const DataNode &node : file)
 			if(node.Token(0) == "date")
 			{
-				int year = node.Value(3);
+				int year  = node.Value(3);
 				int month = node.Value(2);
-				int day = node.Value(1);
+				int day   = node.Value(1);
 				date[0] += (year / 1000) % 10;
 				date[1] += (year / 100) % 10;
 				date[2] += (year / 10) % 10;
@@ -80,8 +80,13 @@ LoadPanel::LoadPanel(PlayerInfo &player, UI &gamePanels)
     : player(player), gamePanels(gamePanels), selectedPilot(player.Pilot()),
       pilotBox(GameData::Interfaces().Get("load menu")->GetBox("pilots")),
       snapshotBox(GameData::Interfaces().Get("load menu")->GetBox("snapshots")),
-      tooltip(200, Alignment::LEFT, Tooltip::Direction::DOWN_LEFT, Tooltip::Corner::TOP_LEFT,
-	          GameData::Colors().Get("tooltip background"), GameData::Colors().Get("medium"), true)
+      tooltip(200,
+	          Alignment::LEFT,
+	          Tooltip::Direction::DOWN_LEFT,
+	          Tooltip::Corner::TOP_LEFT,
+	          GameData::Colors().Get("tooltip background"),
+	          GameData::Colors().Get("medium"),
+	          true)
 {
 	// If you have a player loaded, and the player is on a planet, make sure
 	// the player is saved so that any snapshot you create will be of the
@@ -136,16 +141,16 @@ void LoadPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	{
 		// The list has space for 14 entries. Alpha should be 100% for Y = -157 to
 		// 103, and fade to 0 at 10 pixels beyond that.
-		const Point topLeft = pilotBox.TopLeft();
-		Point currentTopLeft = topLeft + Point(0, -sideScroll);
-		const double top = topLeft.Y();
-		const double bottom = top + pilotBox.Height();
-		const double hTextPad = loadPanel->GetValue("pilot horizontal text pad");
-		const double fadeOut = loadPanel->GetValue("pilot fade out");
+		const Point  topLeft        = pilotBox.TopLeft();
+		Point        currentTopLeft = topLeft + Point(0, -sideScroll);
+		const double top            = topLeft.Y();
+		const double bottom         = top + pilotBox.Height();
+		const double hTextPad       = loadPanel->GetValue("pilot horizontal text pad");
+		const double fadeOut        = loadPanel->GetValue("pilot fade out");
 		for(const shared_ptr<PilotProfile> &pilot : pilots)
 		{
 			const string &identifier = pilot->Identifier();
-			const Point drawPoint = currentTopLeft;
+			const Point   drawPoint  = currentTopLeft;
 			currentTopLeft += Point(0., 20.);
 
 			if(drawPoint.Y() < top - fadeOut)
@@ -154,19 +159,24 @@ void LoadPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 				continue;
 
 			const double width = pilotBox.Width();
-			Rectangle zone(drawPoint + Point(width / 2., 10.), Point(width, 20.));
-			const Point textPoint(drawPoint.X() + hTextPad, zone.Center().Y() - font.Height() / 2);
-			bool isHighlighted = (pilot == selectedPilot || (hasHover && zone.Contains(hoverPoint)));
+			Rectangle    zone(drawPoint + Point(width / 2., 10.), Point(width, 20.));
+			const Point  textPoint(drawPoint.X() + hTextPad, zone.Center().Y() - font.Height() / 2);
+			bool         isHighlighted = (pilot == selectedPilot || (hasHover && zone.Contains(hoverPoint)));
 
 			double alpha = min((drawPoint.Y() - (top - fadeOut)) * .1, (bottom - fadeOut - drawPoint.Y()) * .1);
-			alpha = max(alpha, 0.);
-			alpha = min(alpha, 1.);
+			alpha        = max(alpha, 0.);
+			alpha        = min(alpha, 1.);
 
 			if(pilot == selectedPilot)
 				FillShader::Fill(cb, zone, Color(.1 * alpha, 0.));
 			const int textWidth = pilotBox.Width() - 2. * hTextPad;
-			double textColor = .2 + .3 * !pilot->IsLocked() + .2 * isHighlighted;
-			font.Draw(cb, {identifier, {textWidth, Truncate::BACK}}, textPoint, Color(textColor * alpha, 0.));
+			double    textColor = .2 + .3 * !pilot->IsLocked() + .2 * isHighlighted;
+			font.Draw(cb,
+			          {
+			              identifier, {textWidth, Truncate::BACK}
+            },
+			          textPoint,
+			          Color(textColor * alpha, 0.));
 		}
 	}
 
@@ -174,12 +184,12 @@ void LoadPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	bool hasHoverZone = false;
 	if(selectedPilot)
 	{
-		const Point topLeft = snapshotBox.TopLeft();
-		Point currentTopLeft = topLeft + Point(0, -centerScroll);
-		const double top = topLeft.Y();
-		const double bottom = top + snapshotBox.Height();
-		const double hTextPad = loadPanel->GetValue("snapshot horizontal text pad");
-		const double fadeOut = loadPanel->GetValue("snapshot fade out");
+		const Point  topLeft        = snapshotBox.TopLeft();
+		Point        currentTopLeft = topLeft + Point(0, -centerScroll);
+		const double top            = topLeft.Y();
+		const double bottom         = top + snapshotBox.Height();
+		const double hTextPad       = loadPanel->GetValue("snapshot horizontal text pad");
+		const double fadeOut        = loadPanel->GetValue("snapshot fade out");
 		for(const auto &[file, time] : selectedPilot->Files())
 		{
 			const Point drawPoint = currentTopLeft;
@@ -190,10 +200,10 @@ void LoadPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 			if(drawPoint.Y() > bottom - fadeOut)
 				continue;
 
-			Rectangle zone(drawPoint + Point(snapshotBox.Width() / 2., 10.), Point(snapshotBox.Width(), 19.9));
+			Rectangle   zone(drawPoint + Point(snapshotBox.Width() / 2., 10.), Point(snapshotBox.Width(), 19.9));
 			const Point textPoint(drawPoint.X() + hTextPad, zone.Center().Y() - font.Height() / 2);
-			bool isHovering = (hasHover && zone.Contains(hoverPoint));
-			bool isHighlighted = (file == selectedFile || isHovering);
+			bool        isHovering    = (hasHover && zone.Contains(hoverPoint));
+			bool        isHighlighted = (file == selectedFile || isHovering);
 			if(isHovering)
 			{
 				hasHoverZone = true;
@@ -202,7 +212,7 @@ void LoadPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 				{
 					if(hoverFile != file)
 					{
-						hoverFile = file;
+						hoverFile          = file;
 						hoverFileTimestamp = Format::TimestampString(time);
 					}
 					tooltip.SetText(hoverFileTimestamp);
@@ -211,15 +221,20 @@ void LoadPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 			}
 
 			double alpha = min((drawPoint.Y() - (top - fadeOut)) * .1, (bottom - fadeOut - drawPoint.Y()) * .1);
-			alpha = max(alpha, 0.);
-			alpha = min(alpha, 1.);
+			alpha        = max(alpha, 0.);
+			alpha        = min(alpha, 1.);
 
 			if(file == selectedFile)
 				FillShader::Fill(cb, zone, Color(.1 * alpha, 0.));
-			size_t pos = file.find('~') + 1;
-			const string name = file.substr(pos, file.size() - 4 - pos);
-			const int textWidth = snapshotBox.Width() - 2. * hTextPad;
-			font.Draw(cb, {name, {textWidth, Truncate::BACK}}, textPoint, Color((isHighlighted ? .7 : .5) * alpha, 0.));
+			size_t       pos       = file.find('~') + 1;
+			const string name      = file.substr(pos, file.size() - 4 - pos);
+			const int    textWidth = snapshotBox.Width() - 2. * hTextPad;
+			font.Draw(cb,
+			          {
+			              name, {textWidth, Truncate::BACK}
+            },
+			          textPoint,
+			          Color((isHighlighted ? .7 : .5) * alpha, 0.));
 		}
 	}
 
@@ -260,7 +275,8 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 	{
 		sound = UI::UISound::NONE;
 		GetUI().Push(DialogPanel::RequestStringWithValidation(
-		    this, &LoadPanel::DeletePilot,
+		    this,
+		    &LoadPanel::DeletePilot,
 		    [this](const string &pilot) {
 			    return pilot == loadedInfo.Name();
 		    },
@@ -278,19 +294,22 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 		nameToConfirm.clear();
 		filesystem::path lastSave = Files::Saves() / selectedPilot->Files().front().first;
 		GetUI().Push(DialogPanel::RequestStringWithCharFilter(
-		    this, &LoadPanel::SnapshotCallback,
+		    this,
+		    &LoadPanel::SnapshotCallback,
 		    [this](const string &input, char ch) {
 			    return LoadPanel::SnapshotNameFilter(input, ch);
 		    },
-		    "Enter a name for this snapshot, or use the most recent save's date:", FileDate(lastSave)));
+		    "Enter a name for this snapshot, or use the most recent save's date:",
+		    FileDate(lastSave)));
 	}
 	else if(key == 'R' && !selectedFile.empty() && !selectedPilot->IsLocked())
 	{
-		sound = UI::UISound::NONE;
+		sound           = UI::UISound::NONE;
 		string fileName = selectedFile.substr(selectedFile.rfind('/') + 1);
 		if(fileName != selectedPilot->Identifier() + ".txt")
 			GetUI().Push(DialogPanel::CallFunctionIfOk(
-			    this, &LoadPanel::DeleteSave,
+			    this,
+			    &LoadPanel::DeleteSave,
 			    "Are you sure you want to delete the selected saved game file, \"" + selectedFile + "\"?"));
 	}
 	else if((key == 'l' || key == 'e') && selectedPilot && !selectedPilot->IsLocked())
@@ -308,7 +327,8 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 		{
 			sound = UI::UISound::NONE;
 			GetUI().Push(
-			    DialogPanel::CallFunctionIfOk(this, &LoadPanel::LoadCallback,
+			    DialogPanel::CallFunctionIfOk(this,
+				                              &LoadPanel::LoadCallback,
 				                              "If you load this snapshot, it will overwrite your current game. "
 				                              "Any progress will be lost, unless you have saved other snapshots. "
 				                              "Are you sure you want to do that?"));
@@ -328,8 +348,8 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 	{
 		if(sideHasFocus)
 		{
-			auto it = pilots.begin();
-			int index = 0;
+			auto it    = pilots.begin();
+			int  index = 0;
 			for(; it != pilots.end(); ++it, ++index)
 				if(*it == selectedPilot)
 					break;
@@ -342,7 +362,7 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 				++it;
 				if(it == pilots.end())
 				{
-					it = pilots.begin();
+					it         = pilots.begin();
 					sideScroll = 0.;
 				}
 			}
@@ -353,20 +373,20 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 					sideScroll -= 20.;
 				if(it == pilots.begin())
 				{
-					it = pilots.end();
+					it         = pilots.end();
 					sideScroll = max(0., 20. * pilots.size() - 280.);
 				}
 				--it;
 			}
 			selectedPilot = *it;
-			selectedFile = !selectedPilot->Files().empty() ? selectedPilot->Files().front().first : "";
-			centerScroll = 0.;
+			selectedFile  = !selectedPilot->Files().empty() ? selectedPilot->Files().front().first : "";
+			centerScroll  = 0.;
 		}
 		else if(selectedPilot && !selectedPilot->Files().empty())
 		{
 			auto &saveFiles = selectedPilot->Files();
-			auto it = saveFiles.begin();
-			int index = 0;
+			auto  it        = saveFiles.begin();
+			int   index     = 0;
 			for(; it != saveFiles.end(); ++it, ++index)
 				if(it->first == selectedFile)
 					break;
@@ -379,7 +399,7 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 					centerScroll += 20.;
 				if(it == saveFiles.end())
 				{
-					it = saveFiles.begin();
+					it           = saveFiles.begin();
 					centerScroll = 0.;
 				}
 			}
@@ -390,7 +410,7 @@ bool LoadPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 					centerScroll -= 20.;
 				if(it == saveFiles.begin())
 				{
-					it = saveFiles.end();
+					it           = saveFiles.end();
 					centerScroll = max(0., 20. * saveFiles.size() - 280.);
 				}
 				--it;
@@ -430,27 +450,27 @@ bool LoadPanel::Click(int x, int y, MouseButton button, int clicks)
 	if(pilotBox.Contains(click))
 	{
 		int selected = (y + sideScroll - pilotBox.Top()) / 20;
-		int i = 0;
+		int i        = 0;
 		for(const shared_ptr<PilotProfile> &pilot : pilots)
 			if(i++ == selected && selectedPilot != pilot)
 			{
 				selectedPilot = pilot;
-				selectedFile = !pilot->Files().empty() ? pilot->Files().front().first : "";
-				centerScroll = 0;
+				selectedFile  = !pilot->Files().empty() ? pilot->Files().front().first : "";
+				centerScroll  = 0;
 				UI::PlaySound(UI::UISound::NORMAL);
 			}
 	}
 	else if(snapshotBox.Contains(click))
 	{
 		int selected = (y + centerScroll - snapshotBox.Top()) / 20;
-		int i = 0;
+		int i        = 0;
 		if(!selectedPilot)
 			return true;
 		for(const auto &file : selectedPilot->Files() | views::keys)
 			if(i++ == selected)
 			{
 				const bool sameSelected = selectedFile == file;
-				selectedFile = file;
+				selectedFile            = file;
 				if(sameSelected && clicks > 1)
 					KeyDown('l', 0, Command(), true);
 				break;
@@ -476,7 +496,7 @@ bool LoadPanel::Hover(int x, int y)
 	else if(x >= snapshotBox.Left() && x < snapshotBox.Right())
 		sideHasFocus = false;
 
-	hasHover = true;
+	hasHover   = true;
 	hoverPoint = Point(x, y);
 	// Tooltips should not pop up unless the mouse stays in one place for the
 	// full hover time. Otherwise, every time the user scrubs the mouse over the
@@ -573,7 +593,7 @@ void LoadPanel::SnapshotCallback(const string &name)
 		return;
 	filesystem::path from = *fromOpt;
 
-	string suffix = name.empty() ? FileDate(from) : name;
+	string suffix    = name.empty() ? FileDate(from) : name;
 	string extension = "~" + suffix + ".txt";
 
 	// If a file with this name already exists, make sure the player
@@ -582,9 +602,11 @@ void LoadPanel::SnapshotCallback(const string &name)
 	if(Files::Exists(to) && suffix != nameToConfirm)
 	{
 		nameToConfirm = suffix;
-		GetUI().Push(DialogPanel::RequestString(
-		    this, &LoadPanel::SnapshotCallback,
-		    "Warning: \"" + suffix + "\" is being used for an existing snapshot.\nOverwrite it?", suffix));
+		GetUI().Push(DialogPanel::RequestString(this,
+		                                        &LoadPanel::SnapshotCallback,
+		                                        "Warning: \"" + suffix +
+		                                            "\" is being used for an existing snapshot.\nOverwrite it?",
+		                                        suffix));
 	}
 	else
 		WriteSnapshot(from, to);

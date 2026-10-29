@@ -51,7 +51,7 @@ namespace {
 // Remove any items in this cargo hold.
 void CargoHold::Clear()
 {
-	size = 0;
+	size  = 0;
 	bunks = 0;
 	commodities.clear();
 	outfits.clear();
@@ -83,7 +83,7 @@ void CargoHold::Load(const DataNode &node)
 			for(const DataNode &grand : child)
 			{
 				const Outfit *outfit = GameData::Outfits().Get(grand.Token(0));
-				int count = (grand.Size() < 2) ? 1 : grand.Value(1);
+				int           count  = (grand.Size() < 2) ? 1 : grand.Value(1);
 				outfits[outfit] += count;
 			}
 		}
@@ -397,7 +397,7 @@ int CargoHold::Transfer(const string &commodity, int amount, CargoHold &to)
 	// remainder back to this cargo hold, even if there is no space for it.
 	// Do not invalidate existing iterators by modifying the container.
 	int removed = Remove(commodity, amount);
-	int added = to.Add(commodity, removed);
+	int added   = to.Add(commodity, removed);
 	commodities[commodity] += removed - added;
 
 	return added;
@@ -416,7 +416,7 @@ int CargoHold::Transfer(const Outfit *outfit, int amount, CargoHold &to)
 	// remainder back to this cargo hold, even if there is no space for it.
 	// Do not invalidate existing iterators by modifying the container.
 	int removed = Remove(outfit, amount);
-	int added = to.Add(outfit, removed);
+	int added   = to.Add(outfit, removed);
 	outfits[outfit] += removed - added;
 
 	return added;

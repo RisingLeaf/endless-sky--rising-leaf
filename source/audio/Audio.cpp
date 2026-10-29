@@ -46,8 +46,8 @@ namespace {
 		void Add(Point position, SoundCategory category);
 		void Add(const QueueEntry &other);
 
-		Point sum;
-		double weight = 0.;
+		Point         sum;
+		double        weight   = 0.;
 		SoundCategory category = SoundCategory::MASTER;
 	};
 
@@ -68,13 +68,15 @@ namespace {
 	mutex audioMutex;
 
 	// OpenAL settings.
-	ALCdevice *device = nullptr;
-	ALCcontext *context = nullptr;
-	bool isInitialized = false;
+	ALCdevice  *device        = nullptr;
+	ALCcontext *context       = nullptr;
+	bool        isInitialized = false;
 
 	// We keep track of the volume levels requested, and the volume levels
 	// currently set in OpenAL.
-	map<SoundCategory, double> volume{{SoundCategory::MASTER, .125}};
+	map<SoundCategory, double> volume{
+	    {SoundCategory::MASTER, .125}
+    };
 	map<SoundCategory, double> cachedVolume;
 
 	// This queue keeps track of sounds that have been requested to play. Each
@@ -82,7 +84,7 @@ namespace {
 	// sure that all sounds from a given frame start at the same time.
 	map<const Sound *, QueueEntry> soundQueue;
 	map<const Sound *, QueueEntry> deferred;
-	thread::id mainThreadID;
+	thread::id                     mainThreadID;
 
 	// Sound resources that have been loaded from files.
 	map<string, Sound> sounds;
@@ -94,7 +96,7 @@ namespace {
 
 	// Queue and thread for loading sound files in the background.
 	map<string, filesystem::path> loadQueue;
-	thread loadThread;
+	thread                        loadThread;
 
 	// The current position of the "listener," i.e. the center of the screen.
 	Point listener;
@@ -102,7 +104,7 @@ namespace {
 	// The active music player, if there is one. This player is also present in 'player'.
 	// In the current implementation, the supplier of the music source is always a Fade.
 	shared_ptr<AudioPlayer> musicPlayer;
-	string currentTrack;
+	string                  currentTrack;
 
 	// The number of Pause vs Resume requests received.
 	int pauseChangeCount = 0;
@@ -125,11 +127,11 @@ void Audio::Init(const vector<filesystem::path> &sources)
 
 	// If we don't make it to this point, no audio will be played.
 	isInitialized = true;
-	mainThreadID = this_thread::get_id();
+	mainThreadID  = this_thread::get_id();
 
 	// The listener is looking "into" the screen. This orientation vector is
 	// used to determine what sounds should be in the right or left speaker.
-	ALfloat zero[3] = {0., 0., 0.};
+	ALfloat zero[3]        = {0., 0., 0.};
 	ALfloat orientation[6] = {0., 0., -1., 0., 1., 0.};
 
 	alListenerf(AL_GAIN, volume[SoundCategory::MASTER]);
@@ -148,7 +150,7 @@ void Audio::LoadSounds(const vector<filesystem::path> &sources)
 {
 	for(const auto &source : sources)
 	{
-		filesystem::path root = source / "sounds";
+		filesystem::path         root  = source / "sounds";
 		vector<filesystem::path> files = Files::RecursiveList(root);
 		for(const auto &path : files)
 		{
@@ -191,7 +193,7 @@ double Audio::GetProgress()
 	if(loadQueue.empty())
 		return 1.;
 
-	double done = sounds.size();
+	double done  = sounds.size();
 	double total = done + loadQueue.size();
 	return done / total;
 }
@@ -326,7 +328,7 @@ void Audio::Step(bool isFastForward)
 				for(const auto &player : players)
 					if(player->Category() == category)
 						player->SetVolume(expected);
-	}
+		}
 
 	if(pauseChangeCount > 0)
 	{
@@ -353,7 +355,7 @@ void Audio::Step(bool isFastForward)
 	for(auto it = loopingPlayers.begin(); it != loopingPlayers.end();)
 	{
 		const auto &[sound, player] = *it;
-		auto queueIt = soundQueue.find(sound);
+		auto queueIt                = soundQueue.find(sound);
 		if(queueIt != soundQueue.end())
 		{
 			Move(*player, queueIt->second);
@@ -470,9 +472,9 @@ namespace {
 	// Thread entry point for loading sounds.
 	void Load()
 	{
-		string name;
+		string           name;
 		filesystem::path path;
-		Sound *sound;
+		Sound           *sound;
 		while(true)
 		{
 			{

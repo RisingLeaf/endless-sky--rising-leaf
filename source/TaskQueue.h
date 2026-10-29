@@ -58,8 +58,8 @@ public:
 
 public:
 	// Initialize the threads used to execute the tasks.
-	TaskQueue() = default;
-	TaskQueue(const TaskQueue &) = delete;
+	TaskQueue()                             = default;
+	TaskQueue(const TaskQueue &)            = delete;
 	TaskQueue &operator=(const TaskQueue &) = delete;
 	~TaskQueue();
 
@@ -91,5 +91,5 @@ private:
 
 	// Tasks from this queue that need to be executed on the main thread.
 	std::queue<std::function<void()>> syncTasks;
-	mutable std::mutex syncMutex;
+	mutable std::mutex                syncMutex;
 };

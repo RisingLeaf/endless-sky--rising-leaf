@@ -26,12 +26,12 @@ public:
 	WavSupplier(const Sound &sound, bool is3x, bool looping = false);
 
 	// Inherited pure virtual methods
-	size_t MaxChunks() const override;
-	size_t AvailableChunks() const override;
+	size_t                MaxChunks() const override;
+	size_t                AvailableChunks() const override;
 	std::vector<sample_t> NextDataChunk() override;
 
 
 private:
 	const Sound &sound;
-	bool wasStarted;
+	bool         wasStarted;
 };

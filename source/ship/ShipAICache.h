@@ -31,29 +31,29 @@ public:
 	void Recalibrate(const Ship &ship);
 
 	// Accessors for AI data.
-	bool IsArtilleryAI() const;
+	bool   IsArtilleryAI() const;
 	double ShortestRange() const;
 	double LongestRange() const;
 	double ShortestArtillery() const;
 	double GunRange() const;
 	double TurretRange() const;
 	double MinSafeDistance() const;
-	bool NeedsAmmo() const;
+	bool   NeedsAmmo() const;
 
 
 private:
 	double mass = 0.;
 
-	bool useArtilleryAI = false;
-	double shortestRange = 1000.;
-	double longestRange = 0.;
+	bool   useArtilleryAI    = false;
+	double shortestRange     = 1000.;
+	double longestRange      = 0.;
 	double shortestArtillery = 4000.;
-	double minSafeDistance = 0.;
-	double maxTurningRadius = 200.;
-	double turretRange = 0.;
-	double gunRange = 0.;
-	bool hasWeapons = false;
-	bool canFight = false;
+	double minSafeDistance   = 0.;
+	double maxTurningRadius  = 200.;
+	double turretRange       = 0.;
+	double gunRange          = 0.;
+	bool   hasWeapons        = false;
+	bool   canFight          = false;
 };
 
 

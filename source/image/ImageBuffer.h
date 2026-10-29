@@ -51,16 +51,16 @@ public:
 	// image buffer; subsequent calls will be ignored.
 	void Allocate(int width, int height);
 
-	int Width() const;
-	int Height() const;
-	int Frames() const;
+	int    Width() const;
+	int    Height() const;
+	int    Frames() const;
 	double CalculateArea() const;
 
 	const uint32_t *Pixels() const;
-	uint32_t *Pixels();
+	uint32_t       *Pixels();
 
 	const uint32_t *Begin(int y, int frame = 0) const;
-	uint32_t *Begin(int y, int frame = 0);
+	uint32_t       *Begin(int y, int frame = 0);
 
 	bool ShrinkToHalfSize();
 
@@ -73,8 +73,8 @@ public:
 
 
 private:
-	int width;
-	int height;
-	int frames;
+	int       width;
+	int       height;
+	int       frames;
 	uint32_t *pixels;
 };

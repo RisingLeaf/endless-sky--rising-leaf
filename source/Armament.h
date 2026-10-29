@@ -62,19 +62,19 @@ public:
 
 	// Access the array of weapon hardpoints.
 	const std::vector<Hardpoint> &Get() const;
-	int GunCount() const;
-	int TurretCount() const;
+	int                           GunCount() const;
+	int                           TurretCount() const;
 	// Determine the ammunition used by this armament that can be resupplied (i.e. is not self-uninstalling).
 	std::set<const Outfit *> RestockableAmmo() const;
 
 	// Adjust the aim of the turrets.
 	void Aim(const Ship &ship, const FireCommand &command);
 	// Fire the given weapon, if it is ready.
-	void Fire(unsigned index, Ship &ship, std::vector<Projectile> &projectiles, std::vector<Visual> &visuals,
-	          bool jammed);
+	void
+	Fire(unsigned index, Ship &ship, std::vector<Projectile> &projectiles, std::vector<Visual> &visuals, bool jammed);
 	// Fire the given anti-missile system.
-	bool FireAntiMissile(unsigned index, Ship &ship, const Projectile &projectile, std::vector<Visual> &visuals,
-	                     bool jammed);
+	bool FireAntiMissile(
+	    unsigned index, Ship &ship, const Projectile &projectile, std::vector<Visual> &visuals, bool jammed);
 	// Fire the given tractor beam.
 	bool FireTractorBeam(unsigned index, Ship &ship, const Flotsam &flotsam, std::vector<Visual> &visuals, bool jammed);
 
@@ -93,5 +93,5 @@ private:
 	// it should not hold any pointers specific to one ship (including to
 	// elements of this Armament itself).
 	std::map<const Outfit *, int> streamReload;
-	std::vector<Hardpoint> hardpoints;
+	std::vector<Hardpoint>        hardpoints;
 };

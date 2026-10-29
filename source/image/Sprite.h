@@ -45,10 +45,14 @@ public:
 
 	// Add the given frames, optionally uploading them. The given buffers will be cleared afterwards.
 	// Receive both the 1x and 2x buffers. If the 2x buffer is not empty, then it will be used.
-	void AddFrames(const GraphicsTypes::GraphicsInstance *graphics_instance, ImageBuffer &buffer1x,
-	               ImageBuffer &buffer2x, bool noReduction);
-	void AddSwizzleMaskFrames(const GraphicsTypes::GraphicsInstance *graphics_instance, ImageBuffer &buffer1x,
-	                          ImageBuffer &buffer2x, bool noReduction);
+	void AddFrames(const GraphicsTypes::GraphicsInstance *graphics_instance,
+	               ImageBuffer                           &buffer1x,
+	               ImageBuffer                           &buffer2x,
+	               bool                                   noReduction);
+	void AddSwizzleMaskFrames(const GraphicsTypes::GraphicsInstance *graphics_instance,
+	                          ImageBuffer                           &buffer1x,
+	                          ImageBuffer                           &buffer2x,
+	                          bool                                   noReduction);
 	// Whether the textures for this sprite have been uploaded yet.
 	bool IsLoaded() const;
 	// Free up all textures loaded for this sprite.
@@ -65,7 +69,7 @@ public:
 	// Set and get the number of pixels within the sprite averaged across all frames.
 	// This only gets set for sprites that also have a collision mask.
 	// The caller must account for whether the sprite is being scaled by the Drawable that uses it.
-	void SetArea(double area);
+	void   SetArea(double area);
 	double Area() const;
 
 	// Get the offset of the center from the top left corner; this is for easy
@@ -85,9 +89,9 @@ private:
 
 	bool isLoaded = false;
 
-	float width = 0.f;
-	float height = 0.f;
-	int frames = 0;
-	int swizzleMaskFrames = 0;
-	double area = 0.;
+	float  width             = 0.f;
+	float  height            = 0.f;
+	int    frames            = 0;
+	int    swizzleMaskFrames = 0;
+	double area              = 0.;
 };

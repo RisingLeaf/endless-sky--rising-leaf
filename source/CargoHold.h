@@ -47,26 +47,26 @@ public:
 	void Save(DataWriter &out) const;
 
 	// Set the capacity of this cargo hold.
-	void SetSize(int tons);
-	int Size() const;
-	int Free() const;
+	void   SetSize(int tons);
+	int    Size() const;
+	int    Free() const;
 	double FreePrecise() const;
-	int Used() const;
+	int    Used() const;
 	double UsedPrecise() const;
-	int CommoditiesSize() const;
-	int OutfitsSize() const;
+	int    CommoditiesSize() const;
+	int    OutfitsSize() const;
 	double OutfitsSizePrecise() const;
-	int MinablesSize() const;
+	int    MinablesSize() const;
 	double MinablesSizePrecise() const;
-	bool HasOutfits() const;
-	int MissionCargoSize() const;
-	bool HasMissionCargo() const;
-	bool IsEmpty() const;
+	bool   HasOutfits() const;
+	int    MissionCargoSize() const;
+	bool   HasMissionCargo() const;
+	bool   IsEmpty() const;
 
 	// Set the number of free bunks for passengers.
 	void SetBunks(int count);
-	int BunksFree() const;
-	int Passengers() const;
+	int  BunksFree() const;
+	int  Passengers() const;
 
 	// Normal cargo:
 	int Get(const std::string &commodity) const;
@@ -76,7 +76,7 @@ public:
 	int Get(const Mission *mission) const;
 	int GetPassengers(const Mission *mission) const;
 
-	const std::map<std::string, int> &Commodities() const;
+	const std::map<std::string, int>    &Commodities() const;
 	const std::map<const Outfit *, int> &Outfits() const;
 	// Note: some missions may have cargo that takes up 0 space, but should
 	// still show up on the cargo listing.
@@ -113,7 +113,7 @@ public:
 	// missions. If the returned value is negative, you are carrying something
 	// or someone that warrants a death sentence for you.
 	std::pair<int, const Conversation *> IllegalCargoFine(const Government *government) const;
-	int IllegalPassengersFine(const Government *government) const;
+	int                                  IllegalPassengersFine(const Government *government) const;
 
 	// Returns the amount tons of illegal cargo.
 	int IllegalCargoAmount() const;
@@ -121,12 +121,12 @@ public:
 
 private:
 	// Use -1 to indicate unlimited capacity.
-	int size = -1;
+	int size  = -1;
 	int bunks = -1;
 
 	// Track how many objects of each type are being carried:
-	std::map<std::string, int> commodities;
-	std::map<const Outfit *, int> outfits;
+	std::map<std::string, int>     commodities;
+	std::map<const Outfit *, int>  outfits;
 	std::map<const Mission *, int> missionCargo;
 	std::map<const Mission *, int> passengers;
 };

@@ -17,9 +17,9 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 enum class BlendingMode : char {
-	ALPHA = '-',
-	PREMULTIPLIED_ALPHA = '=',
-	HALF_ADDITIVE = '^',
-	ADDITIVE = '+',
+	ALPHA                = '-',
+	PREMULTIPLIED_ALPHA  = '=',
+	HALF_ADDITIVE        = '^',
+	ADDITIVE             = '+',
 	COMPAT_HALF_ADDITIVE = '~' // The legacy half-additive mode marker. This is only used during parsing.
 };

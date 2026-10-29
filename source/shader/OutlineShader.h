@@ -32,7 +32,12 @@ class OutlineShader {
 public:
 	static void Init(const GraphicsTypes::GraphicsInstance *graphics_instance);
 
-	static void Draw(GraphicsTypes::CommandBufferInstance *cb, const Sprite *sprite, const Point &pos,
-	                 const Point &size, const Color &color, const Point &unit = Point(0., -1.), float frame = 0.f);
+	static void Draw(GraphicsTypes::CommandBufferInstance *cb,
+	                 const Sprite                         *sprite,
+	                 const Point                          &pos,
+	                 const Point                          &size,
+	                 const Color                          &color,
+	                 const Point                          &unit  = Point(0., -1.),
+	                 float                                 frame = 0.f);
 	static void Clear();
 };

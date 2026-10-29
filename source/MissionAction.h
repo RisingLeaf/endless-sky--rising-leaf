@@ -46,13 +46,19 @@ class MissionAction {
 public:
 	MissionAction() = default;
 	// Construct and Load() at the same time.
-	MissionAction(const DataNode &node, const ConditionsStore *playerConditions,
-	              const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	MissionAction(const DataNode                 &node,
+	              const ConditionsStore          *playerConditions,
+	              const std::set<const System *> *visitedSystems,
+	              const std::set<const Planet *> *visitedPlanets);
 
-	void Load(const DataNode &node, const ConditionsStore *playerConditions,
-	          const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
-	void LoadSingle(const DataNode &node, const ConditionsStore *playerConditions,
-	                const std::set<const System *> *visitedSystems, const std::set<const Planet *> *visitedPlanets);
+	void Load(const DataNode                 &node,
+	          const ConditionsStore          *playerConditions,
+	          const std::set<const System *> *visitedSystems,
+	          const std::set<const Planet *> *visitedPlanets);
+	void LoadSingle(const DataNode                 &node,
+	                const ConditionsStore          *playerConditions,
+	                const std::set<const System *> *visitedSystems,
+	                const std::set<const Planet *> *visitedPlanets);
 	// Note: the Save() function can assume this is an instantiated mission, not
 	// a template, so it only has to save a subset of the data.
 	void Save(DataWriter &out) const;
@@ -66,19 +72,25 @@ public:
 	// if it takes away money or outfits that the player does not have, or should
 	// take place in a system that does not match the specified LocationFilter.
 	// It can also not be done if the mission is failed, and the trigger doesn't support it.
-	bool CanBeDone(const PlayerInfo &player, bool isFailed, bool executeWhenLanded,
+	bool CanBeDone(const PlayerInfo            &player,
+	               bool                         isFailed,
+	               bool                         executeWhenLanded,
 	               const std::shared_ptr<Ship> &boardingShip = nullptr) const;
 	// Check if this action requires this ship to exist in order to ever be completed.
 	bool RequiresGiftedShip(const std::string &shipId) const;
 	// Perform this action. If a conversation is shown, the given destination
 	// will be highlighted in the map if you bring it up.
-	void Do(PlayerInfo &player, UI *ui, const Mission *caller, const System *destination = nullptr,
-	        const std::shared_ptr<Ship> &ship = nullptr, const bool isUnique = true) const;
+	void Do(PlayerInfo                  &player,
+	        UI                          *ui,
+	        const Mission               *caller,
+	        const System                *destination = nullptr,
+	        const std::shared_ptr<Ship> &ship        = nullptr,
+	        const bool                   isUnique    = true) const;
 
 	// "Instantiate" this action by filling in the wildcard text for the actual
 	// destination, payment, cargo, etc.
-	MissionAction Instantiate(std::map<std::string, std::string> &subs, const System *origin, int jumps,
-	                          int64_t payload) const;
+	MissionAction
+	Instantiate(std::map<std::string, std::string> &subs, const System *origin, int jumps, int64_t payload) const;
 
 	int64_t Payment() const noexcept;
 
@@ -87,12 +99,12 @@ private:
 	// Whether this action can be triggered after the mission has failed.
 	bool runsWhenFailed = false;
 
-	std::string trigger;
-	std::string location;
+	std::string    trigger;
+	std::string    location;
 	LocationFilter systemFilter;
 	LocationFilter planetFilter;
 
-	DialogSettings dialog;
+	DialogSettings              dialog;
 	ExclusiveItem<Conversation> conversation;
 
 	// Outfits that are required to be owned (or not) for this action to be performable.

@@ -72,8 +72,8 @@ void Fleet::Load(const DataNode &node)
 	{
 		// The "add" and "remove" keywords should never be alone on a line, and
 		// are only valid with "variant" or "personality" definitions.
-		bool add = (child.Token(0) == "add");
-		bool remove = (child.Token(0) == "remove");
+		bool add      = (child.Token(0) == "add");
+		bool remove   = (child.Token(0) == "remove");
 		bool hasValue = child.Size() >= 2;
 		if((add || remove) && (!hasValue || (child.Token(1) != "variant" && child.Token(1) != "personality")))
 		{
@@ -127,7 +127,7 @@ void Fleet::Load(const DataNode &node)
 		{
 			// If given a full definition of one of this fleet's variant members, remove the variant.
 			Variant toRemove(child);
-			int count = erase(variants, toRemove);
+			int     count = erase(variants, toRemove);
 			if(!count)
 				child.PrintTrace("Did not find matching variant for specified operation:");
 		}
@@ -205,8 +205,8 @@ void Fleet::Enter(const System &system, list<shared_ptr<Ship>> &ships, const Pla
 	// what position it should start from in the system.
 	const System *source = &system;
 	const System *target = &system;
-	Point position;
-	double radius = 1000.;
+	Point         position;
+	double        radius = 1000.;
 
 	// The chosen stellar object the fleet will depart from, if any.
 	const StellarObject *object = nullptr;
@@ -220,14 +220,14 @@ void Fleet::Enter(const System &system, list<shared_ptr<Ship>> &ships, const Pla
 		// others don't have that jump method, they are being carried as fighters.
 		// That is, content creators should avoid creating fleets with a mix of jump
 		// drives and hyperdrives.
-		bool hasJump = false;
-		bool hasHyper = false;
+		bool   hasJump      = false;
+		bool   hasHyper     = false;
 		double jumpDistance = System::DEFAULT_NEIGHBOR_DISTANCE;
 		for(const Ship *ship : variantShips)
 		{
 			if(ship->JumpNavigation().HasJumpDrive())
 			{
-				hasJump = true;
+				hasJump      = true;
 				jumpDistance = ship->JumpNavigation().JumpRange();
 				break;
 			}
@@ -333,7 +333,7 @@ void Fleet::Enter(const System &system, list<shared_ptr<Ship>> &ships, const Pla
 		   }))
 		{
 			position = object->Position();
-			radius = object->Radius();
+			radius   = object->Radius();
 		}
 		// The chosen planet could not be departed from by all ships in the variant.
 		else
@@ -356,7 +356,7 @@ void Fleet::Enter(const System &system, list<shared_ptr<Ship>> &ships, const Pla
 			continue;
 
 		Angle angle = Angle::Random(360.);
-		Point pos = position + angle.Unit() * (Random::Real() * radius);
+		Point pos   = position + angle.Unit() * (Random::Real() * radius);
 
 		ships.push_front(ship);
 		ship->SetSystem(source);
@@ -399,7 +399,7 @@ void Fleet::Place(const System &system, list<shared_ptr<Ship>> &ships, bool carr
 	auto center = ChooseCenter(system);
 
 	// Place all the ships in the chosen fleet variant.
-	shared_ptr<Ship> flagship;
+	shared_ptr<Ship>         flagship;
 	vector<shared_ptr<Ship>> placed = Instantiate(variantShips);
 	for(shared_ptr<Ship> &ship : placed)
 	{
@@ -407,8 +407,8 @@ void Fleet::Place(const System &system, list<shared_ptr<Ship>> &ships, bool carr
 		if(carried && PlaceFighter(ship, placed))
 			continue;
 
-		Angle angle = Angle::Random();
-		Point pos = center.first + Angle::Random().Unit() * OffsetFrom(center);
+		Angle  angle    = Angle::Random();
+		Point  pos      = center.first + Angle::Random().Unit() * OffsetFrom(center);
 		double velocity = 0;
 		if(!ship->GetPersonality().IsDerelict())
 			velocity = Random::Real() * ship->MaxVelocity();
@@ -458,7 +458,7 @@ const System *Fleet::Enter(const System &system, Ship &ship, const System *sourc
 	}
 
 	Angle angle = Angle::Random();
-	Point pos = angle.Unit() * Random::Real() * 1000.;
+	Point pos   = angle.Unit() * Random::Real() * 1000.;
 
 	ship.Place(pos, angle.Unit(), angle);
 	ship.SetSystem(source);
@@ -472,8 +472,8 @@ const System *Fleet::Enter(const System &system, Ship &ship, const System *sourc
 void Fleet::Place(const System &system, Ship &ship)
 {
 	// Choose a random inhabited object in the system to spawn around.
-	auto center = ChooseCenter(system);
-	Point pos = center.first + Angle::Random().Unit() * OffsetFrom(center);
+	auto  center = ChooseCenter(system);
+	Point pos    = center.first + Angle::Random().Unit() * OffsetFrom(center);
 
 	double velocity = ship.IsDisabled() ? 0. : Random::Real() * ship.MaxVelocity();
 
@@ -524,8 +524,8 @@ vector<shared_ptr<Ship>> Fleet::Instantiate(const vector<const Ship *> &ships) c
 		// Copy the model instance into a new instance.
 		auto ship = make_shared<Ship>(*model);
 
-		bool canBeCarried = ship->CanBeCarried();
-		const Phrase *phrase = ((canBeCarried && fighterNames) ? fighterNames : names);
+		bool          canBeCarried = ship->CanBeCarried();
+		const Phrase *phrase       = ((canBeCarried && fighterNames) ? fighterNames : names);
 		if(phrase)
 			ship->SetGivenName(phrase->Get());
 		ship->SetGovernment(government);

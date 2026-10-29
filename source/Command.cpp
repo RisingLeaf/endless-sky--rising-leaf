@@ -31,8 +31,8 @@ namespace {
 	// the name of the key it is mapped to, or the SDL keycode it is mapped to.
 	map<Command, string> description;
 	map<Command, string> keyName;
-	map<int, Command> commandForKeycode;
-	map<Command, int> keycodeForCommand;
+	map<int, Command>    commandForKeycode;
+	map<Command, int>    keycodeForCommand;
 	// Keep track of any keycodes that are mapped to multiple commands, in order
 	// to display a warning to the player.
 	map<int, int> keycodeCount;
@@ -155,10 +155,10 @@ void Command::LoadSettings(const filesystem::path &path)
 		auto it = commands.find(node.Token(0));
 		if(it != commands.end() && node.Size() >= 2)
 		{
-			Command command = it->second;
-			const int keycode = static_cast<int>(node.Value(1));
+			Command   command          = it->second;
+			const int keycode          = static_cast<int>(node.Value(1));
 			keycodeForCommand[command] = keycode;
-			keyName[command] = SDL_GetKeyName(keycode);
+			keyName[command]           = SDL_GetKeyName(keycode);
 		}
 	}
 
@@ -195,7 +195,7 @@ void Command::SetKey(const Command command, const int keycode)
 	// Always reset *all* the mappings when one is set. That way, if two commands
 	// are mapped to the same key and you change one of them, the other stays mapped.
 	keycodeForCommand[command] = keycode;
-	keyName[command] = SDL_GetKeyName(keycode);
+	keyName[command]           = SDL_GetKeyName(keycode);
 
 	commandForKeycode.clear();
 	keycodeCount.clear();
@@ -214,7 +214,7 @@ void Command::SetKey(const Command command, const int keycode)
 const string &Command::Description() const
 {
 	static constexpr string empty;
-	auto it = description.find(*this);
+	auto                    it = description.find(*this);
 	return it == description.end() ? empty : it->second;
 }
 
@@ -225,7 +225,7 @@ const string &Command::Description() const
 const string &Command::KeyName() const
 {
 	static constexpr string empty = "(none)";
-	auto it = keyName.find(*this);
+	auto                    it    = keyName.find(*this);
 
 	return !HasBinding() ? empty : it->second;
 }
@@ -264,42 +264,44 @@ void Command::Load(const DataNode &node)
 {
 	for(int i = 1; i < node.Size(); ++i)
 	{
-		static const map<string, Command> lookup = {{"none", NONE},
-		                                            {"menu", MENU},
-		                                            {"forward", FORWARD},
-		                                            {"left", LEFT},
-		                                            {"right", RIGHT},
-		                                            {"back", BACK},
-		                                            {"primary", PRIMARY},
-		                                            {"secondary", SECONDARY},
-		                                            {"select", SELECT},
-		                                            {"land", LAND},
-		                                            {"board", BOARD},
-		                                            {"hail", HAIL},
-		                                            {"scan", SCAN},
-		                                            {"jump", JUMP},
-		                                            {"mouse turning hold", MOUSE_TURNING_HOLD},
-		                                            {"aim turret hold", AIM_TURRET_HOLD},
-		                                            {"fleet jump", FLEET_JUMP},
-		                                            {"target", TARGET},
-		                                            {"nearest", NEAREST},
-		                                            {"deploy", DEPLOY},
-		                                            {"afterburner", AFTERBURNER},
-		                                            {"cloak", CLOAK},
-		                                            {"map", MAP},
-		                                            {"info", INFO},
-		                                            {"fullscreen", FULLSCREEN},
-		                                            {"fastforward", FASTFORWARD},
-		                                            {"fight", FIGHT},
-		                                            {"hold fire", HOLD_FIRE},
-		                                            {"gather", GATHER},
-		                                            {"hold", HOLD_POSITION},
-		                                            {"scan order", SCAN_ORDER},
-		                                            {"ammo", AMMO},
-		                                            {"nearest asteroid", NEAREST_ASTEROID},
-		                                            {"wait", WAIT},
-		                                            {"stop", STOP},
-		                                            {"shift", SHIFT}};
+		static const map<string, Command> lookup = {
+		    {              "none",               NONE},
+		    {              "menu",               MENU},
+		    {           "forward",            FORWARD},
+		    {              "left",               LEFT},
+		    {             "right",              RIGHT},
+		    {              "back",               BACK},
+		    {           "primary",            PRIMARY},
+		    {         "secondary",          SECONDARY},
+		    {            "select",             SELECT},
+		    {              "land",               LAND},
+		    {             "board",              BOARD},
+		    {              "hail",               HAIL},
+		    {              "scan",               SCAN},
+		    {              "jump",               JUMP},
+		    {"mouse turning hold", MOUSE_TURNING_HOLD},
+		    {   "aim turret hold",    AIM_TURRET_HOLD},
+		    {        "fleet jump",         FLEET_JUMP},
+		    {            "target",             TARGET},
+		    {           "nearest",            NEAREST},
+		    {            "deploy",             DEPLOY},
+		    {       "afterburner",        AFTERBURNER},
+		    {             "cloak",              CLOAK},
+		    {               "map",                MAP},
+		    {              "info",               INFO},
+		    {        "fullscreen",         FULLSCREEN},
+		    {       "fastforward",        FASTFORWARD},
+		    {             "fight",              FIGHT},
+		    {         "hold fire",          HOLD_FIRE},
+		    {            "gather",             GATHER},
+		    {              "hold",      HOLD_POSITION},
+		    {        "scan order",         SCAN_ORDER},
+		    {              "ammo",               AMMO},
+		    {  "nearest asteroid",   NEAREST_ASTEROID},
+		    {              "wait",               WAIT},
+		    {              "stop",               STOP},
+		    {             "shift",              SHIFT}
+        };
 
 		auto it = lookup.find(node.Token(i));
 		if(it != lookup.end())

@@ -49,7 +49,7 @@ private:
 	// has been interpolating between the two.
 	Point oldCenter;
 	Point targetCenter;
-	int lerpCount = 0;
+	int   lerpCount = 0;
 
 	// How many frames the mini-map should be displayed for when it is set to only appear
 	// when jumping.

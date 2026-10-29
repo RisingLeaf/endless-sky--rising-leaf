@@ -71,24 +71,24 @@ private:
 
 private:
 	PlayerInfo &player;
-	SavedGame loadedInfo;
-	UI &gamePanels;
+	SavedGame   loadedInfo;
+	UI         &gamePanels;
 
 	std::vector<std::shared_ptr<PilotProfile>> pilots;
-	std::shared_ptr<PilotProfile> selectedPilot;
-	std::string selectedFile;
+	std::shared_ptr<PilotProfile>              selectedPilot;
+	std::string                                selectedFile;
 	// If the player enters a filename that exists, prompt before overwriting it.
 	std::string nameToConfirm;
 
 	const Rectangle pilotBox;
 	const Rectangle snapshotBox;
 
-	Point hoverPoint;
+	Point   hoverPoint;
 	Tooltip tooltip;
-	bool hasHover = false;
-	bool sideHasFocus = false;
-	double sideScroll = 0;
-	double centerScroll = 0;
+	bool    hasHover     = false;
+	bool    sideHasFocus = false;
+	double  sideScroll   = 0;
+	double  centerScroll = 0;
 
 	std::string hoverFile;
 	std::string hoverFileTimestamp;

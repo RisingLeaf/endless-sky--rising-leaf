@@ -117,7 +117,7 @@ bool BatchDrawList::Cull(const Drawable &drawable, const Point &position, const 
 	// calls that we issue (which may be the bottleneck on some systems).
 	Point size(fabs(unit.X() * drawable.Height()) + fabs(unit.Y() * drawable.Width()),
 	           fabs(unit.X() * drawable.Width()) + fabs(unit.Y() * drawable.Height()));
-	Point topLeft = position - size * zoom;
+	Point topLeft     = position - size * zoom;
 	Point bottomRight = position + size * zoom;
 	if(bottomRight.X() < Screen::Left() || bottomRight.Y() < Screen::Top())
 		return true;
@@ -151,8 +151,8 @@ bool BatchDrawList::Add(const Drawable &drawable, Point position, Point unit, do
 	uh *= 2.f * clip;
 
 	// Calculate the other three corners.
-	Point topRight = topLeft + uw;
-	Point bottomLeft = topLeft + uh;
+	Point topRight    = topLeft + uw;
+	Point bottomLeft  = topLeft + uh;
 	Point bottomRight = bottomLeft + uw;
 
 	// Push two copies of the first and last vertices to mark the break between

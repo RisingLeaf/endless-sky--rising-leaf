@@ -45,8 +45,8 @@ public:
 	void Draw(GraphicsTypes::CommandBufferInstance *cb, const Information &info, Panel *panel = nullptr) const;
 
 	// Get the location of a named point or box.
-	bool HasPoint(const std::string &name) const;
-	Point GetPoint(const std::string &name) const;
+	bool      HasPoint(const std::string &name) const;
+	Point     GetPoint(const std::string &name) const;
 	Rectangle GetBox(const std::string &name) const;
 
 	// Get a named value.
@@ -63,7 +63,7 @@ private:
 		Point Get() const;
 		// Get the point's location, treating the Region within the Information as the screen area.
 		Point Get(const Information &info) const;
-		void Set(const Point &position, const Point &anchor);
+		void  Set(const Point &position, const Point &anchor);
 
 	private:
 		Point position;
@@ -74,13 +74,13 @@ private:
 	public:
 		// State enumeration:
 		static const int INACTIVE = 0;
-		static const int ACTIVE = 1;
-		static const int HOVER = 2;
+		static const int ACTIVE   = 1;
+		static const int HOVER    = 2;
 
 	public:
 		// Make sure the destructor is virtual, because classes derived from
 		// this one will be used in a polymorphic list.
-		Element() = default;
+		Element()          = default;
 		virtual ~Element() = default;
 
 		// Create a new element. The alignment of the interface that contains
@@ -107,8 +107,8 @@ private:
 		// Report the actual dimensions of the object that will be drawn.
 		virtual Point NativeDimensions(const Information &info, int state) const;
 		// Draw this element in the given rectangle.
-		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect, const Information &info,
-		                  int state) const;
+		virtual void
+		Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect, const Information &info, int state) const;
 		// Add any click handlers needed for this element. This will only be
 		// called if the element is visible and active.
 		virtual void Place(const Rectangle &bounds, Panel *panel) const;
@@ -116,10 +116,10 @@ private:
 	protected:
 		AnchoredPoint from;
 		AnchoredPoint to;
-		Point alignment;
-		Point padding;
-		std::string visibleIf;
-		std::string activeIf;
+		Point         alignment;
+		Point         padding;
+		std::string   visibleIf;
+		std::string   activeIf;
 	};
 
 	// This class handles "sprite", "image", and "outline" elements.
@@ -134,8 +134,10 @@ private:
 		// Report the actual dimensions of the object that will be drawn.
 		virtual Point NativeDimensions(const Information &info, int state) const override;
 		// Draw this element in the given rectangle.
-		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect, const Information &info,
-		                  int state) const override;
+		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb,
+		                  const Rectangle                      &rect,
+		                  const Information                    &info,
+		                  int                                   state) const override;
 
 	private:
 		const Sprite *GetSprite(const Information &info, int state) const;
@@ -174,11 +176,11 @@ private:
 		// The string may either be a name of a dynamic string, or static text.
 		std::string str;
 		// Color for inactive, active, and hover states.
-		const Color *color[3] = {nullptr, nullptr, nullptr};
-		int fontSize = 14;
-		char buttonKey = '\0';
-		bool isDynamic = false;
-		Truncate truncate = Truncate::NONE;
+		const Color *color[3]  = {nullptr, nullptr, nullptr};
+		int          fontSize  = 14;
+		char         buttonKey = '\0';
+		bool         isDynamic = false;
+		Truncate     truncate  = Truncate::NONE;
 	};
 
 	// This class handles "label", "string", "button", and "dynamic button" elements.
@@ -190,8 +192,10 @@ private:
 		// Report the actual dimensions of the object that will be drawn.
 		virtual Point NativeDimensions(const Information &info, int state) const override;
 		// Draw this element in the given rectangle.
-		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect, const Information &info,
-		                  int state) const override;
+		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb,
+		                  const Rectangle                      &rect,
+		                  const Information                    &info,
+		                  int                                   state) const override;
 	};
 
 	// This class handles "wrapped label", "wrapped string",
@@ -207,12 +211,14 @@ private:
 		// Report the actual dimensions of the object that will be drawn.
 		virtual Point NativeDimensions(const Information &info, int state) const override;
 		// Draw this element in the given rectangle.
-		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect, const Information &info,
-		                  int state) const override;
+		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb,
+		                  const Rectangle                      &rect,
+		                  const Information                    &info,
+		                  int                                   state) const override;
 
 	private:
 		mutable WrappedText text;
-		Alignment textAlignment = Alignment::LEFT;
+		Alignment           textAlignment = Alignment::LEFT;
 	};
 
 	// This class handles "bar" and "ring" elements.
@@ -225,18 +231,20 @@ private:
 		// itself. This returns false if it does not recognize the line, either.
 		virtual bool ParseLine(const DataNode &node) override;
 		// Draw this element in the given rectangle.
-		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect, const Information &info,
-		                  int state) const override;
+		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb,
+		                  const Rectangle                      &rect,
+		                  const Information                    &info,
+		                  int                                   state) const override;
 
 	private:
-		std::string name;
-		const Color *fromColor = nullptr;
-		const Color *toColor = nullptr;
-		float width = 2.f;
-		bool reversed = false;
-		bool isRing = false;
-		double spanAngle = 360.;
-		double startAngle = 0.;
+		std::string  name;
+		const Color *fromColor  = nullptr;
+		const Color *toColor    = nullptr;
+		float        width      = 2.f;
+		bool         reversed   = false;
+		bool         isRing     = false;
+		double       spanAngle  = 360.;
+		double       startAngle = 0.;
 	};
 
 
@@ -250,12 +258,14 @@ private:
 		// itself. This returns false if it does not recognize the line, either.
 		virtual bool ParseLine(const DataNode &node) override;
 		// Draw this element in the given rectangle.
-		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect, const Information &info,
-		                  int state) const override;
+		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb,
+		                  const Rectangle                      &rect,
+		                  const Information                    &info,
+		                  int                                   state) const override;
 
 	private:
 		const Color *color = nullptr;
-		Point orientation;
+		Point        orientation;
 	};
 
 
@@ -269,8 +279,10 @@ private:
 		// itself. This returns false if it does not recognize the line, either.
 		virtual bool ParseLine(const DataNode &node) override;
 		// Draw this element in the given rectangle.
-		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb, const Rectangle &rect, const Information &info,
-		                  int state) const override;
+		virtual void Draw(GraphicsTypes::CommandBufferInstance *cb,
+		                  const Rectangle                      &rect,
+		                  const Information                    &info,
+		                  int                                   state) const override;
 
 	private:
 		const Color *color = nullptr;
@@ -278,8 +290,8 @@ private:
 
 
 private:
-	std::vector<std::unique_ptr<Element>> elements;
-	std::map<std::string, Element> points;
-	std::map<std::string, double> values;
+	std::vector<std::unique_ptr<Element>>      elements;
+	std::map<std::string, Element>             points;
+	std::map<std::string, double>              values;
 	std::map<std::string, std::vector<double>> lists;
 };

@@ -50,16 +50,18 @@ class DialogPanel : public Panel {
 public:
 	class FunctionButton {
 	public:
-		FunctionButton() = default;
+		FunctionButton()  = default;
 		~FunctionButton() = default;
 
 		template <class T>
-		FunctionButton(T *panel, const std::string &buttonLabel, SDL_Keycode buttonKey = '\0',
+		FunctionButton(T                 *panel,
+		               const std::string &buttonLabel,
+		               SDL_Keycode        buttonKey                 = '\0',
 		               bool (T::*buttonAction)(const std::string &) = nullptr);
 
 	public:
-		std::string buttonLabel;
-		SDL_Keycode buttonKey{};
+		std::string                              buttonLabel;
+		SDL_Keycode                              buttonKey{};
 		std::function<bool(const std::string &)> buttonAction;
 	};
 
@@ -73,69 +75,107 @@ public:
 	// OK / Cancel dialog.
 	// The callback is always called with the value of what button the user clicked (ok == true, cancel == false).
 	template <class T>
-	static DialogPanel *CallFunctionOnExit(T *t, void (T::*fun)(bool), std::string message,
-	                                       Truncate truncate = Truncate::NONE, bool allowsFastForward = false);
+	static DialogPanel *CallFunctionOnExit(T *t,
+	                                       void (T::*fun)(bool),
+	                                       std::string message,
+	                                       Truncate    truncate          = Truncate::NONE,
+	                                       bool        allowsFastForward = false);
 	// OK / Cancel dialogs.
 	// If the user selects "ok", the callback is called with no parameters.
 	template <class T>
-	static DialogPanel *CallFunctionIfOk(T *t, void (T::*fun)(), std::string message,
-	                                     Truncate truncate = Truncate::NONE, bool allowsFastForward = false);
-	static DialogPanel *CallFunctionIfOk(std::function<void()> okFunction, std::string message, int activeButton,
-	                                     Truncate truncate = Truncate::NONE, bool allowsFastForward = false);
+	static DialogPanel *CallFunctionIfOk(T *t,
+	                                     void (T::*fun)(),
+	                                     std::string message,
+	                                     Truncate    truncate          = Truncate::NONE,
+	                                     bool        allowsFastForward = false);
+	static DialogPanel *CallFunctionIfOk(std::function<void()> okFunction,
+	                                     std::string           message,
+	                                     int                   activeButton,
+	                                     Truncate              truncate          = Truncate::NONE,
+	                                     bool                  allowsFastForward = false);
 
 	// Accept / Decline dialog for missions.
 	// Calls PlayerInfo::MissionCallback with the respective Endpoint of the selected button as input.
-	static DialogPanel *MissionOfferDialog(std::string message, PlayerInfo &player, const System *system = nullptr,
-	                                       Truncate truncate = Truncate::NONE, bool allowsFastForward = false);
+	static DialogPanel *MissionOfferDialog(std::string   message,
+	                                       PlayerInfo   &player,
+	                                       const System *system            = nullptr,
+	                                       Truncate      truncate          = Truncate::NONE,
+	                                       bool          allowsFastForward = false);
 
 	// OK / Cancel dialogs that request input of differing types.
 	// If the user selects "ok", the callback is called with the input.
 	template <class T>
-	static DialogPanel *RequestString(T *t, void (T::*fun)(const std::string &), std::string message,
-	                                  std::string initialValue = "", Truncate truncate = Truncate::NONE,
-	                                  bool allowsFastForward = false);
+	static DialogPanel *RequestString(T *t,
+	                                  void (T::*fun)(const std::string &),
+	                                  std::string message,
+	                                  std::string initialValue      = "",
+	                                  Truncate    truncate          = Truncate::NONE,
+	                                  bool        allowsFastForward = false);
 
-	static DialogPanel *RequestString(std::function<void(const std::string &)>, std::string message,
-									  std::string initialValue = "", Truncate truncate = Truncate::NONE,
-									  bool allowsFastForward = false);
+	static DialogPanel *RequestString(std::function<void(const std::string &)>,
+	                                  std::string message,
+	                                  std::string initialValue      = "",
+	                                  Truncate    truncate          = Truncate::NONE,
+	                                  bool        allowsFastForward = false);
 	template <class T>
-	static DialogPanel *RequestInteger(T *t, void (T::*fun)(int), std::string message,
-	                                   std::optional<int> initialValue = std::nullopt,
-	                                   Truncate truncate = Truncate::NONE, bool allowsFastForward = false);
+	static DialogPanel *RequestInteger(T *t,
+	                                   void (T::*fun)(int),
+	                                   std::string        message,
+	                                   std::optional<int> initialValue      = std::nullopt,
+	                                   Truncate           truncate          = Truncate::NONE,
+	                                   bool               allowsFastForward = false);
 	template <class T>
-	static DialogPanel *RequestDouble(T *t, void (T::*fun)(double), std::string message,
-	                                  std::optional<double> initialValue = std::nullopt,
-	                                  Truncate truncate = Truncate::NONE, bool allowsFastForward = false);
+	static DialogPanel *RequestDouble(T *t,
+	                                  void (T::*fun)(double),
+	                                  std::string           message,
+	                                  std::optional<double> initialValue      = std::nullopt,
+	                                  Truncate              truncate          = Truncate::NONE,
+	                                  bool                  allowsFastForward = false);
 
 	// OK / Cancel dialogs that request input but with validation.
 	// The "ok" button is disabled if the validation callback returns false.
 	// If the user selects "ok", the callback is called with the input.
 	template <class T>
-	static DialogPanel *RequestStringWithValidation(T *t, void (T::*fun)(const std::string &),
+	static DialogPanel *RequestStringWithValidation(T *t,
+	                                                void (T::*fun)(const std::string &),
 	                                                std::function<bool(const std::string &)> validate,
-	                                                std::string message, std::string initialValue = "",
-	                                                Truncate truncate = Truncate::NONE, bool allowsFastForward = false);
+	                                                std::string                              message,
+	                                                std::string                              initialValue = "",
+	                                                Truncate                                 truncate = Truncate::NONE,
+	                                                bool                                     allowsFastForward = false);
 	template <class T>
-	static DialogPanel *RequestStringWithCharFilter(T *t, void (T::*fun)(const std::string &),
+	static DialogPanel *RequestStringWithCharFilter(T *t,
+	                                                void (T::*fun)(const std::string &),
 	                                                std::function<bool(const std::string &, char)> filter,
-	                                                std::string message, std::string initialValue = "",
-	                                                Truncate truncate = Truncate::NONE, bool allowsFastForward = false);
+	                                                std::string                                    message,
+	                                                std::string                                    initialValue = "",
+	                                                Truncate truncate          = Truncate::NONE,
+	                                                bool     allowsFastForward = false);
 	template <class T>
-	static DialogPanel *
-	RequestIntegerWithValidation(T *t, void (T::*fun)(int), std::function<bool(int)> validate, std::string message,
-	                             std::optional<int> initialValue = std::nullopt, Truncate truncate = Truncate::NONE,
-	                             bool allowsFastForward = false);
+	static DialogPanel *RequestIntegerWithValidation(T *t,
+	                                                 void (T::*fun)(int),
+	                                                 std::function<bool(int)> validate,
+	                                                 std::string              message,
+	                                                 std::optional<int>       initialValue      = std::nullopt,
+	                                                 Truncate                 truncate          = Truncate::NONE,
+	                                                 bool                     allowsFastForward = false);
 	template <class T>
-	static DialogPanel *RequestDoubleWithValidation(T *t, void (T::*fun)(double), std::function<bool(double)> validate,
-	                                                std::string message,
-	                                                std::optional<double> initialValue = std::nullopt,
-	                                                Truncate truncate = Truncate::NONE, bool allowsFastForward = false);
+	static DialogPanel *RequestDoubleWithValidation(T *t,
+	                                                void (T::*fun)(double),
+	                                                std::function<bool(double)> validate,
+	                                                std::string                 message,
+	                                                std::optional<double>       initialValue      = std::nullopt,
+	                                                Truncate                    truncate          = Truncate::NONE,
+	                                                bool                        allowsFastForward = false);
 
 	// An OK / Cancel dialog that requests that the user inputs an integer that is greater than zero.
 	template <class T>
-	static DialogPanel *RequestPositiveInteger(T *t, void (T::*fun)(int), std::string message,
-	                                           std::optional<int> initialValue = std::nullopt,
-	                                           Truncate truncate = Truncate::NONE, bool allowsFastForward = false);
+	static DialogPanel *RequestPositiveInteger(T *t,
+	                                           void (T::*fun)(int),
+	                                           std::string        message,
+	                                           std::optional<int> initialValue      = std::nullopt,
+	                                           Truncate           truncate          = Truncate::NONE,
+	                                           bool               allowsFastForward = false);
 
 	// Draw this panel.
 	virtual void Draw(GraphicsTypes::CommandBufferInstance *cb) override;
@@ -151,29 +191,29 @@ protected:
 	public:
 		std::string message;
 		std::string initialValue;
-		Truncate truncate = Truncate::NONE;
+		Truncate    truncate = Truncate::NONE;
 
-		std::function<void()> voidFun;
-		std::function<void(bool)> boolFun;
-		std::function<void(int)> intFun;
-		std::function<void(double)> doubleFun;
+		std::function<void()>                    voidFun;
+		std::function<void(bool)>                boolFun;
+		std::function<void(int)>                 intFun;
+		std::function<void(double)>              doubleFun;
 		std::function<void(const std::string &)> stringFun;
 
-		std::function<bool(int)> validateIntFun;
-		std::function<bool(double)> validateDoubleFun;
-		std::function<bool(const std::string &)> validateStringFun;
+		std::function<bool(int)>                       validateIntFun;
+		std::function<bool(double)>                    validateDoubleFun;
+		std::function<bool(const std::string &)>       validateStringFun;
 		std::function<bool(const std::string &, char)> filterCharFun;
 
-		bool canCancel = true;
-		int activeButton = 1;
-		bool isMission = false;
+		bool canCancel         = true;
+		int  activeButton      = 1;
+		bool isMission         = false;
 		bool allowsFastForward = false;
 
 		DialogPanel::FunctionButton buttonOne;
 		DialogPanel::FunctionButton buttonThree;
 
 		const System *system = nullptr;
-		PlayerInfo *player = nullptr;
+		PlayerInfo   *player = nullptr;
 	};
 
 
@@ -204,25 +244,25 @@ protected:
 	// The number of extra segments in this dialog.
 	int extensionCount;
 
-	std::function<void()> voidFun;
-	std::function<void(bool)> boolFun;
-	std::function<void(int)> intFun;
-	std::function<void(double)> doubleFun;
+	std::function<void()>                    voidFun;
+	std::function<void(bool)>                boolFun;
+	std::function<void(int)>                 intFun;
+	std::function<void(double)>              doubleFun;
 	std::function<void(const std::string &)> stringFun;
 
-	std::function<bool(int)> validateIntFun;
-	std::function<bool(double)> validateDoubleFun;
+	std::function<bool(int)>                 validateIntFun;
+	std::function<bool(double)>              validateDoubleFun;
 	std::function<bool(const std::string &)> validateStringFun;
 
 	std::function<bool(const std::string &, char)> filterCharFun;
 
 	bool canCancel;
-	int activeButton;
+	int  activeButton;
 	bool isMission;
 	bool isOkDisabled;
 	bool allowsFastForward;
 	bool isWide;
-	int flickerTime = 0;
+	int  flickerTime = 0;
 
 	std::string input;
 
@@ -239,13 +279,15 @@ protected:
 	int numButtons;
 
 	const System *system = nullptr;
-	PlayerInfo *player = nullptr;
+	PlayerInfo   *player = nullptr;
 };
 
 
 
 template <class T>
-DialogPanel::FunctionButton::FunctionButton(T *panel, const std::string &buttonLabel, SDL_Keycode buttonKey,
+DialogPanel::FunctionButton::FunctionButton(T                 *panel,
+                                            const std::string &buttonLabel,
+                                            SDL_Keycode        buttonKey,
                                             bool (T::*buttonAction)(const std::string &))
     : buttonLabel(buttonLabel), buttonKey(buttonKey),
       buttonAction(std::bind(buttonAction, panel, std::placeholders::_1))
@@ -255,13 +297,13 @@ DialogPanel::FunctionButton::FunctionButton(T *panel, const std::string &buttonL
 
 
 template <class T>
-DialogPanel *DialogPanel::CallFunctionOnExit(T *t, void (T::*fun)(bool), std::string message, Truncate truncate,
-                                             bool allowsFastForward)
+DialogPanel *DialogPanel::CallFunctionOnExit(
+    T *t, void (T::*fun)(bool), std::string message, Truncate truncate, bool allowsFastForward)
 {
 	DialogInit init;
-	init.message = std::move(message);
-	init.boolFun = std::bind(fun, t, std::placeholders::_1);
-	init.truncate = truncate;
+	init.message           = std::move(message);
+	init.boolFun           = std::bind(fun, t, std::placeholders::_1);
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
@@ -269,13 +311,13 @@ DialogPanel *DialogPanel::CallFunctionOnExit(T *t, void (T::*fun)(bool), std::st
 
 
 template <class T>
-DialogPanel *DialogPanel::CallFunctionIfOk(T *t, void (T::*fun)(), std::string message, Truncate truncate,
-                                           bool allowsFastForward)
+DialogPanel *
+DialogPanel::CallFunctionIfOk(T *t, void (T::*fun)(), std::string message, Truncate truncate, bool allowsFastForward)
 {
 	DialogInit init;
-	init.message = std::move(message);
-	init.voidFun = std::bind(fun, t);
-	init.truncate = truncate;
+	init.message           = std::move(message);
+	init.voidFun           = std::bind(fun, t);
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
@@ -283,14 +325,18 @@ DialogPanel *DialogPanel::CallFunctionIfOk(T *t, void (T::*fun)(), std::string m
 
 
 template <class T>
-DialogPanel *DialogPanel::RequestString(T *t, void (T::*fun)(const std::string &), std::string message,
-                                        std::string initialValue, Truncate truncate, bool allowsFastForward)
+DialogPanel *DialogPanel::RequestString(T *t,
+                                        void (T::*fun)(const std::string &),
+                                        std::string message,
+                                        std::string initialValue,
+                                        Truncate    truncate,
+                                        bool        allowsFastForward)
 {
 	DialogInit init;
-	init.message = std::move(message);
-	init.initialValue = std::move(initialValue);
-	init.stringFun = std::bind(fun, t, std::placeholders::_1);
-	init.truncate = truncate;
+	init.message           = std::move(message);
+	init.initialValue      = std::move(initialValue);
+	init.stringFun         = std::bind(fun, t, std::placeholders::_1);
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
@@ -298,15 +344,19 @@ DialogPanel *DialogPanel::RequestString(T *t, void (T::*fun)(const std::string &
 
 
 template <class T>
-DialogPanel *DialogPanel::RequestInteger(T *t, void (T::*fun)(int), std::string message,
-                                         std::optional<int> initialValue, Truncate truncate, bool allowsFastForward)
+DialogPanel *DialogPanel::RequestInteger(T *t,
+                                         void (T::*fun)(int),
+                                         std::string        message,
+                                         std::optional<int> initialValue,
+                                         Truncate           truncate,
+                                         bool               allowsFastForward)
 {
 	DialogInit init;
 	init.message = std::move(message);
 	if(initialValue.has_value())
 		init.initialValue = std::to_string(initialValue.value());
-	init.intFun = std::bind(fun, t, std::placeholders::_1);
-	init.truncate = truncate;
+	init.intFun            = std::bind(fun, t, std::placeholders::_1);
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
@@ -314,15 +364,19 @@ DialogPanel *DialogPanel::RequestInteger(T *t, void (T::*fun)(int), std::string 
 
 
 template <class T>
-DialogPanel *DialogPanel::RequestDouble(T *t, void (T::*fun)(double), std::string message,
-                                        std::optional<double> initialValue, Truncate truncate, bool allowsFastForward)
+DialogPanel *DialogPanel::RequestDouble(T *t,
+                                        void (T::*fun)(double),
+                                        std::string           message,
+                                        std::optional<double> initialValue,
+                                        Truncate              truncate,
+                                        bool                  allowsFastForward)
 {
 	DialogInit init;
 	init.message = std::move(message);
 	if(initialValue.has_value())
 		init.initialValue = Format::StripCommas(Format::Number(initialValue.value(), 5));
-	init.doubleFun = std::bind(fun, t, std::placeholders::_1);
-	init.truncate = truncate;
+	init.doubleFun         = std::bind(fun, t, std::placeholders::_1);
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
@@ -330,17 +384,20 @@ DialogPanel *DialogPanel::RequestDouble(T *t, void (T::*fun)(double), std::strin
 
 
 template <class T>
-DialogPanel *DialogPanel::RequestStringWithValidation(T *t, void (T::*fun)(const std::string &),
+DialogPanel *DialogPanel::RequestStringWithValidation(T *t,
+                                                      void (T::*fun)(const std::string &),
                                                       std::function<bool(const std::string &)> validate,
-                                                      std::string message, std::string initialValue, Truncate truncate,
-                                                      bool allowsFastForward)
+                                                      std::string                              message,
+                                                      std::string                              initialValue,
+                                                      Truncate                                 truncate,
+                                                      bool                                     allowsFastForward)
 {
 	DialogInit init;
-	init.message = std::move(message);
-	init.initialValue = std::move(initialValue);
-	init.stringFun = std::bind(fun, t, std::placeholders::_1);
+	init.message           = std::move(message);
+	init.initialValue      = std::move(initialValue);
+	init.stringFun         = std::bind(fun, t, std::placeholders::_1);
 	init.validateStringFun = std::move(validate);
-	init.truncate = truncate;
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
@@ -348,17 +405,20 @@ DialogPanel *DialogPanel::RequestStringWithValidation(T *t, void (T::*fun)(const
 
 
 template <class T>
-DialogPanel *DialogPanel::RequestStringWithCharFilter(T *t, void (T::*fun)(const std::string &),
+DialogPanel *DialogPanel::RequestStringWithCharFilter(T *t,
+                                                      void (T::*fun)(const std::string &),
                                                       std::function<bool(const std::string &, char)> filter,
-                                                      std::string message, std::string initialValue, Truncate truncate,
-                                                      bool allowsFastForward)
+                                                      std::string                                    message,
+                                                      std::string                                    initialValue,
+                                                      Truncate                                       truncate,
+                                                      bool                                           allowsFastForward)
 {
 	DialogInit init;
-	init.message = std::move(message);
-	init.initialValue = std::move(initialValue);
-	init.stringFun = std::bind(fun, t, std::placeholders::_1);
-	init.filterCharFun = std::move(filter);
-	init.truncate = truncate;
+	init.message           = std::move(message);
+	init.initialValue      = std::move(initialValue);
+	init.stringFun         = std::bind(fun, t, std::placeholders::_1);
+	init.filterCharFun     = std::move(filter);
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
@@ -366,17 +426,21 @@ DialogPanel *DialogPanel::RequestStringWithCharFilter(T *t, void (T::*fun)(const
 
 
 template <class T>
-DialogPanel *DialogPanel::RequestIntegerWithValidation(T *t, void (T::*fun)(int), std::function<bool(int)> validate,
-                                                       std::string message, std::optional<int> initialValue,
-                                                       Truncate truncate, bool allowsFastForward)
+DialogPanel *DialogPanel::RequestIntegerWithValidation(T *t,
+                                                       void (T::*fun)(int),
+                                                       std::function<bool(int)> validate,
+                                                       std::string              message,
+                                                       std::optional<int>       initialValue,
+                                                       Truncate                 truncate,
+                                                       bool                     allowsFastForward)
 {
 	DialogInit init;
 	init.message = std::move(message);
 	if(initialValue.has_value())
 		init.initialValue = std::to_string(initialValue.value());
-	init.intFun = std::bind(fun, t, std::placeholders::_1);
-	init.validateIntFun = std::move(validate);
-	init.truncate = truncate;
+	init.intFun            = std::bind(fun, t, std::placeholders::_1);
+	init.validateIntFun    = std::move(validate);
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
@@ -384,18 +448,21 @@ DialogPanel *DialogPanel::RequestIntegerWithValidation(T *t, void (T::*fun)(int)
 
 
 template <class T>
-DialogPanel *DialogPanel::RequestDoubleWithValidation(T *t, void (T::*fun)(double),
-                                                      std::function<bool(double)> validate, std::string message,
-                                                      std::optional<double> initialValue, Truncate truncate,
-                                                      bool allowsFastForward)
+DialogPanel *DialogPanel::RequestDoubleWithValidation(T *t,
+                                                      void (T::*fun)(double),
+                                                      std::function<bool(double)> validate,
+                                                      std::string                 message,
+                                                      std::optional<double>       initialValue,
+                                                      Truncate                    truncate,
+                                                      bool                        allowsFastForward)
 {
 	DialogInit init;
 	init.message = std::move(message);
 	if(initialValue.has_value())
 		init.initialValue = Format::StripCommas(Format::Number(initialValue.value(), 5));
-	init.doubleFun = std::bind(fun, t, std::placeholders::_1);
+	init.doubleFun         = std::bind(fun, t, std::placeholders::_1);
 	init.validateDoubleFun = std::move(validate);
-	init.truncate = truncate;
+	init.truncate          = truncate;
 	init.allowsFastForward = allowsFastForward;
 	return new DialogPanel(init);
 }
@@ -403,14 +470,21 @@ DialogPanel *DialogPanel::RequestDoubleWithValidation(T *t, void (T::*fun)(doubl
 
 
 template <class T>
-DialogPanel *DialogPanel::RequestPositiveInteger(T *t, void (T::*fun)(int), std::string message,
-                                                 std::optional<int> initialValue, Truncate truncate,
-                                                 bool allowsFastForward)
+DialogPanel *DialogPanel::RequestPositiveInteger(T *t,
+                                                 void (T::*fun)(int),
+                                                 std::string        message,
+                                                 std::optional<int> initialValue,
+                                                 Truncate           truncate,
+                                                 bool               allowsFastForward)
 {
 	return DialogPanel::RequestIntegerWithValidation(
-	    t, fun,
+	    t,
+	    fun,
 	    [](int value) -> bool {
 		    return value > 0;
 	    },
-	    message, initialValue, truncate, allowsFastForward);
+	    message,
+	    initialValue,
+	    truncate,
+	    allowsFastForward);
 }

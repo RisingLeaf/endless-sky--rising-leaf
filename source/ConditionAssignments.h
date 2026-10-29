@@ -79,8 +79,8 @@ private:
 
 
 	public:
-		std::string conditionToAssignTo;
-		AssignOp assignOperator;
+		std::string  conditionToAssignTo;
+		AssignOp     assignOperator;
 		ConditionSet expressionToEvaluate;
 	};
 

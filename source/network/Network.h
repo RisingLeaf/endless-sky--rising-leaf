@@ -41,25 +41,25 @@ namespace Network {
 	bool NetworkingAvailable();
 
 	enum class EventType : std::uint8_t {
-		TEXT = 0x00,
+		TEXT               = 0x00,
 		UPDATE_INPUT_STATE = 0x01,
-		PUSH_SPRITE = 0x02,
-		SET_DRAWABLE = 0x03,
-		FREE_DRAWABLES = 0x04,
-		INVALID = 0xff
+		PUSH_SPRITE        = 0x02,
+		SET_DRAWABLE       = 0x03,
+		FREE_DRAWABLES     = 0x04,
+		INVALID            = 0xff
 	};
 
 	struct Event {
-		EventType Type = EventType::INVALID;
+		EventType                  Type = EventType::INVALID;
 		std::vector<unsigned char> Data;
 	};
 
 	struct OutgoingEvent {
 		Event event;
-		bool reliable = true;
+		bool  reliable = true;
 	};
 
-	Event SerializeCommand(const Command &command);
+	Event                  SerializeCommand(const Command &command);
 	std::optional<Command> DeserializeCommand(const Event &event);
 
 	class NetworkInterface {
@@ -69,10 +69,10 @@ namespace Network {
 	public:
 		virtual ~NetworkInterface();
 
-		NetworkInterface(const NetworkInterface &) = delete;
+		NetworkInterface(const NetworkInterface &)            = delete;
 		NetworkInterface &operator=(const NetworkInterface &) = delete;
 
-		bool SendEvent(const Event &event, bool reliable = true);
+		bool                 SendEvent(const Event &event, bool reliable = true);
 		std::optional<Event> PollEvent();
 
 	protected:
@@ -95,35 +95,35 @@ namespace Network {
 			}
 		};
 
-		ENetAddress address{};
+		ENetAddress                                address{};
 		std::unique_ptr<ENetHost, ENetHostDeleter> network_interface = nullptr;
 
-		std::thread EventLoop;
+		std::thread       EventLoop;
 		std::atomic<bool> Running{false};
 
-		std::mutex EventMutex;
+		std::mutex                EventMutex;
 		std::queue<OutgoingEvent> OutgoingEvents;
-		std::queue<Event> IncomingEvents;
+		std::queue<Event>         IncomingEvents;
 	};
 
-	constexpr asl::uint8 FIELD_SPRITE = 1 << 0;
-	constexpr asl::uint8 FIELD_FRAME = 1 << 1;
+	constexpr asl::uint8 FIELD_SPRITE   = 1 << 0;
+	constexpr asl::uint8 FIELD_FRAME    = 1 << 1;
 	constexpr asl::uint8 FIELD_POSITION = 1 << 2;
-	constexpr asl::uint8 FIELD_ANGLE = 1 << 3;
-	constexpr asl::uint8 FIELD_ALPHA = 1 << 4;
-	constexpr asl::uint8 FIELD_SWIZZLE = 1 << 5;
-	constexpr asl::uint8 FIELD_SCALE = 1 << 6;
+	constexpr asl::uint8 FIELD_ANGLE    = 1 << 3;
+	constexpr asl::uint8 FIELD_ALPHA    = 1 << 4;
+	constexpr asl::uint8 FIELD_SWIZZLE  = 1 << 5;
+	constexpr asl::uint8 FIELD_SCALE    = 1 << 6;
 	struct BodyInfo {
-		bool Active = false;
-		std::size_t Index = 0;
-		const Sprite *sprite = nullptr;
-		asl::float32 frame = 0;
-		asl::float32 xpos = 0, ypos = 0;
-		asl::int32 angle = 0;
-		asl::float32 alpha = 0;
+		bool                 Active = false;
+		std::size_t          Index  = 0;
+		const Sprite        *sprite = nullptr;
+		asl::float32         frame  = 0;
+		asl::float32         xpos = 0, ypos = 0;
+		asl::int32           angle = 0;
+		asl::float32         alpha = 0;
 		std::array<bool, 16> swizzle{}; // We assume a simple swizzle matrix for sake of bandwidth
-		asl::float32 xscale = 0;
-		asl::float32 yscale = 0;
+		asl::float32         xscale = 0;
+		asl::float32         yscale = 0;
 	};
 
 	class Server final : public NetworkInterface {
@@ -131,7 +131,7 @@ namespace Network {
 
 	public:
 		struct PeerState {
-			int Identifier = -1;
+			int     Identifier = -1;
 			Command CurrentInput;
 		};
 
@@ -140,15 +140,15 @@ namespace Network {
 		static std::expected<std::unique_ptr<Server>, std::string_view> CreateServer();
 
 		std::vector<PeerState> GetPeerStates() const;
-		void SendSprite(const Sprite *sprite);
+		void                   SendSprite(const Sprite *sprite);
 
 		static asl::uint16 PackSwizzle(const BodyInfo &info);
-		static Event GenerateBodyEvent(asl::uint64 spriteID, const BodyInfo &info, asl::uint8 mask);
+		static Event       GenerateBodyEvent(asl::uint64 spriteID, const BodyInfo &info, asl::uint8 mask);
 
 		asl::uint64 PushSprite(const Sprite *sprite);
-		void MarkUnused();
-		void PushBody(const Body &body, Point position, double cloak, int step);
-		void FreeUnused();
+		void        MarkUnused();
+		void        PushBody(const Body &body, Point position, double cloak, int step);
+		void        FreeUnused();
 
 	protected:
 		void OnPeerConnected(ENetPeer *connectedPeer) override;
@@ -159,15 +159,15 @@ namespace Network {
 	private:
 		void RunEventLoop();
 
-		mutable std::mutex PeersMutex;
+		mutable std::mutex                        PeersMutex;
 		std::unordered_map<ENetPeer *, PeerState> Peers;
 
 		std::unordered_map<const Sprite *, asl::uint64> SpriteIDs;
-		std::vector<const Sprite *> SpriteByID;
+		std::vector<const Sprite *>                     SpriteByID;
 
 		std::unordered_map<const Body *, BodyInfo> Bodies;
-		std::set<std::size_t> FreeIndices;
-		std::size_t NextIndex = 0;
+		std::set<std::size_t>                      FreeIndices;
+		std::size_t                                NextIndex = 0;
 	};
 
 	class Client final : public NetworkInterface {
@@ -177,13 +177,13 @@ namespace Network {
 		~Client() override;
 
 		static std::expected<std::unique_ptr<Client>, std::string_view> CreateClient();
-		std::optional<std::string_view> Connect(std::string_view address);
+		std::optional<std::string_view>                                 Connect(std::string_view address);
 
-		void AddGhosts(DrawList & draws);
+		void AddGhosts(DrawList &draws);
 
 	protected:
 		struct ConnectCommand {
-			std::string address;
+			std::string                                   address;
 			std::promise<std::optional<std::string_view>> result;
 		};
 
@@ -198,13 +198,13 @@ namespace Network {
 		// Accessed only by the event-loop thread.
 		ENetPeer *peer = nullptr;
 
-		std::mutex CommandMutex;
+		std::mutex                                  CommandMutex;
 		std::queue<std::unique_ptr<ConnectCommand>> Commands;
 
-		std::mutex BodyMutex;
+		std::mutex                  BodyMutex;
 		std::vector<const Sprite *> SpriteByID;
-		std::vector<BodyInfo> Bodies;
-		std::vector<Swizzle> Swizzles;
+		std::vector<BodyInfo>       Bodies;
+		std::vector<Swizzle>        Swizzles;
 	};
 } // namespace Network
 

@@ -31,9 +31,9 @@ class TaskQueue;
 // for managing the loading and unloading of sprites that use deferred loading.
 class SpriteLoadManager {
 public:
-	static void Init(TaskQueue &queue, std::map<std::string, std::shared_ptr<ImageSet>> images);
-	static void PreventSpriteUpload();
-	static void FindDeferredFolders();
+	static void   Init(TaskQueue &queue, std::map<std::string, std::shared_ptr<ImageSet>> images);
+	static void   PreventSpriteUpload();
+	static void   FindDeferredFolders();
 	static double Progress();
 
 	// Load an individual sprite in full.

@@ -23,12 +23,12 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 // A map that maintains insertion order. The underlying data structure is just a vector of pairs.
 template <class K, class V>
 class OrderedMap {
-	using Pair = std::pair<K, V>;
-	using iterator = typename std::vector<Pair>::iterator;
+	using Pair           = std::pair<K, V>;
+	using iterator       = typename std::vector<Pair>::iterator;
 	using const_iterator = typename std::vector<Pair>::const_iterator;
 
 public:
-	iterator find(const K &key);
+	iterator       find(const K &key);
 	const_iterator find(const K &key) const;
 
 	bool contains(const K &key) const;
@@ -37,7 +37,7 @@ public:
 	template <class... Args>
 	V &emplace_back(const K &key, Args &&...args);
 
-	V &at(const K &key);
+	V       &at(const K &key);
 	const V &at(const K &key) const;
 
 	Pair &index(std::size_t i)

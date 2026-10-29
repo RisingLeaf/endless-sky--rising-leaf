@@ -32,8 +32,8 @@ public:
 	// Rotate the initial tick mark position, if this loading circle has a rotation speed.
 	void Step();
 	// Provide the position of the center of the circle and the progress percentage.
-	void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &position, double progress = 1.,
-	          double zoom = 1.) const;
+	void
+	Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &position, double progress = 1., double zoom = 1.) const;
 
 
 private:

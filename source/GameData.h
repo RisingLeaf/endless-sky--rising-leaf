@@ -87,13 +87,13 @@ class Wormhole;
 // universe.
 class GameData {
 public:
-	static std::shared_future<void> BeginLoad(TaskQueue &queue, const PlayerInfo &player, bool onlyLoadData,
-	                                          bool debugMode, bool preventUpload);
+	static std::shared_future<void>
+	BeginLoad(TaskQueue &queue, const PlayerInfo &player, bool onlyLoadData, bool debugMode, bool preventUpload);
 	static void FinishLoading();
 	// Check for objects that are referred to but never defined.
-	static void CheckReferences();
-	static void LoadSettings();
-	static void LoadShaders();
+	static void   CheckReferences();
+	static void   LoadSettings();
+	static void   LoadShaders();
 	static double GetProgress();
 	// Whether initial game loading is complete (data, sprites and audio are loaded).
 	static bool IsLoaded();
@@ -128,42 +128,42 @@ public:
 	// Handle any events that may have been taken against a Person.
 	static void HandleEvent(const ShipEvent &event);
 
-	static const Set<Color> &Colors();
-	static const Set<Swizzle> &Swizzles();
-	static const Set<Confusion> &Confusions();
-	static const Set<Conversation> &Conversations();
-	static const Set<Effect> &Effects();
-	static const Set<GameEvent> &Events();
-	static const Set<Fleet> &Fleets();
-	static const Set<FormationPattern> &Formations();
-	static const Set<Galaxy> &Galaxies();
-	static const Set<Government> &Governments();
-	static const Set<Hazard> &Hazards();
-	static const Set<Interface> &Interfaces();
+	static const Set<Color>             &Colors();
+	static const Set<Swizzle>           &Swizzles();
+	static const Set<Confusion>         &Confusions();
+	static const Set<Conversation>      &Conversations();
+	static const Set<Effect>            &Effects();
+	static const Set<GameEvent>         &Events();
+	static const Set<Fleet>             &Fleets();
+	static const Set<FormationPattern>  &Formations();
+	static const Set<Galaxy>            &Galaxies();
+	static const Set<Government>        &Governments();
+	static const Set<Hazard>            &Hazards();
+	static const Set<Interface>         &Interfaces();
 	static const Set<Message::Category> &MessageCategories();
-	static const Set<Message> &Messages();
-	static const Set<Minable> &Minables();
-	static const Set<Mission> &Missions();
-	static const Set<News> &SpaceportNews();
-	static const Set<Outfit> &Outfits();
-	static const Set<Shop<Outfit>> &Outfitters();
-	static const Set<Person> &Persons();
-	static const Set<Phrase> &Phrases();
-	static const Set<Planet> &Planets();
-	static const Set<Ship> &Ships();
-	static const Set<Shop<Ship>> &Shipyards();
-	static const Set<System> &Systems();
-	static const Set<Test> &Tests();
-	static const Set<TestData> &TestDataSets();
-	static const Set<Wormhole> &Wormholes();
-	static const Set<Gamerules> &GamerulesPresets();
+	static const Set<Message>           &Messages();
+	static const Set<Minable>           &Minables();
+	static const Set<Mission>           &Missions();
+	static const Set<News>              &SpaceportNews();
+	static const Set<Outfit>            &Outfits();
+	static const Set<Shop<Outfit>>      &Outfitters();
+	static const Set<Person>            &Persons();
+	static const Set<Phrase>            &Phrases();
+	static const Set<Planet>            &Planets();
+	static const Set<Ship>              &Ships();
+	static const Set<Shop<Ship>>        &Shipyards();
+	static const Set<System>            &Systems();
+	static const Set<Test>              &Tests();
+	static const Set<TestData>          &TestDataSets();
+	static const Set<Wormhole>          &Wormholes();
+	static const Set<Gamerules>         &GamerulesPresets();
 
 	static const std::set<std::string> &UniverseWormholeRequirements();
 
 	static ConditionsStore &GlobalConditions();
 
-	static const Government *PlayerGovernment();
-	static Politics &GetPolitics();
+	static const Government                   *PlayerGovernment();
+	static Politics                           &GetPolitics();
 	static const std::vector<StartConditions> &StartOptions();
 
 	static const std::vector<Trade::Commodity> &Commodities();
@@ -177,14 +177,14 @@ public:
 	static const CategoryList &GetCategory(const CategoryType type);
 
 	static const StarField &Background();
-	static void ClearBackground();
-	static void StepBackground(const Point &vel, double zoom = 1.);
-	static const Point &GetBackgroundPosition();
-	static void SetBackgroundPosition(const Point &position);
-	static void SetHaze(const Sprite *sprite, bool allowAnimation);
+	static void             ClearBackground();
+	static void             StepBackground(const Point &vel, double zoom = 1.);
+	static const Point     &GetBackgroundPosition();
+	static void             SetBackgroundPosition(const Point &position);
+	static void             SetHaze(const Sprite *sprite, bool allowAnimation);
 
-	static const std::string &Tooltip(const std::string &label);
-	static std::string HelpMessage(const std::string &name);
+	static const std::string                        &Tooltip(const std::string &label);
+	static std::string                               HelpMessage(const std::string &name);
 	static const std::map<std::string, std::string> &HelpTemplates();
 
 	static MaskManager &GetMaskManager();
@@ -192,7 +192,7 @@ public:
 	static const TextReplacements &GetTextReplacements();
 
 	static const Gamerules &GetGamerules();
-	static void SetGamerules(const Gamerules *gamerules);
+	static void             SetGamerules(const Gamerules *gamerules);
 	static const Gamerules &DefaultGamerules();
 
 	// Thread-safe way to draw the menu background.
@@ -200,6 +200,6 @@ public:
 
 
 private:
-	static void LoadSources(TaskQueue &queue);
+	static void                                             LoadSources(TaskQueue &queue);
 	static std::map<std::string, std::shared_ptr<ImageSet>> FindImages();
 };

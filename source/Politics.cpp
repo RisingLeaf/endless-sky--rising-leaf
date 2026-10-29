@@ -36,14 +36,14 @@ namespace {
 	bool EvadesCargoScan(const Ship &ship)
 	{
 		// Illegal goods can be hidden inside legal goods to avoid detection.
-		const int contraband = ship.Cargo().IllegalCargoAmount();
+		const int contraband      = ship.Cargo().IllegalCargoAmount();
 		const int netIllegalCargo = contraband - ship.Attributes().Get("scan concealment");
 		if(netIllegalCargo <= 0)
 			return true;
 
-		const int legalGoods = ship.Cargo().Used() - contraband;
+		const int    legalGoods   = ship.Cargo().Used() - contraband;
 		const double illegalRatio = legalGoods ? max(1., 2. * netIllegalCargo / legalGoods) : 1.;
-		const double scanChance = illegalRatio / (1. + ship.Attributes().Get("scan interference"));
+		const double scanChance   = illegalRatio / (1. + ship.Attributes().Get("scan interference"));
 		return Random::Real() > scanChance;
 	}
 
@@ -118,8 +118,8 @@ void Politics::Offend(const Government *gov, int eventType, int count)
 
 	for(const auto &it : GameData::Governments())
 	{
-		const Government *other = &it.second;
-		double weight = other->AttitudeToward(gov);
+		const Government         *other   = &it.second;
+		double                    weight  = other->AttitudeToward(gov);
 		Government::PenaltyEffect penalty = other->PenaltyFor(eventType, gov);
 
 		// You can provoke a government even by attacking an empty ship, such as
@@ -243,8 +243,8 @@ bool Politics::HasDominated(const Planet *planet) const
 
 
 // Check to see if the player has done anything they should be fined for.
-pair<const Conversation *, string> Politics::Fine(PlayerInfo &player, const Government *gov, int scan,
-                                                  const Ship *target, double security)
+pair<const Conversation *, string>
+Politics::Fine(PlayerInfo &player, const Government *gov, int scan, const Ship *target, double security)
 {
 	// Do nothing if you have already been fined today, or if you evade
 	// detection.
@@ -252,8 +252,8 @@ pair<const Conversation *, string> Politics::Fine(PlayerInfo &player, const Gove
 		return {};
 
 	const Conversation *deathSentence = nullptr;
-	string reason;
-	int64_t maxFine = 0;
+	string              reason;
+	int64_t             maxFine = 0;
 	for(const shared_ptr<Ship> &ship : player.Ships())
 	{
 		if(target && target != &*ship)
@@ -276,7 +276,7 @@ pair<const Conversation *, string> Politics::Fine(PlayerInfo &player, const Gove
 			if((fine > maxFine && maxFine >= 0) || fine < 0)
 			{
 				maxFine = fine;
-				reason = " for carrying illegal passengers on the " + ship->GivenName() + ".";
+				reason  = " for carrying illegal passengers on the " + ship->GivenName() + ".";
 
 				for(const Mission &mission : player.Missions())
 				{
@@ -306,7 +306,7 @@ pair<const Conversation *, string> Politics::Fine(PlayerInfo &player, const Gove
 			if((fine.first > maxFine && maxFine >= 0) || fine.first < 0)
 			{
 				maxFine = fine.first;
-				reason = " for carrying illegal cargo on the " + ship->GivenName() + ".";
+				reason  = " for carrying illegal cargo on the " + ship->GivenName() + ".";
 
 				for(const Mission &mission : player.Missions())
 				{
@@ -335,12 +335,12 @@ pair<const Conversation *, string> Politics::Fine(PlayerInfo &player, const Gove
 			for(const auto &[outfit, count] : ship->Outfits())
 				if(count)
 				{
-					int fine = gov->Fines(outfit);
+					int                  fine     = gov->Fines(outfit);
 					Government::Atrocity atrocity = gov->Condemns(outfit);
 					if(atrocity.isAtrocity)
 					{
 						deathSentence = atrocity.customDeathSentence;
-						fine = -1;
+						fine          = -1;
 					}
 					if(fine)
 					{
@@ -359,17 +359,17 @@ pair<const Conversation *, string> Politics::Fine(PlayerInfo &player, const Gove
 				                     },
 				                     5);
 
-			int shipFine = gov->Fines(ship.get());
+			int                  shipFine = gov->Fines(ship.get());
 			Government::Atrocity atrocity = gov->Condemns(ship.get());
 			if(atrocity.isAtrocity)
 			{
 				deathSentence = atrocity.customDeathSentence;
-				shipFine = -1;
+				shipFine      = -1;
 			}
 			if((shipFine > maxFine && maxFine >= 0) || shipFine < 0)
 			{
 				maxFine = shipFine;
-				reason = " for flying an illegal ship, the " + ship->GivenName() + ".";
+				reason  = " for flying an illegal ship, the " + ship->GivenName() + ".";
 			}
 		}
 		if(failedMissions && maxFine > 0)
@@ -398,7 +398,7 @@ pair<const Conversation *, string> Politics::Fine(PlayerInfo &player, const Gove
 	{
 		// Scale the fine based on how lenient this government is.
 		maxFine = lround(maxFine * gov->GetFineFraction());
-		reason = "The " + gov->DisplayName() + " authorities fine you " + Format::CreditString(maxFine) + reason;
+		reason  = "The " + gov->DisplayName() + " authorities fine you " + Format::CreditString(maxFine) + reason;
 		player.Accounts().AddFine(maxFine);
 		fined.insert(gov);
 	}
@@ -425,8 +425,8 @@ void Politics::AddReputation(const Government *gov, double value)
 
 void Politics::SetReputation(const Government *gov, double value)
 {
-	value = min(value, gov->ReputationMax());
-	value = max(value, gov->ReputationMin());
+	value               = min(value, gov->ReputationMax());
+	value               = max(value, gov->ReputationMin());
 	reputationWith[gov] = value;
 }
 

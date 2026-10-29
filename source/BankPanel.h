@@ -51,8 +51,8 @@ private:
 	PlayerInfo &player;
 	// Loan amount you're prequalified for.
 	int64_t qualify;
-	int selectedRow = 0;
+	int     selectedRow = 0;
 
 	bool mergedMortgages = false;
-	int mortgageRows = 0;
+	int  mortgageRows    = 0;
 };

@@ -25,15 +25,19 @@ using namespace std;
 
 
 // Construct and Load() at the same time.
-NPCAction::NPCAction(const DataNode &node, const ConditionsStore *playerConditions,
-                     const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+NPCAction::NPCAction(const DataNode            &node,
+                     const ConditionsStore     *playerConditions,
+                     const set<const System *> *visitedSystems,
+                     const set<const Planet *> *visitedPlanets)
 {
 	Load(node, playerConditions, visitedSystems, visitedPlanets);
 }
 
 
-void NPCAction::Load(const DataNode &node, const ConditionsStore *playerConditions,
-                     const set<const System *> *visitedSystems, const set<const Planet *> *visitedPlanets)
+void NPCAction::Load(const DataNode            &node,
+                     const ConditionsStore     *playerConditions,
+                     const set<const System *> *visitedSystems,
+                     const set<const Planet *> *visitedPlanets)
 {
 	if(node.Size() >= 2)
 		trigger = node.Token(1);
@@ -90,6 +94,6 @@ NPCAction NPCAction::Instantiate(map<string, string> &subs, const System *origin
 {
 	NPCAction result;
 	result.trigger = trigger;
-	result.action = action.Instantiate(subs, origin, jumps, payload);
+	result.action  = action.Instantiate(subs, origin, jumps, payload);
 	return result;
 }

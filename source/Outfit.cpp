@@ -45,145 +45,145 @@ namespace {
 	// disallowed or undesirable behaviors (such as dividing by zero).
 	const auto MINIMUM_OVERRIDES = map<string, optional<int64_t>>{
 	    // Attributes which are present and map to nullopt may have any value.
-	    {"shield energy", std::nullopt},
-	    {"shield fuel", std::nullopt},
-	    {"shield heat", std::nullopt},
-	    {"hull energy", std::nullopt},
-	    {"hull fuel", std::nullopt},
-	    {"hull heat", std::nullopt},
-	    {"hull threshold", std::nullopt},
-	    {"energy generation", std::nullopt},
-	    {"energy consumption", std::nullopt},
-	    {"fuel generation", std::nullopt},
-	    {"fuel consumption", std::nullopt},
-	    {"fuel energy", std::nullopt},
-	    {"fuel heat", std::nullopt},
-	    {"heat generation", std::nullopt},
-	    {"flotsam chance", std::nullopt},
+	    {               "shield energy",                std::nullopt},
+	    {                 "shield fuel",                std::nullopt},
+	    {                 "shield heat",                std::nullopt},
+	    {                 "hull energy",                std::nullopt},
+	    {                   "hull fuel",                std::nullopt},
+	    {                   "hull heat",                std::nullopt},
+	    {              "hull threshold",                std::nullopt},
+	    {           "energy generation",                std::nullopt},
+	    {          "energy consumption",                std::nullopt},
+	    {             "fuel generation",                std::nullopt},
+	    {            "fuel consumption",                std::nullopt},
+	    {                 "fuel energy",                std::nullopt},
+	    {                   "fuel heat",                std::nullopt},
+	    {             "heat generation",                std::nullopt},
+	    {              "flotsam chance",                std::nullopt},
 
-	    {"thrusting shields", std::nullopt},
-	    {"thrusting hull", std::nullopt},
-	    {"thrusting energy", std::nullopt},
-	    {"thrusting fuel", std::nullopt},
-	    {"thrusting heat", std::nullopt},
-	    {"thrusting discharge", std::nullopt},
-	    {"thrusting corrosion", std::nullopt},
-	    {"thrusting ion", std::nullopt},
-	    {"thrusting leakage", std::nullopt},
-	    {"thrusting burn", std::nullopt},
-	    {"thrusting disruption", std::nullopt},
-	    {"thrusting slowing", std::nullopt},
+	    {           "thrusting shields",                std::nullopt},
+	    {              "thrusting hull",                std::nullopt},
+	    {            "thrusting energy",                std::nullopt},
+	    {              "thrusting fuel",                std::nullopt},
+	    {              "thrusting heat",                std::nullopt},
+	    {         "thrusting discharge",                std::nullopt},
+	    {         "thrusting corrosion",                std::nullopt},
+	    {               "thrusting ion",                std::nullopt},
+	    {           "thrusting leakage",                std::nullopt},
+	    {              "thrusting burn",                std::nullopt},
+	    {        "thrusting disruption",                std::nullopt},
+	    {           "thrusting slowing",                std::nullopt},
 
-	    {"turning shields", std::nullopt},
-	    {"turning hull", std::nullopt},
-	    {"turning energy", std::nullopt},
-	    {"turning fuel", std::nullopt},
-	    {"turning heat", std::nullopt},
-	    {"turning discharge", std::nullopt},
-	    {"turning corrosion", std::nullopt},
-	    {"turning ion", std::nullopt},
-	    {"turning leakage", std::nullopt},
-	    {"turning burn", std::nullopt},
-	    {"turning disruption", std::nullopt},
-	    {"turning slowing", std::nullopt},
+	    {             "turning shields",                std::nullopt},
+	    {                "turning hull",                std::nullopt},
+	    {              "turning energy",                std::nullopt},
+	    {                "turning fuel",                std::nullopt},
+	    {                "turning heat",                std::nullopt},
+	    {           "turning discharge",                std::nullopt},
+	    {           "turning corrosion",                std::nullopt},
+	    {                 "turning ion",                std::nullopt},
+	    {             "turning leakage",                std::nullopt},
+	    {                "turning burn",                std::nullopt},
+	    {          "turning disruption",                std::nullopt},
+	    {             "turning slowing",                std::nullopt},
 
-	    {"reverse thrusting shields", std::nullopt},
-	    {"reverse thrusting hull", std::nullopt},
-	    {"reverse thrusting energy", std::nullopt},
-	    {"reverse thrusting fuel", std::nullopt},
-	    {"reverse thrusting heat", std::nullopt},
-	    {"reverse thrusting discharge", std::nullopt},
-	    {"reverse thrusting corrosion", std::nullopt},
-	    {"reverse thrusting ion", std::nullopt},
-	    {"reverse thrusting leakage", std::nullopt},
-	    {"reverse thrusting burn", std::nullopt},
-	    {"reverse thrusting disruption", std::nullopt},
-	    {"reverse thrusting slowing", std::nullopt},
+	    {   "reverse thrusting shields",                std::nullopt},
+	    {      "reverse thrusting hull",                std::nullopt},
+	    {    "reverse thrusting energy",                std::nullopt},
+	    {      "reverse thrusting fuel",                std::nullopt},
+	    {      "reverse thrusting heat",                std::nullopt},
+	    { "reverse thrusting discharge",                std::nullopt},
+	    { "reverse thrusting corrosion",                std::nullopt},
+	    {       "reverse thrusting ion",                std::nullopt},
+	    {   "reverse thrusting leakage",                std::nullopt},
+	    {      "reverse thrusting burn",                std::nullopt},
+	    {"reverse thrusting disruption",                std::nullopt},
+	    {   "reverse thrusting slowing",                std::nullopt},
 
-	    {"afterburner shields", std::nullopt},
-	    {"afterburner hull", std::nullopt},
-	    {"afterburner energy", std::nullopt},
-	    {"afterburner fuel", std::nullopt},
-	    {"afterburner heat", std::nullopt},
-	    {"afterburner discharge", std::nullopt},
-	    {"afterburner corrosion", std::nullopt},
-	    {"afterburner ion", std::nullopt},
-	    {"afterburner leakage", std::nullopt},
-	    {"afterburner burn", std::nullopt},
-	    {"afterburner disruption", std::nullopt},
-	    {"afterburner slowing", std::nullopt},
+	    {         "afterburner shields",                std::nullopt},
+	    {            "afterburner hull",                std::nullopt},
+	    {          "afterburner energy",                std::nullopt},
+	    {            "afterburner fuel",                std::nullopt},
+	    {            "afterburner heat",                std::nullopt},
+	    {       "afterburner discharge",                std::nullopt},
+	    {       "afterburner corrosion",                std::nullopt},
+	    {             "afterburner ion",                std::nullopt},
+	    {         "afterburner leakage",                std::nullopt},
+	    {            "afterburner burn",                std::nullopt},
+	    {      "afterburner disruption",                std::nullopt},
+	    {         "afterburner slowing",                std::nullopt},
 
-	    {"cooling energy", std::nullopt},
-	    {"discharge resistance energy", std::nullopt},
-	    {"discharge resistance fuel", std::nullopt},
-	    {"discharge resistance heat", std::nullopt},
-	    {"corrosion resistance energy", std::nullopt},
-	    {"corrosion resistance fuel", std::nullopt},
-	    {"corrosion resistance heat", std::nullopt},
-	    {"ion resistance energy", std::nullopt},
-	    {"ion resistance fuel", std::nullopt},
-	    {"ion resistance heat", std::nullopt},
-	    {"scramble resistance energy", std::nullopt},
-	    {"scramble resistance fuel", std::nullopt},
-	    {"scramble resistance heat", std::nullopt},
-	    {"leak resistance energy", std::nullopt},
-	    {"leak resistance fuel", std::nullopt},
-	    {"leak resistance heat", std::nullopt},
-	    {"burn resistance energy", std::nullopt},
-	    {"burn resistance fuel", std::nullopt},
-	    {"burn resistance heat", std::nullopt},
-	    {"disruption resistance energy", std::nullopt},
-	    {"disruption resistance fuel", std::nullopt},
-	    {"disruption resistance heat", std::nullopt},
-	    {"slowing resistance energy", std::nullopt},
-	    {"slowing resistance fuel", std::nullopt},
-	    {"slowing resistance heat", std::nullopt},
-	    {"crew equivalent", std::nullopt},
+	    {              "cooling energy",                std::nullopt},
+	    { "discharge resistance energy",                std::nullopt},
+	    {   "discharge resistance fuel",                std::nullopt},
+	    {   "discharge resistance heat",                std::nullopt},
+	    { "corrosion resistance energy",                std::nullopt},
+	    {   "corrosion resistance fuel",                std::nullopt},
+	    {   "corrosion resistance heat",                std::nullopt},
+	    {       "ion resistance energy",                std::nullopt},
+	    {         "ion resistance fuel",                std::nullopt},
+	    {         "ion resistance heat",                std::nullopt},
+	    {  "scramble resistance energy",                std::nullopt},
+	    {    "scramble resistance fuel",                std::nullopt},
+	    {    "scramble resistance heat",                std::nullopt},
+	    {      "leak resistance energy",                std::nullopt},
+	    {        "leak resistance fuel",                std::nullopt},
+	    {        "leak resistance heat",                std::nullopt},
+	    {      "burn resistance energy",                std::nullopt},
+	    {        "burn resistance fuel",                std::nullopt},
+	    {        "burn resistance heat",                std::nullopt},
+	    {"disruption resistance energy",                std::nullopt},
+	    {  "disruption resistance fuel",                std::nullopt},
+	    {  "disruption resistance heat",                std::nullopt},
+	    {   "slowing resistance energy",                std::nullopt},
+	    {     "slowing resistance fuel",                std::nullopt},
+	    {     "slowing resistance heat",                std::nullopt},
+	    {             "crew equivalent",                std::nullopt},
 
-	    {"cloaking energy", std::nullopt},
-	    {"cloaking fuel", std::nullopt},
-	    {"cloaking heat", std::nullopt},
-	    {"cloaking hull", std::nullopt},
-	    {"cloaking repair delay", std::nullopt},
-	    {"cloaking shields", std::nullopt},
-	    {"cloaking shield delay", std::nullopt},
-	    {"cloaked firing", std::nullopt},
+	    {             "cloaking energy",                std::nullopt},
+	    {               "cloaking fuel",                std::nullopt},
+	    {               "cloaking heat",                std::nullopt},
+	    {               "cloaking hull",                std::nullopt},
+	    {       "cloaking repair delay",                std::nullopt},
+	    {            "cloaking shields",                std::nullopt},
+	    {       "cloaking shield delay",                std::nullopt},
+	    {              "cloaked firing",                std::nullopt},
 
 	    // "Protection" attributes appear in denominators and are incremented by 1.
-	    {"shield protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"hull protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"energy protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"fuel protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"heat protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"piercing protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"force protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"discharge protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"drag reduction", -0.99 * ATTRIBUTE_PRECISION},
-	    {"corrosion protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"inertia reduction", -0.99 * ATTRIBUTE_PRECISION},
-	    {"ion protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"scramble protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"leak protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"burn protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"disruption protection", -0.99 * ATTRIBUTE_PRECISION},
-	    {"slowing protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {           "shield protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {             "hull protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {           "energy protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {             "fuel protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {             "heat protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {         "piercing protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {            "force protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {        "discharge protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {              "drag reduction", -0.99 * ATTRIBUTE_PRECISION},
+	    {        "corrosion protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {           "inertia reduction", -0.99 * ATTRIBUTE_PRECISION},
+	    {              "ion protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {         "scramble protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {             "leak protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {             "burn protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {       "disruption protection", -0.99 * ATTRIBUTE_PRECISION},
+	    {          "slowing protection", -0.99 * ATTRIBUTE_PRECISION},
 
 	    // "Multiplier" attributes appear in numerators and are incremented by 1.
-	    {"hull multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"hull repair multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"hull energy multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"hull fuel multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"hull heat multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"cloaked repair multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"shield multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"shield generation multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"shield energy multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"shield fuel multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"shield heat multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"cloaked regen multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"acceleration multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"turn multiplier", -1. * ATTRIBUTE_PRECISION},
-	    {"turret turn multiplier", -1. * ATTRIBUTE_PRECISION},
+	    {             "hull multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {      "hull repair multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {      "hull energy multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {        "hull fuel multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {        "hull heat multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {   "cloaked repair multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {           "shield multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {"shield generation multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {    "shield energy multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {      "shield fuel multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {      "shield heat multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {    "cloaked regen multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {     "acceleration multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {             "turn multiplier",   -1. * ATTRIBUTE_PRECISION},
+	    {      "turret turn multiplier",   -1. * ATTRIBUTE_PRECISION},
 	};
 
 	void AddFlareSprites(vector<pair<Drawable, int>> &thisFlares, const pair<Drawable, int> &it, int count)
@@ -296,8 +296,8 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 
 		if(key == "display name" && hasValue)
 			displayName = child.Token(1);
@@ -416,7 +416,7 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
 	// or it's a pseudo-outfit like submunitions, so the name doesn't matter.
 	if(!displayName.empty() && pluralName.empty())
 	{
-		pluralName = displayName + 's';
+		pluralName       = displayName + 's';
 		const char &last = displayName.back();
 		if(!category.empty() &&
 		   (last == 's' || last == 'x' || last == 'z' || displayName.ends_with("ch") || displayName.ends_with("sh")))
@@ -425,10 +425,10 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
 	}
 
 	// Set the default jump fuel if not defined.
-	bool isHyperdrive = attributes.Get("hyperdrive");
-	bool isScramDrive = attributes.Get("scram drive");
-	bool isJumpDrive = attributes.Get("jump drive");
-	int64_t jumpFuel = attributes.Get("jump fuel");
+	bool    isHyperdrive = attributes.Get("hyperdrive");
+	bool    isScramDrive = attributes.Get("scram drive");
+	bool    isJumpDrive  = attributes.Get("jump drive");
+	int64_t jumpFuel     = attributes.Get("jump fuel");
 	if((isHyperdrive || isScramDrive) && attributes.Get("hyperdrive fuel") <= 0)
 	{
 		if(jumpFuel > 0)
@@ -460,16 +460,16 @@ void Outfit::Load(const DataNode &node, const ConditionsStore *playerConditions)
 	if(weapon && attributes.Get("turret mounts") && !weapon->TurretTurn() && !weapon->AntiMissile() &&
 	   !weapon->TractorBeam())
 	{
-		Weapon newWeapon = *weapon;
+		Weapon newWeapon     = *weapon;
 		newWeapon.turretTurn = 4.;
-		weapon = make_shared<Weapon>(std::move(newWeapon));
+		weapon               = make_shared<Weapon>(std::move(newWeapon));
 		node.PrintTrace("Deprecated use of a turret without specified \"turret turn\":");
 	}
 
 	// Convert any legacy cargo / outfit scan definitions into power & speed,
 	// so no runtime code has to check for both.
 	auto convertScan = [&](string &&kind) -> void {
-		string label = kind + " scan";
+		string  label   = kind + " scan";
 		int64_t initial = attributes.Get(label);
 		if(initial)
 		{

@@ -33,13 +33,13 @@ public:
 	enum class ClickAction : int {
 		SHOW_GOVERNMENT = MapPanel::SHOW_GOVERNMENT,
 		SHOW_REPUTATION = MapPanel::SHOW_REPUTATION,
-		SHOW_SHIPYARD = MapPanel::SHOW_SHIPYARD,
-		SHOW_OUTFITTER = MapPanel::SHOW_OUTFITTER,
-		SHOW_VISITED = MapPanel::SHOW_VISITED,
-		GOTO_SHIPYARD = 3,
-		GOTO_OUTFITTER = 2,
-		SELECTED = 1,
-		NONE = 0
+		SHOW_SHIPYARD   = MapPanel::SHOW_SHIPYARD,
+		SHOW_OUTFITTER  = MapPanel::SHOW_OUTFITTER,
+		SHOW_VISITED    = MapPanel::SHOW_VISITED,
+		GOTO_SHIPYARD   = 3,
+		GOTO_OUTFITTER  = 2,
+		SELECTED        = 1,
+		NONE            = 0
 	};
 
 
@@ -68,17 +68,17 @@ public:
 
 protected:
 	// Highlight this card; this is to be called when it is selected.
-	void Highlight(GraphicsTypes::CommandBufferInstance *cb, double availableSpace) const;
+	void   Highlight(GraphicsTypes::CommandBufferInstance *cb, double availableSpace) const;
 	double AvailableBottomSpace() const;
 	double AvailableTopSpace() const;
 
 
 private:
-	const Planet *planet;
+	const Planet         *planet;
 	const MapDetailPanel *parent;
 
 	unsigned number;
-	bool isSelected = false;
+	bool     isSelected = false;
 
 	bool hasVisited;
 	bool hasSpaceport;
@@ -87,14 +87,14 @@ private:
 
 	// The current starting y position.
 	double yCoordinate = 0.;
-	bool isShown = false;
+	bool   isShown     = false;
 
 	const Sprite *sprite;
-	float spriteScale;
+	float         spriteScale;
 	LoadingCircle loadingCircle;
 
-	std::string governmentName;
-	std::string reputationLabel;
+	std::string        governmentName;
+	std::string        reputationLabel;
 	const std::string &planetName;
 	// The currently select category (outfitter, shipyard, ...)
 	unsigned selectedCategory = 0;

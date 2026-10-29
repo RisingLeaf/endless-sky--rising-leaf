@@ -40,20 +40,20 @@ public:
 
 	// Get and update the current aiming offset of a ship.
 	double CurrentConfusion() const;
-	void UpdateConfusion(bool isFocusing);
+	void   UpdateConfusion(bool isFocusing);
 
 
 private:
 	std::string name;
 
 	double confusionMultiplier = 10.;
-	double period = 240.;
-	double focusMultiplier = .1;
-	double gainFocusTime = 600.;
-	double loseFocusTime = 120.;
+	double period              = 240.;
+	double focusMultiplier     = .1;
+	double gainFocusTime       = 600.;
+	double loseFocusTime       = 120.;
 
 	// Variables used for tracking a ship's current confusion.
-	int tick = 0;
+	int    tick            = 0;
 	double focusPercentage = 0.;
-	double confusion = 0.;
+	double confusion       = 0.;
 };

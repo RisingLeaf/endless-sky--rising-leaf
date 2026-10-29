@@ -76,19 +76,19 @@ namespace {
 	{
 		// This function should only ever be called from the main thread, but
 		// just to be sure, use mutex protection on the static locals.
-		static mutex distanceMutex;
+		static mutex      distanceMutex;
 		lock_guard<mutex> lock(distanceMutex);
 
 		static const System *previousCenter = center;
-		static DistanceMap distance(center, distanceSettings.WormholeStrat(), distanceSettings.AssumesJumpDrive(), -1,
-		                            maximum);
-		static int previousMaximum = maximum;
+		static DistanceMap   distance(
+		    center, distanceSettings.WormholeStrat(), distanceSettings.AssumesJumpDrive(), -1, maximum);
+		static int                         previousMaximum          = maximum;
 		static DistanceCalculationSettings previousDistanceSettings = distanceSettings;
 
 		if(center != previousCenter || maximum > previousMaximum || distanceSettings != previousDistanceSettings)
 		{
-			previousCenter = center;
-			previousMaximum = maximum;
+			previousCenter           = center;
+			previousMaximum          = maximum;
 			previousDistanceSettings = distanceSettings;
 			distance =
 			    DistanceMap(center, distanceSettings.WormholeStrat(), distanceSettings.AssumesJumpDrive(), -1, maximum);
@@ -148,7 +148,8 @@ namespace {
 
 
 // Construct and Load() at the same time.
-LocationFilter::LocationFilter(const DataNode &node, const set<const System *> *visitedSystems,
+LocationFilter::LocationFilter(const DataNode            &node,
+                               const set<const System *> *visitedSystems,
                                const set<const Planet *> *visitedPlanets)
 {
 	Load(node, visitedSystems, visitedPlanets);
@@ -156,7 +157,8 @@ LocationFilter::LocationFilter(const DataNode &node, const set<const System *> *
 
 
 
-void LocationFilter::Load(const DataNode &node, const set<const System *> *visitedSystems,
+void LocationFilter::Load(const DataNode            &node,
+                          const set<const System *> *visitedSystems,
                           const set<const Planet *> *visitedPlanets)
 {
 	for(const DataNode &child : node)
@@ -449,13 +451,13 @@ LocationFilter LocationFilter::SetOrigin(const System *origin) const
 	// Copy all parts of this instantiated filter into the result.
 	LocationFilter result = *this;
 	// Perform the conversion.
-	result.center = origin;
-	result.centerMinDistance = originMinDistance;
-	result.centerMaxDistance = originMaxDistance;
+	result.center                = origin;
+	result.centerMinDistance     = originMinDistance;
+	result.centerMaxDistance     = originMaxDistance;
 	result.centerDistanceOptions = originDistanceOptions;
 	// Revert "distance" parameters to their default.
-	result.originMinDistance = 0;
-	result.originMaxDistance = -1;
+	result.originMinDistance     = 0;
+	result.originMaxDistance     = -1;
 	result.originDistanceOptions = DistanceCalculationSettings{};
 
 	return result;
@@ -508,7 +510,8 @@ const Planet *LocationFilter::PickPlanet(const System *origin, bool hasClearance
 
 
 // Load one particular line of conditions.
-void LocationFilter::LoadChild(const DataNode &child, const set<const System *> *visitedSystems,
+void LocationFilter::LoadChild(const DataNode            &child,
+                               const set<const System *> *visitedSystems,
                                const set<const Planet *> *visitedPlanets)
 {
 	if(!visitedSystems || !visitedPlanets)
@@ -516,9 +519,9 @@ void LocationFilter::LoadChild(const DataNode &child, const set<const System *> 
 	this->visitedSystems = visitedSystems;
 	this->visitedPlanets = visitedPlanets;
 
-	bool isNot = (child.Token(0) == "not" || child.Token(0) == "neighbor");
-	int valueIndex = 1 + isNot;
-	const string &key = child.Token(valueIndex - 1);
+	bool          isNot      = (child.Token(0) == "not" || child.Token(0) == "neighbor");
+	int           valueIndex = 1 + isNot;
+	const string &key        = child.Token(valueIndex - 1);
 	if(key == "not" || key == "neighbor")
 		child.PrintTrace("Skipping unsupported use of 'not' and 'neighbor'."
 		                 " These keywords must be nested if used together.");

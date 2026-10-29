@@ -39,7 +39,7 @@ using namespace std;
 namespace {
 	// Dynamic economy parameters: how much of its production each system keeps
 	// and exports each day:
-	const double KEEP = .89;
+	const double KEEP   = .89;
 	const double EXPORT = .10;
 	// Standard deviation of the daily production of each commodity:
 	const double VOLUME = 2000.;
@@ -96,7 +96,7 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 {
 	if(node.Size() < 2)
 		return;
-	trueName = node.Token(1);
+	trueName  = node.Token(1);
 	isDefined = true;
 
 	// Track planets associated with removed objects. Check if remaining objects
@@ -111,7 +111,7 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 	for(const DataNode &child : node)
 	{
 		// Check for the "add" or "remove" keyword.
-		bool add = (child.Token(0) == "add");
+		bool add    = (child.Token(0) == "add");
 		bool remove = (child.Token(0) == "remove");
 		if((add || remove) && child.Size() < 2)
 		{
@@ -120,10 +120,10 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 		}
 
 		// Get the key and value (if any).
-		const string &key = child.Token((add || remove) ? 1 : 0);
-		int valueIndex = (add || remove) ? 2 : 1;
-		bool hasValue = (child.Size() > valueIndex);
-		const string &value = child.Token(hasValue ? valueIndex : 0);
+		const string &key        = child.Token((add || remove) ? 1 : 0);
+		int           valueIndex = (add || remove) ? 2 : 1;
+		bool          hasValue   = (child.Size() > valueIndex);
+		const string &value      = child.Token(hasValue ? valueIndex : 0);
 
 		// Check for conditions that require clearing this key's current value.
 		// "remove <key>" means to clear the key's previous contents.
@@ -157,8 +157,8 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 				starfieldDensity = 1.;
 			else if(key == "ramscoop")
 			{
-				universalRamscoop = true;
-				ramscoopAddend = 0.;
+				universalRamscoop  = true;
+				ramscoopAddend     = 0.;
 				ramscoopMultiplier = 1.;
 			}
 			else if(key == "trade")
@@ -217,8 +217,8 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 		{
 			for(const DataNode &grand : child)
 			{
-				const string &grandKey = grand.Token(0);
-				bool grandHasValue = grand.Size() >= 2;
+				const string &grandKey      = grand.Token(0);
+				bool          grandHasValue = grand.Size() >= 2;
 				if(grandKey == "universal" && grandHasValue)
 					universalRamscoop = grand.BoolValue(1);
 				else if(grandKey == "addend" && grandHasValue)
@@ -363,8 +363,8 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 					continue;
 				}
 
-				auto index = removeIt - objects.begin();
-				auto last = removeIt + 1;
+				auto   index   = removeIt - objects.begin();
+				auto   last    = removeIt + 1;
 				size_t removed = 1;
 				// Remove any child objects too.
 				for(; last != objects.end() && last->parent >= index; ++last, ++removed)
@@ -406,7 +406,7 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 		else if(key == "habitable")
 		{
 			explicitHabitableDistanceSet = true;
-			habitable = child.Value(valueIndex);
+			habitable                    = child.Value(valueIndex);
 		}
 		else if(key == "jump range")
 			jumpRange = max(0., child.Value(valueIndex));
@@ -421,12 +421,12 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 			if(hasValue)
 			{
 				extraHyperArrivalDistance = child.Value(1);
-				extraJumpArrivalDistance = fabs(child.Value(1));
+				extraJumpArrivalDistance  = fabs(child.Value(1));
 			}
 			for(const DataNode &grand : child)
 			{
-				const string &type = grand.Token(0);
-				bool grandHasValue = grand.Size() >= 2;
+				const string &type          = grand.Token(0);
+				bool          grandHasValue = grand.Size() >= 2;
 				if(type == "link" && grandHasValue)
 					extraHyperArrivalDistance = grand.Value(1);
 				else if(type == "jump" && grandHasValue)
@@ -439,13 +439,13 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 		{
 			if(hasValue)
 			{
-				jumpDepartureDistance = child.Value(1);
+				jumpDepartureDistance  = child.Value(1);
 				hyperDepartureDistance = fabs(child.Value(1));
 			}
 			for(const DataNode &grand : child)
 			{
-				const string &type = grand.Token(0);
-				bool grandHasValue = grand.Size() >= 2;
+				const string &type          = grand.Token(0);
+				bool          grandHasValue = grand.Size() >= 2;
 				if(type == "link" && grandHasValue)
 					hyperDepartureDistance = grand.Value(1);
 				else if(type == "jump" && grandHasValue)
@@ -477,14 +477,14 @@ void System::Load(const DataNode &node, Set<Planet> &planets, const ConditionsSt
 		while(root->parent >= 0)
 			root = &objects[root->parent];
 
-		static const string STAR = "You cannot land on a star!";
-		static const string HOTPLANET = "This planet is too hot to land on.";
-		static const string COLDPLANET = "This planet is too cold to land on.";
+		static const string STAR              = "You cannot land on a star!";
+		static const string HOTPLANET         = "This planet is too hot to land on.";
+		static const string COLDPLANET        = "This planet is too cold to land on.";
 		static const string UNINHABITEDPLANET = "This planet doesn't have anywhere you can land.";
-		static const string HOTMOON = "This moon is too hot to land on.";
-		static const string COLDMOON = "This moon is too cold to land on.";
-		static const string UNINHABITEDMOON = "This moon doesn't have anywhere you can land.";
-		static const string STATION = "This station cannot be docked with.";
+		static const string HOTMOON           = "This moon is too hot to land on.";
+		static const string COLDMOON          = "This moon is too cold to land on.";
+		static const string UNINHABITEDMOON   = "This moon doesn't have anywhere you can land.";
+		static const string STATION           = "This station cannot be docked with.";
 
 		double fraction = root->distance / habitable;
 		if(object.IsStar())
@@ -574,13 +574,13 @@ void System::UpdateSystem(const Set<System> &systems, const set<double> &neighbo
 	mapIcons.clear();
 	if(!explicitHabitableDistanceSet)
 		habitable = 0.;
-	int numStars = 0;
-	double starMass = 0.;
+	int    numStars     = 0;
+	double starMass     = 0.;
 	double starDistance = 0.;
 	for(const StellarObject &object : objects)
 	{
 		const StellarObjectSpriteData &spriteData = GameData::ObjectSpriteData(object.GetSprite());
-		const Sprite *starIcon = spriteData.StarIcon();
+		const Sprite                  *starIcon   = spriteData.StarIcon();
 		if(starIcon)
 			mapIcons.emplace_back(starIcon);
 		if(!explicitHabitableDistanceSet)
@@ -605,13 +605,13 @@ void System::UpdateSystem(const Set<System> &systems, const set<double> &neighbo
 	bool treatNextObjectAsStar = false;
 	if(!numStars && !objects.empty())
 	{
-		treatNextObjectAsStar = true;
+		treatNextObjectAsStar                     = true;
 		const StellarObjectSpriteData &spriteData = GameData::ObjectSpriteData(objects[0].GetSprite());
 		numStars += 1;
 		starMass += spriteData.Mass();
 	}
 
-	bool invalidStarMass = false;
+	bool     invalidStarMass = false;
 	set<int> warnedIndex;
 	for(StellarObject &object : objects)
 	{
@@ -626,9 +626,9 @@ void System::UpdateSystem(const Set<System> &systems, const set<double> &neighbo
 		{
 			// Objects with a parent are moons whose orbital period
 			// is influenced by the mass of their parent planet.
-			const Sprite *parent = objects[object.parent].GetSprite();
+			const Sprite                  *parent     = objects[object.parent].GetSprite();
 			const StellarObjectSpriteData &spriteData = GameData::ObjectSpriteData(parent);
-			double mass = spriteData.Mass();
+			double                         mass       = spriteData.Mass();
 			if(!mass)
 			{
 				if(warnedIndex.insert(object.parent).second)
@@ -793,7 +793,7 @@ const set<const System *> &System::Links() const
 const set<const System *> &System::JumpNeighbors(double neighborDistance) const
 {
 	static const set<const System *> EMPTY;
-	const auto it = neighbors.find(jumpRange ? jumpRange : neighborDistance);
+	const auto                       it = neighbors.find(jumpRange ? jumpRange : neighborDistance);
 	return it == neighbors.end() ? EMPTY : it->second;
 }
 
@@ -826,16 +826,18 @@ bool System::Inaccessible() const
 
 // Return how much ramscoop fuel and solar energy/heat is generated by this system
 // for a ship with the attributes and position.
-System::SolarGeneration System::GetSolarGeneration(const Point &shipPosition, double shipRamscoop,
-                                                   double shipCollection, double shipCollectionHeat) const
+System::SolarGeneration System::GetSolarGeneration(const Point &shipPosition,
+                                                   double       shipRamscoop,
+                                                   double       shipCollection,
+                                                   double       shipCollectionHeat) const
 {
 	SolarGeneration generation{ramscoopAddend, 0., 0.};
 	for(const auto &stellar : objects)
 	{
 		const StellarObjectSpriteData &spriteData = GameData::ObjectSpriteData(stellar.GetSprite());
-		double power = spriteData.SolarPower();
-		double wind = spriteData.SolarWind();
-		double scale = .2 + 1.8 / (.001 * stellar.position.Distance(shipPosition) + 1);
+		double                         power      = spriteData.SolarPower();
+		double                         wind       = spriteData.SolarWind();
+		double                         scale      = .2 + 1.8 / (.001 * stellar.position.Distance(shipPosition) + 1);
 		// Even if a ship has no ramscoop, it can harvest a tiny bit of fuel by flying close to the star,
 		// provided the system allows it. Both the system and the gamerule must allow the universal ramscoop
 		// in order for it to function.
@@ -859,7 +861,8 @@ double System::ExtraHyperArrivalDistance() const
 	if(extraHyperArrivalDistance.has_value())
 		distance = *extraHyperArrivalDistance;
 	else if(gamerules.HabitableBasedArrivalDistance())
-		distance = clamp(habitable, gamerules.HabitableArrivalMin().value_or(0),
+		distance = clamp(habitable,
+		                 gamerules.HabitableArrivalMin().value_or(0),
 		                 gamerules.HabitableArrivalMax().value_or(numeric_limits<double>::infinity()));
 
 	const optional<double> arrivalGamerule = gamerules.SystemArrivalMin();
@@ -879,7 +882,8 @@ double System::ExtraJumpArrivalDistance() const
 	if(extraJumpArrivalDistance.has_value())
 		distance = *extraJumpArrivalDistance;
 	else if(gamerules.HabitableBasedArrivalDistance())
-		distance = clamp(habitable, gamerules.HabitableArrivalMin().value_or(0),
+		distance = clamp(habitable,
+		                 gamerules.HabitableArrivalMin().value_or(0),
 		                 gamerules.HabitableArrivalMax().value_or(numeric_limits<double>::infinity()));
 
 	const optional<double> arrivalGamerule = gamerules.SystemArrivalMin();
@@ -909,7 +913,7 @@ double System::HyperDepartureDistance() const
 const set<const System *> &System::VisibleNeighbors() const
 {
 	static const set<const System *> EMPTY;
-	const auto it = neighbors.find(DEFAULT_NEIGHBOR_DISTANCE);
+	const auto                       it = neighbors.find(DEFAULT_NEIGHBOR_DISTANCE);
 	return it == neighbors.end() ? EMPTY : it->second;
 }
 
@@ -924,7 +928,7 @@ void System::SetDate(const Date &date)
 	{
 		// "offset" is used to allow binary orbits; the second object is offset
 		// by 180 degrees.
-		object.angle = Angle(now * object.speed + object.offset);
+		object.angle    = Angle(now * object.speed + object.offset);
 		object.position = object.angle.Unit() * object.distance;
 
 		// Because of the order of the vector, the parent's position has always
@@ -1197,14 +1201,14 @@ void System::LoadObject(const DataNode &node, Set<Planet> &planets, const Condit
 	int index = objects.size();
 	objects.push_back(StellarObject());
 	StellarObject &object = objects.back();
-	object.index = index;
-	object.parent = parent;
+	object.index          = index;
+	object.parent         = parent;
 
 	bool isAdded = (node.Token(0) == "add");
 	if(node.Size() >= 2 + isAdded)
 	{
 		Planet *planet = planets.Get(node.Token(1 + isAdded));
-		object.planet = planet;
+		object.planet  = planet;
 		planet->SetSystem(this);
 	}
 
@@ -1212,8 +1216,8 @@ void System::LoadObject(const DataNode &node, Set<Planet> &planets, const Condit
 	{
 		const string &key = child.Token(0);
 		if(key == "hazard" && child.Size() >= 3)
-			object.hazards.emplace_back(GameData::Hazards().Get(child.Token(1)), child.Value(2), child,
-			                            playerConditions);
+			object.hazards.emplace_back(
+			    GameData::Hazards().Get(child.Token(1)), child.Value(2), child, playerConditions);
 		else if(key == "object")
 			LoadObject(child, planets, playerConditions, index);
 		else
@@ -1225,8 +1229,8 @@ void System::LoadObject(const DataNode &node, Set<Planet> &planets, const Condit
 
 void System::LoadObjectHelper(const DataNode &node, StellarObject &object, bool removing) const
 {
-	const string &key = node.Token(0);
-	bool hasValue = node.Size() >= 2;
+	const string &key      = node.Token(0);
+	bool          hasValue = node.Size() >= 2;
 	if(key == "sprite" && hasValue)
 	{
 		object.LoadSprite(node);
@@ -1236,7 +1240,7 @@ void System::LoadObjectHelper(const DataNode &node, StellarObject &object, bool 
 		if(!object.isStar)
 		{
 			object.isStation = node.Token(1).starts_with("planet/station");
-			object.isMoon = (!object.isStation && object.parent >= 0 && !objects[object.parent].IsStar());
+			object.isMoon    = (!object.isStation && object.parent >= 0 && !objects[object.parent].IsStar());
 		}
 	}
 	else if(key == "distance" && hasValue)
@@ -1250,7 +1254,7 @@ void System::LoadObjectHelper(const DataNode &node, StellarObject &object, bool 
 			return;
 		}
 		object.explicitPeriodSet = true;
-		object.speed = 360. / period;
+		object.speed             = 360. / period;
 	}
 	else if(key == "offset" && hasValue)
 		object.offset = node.Value(1);
@@ -1300,7 +1304,7 @@ void System::UpdateNeighbors(const Set<System> &systems, double distance)
 
 void System::Price::SetBase(int base)
 {
-	this->base = base;
+	this->base  = base;
 	this->price = base;
 }
 

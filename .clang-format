@@ -32,8 +32,16 @@ AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 AllowShortBlocksOnASingleLine: Never
 AllowShortFunctionsOnASingleLine: None
-AllowShortCaseLabelsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: true
 AllowShortLambdasOnASingleLine: None
+
+AlignAfterOpenBracket: true
+AlignArrayOfStructures: Right
+AlignConsecutiveAssignments: Consecutive
+AlignConsecutiveDeclarations: Consecutive
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+AlignOperands: AlignAfterOperator
 
 IndentCaseLabels: false
 IndentGotoLabels: false
@@ -58,8 +66,8 @@ SpacesInAngles: Never
 
 IndentWrappedFunctionNames: false
 
-BinPackParameters: BinPack
-BinPackArguments: true
+BinPackParameters: OnePerLine
+BinPackArguments: false
 
 BreakConstructorInitializers: BeforeColon
 ConstructorInitializerIndentWidth: 4

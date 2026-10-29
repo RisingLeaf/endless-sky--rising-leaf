@@ -41,17 +41,27 @@ using namespace std;
 
 namespace {
 	const double SIDEBAR_WIDTH = 100.;
-	const double TEXT_WIDTH = 400.;
-	const double PAD = 10.;
-	const double WIDTH = SIDEBAR_WIDTH + TEXT_WIDTH;
-	const double LINE_HEIGHT = 25.;
+	const double TEXT_WIDTH    = 400.;
+	const double PAD           = 10.;
+	const double WIDTH         = SIDEBAR_WIDTH + TEXT_WIDTH;
+	const double LINE_HEIGHT   = 25.;
 
 	// The minimum distance in pixels between the selected month and the edge of the screen before the month gets centered
 	const double MINIMUM_SELECTION_DISTANCE = LINE_HEIGHT * 3;
 
-	const double GAP = 30.;
-	const string MONTH[] = {"  January", "  February", "  March",     "  April",   "  May",      "  June",
-	                        "  July",    "  August",   "  September", "  October", "  November", "  December"};
+	const double GAP     = 30.;
+	const string MONTH[] = {"  January",
+	                        "  February",
+	                        "  March",
+	                        "  April",
+	                        "  May",
+	                        "  June",
+	                        "  July",
+	                        "  August",
+	                        "  September",
+	                        "  October",
+	                        "  November",
+	                        "  December"};
 } // namespace
 
 
@@ -118,7 +128,7 @@ bool LogbookPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, 
 	{
 		// Find the index of the currently selected line.
 		vector<Selection> selections = AvailableSelections(false);
-		size_t i = 0;
+		size_t            i          = 0;
 		for(; i < selections.size(); ++i)
 			if(selections[i] == selection)
 				break;
@@ -152,8 +162,8 @@ bool LogbookPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, 
 			i = selections.size() - 1;
 		if(selections[i] != selection)
 		{
-			selection = selections[i];
-			scroll = 0.;
+			selection     = selections[i];
+			scroll        = 0.;
 			selectedEntry = nullptr;
 
 			selections = AvailableSelections();
@@ -196,8 +206,8 @@ bool LogbookPanel::Click(int x, int y, MouseButton button, int clicks)
 	for(const ClickZone<Selection> &zone : selectionZones)
 		if(zone.Contains(clickPoint))
 		{
-			selection = zone.Value();
-			scroll = 0.;
+			selection     = zone.Value();
+			scroll        = 0.;
 			selectedEntry = nullptr;
 			UI::PlaySound(UI::UISound::NORMAL);
 			return true;
@@ -260,7 +270,7 @@ void LogbookPanel::CreateSections()
 	for(const auto &[category, entries] : player.SpecialLogs())
 	{
 		Section &section = sections[category];
-		Page &page = section.insert({category, Page(PageType::SPECIAL)}).first->second;
+		Page    &page    = section.insert({category, Page(PageType::SPECIAL)}).first->second;
 		for(const auto &[heading, entry] : entries)
 			page.entries.emplace_back(heading, entry);
 	}
@@ -268,7 +278,7 @@ void LogbookPanel::CreateSections()
 	for(const auto &[date, entry] : player.Logbook())
 	{
 		Section &section = sections[to_string(date.Year())];
-		Page &page = section.insert({MONTH[date.Month() - 1], Page(PageType::DATE)}).first->second;
+		Page    &page    = section.insert({MONTH[date.Month() - 1], Page(PageType::DATE)}).first->second;
 		page.entries.emplace_back(date.ToString(), entry);
 	}
 }
@@ -278,7 +288,7 @@ void LogbookPanel::CreateSections()
 void LogbookPanel::SelectEntry(const BookEntry &entry)
 {
 	vector<const System *> options;
-	set<const System *> uniqueOptions;
+	set<const System *>    uniqueOptions;
 
 	auto AddOption = [&](const System *system) -> void {
 		if(!uniqueOptions.contains(system) && system->IsValid() && player.CanView(*system))
@@ -301,7 +311,7 @@ void LogbookPanel::SelectEntry(const BookEntry &entry)
 		centeredSystem = options.front();
 	else if(options.size() > 1)
 	{
-		auto it = std::next(ranges::find(options, centeredSystem));
+		auto it        = std::next(ranges::find(options, centeredSystem));
 		centeredSystem = it == options.end() ? options.front() : *it;
 	}
 	if(centeredSystem)
@@ -316,13 +326,13 @@ void LogbookPanel::DrawSelectedEntry(GraphicsTypes::CommandBufferInstance *cb) c
 	if(!selectedEntry)
 		return;
 
-	const Set<Color> &colors = GameData::Colors();
-	const Color &sourceColor = *colors.Get("active mission");
-	const Color &markColor = *colors.Get("waypoint");
+	const Set<Color> &colors      = GameData::Colors();
+	const Color      &sourceColor = *colors.Get("active mission");
+	const Color      &markColor   = *colors.Get("waypoint");
 
-	double zoom = Zoom();
+	double      zoom = Zoom();
 	const Color black(0.f, 1.f);
-	Point angle = Angle(30.).Unit();
+	Point       angle = Angle(30.).Unit();
 
 	auto DrawPointer = [&](const System *system, const Color &color) -> void {
 		Point position = zoom * (system->Position() + center);
@@ -359,24 +369,26 @@ void LogbookPanel::DrawLogbook(GraphicsTypes::CommandBufferInstance *cb)
 
 	// Draw the panel. The sidebar should be slightly darker than the rest.
 	const Color &sideColor = *GameData::Colors().Get("logbook sidebar");
-	FillShader::Fill(cb, Point(Screen::Left() + .5 * SIDEBAR_WIDTH, 0.), Point(SIDEBAR_WIDTH, Screen::Height()),
-	                 sideColor);
+	FillShader::Fill(
+	    cb, Point(Screen::Left() + .5 * SIDEBAR_WIDTH, 0.), Point(SIDEBAR_WIDTH, Screen::Height()), sideColor);
 	const Color &backColor = *GameData::Colors().Get("logbook background");
-	FillShader::Fill(cb, Point(Screen::Left() + SIDEBAR_WIDTH + .5 * TEXT_WIDTH, 0.),
-	                 Point(TEXT_WIDTH, Screen::Height()), backColor);
+	FillShader::Fill(cb,
+	                 Point(Screen::Left() + SIDEBAR_WIDTH + .5 * TEXT_WIDTH, 0.),
+	                 Point(TEXT_WIDTH, Screen::Height()),
+	                 backColor);
 	const Color &lineColor = *GameData::Colors().Get("logbook line");
 	FillShader::Fill(cb, Point(Screen::Left() + SIDEBAR_WIDTH - .5, 0.), Point(1., Screen::Height()), lineColor);
 
 	Panel::DrawEdgeSprite(cb, SpriteSet::Get("ui/right edge"), Screen::Left() + WIDTH);
 
 	// Colors to be used for drawing the log.
-	const Font &font = FontSet::Get(14);
-	const Font &mainFont = FontSet::Get(Preferences::GetFontSize());
-	const Color &dim = *GameData::Colors().Get("dim");
-	const Color &medium = *GameData::Colors().Get("medium");
-	const Color &bright = *GameData::Colors().Get("bright");
-	Color entryHover = bright.Transparent(.125);
-	Color entrySelected = medium.Transparent(.125);
+	const Font  &font          = FontSet::Get(14);
+	const Font  &mainFont      = FontSet::Get(Preferences::GetFontSize());
+	const Color &dim           = *GameData::Colors().Get("dim");
+	const Color &medium        = *GameData::Colors().Get("medium");
+	const Color &bright        = *GameData::Colors().Get("bright");
+	Color        entryHover    = bright.Transparent(.125);
+	Color        entrySelected = medium.Transparent(.125);
 
 	// Draw the sidebar.
 	// The currently selected sidebar item should be highlighted. This is how
@@ -390,7 +402,7 @@ void LogbookPanel::DrawLogbook(GraphicsTypes::CommandBufferInstance *cb)
 	Point zoneSize = Point(SIDEBAR_WIDTH, LINE_HEIGHT);
 	for(const auto &[name, section] : sections)
 	{
-		zoneStart = pos;
+		zoneStart         = pos;
 		bool isExpandable = section.size() != 1 || name != section.front().first;
 		if(selection.first == name && !isExpandable)
 		{
@@ -423,7 +435,7 @@ void LogbookPanel::DrawLogbook(GraphicsTypes::CommandBufferInstance *cb)
 	if(it == sections.end())
 		return;
 	const Section &section = it->second;
-	auto sit = section.find(selection.second);
+	auto           sit     = section.find(selection.second);
 	if(sit == section.end())
 		return;
 	const Page &page = sit->second;

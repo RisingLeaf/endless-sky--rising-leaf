@@ -60,13 +60,13 @@ void PilotProfile::LoadProfiles()
 
 		string fileName = Files::Name(path);
 		// The file name is either "Pilot Name.txt" or "Pilot Name~SnapshotTitle.txt".
-		size_t pos = fileName.find('~');
+		size_t     pos        = fileName.find('~');
 		const bool isSnapshot = (pos != string::npos);
 		if(!isSnapshot)
 			pos = fileName.size() - 4;
 
-		string pilotName = fileName.substr(0, pos);
-		shared_ptr<PilotProfile> &pilot = GetProfile(pilotName);
+		string                    pilotName = fileName.substr(0, pos);
+		shared_ptr<PilotProfile> &pilot     = GetProfile(pilotName);
 		// We need to call load again here since save files may exist that
 		// didn't have a corresponding pilot file, in which case GetProfile
 		// will return a new pilot.
@@ -88,7 +88,8 @@ void PilotProfile::LoadProfiles()
 		auto start = pilot->Files().begin();
 		if(start->first.find('~') == string::npos)
 			++start;
-		sort(start, pilot->Files().end(),
+		sort(start,
+		     pilot->Files().end(),
 		     [](const pair<string, filesystem::file_time_type> &a,
 		        const pair<string, filesystem::file_time_type> &b) -> bool {
 			     return a.second > b.second || (a.second == b.second && a.first < b.first);
@@ -144,9 +145,9 @@ shared_ptr<PilotProfile> &PilotProfile::NewProfile()
 
 std::string PilotProfile::GetIdentifier(const std::string &pilotName)
 {
-	string name = pilotName;
+	string                                name             = pilotName;
 	map<string, shared_ptr<PilotProfile>> existingProfiles = GetProfileMap();
-	int index = 0;
+	int                                   index            = 0;
 	while(true)
 	{
 		if(index++)
@@ -205,8 +206,8 @@ void PilotProfile::Load()
 	DataFile file(filePath);
 	for(const DataNode &child : file)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 
 		if(key == "locked")
 			isLocked = true;
@@ -216,8 +217,8 @@ void PilotProfile::Load()
 			conditions.Load(child);
 		else if(key == "gamerules" && hasValue)
 		{
-			const string &presetName = child.Token(1);
-			const Gamerules *preset = GameData::GamerulesPresets().Find(presetName);
+			const string    &presetName = child.Token(1);
+			const Gamerules *preset     = GameData::GamerulesPresets().Find(presetName);
 			if(!preset)
 			{
 				child.PrintTrace("The gamerule preset \"" + presetName +

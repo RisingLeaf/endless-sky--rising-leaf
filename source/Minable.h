@@ -65,7 +65,7 @@ public:
 	// Load a definition of a minable object.
 	void Load(const DataNode &node, const ConditionsStore *playerConditions);
 	// Calculate the expected payload value of this Minable after all outfits have been fully loaded.
-	void FinishLoading();
+	void               FinishLoading();
 	const std::string &TrueName() const;
 	const std::string &DisplayName() const;
 	const std::string &Noun() const;
@@ -92,8 +92,8 @@ public:
 
 
 protected:
-	virtual int DoTakeDamage(const DamageDealt &damage, const Government *hitBy, bool wasDisabled,
-	                         bool wasDestroyed) override;
+	virtual int
+	DoTakeDamage(const DamageDealt &damage, const Government *hitBy, bool wasDisabled, bool wasDestroyed) override;
 
 
 private:
@@ -140,13 +140,13 @@ private:
 	// payload drop rate.
 	double prospecting = 0.;
 	// Material released when this object is destroyed.
-	std::vector<Payload> payload;
+	std::vector<Payload>    payload;
 	std::vector<LiveEffect> liveEffects;
 	// Explosion effects created when this object is destroyed.
 	std::map<const Effect *, int> explosions;
 	// The expected value of the payload of this minable.
 	int64_t expectedValue = 0.;
 	// The value of the highest quality drop from this minable.
-	int64_t highestQuality = 0.;
-	bool useRandomFrameRate = true;
+	int64_t highestQuality     = 0.;
+	bool    useRandomFrameRate = true;
 };

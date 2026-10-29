@@ -71,7 +71,7 @@ bool Bitset::Intersects(const Bitset &other) const noexcept
 bool Bitset::Test(size_t index) const noexcept
 {
 	const auto blockIndex = index / BITS_PER_BLOCK;
-	const auto pos = index % BITS_PER_BLOCK;
+	const auto pos        = index % BITS_PER_BLOCK;
 	return bits[blockIndex] & (uint64_t(1) << pos);
 }
 
@@ -81,7 +81,7 @@ bool Bitset::Test(size_t index) const noexcept
 void Bitset::Set(size_t index) noexcept
 {
 	const auto blockIndex = index / BITS_PER_BLOCK;
-	const auto pos = index % BITS_PER_BLOCK;
+	const auto pos        = index % BITS_PER_BLOCK;
 	bits[blockIndex] |= (uint64_t(1) << pos);
 }
 

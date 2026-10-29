@@ -33,8 +33,8 @@ Weather::Weather(const Hazard *hazard, int totalLifetime, int lifetimeRemaining,
 	// weather to start and end at about 10% the maximum. Store the entire
 	// denominator of the exponent for the normal curve equation here since
 	// this doesn't change with the elapsed time.
-	deviation = totalLifetime / 4.3;
-	deviation = 2. * deviation * deviation;
+	deviation       = totalLifetime / 4.3;
+	deviation       = 2. * deviation * deviation;
 	currentStrength = strength;
 }
 
@@ -79,8 +79,8 @@ void Weather::Step(vector<Visual> &visuals, const Point &center)
 {
 	// Environmental effects are created by choosing a random angle and distance from
 	// their origin, then creating the effect there.
-	double minRange = hazard->MinRange();
-	double maxRange = hazard->MaxRange();
+	double minRange         = hazard->MinRange();
+	double maxRange         = hazard->MaxRange();
 	double effectMultiplier = currentStrength;
 
 	// If a hazard is system-wide, the max range becomes the edge of the screen,
@@ -112,9 +112,9 @@ void Weather::Step(vector<Visual> &visuals, const Point &center)
 		for(auto &&effect : hazard->EnvironmentalEffects())
 			for(int i = 0; i < effect.second * effectMultiplier; ++i)
 			{
-				Point angle = Angle::Random().Unit();
+				Point  angle     = Angle::Random().Unit();
 				double magnitude = (maxRange - minRange) * sqrt(Random::Real());
-				Point pos = (hazard->SystemWide() ? center : origin) + (minRange + magnitude) * angle;
+				Point  pos       = (hazard->SystemWide() ? center : origin) + (minRange + magnitude) * angle;
 				visuals.emplace_back(*effect.first, std::move(pos), Point(), Angle::Random());
 			}
 	}
@@ -134,9 +134,9 @@ void Weather::CalculateStrength()
 	// reached half the totalLifetime.
 	if(hazard->Deviates())
 	{
-		double offset = lifetimeRemaining - totalLifetime / 2.;
+		double offset   = lifetimeRemaining - totalLifetime / 2.;
 		currentStrength = strength * exp(-offset * offset / deviation);
-		sqrtStrength = sqrt(currentStrength);
+		sqrtStrength    = sqrt(currentStrength);
 	}
 }
 

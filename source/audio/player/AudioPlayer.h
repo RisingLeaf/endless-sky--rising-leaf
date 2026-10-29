@@ -78,7 +78,7 @@ protected:
 	static constexpr size_t MAX_INITIAL_BUFFERS = 3;
 
 	SoundCategory category;
-	bool spatial;
+	bool          spatial;
 
 	/// The configured source, or 0.
 	ALuint alSource = 0;

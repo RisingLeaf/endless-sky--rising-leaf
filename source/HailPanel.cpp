@@ -59,8 +59,8 @@ HailPanel::HailPanel(PlayerInfo &player, const shared_ptr<Ship> &ship, function<
 	else
 		header = ship->DisplayModelName() + " (" + gov->DisplayName() + "):";
 	// Drones are always unpiloted, so they never respond to hails.
-	bool isMute = ship->GetPersonality().IsMute() || (ship->Attributes().Category() == "Drone");
-	hasLanguage = !isMute && (gov->Language().empty() || player.Conditions().Get("language: " + gov->Language()));
+	bool isMute     = ship->GetPersonality().IsMute() || (ship->Attributes().Category() == "Drone");
+	hasLanguage     = !isMute && (gov->Language().empty() || player.Conditions().Get("language: " + gov->Language()));
 	canAssistPlayer = !ship->CanBeCarried();
 
 	if(isMute)
@@ -95,24 +95,24 @@ HailPanel::HailPanel(PlayerInfo &player, const shared_ptr<Ship> &ship, function<
 		if(flagship->NeedsFuel(false))
 		{
 			playerNeedsHelp = true;
-			canGiveFuel = ship->CanRefuel(*flagship) && canAssistPlayer;
+			canGiveFuel     = ship->CanRefuel(*flagship) && canAssistPlayer;
 		}
 		if(flagship->NeedsEnergy())
 		{
 			playerNeedsHelp = true;
-			canGiveEnergy = ship->CanGiveEnergy(*flagship) && canAssistPlayer;
+			canGiveEnergy   = ship->CanGiveEnergy(*flagship) && canAssistPlayer;
 		}
 		// Check if the player is disabled.
 		if(flagship->IsDisabled())
 		{
 			playerNeedsHelp = true;
-			canRepair = canAssistPlayer;
+			canRepair       = canAssistPlayer;
 		}
 
 		if(ship->GetPersonality().IsSurveillance())
 		{
 			canGiveFuel = false;
-			canRepair = false;
+			canRepair   = false;
 		}
 
 		if(ship->GetShipToAssist() == player.FlagshipPtr())
@@ -238,7 +238,7 @@ void HailPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 	// Get the height and width of the Drawable instead of the underlying Sprite
 	// so that scaling is accounted for.
 	float height = ship ? ship->Height() : object->Height();
-	float width = ship ? ship->Width() : object->Width();
+	float width  = ship ? ship->Width() : object->Width();
 
 	// Draw the sprite, rotated, scaled, and swizzled as necessary.
 	// The Height and Width functions on Drawable are for world-coordinates.
@@ -264,9 +264,9 @@ void HailPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 
 bool HailPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress)
 {
-	UI::UISound sound = UI::UISound::NORMAL;
-	bool shipIsEnemy = (ship && ship->GetGovernment()->IsEnemy());
-	const Government *gov = ship ? ship->GetGovernment() : planet ? planet->GetGovernment() : nullptr;
+	UI::UISound       sound       = UI::UISound::NORMAL;
+	bool              shipIsEnemy = (ship && ship->GetGovernment()->IsEnemy());
+	const Government *gov         = ship ? ship->GetGovernment() : planet ? planet->GetGovernment() : nullptr;
 
 	if(key == 'd' || key == SDLK_ESCAPE || key == SDLK_RETURN || (key == 'w' && (mod & (SDL_KMOD_CTRL | SDL_KMOD_GUI))))
 	{
@@ -277,7 +277,7 @@ bool HailPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 	}
 	else if(key == 't' && hasLanguage && planet)
 	{
-		bool isFriendly = gov && !gov->IsEnemy();
+		bool                             isFriendly   = gov && !gov->IsEnemy();
 		Preferences::TributeConfirmation confirmation = Preferences::GetTributeConfirmation();
 		bool displayConfirmation = (confirmation == Preferences::TributeConfirmation::ALWAYS ||
 		                            (isFriendly && confirmation == Preferences::TributeConfirmation::FRIENDLY_ONLY));
@@ -300,7 +300,8 @@ bool HailPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, boo
 			    [this]() {
 				    SetMessage(planet->DemandTribute(player));
 			    },
-			    message, false));
+			    message,
+			    false));
 		}
 		else
 			SetMessage(planet->DemandTribute(player));

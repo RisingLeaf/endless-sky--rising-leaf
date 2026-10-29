@@ -27,9 +27,9 @@ namespace {
 
 	// The main task queue used by the worker threads.
 	queue<TaskQueue::Task> tasks;
-	mutex asyncMutex;
-	condition_variable asyncCondition;
-	bool shouldQuit = false;
+	mutex                  asyncMutex;
+	condition_variable     asyncCondition;
+	bool                   shouldQuit = false;
 
 	// Worker threads for executing tasks.
 	struct WorkerThreads {
@@ -94,7 +94,7 @@ shared_future<void> TaskQueue::Run(function<void()> asyncTask, function<void()> 
 
 		// Queue this task for execution and create a future to track its state.
 		tasks.push(Task{this, std::move(asyncTask), std::move(syncTask)});
-		result = futures.emplace_back(tasks.back().futurePromise.get_future());
+		result                = futures.emplace_back(tasks.back().futurePromise.get_future());
 		tasks.back().futureIt = prev(futures.end());
 	}
 	asyncCondition.notify_one();
@@ -171,7 +171,7 @@ void TaskQueue::ThreadLoop() noexcept
 				// Any exception by the task is caught and rethrown inside the main thread
 				// so we can handle it appropriately.
 				auto exception = current_exception();
-				task.sync = [exception] {
+				task.sync      = [exception] {
 					rethrow_exception(exception);
 				};
 			}

@@ -78,7 +78,7 @@ vector<AudioSupplier::sample_t> Fade::NextDataChunk()
 		vector<sample_t> faded = std::get<0>(fadeProgress[0])->NextDataChunk();
 		for(size_t i = 1; i < fadeProgress.size(); ++i)
 		{
-			vector<sample_t> other = std::get<0>(fadeProgress[i])->NextDataChunk();
+			vector<sample_t> other             = std::get<0>(fadeProgress[i])->NextDataChunk();
 			auto &[source, fade, fadePerFrame] = fadeProgress[i - 1];
 			CrossFade(faded, other, fade, fadePerFrame);
 			faded = std::move(other);

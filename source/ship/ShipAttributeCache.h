@@ -51,102 +51,102 @@ private:
 	// A ship can freely access its own attribute cache.
 	friend class Ship;
 
-	double outfitCapacity = 0.;
-	double weaponCapacity = 0.;
-	double engineCapacity = 0.;
-	double cargoSpace = 0.;
-	bool automaton = false;
-	int requiredCrew = 0;
-	int mandatoryCrew = 0;
-	int bunks = 0;
-	int crewEquiv = 0;
-	bool onlyUseCrewEquiv = false;
+	double outfitCapacity   = 0.;
+	double weaponCapacity   = 0.;
+	double engineCapacity   = 0.;
+	double cargoSpace       = 0.;
+	bool   automaton        = false;
+	int    requiredCrew     = 0;
+	int    mandatoryCrew    = 0;
+	int    bunks            = 0;
+	int    crewEquiv        = 0;
+	bool   onlyUseCrewEquiv = false;
 
-	double energyGeneration = 0.;
+	double energyGeneration  = 0.;
 	double energyConsumption = 0.;
 
-	double fuelGeneration = 0.;
+	double fuelGeneration  = 0.;
 	double fuelConsumption = 0.;
-	double fuelEnergy = 0.;
-	double fuelHeat = 0.;
+	double fuelEnergy      = 0.;
+	double fuelHeat        = 0.;
 
-	double ramscoop = 0.;
+	double ramscoop        = 0.;
 	double solarCollection = 0.;
-	double solarHeat = 0.;
+	double solarHeat       = 0.;
 
-	double heatGeneration = 0.;
-	double heatCapacity = 0.;
+	double heatGeneration          = 0.;
+	double heatCapacity            = 0.;
 	double overheatDamageThreshold = 1.;
-	double overheatDamageRate = 0.;
+	double overheatDamageRate      = 0.;
 
-	double cooling = 0.;
-	double activeCooling = 0.;
-	double coolingEnergy = 0.;
+	double cooling             = 0.;
+	double activeCooling       = 0.;
+	double coolingEnergy       = 0.;
 	double coolingInefficiency = 1.;
 
-	int repairDelay = 0;
-	int disabledRepairDelay = 0;
-	double hullRepairRate = 0.;
+	int            repairDelay         = 0;
+	int            disabledRepairDelay = 0;
+	double         hullRepairRate      = 0.;
 	ResourceLevels hullRepairCost;
-	double hullRepairRateWithDelay = 0.;
+	double         hullRepairRateWithDelay = 0.;
 	ResourceLevels hullRepairWithDelayCost;
 
-	int shieldDelay = 0;
-	int depletedShieldDelay = 0;
-	double shieldRegenRate = 0.;
+	int            shieldDelay         = 0;
+	int            depletedShieldDelay = 0;
+	double         shieldRegenRate     = 0.;
 	ResourceLevels shieldRegenCost;
-	double shieldRegenRateWithDelay = 0.;
+	double         shieldRegenRateWithDelay = 0.;
 	ResourceLevels shieldRegenWithDelayCost;
 
-	int recoveryTime = 0;
+	int            recoveryTime = 0;
 	ResourceLevels recoveryCost;
 
-	double thrust = 0.;
+	double         thrust = 0.;
 	ResourceLevels thrustCost;
-	double turn = 0.;
+	double         turn = 0.;
 	ResourceLevels turnCost;
-	double reverseThrust = 0.;
+	double         reverseThrust = 0.;
 	ResourceLevels reverseThrustCost;
-	double afterburnerThrust = 0.;
+	double         afterburnerThrust = 0.;
 	ResourceLevels afterburnerThrustCost;
 
 	ResourceLevels cloakCost;
-	double cloak = 0.;
-	double cloakByMass = 0.;
-	double cloakHullThreshold = 0.;
-	double cloakingShieldDelay = 0.;
-	double cloakingHullDelay = 0.;
-	double cloakPhasing = 0.;
-	double cloakedRepairMult = 0.;
-	double cloakedRegenMult = 0.;
-	double cloakedFiring = 0.;
-	bool canBoardWhileCloaked = false;
-	bool canAfterburnerWhileCloaked = false;
-	bool canCommunicateWhileCloaked = false;
-	bool canFireWhileCloaked = false;
-	bool canPickupWhileCloaked = false;
-	bool canScanWhileCloaked = false;
-	bool canDeployWhileCloaked = false;
+	double         cloak                      = 0.;
+	double         cloakByMass                = 0.;
+	double         cloakHullThreshold         = 0.;
+	double         cloakingShieldDelay        = 0.;
+	double         cloakingHullDelay          = 0.;
+	double         cloakPhasing               = 0.;
+	double         cloakedRepairMult          = 0.;
+	double         cloakedRegenMult           = 0.;
+	double         cloakedFiring              = 0.;
+	bool           canBoardWhileCloaked       = false;
+	bool           canAfterburnerWhileCloaked = false;
+	bool           canCommunicateWhileCloaked = false;
+	bool           canFireWhileCloaked        = false;
+	bool           canPickupWhileCloaked      = false;
+	bool           canScanWhileCloaked        = false;
+	bool           canDeployWhileCloaked      = false;
 
-	double cargoScanPower = 0.;
-	double outfitScanPower = 0.;
-	double cargoScanSpeed = 0.;
-	double outfitScanSpeed = 0.;
-	double cargoScanOpacity = 0.;
+	double cargoScanPower    = 0.;
+	double outfitScanPower   = 0.;
+	double cargoScanSpeed    = 0.;
+	double outfitScanSpeed   = 0.;
+	double cargoScanOpacity  = 0.;
 	double outfitScanOpacity = 0.;
 	double asteroidScanPower = 0.;
-	double atmosphereScan = 0.;
-	bool silentScans = false;
-	bool inscrutable = false;
+	double atmosphereScan    = 0.;
+	bool   silentScans       = false;
+	bool   inscrutable       = false;
 
-	double drag = 1.;
-	double dragReduction = 1.;
+	double drag             = 1.;
+	double dragReduction    = 1.;
 	double accelerationMult = 1.;
 	double inertiaReduction = 1.;
-	double turnMult = 1.;
+	double turnMult         = 1.;
 
-	float landingSpeed = 0.f;
-	bool silentJumps = false;
+	float  landingSpeed = 0.f;
+	bool   silentJumps  = false;
 	double selfDestruct = 0.;
 
 	double turretTurnMult = 1.;

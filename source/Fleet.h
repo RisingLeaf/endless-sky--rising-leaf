@@ -64,30 +64,32 @@ public:
 	void Enter(const System &system, std::list<std::shared_ptr<Ship>> &ships, const Planet *planet = nullptr) const;
 	// Place a fleet in the given system, already "in action." If the carried flag is set, only
 	// uncarried ships will be added to the list (as any carriables will be stored in bays).
-	void Place(const System &system, std::list<std::shared_ptr<Ship>> &ships, bool carried = true,
-	           bool addCargo = true) const;
+	void Place(const System                     &system,
+	           std::list<std::shared_ptr<Ship>> &ships,
+	           bool                              carried  = true,
+	           bool                              addCargo = true) const;
 
 	// Do the randomization to make a ship enter or be in the given system.
 	// Return the system that was chosen for the ship to enter from.
 	static const System *Enter(const System &system, Ship &ship, const System *source = nullptr);
-	static void Place(const System &system, Ship &ship);
+	static void          Place(const System &system, Ship &ship);
 
 	int64_t Strength() const;
 
 
 private:
-	static std::pair<Point, double> ChooseCenter(const System &system);
+	static std::pair<Point, double>    ChooseCenter(const System &system);
 	std::vector<std::shared_ptr<Ship>> Instantiate(const std::vector<const Ship *> &ships) const;
 	bool PlaceFighter(const std::shared_ptr<Ship> &fighter, std::vector<std::shared_ptr<Ship>> &placed) const;
 
 
 private:
-	std::string fleetName;
-	const Government *government = nullptr;
-	const Phrase *names = nullptr;
-	const Phrase *fighterNames = nullptr;
-	const FormationPattern *formation = nullptr;
-	WeightedList<Variant> variants;
+	std::string             fleetName;
+	const Government       *government   = nullptr;
+	const Phrase           *names        = nullptr;
+	const Phrase           *fighterNames = nullptr;
+	const FormationPattern *formation    = nullptr;
+	WeightedList<Variant>   variants;
 	// The cargo ships in this fleet will carry.
 	FleetCargo cargo;
 

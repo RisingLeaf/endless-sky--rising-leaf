@@ -42,7 +42,8 @@ void RaidFleet::Load(vector<RaidFleet> &raidFleets, const DataNode &node, bool r
 		raidFleets.erase(remove_if(raidFleets.begin(), raidFleets.end(), fleetMatcher), raidFleets.end());
 	}
 	else
-		raidFleets.emplace_back(fleet, node.Size() > (valueIndex + 1) ? node.Value(valueIndex + 1) : 2.,
+		raidFleets.emplace_back(fleet,
+		                        node.Size() > (valueIndex + 1) ? node.Value(valueIndex + 1) : 2.,
 		                        node.Size() > (valueIndex + 2) ? node.Value(valueIndex + 2) : 0.);
 }
 

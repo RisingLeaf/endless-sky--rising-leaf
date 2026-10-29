@@ -41,15 +41,22 @@ public:
 	void Load(const GraphicsTypes::GraphicsInstance *graphics_instance, const std::filesystem::path &imagePath);
 
 	// Draw a text string, subject to the given layout and truncation strategy.
-	void Draw(GraphicsTypes::CommandBufferInstance *cb, const DisplayText &text, const Point &point,
-	          const Color &color) const;
-	void DrawAliased(GraphicsTypes::CommandBufferInstance *cb, const DisplayText &text, double x, double y,
-	                 const Color &color) const;
+	void Draw(GraphicsTypes::CommandBufferInstance *cb,
+	          const DisplayText                    &text,
+	          const Point                          &point,
+	          const Color                          &color) const;
+	void DrawAliased(GraphicsTypes::CommandBufferInstance *cb,
+	                 const DisplayText                    &text,
+	                 double                                x,
+	                 double                                y,
+	                 const Color                          &color) const;
 	// Draw the given text string, e.g. post-formatting (or without regard to formatting).
-	void Draw(GraphicsTypes::CommandBufferInstance *cb, const std::string &str, const Point &point,
-	          const Color &color) const;
-	void DrawAliased(GraphicsTypes::CommandBufferInstance *cb, const std::string &str, double x, double y,
-	                 const Color &color) const;
+	void Draw(GraphicsTypes::CommandBufferInstance *cb,
+	          const std::string                    &str,
+	          const Point                          &point,
+	          const Color                          &color) const;
+	void DrawAliased(
+	    GraphicsTypes::CommandBufferInstance *cb, const std::string &str, double x, double y, const Color &color) const;
 
 	// Determine the string's width, without considering formatting.
 	int Width(const std::string &str, char after = ' ') const;
@@ -65,9 +72,9 @@ public:
 
 private:
 	static int Glyph(char c, bool isAfterSpace) noexcept;
-	void LoadTexture(const GraphicsTypes::GraphicsInstance *graphics_instance, ImageBuffer &image);
-	void CalculateAdvances(ImageBuffer &image);
-	void SetUpShader(const GraphicsTypes::GraphicsInstance *graphics_instance, float glyphW, float glyphH);
+	void       LoadTexture(const GraphicsTypes::GraphicsInstance *graphics_instance, ImageBuffer &image);
+	void       CalculateAdvances(ImageBuffer &image);
+	void       SetUpShader(const GraphicsTypes::GraphicsInstance *graphics_instance, float glyphW, float glyphH);
 
 	int WidthRawString(const char *str, char after = ' ') const noexcept;
 
@@ -76,24 +83,25 @@ private:
 	std::string TruncateFront(const std::string &str, int &width) const;
 	std::string TruncateMiddle(const std::string &str, int &width) const;
 
-	std::string TruncateEndsOrMiddle(const std::string &str, int &width,
+	std::string TruncateEndsOrMiddle(const std::string                                   &str,
+	                                 int                                                 &width,
 	                                 std::function<std::string(const std::string &, int)> getResultString) const;
 
 private:
 	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
-	ShaderInfo info;
-	graphics_layer::TextureHandle texture;
-	graphics_layer::ObjectHandle geometry;
+	ShaderInfo                                     info;
+	graphics_layer::TextureHandle                  texture;
+	graphics_layer::ObjectHandle                   geometry;
 
-	int height = 0;
-	int space = 0;
-	mutable int screenWidth = 0;
-	mutable int screenHeight = 0;
+	int           height       = 0;
+	int           space        = 0;
+	mutable int   screenWidth  = 0;
+	mutable int   screenHeight = 0;
 	mutable float scale[2]{0.f, 0.f};
-	float glyphWidth = 0.f;
-	float glyphHeight = 0.f;
+	float         glyphWidth  = 0.f;
+	float         glyphHeight = 0.f;
 
-	static const int GLYPHS = 98;
-	int advance[GLYPHS * GLYPHS] = {};
-	int widthEllipses = 0;
+	static const int GLYPHS                   = 98;
+	int              advance[GLYPHS * GLYPHS] = {};
+	int              widthEllipses            = 0;
 };

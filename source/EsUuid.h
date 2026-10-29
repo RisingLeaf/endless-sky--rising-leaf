@@ -32,17 +32,17 @@ class EsUuid final {
 public:
 	// Used to represent a UUID across supported platforms.
 	struct UuidType final {
-		UuidType() = default;
-		UuidType(UuidType &&) = default;
+		UuidType()                       = default;
+		UuidType(UuidType &&)            = default;
 		UuidType &operator=(UuidType &&) = default;
-		~UuidType() = default;
+		~UuidType()                      = default;
 		UuidType &operator=(const UuidType &other)
 		{
 			return *this = UuidType(other);
 		}
 #ifdef _WIN32
 		UuidType(const UuidType &other) = default;
-		UUID id = {};
+		UUID id                         = {};
 #else
 		UuidType(const UuidType &other)
 		{
@@ -55,11 +55,11 @@ public:
 
 public:
 	static UuidType MakeUuid();
-	static EsUuid FromString(const std::string &input);
+	static EsUuid   FromString(const std::string &input);
 
 
 public:
-	EsUuid() noexcept = default;
+	EsUuid() noexcept  = default;
 	~EsUuid() noexcept = default;
 	// Copying a UUID does not copy its value. (This allows us to use simple copy operations on stock
 	// ship definitions when spawning fleets, etc.)

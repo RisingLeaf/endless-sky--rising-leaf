@@ -30,9 +30,9 @@ void Trade::Load(const DataNode &node)
 		const string &key = child.Token(0);
 		if(key == "commodity" && child.Size() >= 2)
 		{
-			bool isSpecial = (child.Size() < 4);
-			vector<Commodity> &list = (isSpecial ? specialCommodities : commodities);
-			auto it = list.begin();
+			bool               isSpecial = (child.Size() < 4);
+			vector<Commodity> &list      = (isSpecial ? specialCommodities : commodities);
+			auto               it        = list.begin();
 			for(; it != list.end(); ++it)
 				if(it->name == child.Token(1))
 					break;
@@ -42,7 +42,7 @@ void Trade::Load(const DataNode &node)
 			it->name = child.Token(1);
 			if(!isSpecial)
 			{
-				it->low = child.Value(2);
+				it->low  = child.Value(2);
 				it->high = child.Value(3);
 			}
 			for(const DataNode &grand : child)

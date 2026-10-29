@@ -42,28 +42,17 @@ namespace {
 	{
 		switch(trigger)
 		{
-		case NPC::Trigger::ASSIST:
-			return "on assist";
-		case NPC::Trigger::SCAN_CARGO:
-			return "on 'scan cargo'";
-		case NPC::Trigger::SCAN_OUTFITS:
-			return "on 'scan outfits'";
-		case NPC::Trigger::PROVOKE:
-			return "on provoke";
-		case NPC::Trigger::DISABLE:
-			return "on disable";
-		case NPC::Trigger::BOARD:
-			return "on board";
-		case NPC::Trigger::CAPTURE:
-			return "on capture";
-		case NPC::Trigger::DESTROY:
-			return "on destroy";
-		case NPC::Trigger::KILL:
-			return "on kill";
-		case NPC::Trigger::ENCOUNTER:
-			return "on encounter";
-		default:
-			return "unknown trigger";
+		case NPC::Trigger::ASSIST:       return "on assist";
+		case NPC::Trigger::SCAN_CARGO:   return "on 'scan cargo'";
+		case NPC::Trigger::SCAN_OUTFITS: return "on 'scan outfits'";
+		case NPC::Trigger::PROVOKE:      return "on provoke";
+		case NPC::Trigger::DISABLE:      return "on disable";
+		case NPC::Trigger::BOARD:        return "on board";
+		case NPC::Trigger::CAPTURE:      return "on capture";
+		case NPC::Trigger::DESTROY:      return "on destroy";
+		case NPC::Trigger::KILL:         return "on kill";
+		case NPC::Trigger::ENCOUNTER:    return "on encounter";
+		default:                         return "unknown trigger";
 		}
 	}
 } // namespace
@@ -71,7 +60,9 @@ namespace {
 
 
 // Construct and Load() at the same time.
-NPC::NPC(const DataNode &node, const ConditionsStore *playerConditions, const set<const System *> *visitedSystems,
+NPC::NPC(const DataNode            &node,
+         const ConditionsStore     *playerConditions,
+         const set<const System *> *visitedSystems,
          const set<const Planet *> *visitedPlanets)
 {
 	Load(node, playerConditions, visitedSystems, visitedPlanets);
@@ -79,7 +70,9 @@ NPC::NPC(const DataNode &node, const ConditionsStore *playerConditions, const se
 
 
 
-void NPC::Load(const DataNode &node, const ConditionsStore *playerConditions, const set<const System *> *visitedSystems,
+void NPC::Load(const DataNode            &node,
+               const ConditionsStore     *playerConditions,
+               const set<const System *> *visitedSystems,
                const set<const Planet *> *visitedPlanets)
 {
 	// Any tokens after the "npc" tag list the things that must happen for this
@@ -122,8 +115,8 @@ void NPC::Load(const DataNode &node, const ConditionsStore *playerConditions, co
 
 	for(const DataNode &child : node)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 
 		if(key == "system")
 		{
@@ -176,16 +169,16 @@ void NPC::Load(const DataNode &node, const ConditionsStore *playerConditions, co
 		else if(key == "on" && hasValue)
 		{
 			static const map<string, Trigger> trigger = {
-			    {"assist", Trigger::ASSIST},
-			    {"scan cargo", Trigger::SCAN_CARGO},
+			    {      "assist",       Trigger::ASSIST},
+			    {  "scan cargo",   Trigger::SCAN_CARGO},
 			    {"scan outfits", Trigger::SCAN_OUTFITS},
-			    {"provoke", Trigger::PROVOKE},
-			    {"disable", Trigger::DISABLE},
-			    {"board", Trigger::BOARD},
-			    {"capture", Trigger::CAPTURE},
-			    {"destroy", Trigger::DESTROY},
-			    {"kill", Trigger::KILL},
-			    {"encounter", Trigger::ENCOUNTER},
+			    {     "provoke",      Trigger::PROVOKE},
+			    {     "disable",      Trigger::DISABLE},
+			    {       "board",        Trigger::BOARD},
+			    {     "capture",      Trigger::CAPTURE},
+			    {     "destroy",      Trigger::DESTROY},
+			    {        "kill",         Trigger::KILL},
+			    {   "encounter",    Trigger::ENCOUNTER},
 			};
 			auto it = trigger.find(child.Token(1));
 			if(it != trigger.end())
@@ -449,7 +442,7 @@ bool NPC::Do(const ShipEvent &event, PlayerInfo &player, UI &ui, const Mission *
 	// is an NPC and it just got captured, replace it with a destroyed copy of
 	// itself so that this class thinks the ship is destroyed.
 	shared_ptr<Ship> ship;
-	int type = event.Type();
+	int              type = event.Type();
 	for(shared_ptr<Ship> &ptr : ships)
 		if(ptr == event.Target())
 		{
@@ -478,7 +471,7 @@ bool NPC::Do(const ShipEvent &event, PlayerInfo &player, UI &ui, const Mission *
 	// Determine if this NPC is already in the succeeded state,
 	// regardless of whether it will despawn on the next landing.
 	bool alreadySucceeded = HasSucceeded(player.GetSystem(), false);
-	bool alreadyFailed = HasFailed();
+	bool alreadyFailed    = HasFailed();
 
 	// If this event was "ASSIST", the ship is now known as not disabled.
 	if(type == ShipEvent::ASSIST)
@@ -620,22 +613,26 @@ bool NPC::HasFailed() const
 
 // Create a copy of this NPC but with the fleets replaced by the actual
 // ships they represent, wildcards in the conversation text replaced, etc.
-NPC NPC::Instantiate(const PlayerInfo &player, map<string, string> &subs, const System *origin,
-                     const System *destination, int jumps, int64_t payload) const
+NPC NPC::Instantiate(const PlayerInfo    &player,
+                     map<string, string> &subs,
+                     const System        *origin,
+                     const System        *destination,
+                     int                  jumps,
+                     int64_t              payload) const
 {
 	NPC result;
 	result.government = government;
 	if(!result.government)
 		result.government = GameData::PlayerGovernment();
-	result.personality = personality;
-	result.succeedIf = succeedIf;
-	result.failIf = failIf;
-	result.mustEvade = mustEvade;
+	result.personality   = personality;
+	result.succeedIf     = succeedIf;
+	result.failIf        = failIf;
+	result.mustEvade     = mustEvade;
 	result.mustAccompany = mustAccompany;
 
 	result.passedSpawnConditions = passedSpawnConditions;
-	result.toSpawn = toSpawn;
-	result.toDespawn = toDespawn;
+	result.toSpawn               = toSpawn;
+	result.toDespawn             = toDespawn;
 
 	// Validate the actions.
 	for(const auto &[trigger, action] : npcActions)
@@ -705,7 +702,7 @@ NPC NPC::Instantiate(const PlayerInfo &player, map<string, string> &subs, const 
 	// String replacement:
 	if(!result.ships.empty())
 	{
-		subs["<npc>"] = result.ships.front()->GivenName();
+		subs["<npc>"]       = result.ships.front()->GivenName();
 		subs["<npc model>"] = result.ships.front()->DisplayModelName();
 	}
 	// Do string replacement on any dialog or conversation.
@@ -727,15 +724,15 @@ void NPC::DoActions(const ShipEvent &event, bool newEvent, PlayerInfo &player, U
 {
 	// Map the ShipEvent that was received to the Triggers it could flip.
 	static const map<int, vector<Trigger>> eventTriggers = {
-	    {ShipEvent::ASSIST, {Trigger::ASSIST}},
-	    {ShipEvent::SCAN_CARGO, {Trigger::SCAN_CARGO}},
-	    {ShipEvent::SCAN_OUTFITS, {Trigger::SCAN_OUTFITS}},
-	    {ShipEvent::PROVOKE, {Trigger::PROVOKE}},
-	    {ShipEvent::DISABLE, {Trigger::DISABLE}},
-	    {ShipEvent::BOARD, {Trigger::BOARD}},
-	    {ShipEvent::CAPTURE, {Trigger::CAPTURE, Trigger::KILL}},
-	    {ShipEvent::DESTROY, {Trigger::DESTROY, Trigger::KILL}},
-	    {ShipEvent::ENCOUNTER, {Trigger::ENCOUNTER}},
+	    {      ShipEvent::ASSIST,                 {Trigger::ASSIST}},
+	    {  ShipEvent::SCAN_CARGO,             {Trigger::SCAN_CARGO}},
+	    {ShipEvent::SCAN_OUTFITS,           {Trigger::SCAN_OUTFITS}},
+	    {     ShipEvent::PROVOKE,                {Trigger::PROVOKE}},
+	    {     ShipEvent::DISABLE,                {Trigger::DISABLE}},
+	    {       ShipEvent::BOARD,                  {Trigger::BOARD}},
+	    {     ShipEvent::CAPTURE, {Trigger::CAPTURE, Trigger::KILL}},
+	    {     ShipEvent::DESTROY, {Trigger::DESTROY, Trigger::KILL}},
+	    {   ShipEvent::ENCOUNTER,              {Trigger::ENCOUNTER}},
 	};
 
 	int type = event.Type();
@@ -759,26 +756,28 @@ void NPC::DoActions(const ShipEvent &event, bool newEvent, PlayerInfo &player, U
 			continue;
 
 		static const map<Trigger, int> triggerRequirements = {
-		    {Trigger::ASSIST, ShipEvent::ASSIST},
-		    {Trigger::SCAN_CARGO, ShipEvent::SCAN_CARGO},
-		    {Trigger::SCAN_OUTFITS, ShipEvent::SCAN_OUTFITS},
-		    {Trigger::PROVOKE, ShipEvent::PROVOKE},
-		    {Trigger::DISABLE, ShipEvent::DISABLE},
-		    {Trigger::BOARD, ShipEvent::BOARD},
-		    {Trigger::CAPTURE, ShipEvent::CAPTURE},
-		    {Trigger::DESTROY, ShipEvent::DESTROY},
-		    {Trigger::KILL, ShipEvent::CAPTURE | ShipEvent::DESTROY},
-		    {Trigger::ENCOUNTER, ShipEvent::ENCOUNTER},
+		    {      Trigger::ASSIST,                       ShipEvent::ASSIST},
+		    {  Trigger::SCAN_CARGO,                   ShipEvent::SCAN_CARGO},
+		    {Trigger::SCAN_OUTFITS,                 ShipEvent::SCAN_OUTFITS},
+		    {     Trigger::PROVOKE,                      ShipEvent::PROVOKE},
+		    {     Trigger::DISABLE,                      ShipEvent::DISABLE},
+		    {       Trigger::BOARD,                        ShipEvent::BOARD},
+		    {     Trigger::CAPTURE,                      ShipEvent::CAPTURE},
+		    {     Trigger::DESTROY,                      ShipEvent::DESTROY},
+		    {        Trigger::KILL, ShipEvent::CAPTURE | ShipEvent::DESTROY},
+		    {   Trigger::ENCOUNTER,                    ShipEvent::ENCOUNTER},
 		};
 
 		// Some Triggers cannot be met if any of the ships in this NPC have certain events.
 		// If any of the ships were captured, the DESTROY trigger will not run.
-		static const map<Trigger, int> triggerExclusions = {{Trigger::DESTROY, ShipEvent::CAPTURE}};
+		static const map<Trigger, int> triggerExclusions = {
+		    {Trigger::DESTROY, ShipEvent::CAPTURE}
+        };
 
-		const auto requiredIt = triggerRequirements.find(trigger);
-		const int requiredEvents = requiredIt == triggerRequirements.end() ? 0 : requiredIt->second;
-		const auto excludedIt = triggerExclusions.find(trigger);
-		const int excludedEvents = excludedIt == triggerExclusions.end() ? 0 : excludedIt->second;
+		const auto requiredIt     = triggerRequirements.find(trigger);
+		const int  requiredEvents = requiredIt == triggerRequirements.end() ? 0 : requiredIt->second;
+		const auto excludedIt     = triggerExclusions.find(trigger);
+		const int  excludedEvents = excludedIt == triggerExclusions.end() ? 0 : excludedIt->second;
 
 		// The PROVOKE and ENCOUNTER Triggers only requires a single ship to receive the
 		// event in order to run. All other Triggers require that all ships

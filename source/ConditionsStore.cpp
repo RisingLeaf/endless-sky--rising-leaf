@@ -139,7 +139,7 @@ ConditionEntry &ConditionsStore::operator[](const string &name)
 
 	// Create the entry (name is used as key, and as ConditionEntry constructor argument.
 	auto emp = storage.emplace(make_pair(name, name));
-	it = emp.first;
+	it       = emp.first;
 
 	// If a relevant prefix provider is found, then provision this entry with the provider.
 	if(ceprov != nullptr)

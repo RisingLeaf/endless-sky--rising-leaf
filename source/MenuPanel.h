@@ -50,18 +50,18 @@ private:
 
 private:
 	PlayerInfo &player;
-	UI &gamePanels;
+	UI         &gamePanels;
 
 	const Interface *mainMenuUi;
 
 	// When the menu panel is closed, return the starfield to this position.
-	Point returnPos;
-	double animation = 0.;
-	double xSpeed = 0.;
-	double ySpeed = 0.;
+	Point  returnPos;
+	double animation  = 0.;
+	double xSpeed     = 0.;
+	double ySpeed     = 0.;
 	double yAmplitude = 0.;
 
 	std::vector<std::string> credits;
-	long long int scroll = 0;
-	bool scrollingPaused = false;
+	long long int            scroll          = 0;
+	bool                     scrollingPaused = false;
 };

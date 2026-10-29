@@ -68,7 +68,7 @@ Projectile::Projectile(const Ship &parent, Point position, Angle angle, const We
 	target =
 	    targetShip ? static_pointer_cast<Entity>(targetShip) : static_pointer_cast<Entity>(parent.GetTargetAsteroid());
 
-	government = parent.GetGovernment();
+	government    = parent.GetGovernment();
 	hitsRemaining = weapon->PenetrationCount();
 
 	// If you are boarding your target, do not fire on it.
@@ -79,7 +79,7 @@ Projectile::Projectile(const Ship &parent, Point position, Angle angle, const We
 	if(cachedTarget)
 	{
 		targetGovernment = cachedTarget->GetGovernment();
-		targetDisabled = cachedTarget->IsDisabled();
+		targetDisabled   = cachedTarget->IsDisabled();
 	}
 
 	dV = this->angle.Unit() * (weapon->Velocity() + Random::Real() * weapon->RandomVelocity());
@@ -101,14 +101,16 @@ Projectile::Projectile(const Ship &parent, Point position, Angle angle, const We
 
 
 Projectile::Projectile(const Projectile &parent, const Point &offset, const Angle &angle, const Weapon *weapon)
-    : Body(weapon->ProjectileSprite(), parent.position + parent.velocity + parent.angle.Rotate(offset), parent.velocity,
+    : Body(weapon->ProjectileSprite(),
+	       parent.position + parent.velocity + parent.angle.Rotate(offset),
+	       parent.velocity,
 	       parent.angle + angle),
       weapon(weapon), target(parent.target), lifetime(weapon->Lifetime())
 {
-	government = parent.government;
+	government       = parent.government;
 	targetGovernment = parent.targetGovernment;
-	targetDisabled = parent.targetDisabled;
-	hitsRemaining = weapon->PenetrationCount();
+	targetDisabled   = parent.targetDisabled;
+	hitsRemaining    = weapon->PenetrationCount();
 
 	cachedTarget = TargetPtr().get();
 
@@ -139,7 +141,7 @@ Projectile::Projectile(const Point &position, const Angle &angle, const Weapon *
     : weapon(weapon), isShipExplosion(true)
 {
 	this->position = position;
-	this->angle = angle;
+	this->angle    = angle;
 }
 
 
@@ -203,9 +205,9 @@ void Projectile::Move(vector<Visual> &visuals, vector<Projectile> &projectiles)
 		}
 	}
 
-	double turn = weapon->Turn();
-	double accel = weapon->Acceleration();
-	bool homing = weapon->Homing();
+	double turn   = weapon->Turn();
+	double accel  = weapon->Acceleration();
+	bool   homing = weapon->Homing();
 	if(currentTarget && homing && !Random::Int(30))
 	{
 		CheckLock(*currentTarget);
@@ -221,10 +223,10 @@ void Projectile::Move(vector<Visual> &visuals, vector<Projectile> &projectiles)
 		{
 			// Vector d is the direction we want to turn towards.
 			Point d;
-			bool isFacingAway = false;
+			bool  isFacingAway = false;
 			if(currentTarget)
 			{
-				d = currentTarget->Position() - position;
+				d            = currentTarget->Position() - position;
 				isFacingAway = d.Dot(angle.Unit()) < 0.;
 			}
 
@@ -234,8 +236,8 @@ void Projectile::Move(vector<Visual> &visuals, vector<Projectile> &projectiles)
 				target.reset();
 			else if(currentTarget && hasLock)
 			{
-				Point unit = d.Unit();
-				double drag = weapon->Drag();
+				Point  unit         = d.Unit();
+				double drag         = weapon->Drag();
 				double trueVelocity = drag ? accel / drag : velocity.Length();
 				double stepsToReach = d.Length() / trueVelocity;
 				// At the highest homing level, compensate for target motion.
@@ -246,10 +248,10 @@ void Projectile::Move(vector<Visual> &visuals, vector<Projectile> &projectiles)
 						// If the target is moving toward this projectile, the intercept
 						// course is where the target and the projectile have the same
 						// velocity normal to the distance between them.
-						Point normal(unit.Y(), -unit.X());
+						Point  normal(unit.Y(), -unit.X());
 						double vN = normal.Dot(currentTarget->Velocity());
 						double vT = sqrt(max(0., trueVelocity * trueVelocity - vN * vN));
-						d = vT * unit + vN * normal;
+						d         = vT * unit + vN * normal;
 					}
 					else
 					{
@@ -294,7 +296,7 @@ void Projectile::Move(vector<Visual> &visuals, vector<Projectile> &projectiles)
 	if(accel)
 	{
 		double d = 1. - weapon->Drag();
-		Point a = accel * angle.Unit();
+		Point  a = accel * angle.Unit();
 		velocity *= d;
 		velocity += a;
 		dV *= d;
@@ -328,16 +330,16 @@ void Projectile::Collide(vector<Visual> &visuals, const Collision &collision)
 	// also accounting for the intersection clipping. Hit effects should appear from
 	// the front of the projectile, and so are shifted forward by the full velocity
 	// of the projectile.
-	double intersection = collision.IntersectionRange();
-	Point effectPosition = position + velocity * intersection;
-	Point hitVelocity = collision.HitVelocity();
+	double intersection   = collision.IntersectionRange();
+	Point  effectPosition = position + velocity * intersection;
+	Point  hitVelocity    = collision.HitVelocity();
 	for(const auto &[effect, count] : weapon->HitEffects())
 		for(int i = 0; i < count; ++i)
 			visuals.emplace_back(*effect, effectPosition, velocity, angle, hitVelocity);
 	// The projectile dies if it has no hits remaining.
 	if(--hitsRemaining == 0)
 	{
-		clip = intersection;
+		clip     = intersection;
 		lifetime = 0;
 		death = collision.GetCollisionType() == CollisionType::EXPLOSION ? DeathType::EXPLOSION : DeathType::COLLISION;
 	}
@@ -365,7 +367,7 @@ bool Projectile::IsDead() const
 void Projectile::Kill()
 {
 	lifetime = 0;
-	death = DeathType::ANTI_MISSILE;
+	death    = DeathType::ANTI_MISSILE;
 }
 
 
@@ -423,9 +425,9 @@ shared_ptr<Entity> Projectile::TargetPtr() const
 void Projectile::BreakTarget()
 {
 	target.reset();
-	cachedTarget = nullptr;
+	cachedTarget     = nullptr;
 	targetGovernment = nullptr;
-	targetDisabled = false;
+	targetDisabled   = false;
 }
 
 
@@ -437,14 +439,14 @@ void Projectile::BreakTarget()
 void Projectile::CheckLock(const Entity &target)
 {
 	static const double RELOCK_RATE = .3;
-	double base = hasLock ? 1. : RELOCK_RATE;
-	hasLock = false;
+	double              base        = hasLock ? 1. : RELOCK_RATE;
+	hasLock                         = false;
 
 	// For each tracking type, calculate the probability twice every second that a
 	// lock will be lost.
 	if(weapon->Tracking())
 	{
-		double lockChance = (weapon->Tracking());
+		double lockChance  = (weapon->Tracking());
 		double probability = lockChance / (RELOCK_RATE - (lockChance * RELOCK_RATE) + lockChance);
 		hasLock |= Check(probability, base);
 	}
@@ -459,8 +461,8 @@ void Projectile::CheckLock(const Entity &target)
 		if(opticalJamming)
 			opticalJamming *= RangeFraction(position.Distance(target.Position()), opticalJamming);
 		double opticalSize = target.OpticalSize() / (1. + opticalJamming);
-		double weight = opticalSize * opticalSize * opticalSize / 1e9;
-		double lockChance = weapon->OpticalTracking() * weight / (1. + weight);
+		double weight      = opticalSize * opticalSize * opticalSize / 1e9;
+		double lockChance  = weapon->OpticalTracking() * weight / (1. + weight);
 		double probability = lockChance / (RELOCK_RATE - (lockChance * RELOCK_RATE) + lockChance);
 		hasLock |= Check(probability, base);
 	}
@@ -471,12 +473,12 @@ void Projectile::CheckLock(const Entity &target)
 	// wavelengths of IR radiation are easier to distinguish at closer distances.
 	if(weapon->InfraredTracking())
 	{
-		double distance = position.Distance(target.Position());
+		double distance   = position.Distance(target.Position());
 		double shortRange = weapon->Range() * 0.33;
 		double multiplier = 1.;
 		if(distance <= shortRange)
 			multiplier = 2. - distance / shortRange;
-		double lockChance = weapon->InfraredTracking() * min(1., target.HeatFraction() * multiplier);
+		double lockChance  = weapon->InfraredTracking() * min(1., target.HeatFraction() * multiplier);
 		double probability = lockChance / (RELOCK_RATE - (lockChance * RELOCK_RATE) + lockChance);
 		hasLock |= Check(probability, base);
 	}
@@ -491,7 +493,7 @@ void Projectile::CheckLock(const Entity &target)
 		double radarJamming = target.IsDisabled() ? 0. : target.RadarJamming();
 		if(radarJamming)
 			radarJamming *= RangeFraction(position.Distance(target.Position()), radarJamming);
-		double lockChance = weapon->RadarTracking() / (1. + radarJamming);
+		double lockChance  = weapon->RadarTracking() / (1. + radarJamming);
 		double probability = lockChance / (RELOCK_RATE - (lockChance * RELOCK_RATE) + lockChance);
 		hasLock |= Check(probability, base);
 	}
@@ -513,8 +515,8 @@ void Projectile::CheckConfused(const Entity &target)
 
 	bool trackingConfused = true;
 	bool infraredConfused = true;
-	bool opticalConfused = true;
-	bool radarConfused = true;
+	bool opticalConfused  = true;
+	bool radarConfused    = true;
 
 	// Tracking and Infrared: proportional to tracking quality.
 	if(weapon->Tracking())
@@ -531,15 +533,15 @@ void Projectile::CheckConfused(const Entity &target)
 	if(weapon->OpticalTracking())
 	{
 		double opticalTracking = weapon->OpticalTracking();
-		double opticalJamming = target.OpticalJamming();
-		opticalConfused = ConfusedTracking(opticalTracking, opticalJamming, distance);
+		double opticalJamming  = target.OpticalJamming();
+		opticalConfused        = ConfusedTracking(opticalTracking, opticalJamming, distance);
 	}
 
 	if(weapon->RadarTracking())
 	{
 		double radarTracking = weapon->RadarTracking();
-		double radarJamming = target.RadarJamming();
-		radarConfused = ConfusedTracking(radarTracking, radarJamming, distance);
+		double radarJamming  = target.RadarJamming();
+		radarConfused        = ConfusedTracking(radarTracking, radarJamming, distance);
 	}
 
 	isConfused = trackingConfused && infraredConfused && opticalConfused && radarConfused;

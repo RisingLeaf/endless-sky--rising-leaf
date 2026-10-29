@@ -93,15 +93,11 @@ namespace {
 	{
 		switch(entryType)
 		{
-		case SystemEntry::HYPERDRIVE:
-			return "hyperdrive";
-		case SystemEntry::JUMP:
-			return "jump drive";
-		case SystemEntry::WORMHOLE:
-			return "wormhole";
+		case SystemEntry::HYPERDRIVE: return "hyperdrive";
+		case SystemEntry::JUMP:       return "jump drive";
+		case SystemEntry::WORMHOLE:   return "wormhole";
 		default:
-		case SystemEntry::TAKE_OFF:
-			return "takeoff";
+		case SystemEntry::TAKE_OFF:   return "takeoff";
 		}
 	}
 
@@ -157,7 +153,9 @@ namespace {
 		}
 	}
 
-	int CanScanTarget(const Point &position, const vector<int> &types, const System *system,
+	int CanScanTarget(const Point                                                                   &position,
+	                  const vector<int>                                                             &types,
+	                  const System                                                                  *system,
 	                  const map<int, map<weak_ptr<Ship>, double, owner_less<weak_ptr<const Ship>>>> &scanners)
 	{
 		int options = 0;
@@ -280,8 +278,8 @@ void PlayerInfo::New(const StartConditions &start, const shared_ptr<PilotProfile
 	RegisterDerivedConditions();
 	start.GetConditions().Apply();
 	maxEscortCount = _pilot->GetGamerules().GetDefaultMaxEscortCount();
-	maxEscortCrew = _pilot->GetGamerules().GetDefaultMaxEscortCrew();
-	adminCap = _pilot->GetGamerules().GetDefaultAdminCap();
+	maxEscortCrew  = _pilot->GetGamerules().GetDefaultMaxEscortCrew();
+	adminCap       = _pilot->GetGamerules().GetDefaultAdminCap();
 
 	// Generate missions that will be available on the first day.
 	CreateMissions();
@@ -317,7 +315,7 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 	filePath = path.string();
 	// Strip anything after the "~" from snapshots, so that the file we save
 	// will be the auto-save, not the snapshot.
-	size_t pos = filePath.find('~');
+	size_t pos     = filePath.find('~');
 	size_t namePos = filePath.length() - Files::Name(filePath).length();
 	if(pos != string::npos && pos > namePos)
 		filePath = filePath.substr(0, pos) + ".txt";
@@ -332,22 +330,22 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 	DataFile file(path);
 	for(const DataNode &child : file)
 	{
-		const string &key = child.Token(0);
-		bool hasValue = child.Size() >= 2;
+		const string &key      = child.Token(0);
+		bool          hasValue = child.Size() >= 2;
 		// Basic player information and persistent UI settings:
 		if(key == "pilot" && child.Size() >= 3)
 		{
 			firstName = child.Token(1);
-			lastName = child.Token(2);
+			lastName  = child.Token(2);
 		}
 		else if(key == "original name" && child.Size() >= 3)
 		{
 			originalFirstName = child.Token(1);
-			originalLastName = child.Token(2);
+			originalLastName  = child.Token(2);
 		}
 		else if(key == "date" && child.Size() >= 4)
-			date = Date(static_cast<int>(child.Value(1)), static_cast<int>(child.Value(2)),
-			            static_cast<int>(child.Value(3)));
+			date = Date(
+			    static_cast<int>(child.Value(1)), static_cast<int>(child.Value(2)), static_cast<int>(child.Value(3)));
 		else if(key == "marked event changes today")
 			markedChangesToday = true;
 		else if(key == "system entry method" && hasValue)
@@ -519,7 +517,9 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 			{
 				if(grand.Size() >= 3)
 				{
-					Date log_book_date(static_cast<int>(grand.Value(0)), static_cast<int>(grand.Value(1)), static_cast<int>(grand.Value(2)));
+					Date log_book_date(static_cast<int>(grand.Value(0)),
+					                   static_cast<int>(grand.Value(1)),
+					                   static_cast<int>(grand.Value(2)));
 					logbook[log_book_date].Load(grand);
 				}
 				else if(grand.Size() >= 2)
@@ -553,8 +553,11 @@ void PlayerInfo::Load(const filesystem::path &path, const shared_ptr<PilotProfil
 	// cargo and passengers.
 	UpdateCargoCapacities();
 
-	auto DistributeMissionCargo = [](const map<string, map<string, int>> &toDistribute, const list<Mission> &missions,
-	                                 vector<shared_ptr<Ship>> &ships, CargoHold &cargo, bool passengers) -> void {
+	auto DistributeMissionCargo = [](const map<string, map<string, int>> &toDistribute,
+	                                 const list<Mission>                 &missions,
+	                                 vector<shared_ptr<Ship>>            &ships,
+	                                 CargoHold                           &cargo,
+	                                 bool                                 passengers) -> void {
 		for(const auto &it : toDistribute)
 		{
 			const auto missionIt = find_if(missions.begin(), missions.end(), [&it](const Mission &mission) {
@@ -651,9 +654,9 @@ void PlayerInfo::Save() const
 		SavedGame saved(filePath);
 		if(saved.GetDate() != date.ToString())
 		{
-			string root = filePath.substr(0, filePath.length() - 4);
-			const int previousCount = Preferences::GetPreviousSaveCount();
-			const string rootPrevious = root + "~~previous-";
+			string       root          = filePath.substr(0, filePath.length() - 4);
+			const int    previousCount = Preferences::GetPreviousSaveCount();
+			const string rootPrevious  = root + "~~previous-";
 			for(int i = previousCount - 1; i > 0; --i)
 			{
 				const string toMove = rootPrevious + to_string(i) + ".txt";
@@ -749,7 +752,7 @@ void PlayerInfo::AddChanges(list<DataNode> &changes, bool instantChanges)
 {
 	bool changedPlanets = false;
 	bool changedSystems = false;
-	bool changedShops = false;
+	bool changedShops   = false;
 	for(const DataNode &change : changes)
 	{
 		const string &key = change.Token(0);
@@ -891,15 +894,15 @@ const string &PlayerInfo::LastName() const
 void PlayerInfo::SetName(const string &first, const string &last)
 {
 	firstName = first;
-	lastName = last;
+	lastName  = last;
 	// The path for a particular pilot uses only the original name of the pilot.
 	if(!originalFirstName.empty())
 		return;
 	originalFirstName = firstName;
-	originalLastName = lastName;
+	originalLastName  = lastName;
 
 	string identifier = PilotProfile::GetIdentifier(first + " " + last);
-	filePath = (Files::Saves() / (identifier + ".txt")).string();
+	filePath          = (Files::Saves() / (identifier + ".txt")).string();
 	pilot->SetIdentifier(identifier);
 }
 
@@ -924,7 +927,7 @@ void PlayerInfo::AdvanceDate(int amount)
 
 		// Check if any special events should happen today.
 		markedChangesToday = false;
-		auto it = scheduledEvents.begin();
+		auto           it  = scheduledEvents.begin();
 		list<DataNode> eventChanges;
 		while(it != scheduledEvents.end() && date >= it->date)
 		{
@@ -984,7 +987,7 @@ SystemEntry PlayerInfo::GetSystemEntry() const
 void PlayerInfo::SetSystem(const System &new_system)
 {
 	this->previousSystem = this->system;
-	this->system = &new_system;
+	this->system         = &new_system;
 	Visit(new_system);
 }
 
@@ -1035,8 +1038,8 @@ const StellarObject *PlayerInfo::GetStellarObject() const
 	if(!system || !planet)
 		return nullptr;
 
-	double closestDistance = numeric_limits<double>::infinity();
-	const StellarObject *closestObject = nullptr;
+	double               closestDistance = numeric_limits<double>::infinity();
+	const StellarObject *closestObject   = nullptr;
 	for(const StellarObject &object : system->Objects())
 		if(object.GetPlanet() == planet)
 		{
@@ -1047,7 +1050,7 @@ const StellarObject *PlayerInfo::GetStellarObject() const
 			if(distance < closestDistance)
 			{
 				closestDistance = distance;
-				closestObject = &object;
+				closestObject   = &object;
 			}
 		}
 	return closestObject;
@@ -1097,7 +1100,7 @@ Account &PlayerInfo::Accounts()
 int64_t PlayerInfo::Salaries() const
 {
 	// Don't count extra crew on anything but the flagship.
-	int64_t crew = 0;
+	int64_t     crew     = 0;
 	const Ship *flagship = Flagship();
 	if(flagship)
 		crew = flagship->Crew() - flagship->RequiredCrew();
@@ -1299,7 +1302,7 @@ map<const shared_ptr<Ship>, vector<string>> PlayerInfo::FlightCheck() const
 			{
 				// Include the lack of bay availability amongst any other
 				// warnings for this carriable ship.
-				auto it = flightChecks.find(carriable);
+				auto   it      = flightChecks.find(carriable);
 				string warning = "no bays?";
 				if(it != flightChecks.end())
 					it->second.emplace_back(warning);
@@ -1332,7 +1335,7 @@ bool PlayerInfo::BuyShip(const Ship *model, const string &name)
 	if(!model)
 		return false;
 
-	int day = date.DaysSinceEpoch();
+	int     day  = date.DaysSinceEpoch();
 	int64_t cost = stockDepreciation.Value(*model, day);
 	if(accounts.Credits() < cost)
 		return false;
@@ -1378,7 +1381,7 @@ void PlayerInfo::SellShip(const Ship *selected, bool storeOutfits)
 	for(auto it = ships.begin(); it != ships.end(); ++it)
 		if(it->get() == selected)
 		{
-			int day = date.DaysSinceEpoch();
+			int     day = date.DaysSinceEpoch();
 			int64_t cost;
 
 			// Passing a pointer to Value gets only the hull cost. Passing a reference
@@ -1501,8 +1504,8 @@ void PlayerInfo::ReorderShip(int fromIndex, int toIndex)
 		return;
 
 	// Reorder the list.
-	shared_ptr<Ship> ship = ships[fromIndex];
-	auto oldFirstShip = ships[0];
+	shared_ptr<Ship> ship         = ships[fromIndex];
+	auto             oldFirstShip = ships[0];
 	ships.erase(ships.begin() + fromIndex);
 	ships.insert(ships.begin() + toIndex, ship);
 	auto newFirstShip = ships[0];
@@ -1519,7 +1522,7 @@ void PlayerInfo::SetShipOrder(const vector<shared_ptr<Ship>> &newOrder)
 	if(is_permutation(ships.begin(), ships.end(), newOrder.begin()))
 	{
 		Ship *oldFirstShip = ships.front().get();
-		ships = newOrder;
+		ships              = newOrder;
 		Ship *newFirstShip = ships.front().get();
 		// Check if the position of the flagship has changed, and the ship in the first position
 		// can be a flagship and is in the current system.
@@ -1554,9 +1557,9 @@ pair<double, double> PlayerInfo::RaidFleetFactors() const
 
 double PlayerInfo::RaidFleetAttraction(const RaidFleet &raid, const System *raid_system) const
 {
-	double attraction = 0.;
-	const Fleet *raidFleet = raid.GetFleet();
-	const Government *raidGov = raidFleet ? raidFleet->GetGovernment() : nullptr;
+	double            attraction = 0.;
+	const Fleet      *raidFleet  = raid.GetFleet();
+	const Government *raidGov    = raidFleet ? raidFleet->GetGovernment() : nullptr;
 	if(raidGov && raidGov->IsEnemy())
 	{
 		// The player's base attraction to a fleet is determined by their fleet attraction minus
@@ -1680,7 +1683,7 @@ int64_t PlayerInfo::GetBasis(const string &commodity, int tons) const
 	if(!total)
 		return 0;
 
-	auto it = costBasis.find(commodity);
+	auto    it    = costBasis.find(commodity);
 	int64_t basis = (it == costBasis.end()) ? 0 : it->second;
 	return (basis * tons) / total;
 }
@@ -1692,10 +1695,10 @@ int64_t PlayerInfo::GetBasis(const string &commodity, int tons) const
 // Updates the information on how much space is available.
 void PlayerInfo::UpdateCargoCapacities()
 {
-	int size = 0;
-	int bunks = 0;
+	int size         = 0;
+	int bunks        = 0;
 	largestCargoHold = 0;
-	flagship = FlagshipPtr();
+	flagship         = FlagshipPtr();
 	for(const shared_ptr<Ship> &ship : ships)
 		if(ship->GetPlanet() == planet && !ship->IsParked())
 		{
@@ -1734,7 +1737,7 @@ void PlayerInfo::Land(UI &ui)
 		travelDestination = nullptr;
 
 	// Remove any ships that have been destroyed or captured.
-	map<string, int> lostCargo;
+	map<string, int>                   lostCargo;
 	vector<shared_ptr<Ship>>::iterator it = ships.begin();
 	while(it != ships.end())
 	{
@@ -1762,7 +1765,7 @@ void PlayerInfo::Land(UI &ui)
 
 	// Ships that are landed with you on the planet should fully recharge.
 	// Those in remote systems restore what they can without landing.
-	bool clearance = HasClearance();
+	bool       clearance      = HasClearance();
 	const bool canUseServices = planet->CanUseServices();
 	for(const shared_ptr<Ship> &ship : ships)
 		if(!ship->IsParked() && !ship->IsDisabled())
@@ -1788,7 +1791,7 @@ void PlayerInfo::Land(UI &ui)
 					if(landingObject)
 					{
 						const Planet *landingPlanet = landingObject->GetPlanet();
-						const Port &port = landingPlanet->GetPort();
+						const Port   &port          = landingPlanet->GetPort();
 						ship->Recharge(landingPlanet->CanUseServices() ? port.GetRecharges() : Port::RechargeType::None,
 						               port.HasService(Port::ServicesType::HireCrew));
 						ship->SetPlanet(landingPlanet);
@@ -1965,7 +1968,7 @@ bool PlayerInfo::TakeOff(UI &ui, const bool distributeCargo)
 
 	// For each active, carriable ship you own, try to find an active ship that has a bay for it.
 	auto carriers = vector<Ship *>{};
-	auto toLoad = vector<shared_ptr<Ship>>{};
+	auto toLoad   = vector<shared_ptr<Ship>>{};
 	for(auto &ship : ships)
 		if(!ship->IsParked() && !ship->IsDisabled())
 		{
@@ -2029,11 +2032,11 @@ bool PlayerInfo::TakeOff(UI &ui, const bool distributeCargo)
 		RemoveMission(Mission::ABORT, *mission, ui);
 
 	// Any ordinary cargo left behind can be sold.
-	int64_t income = 0;
-	int day = date.DaysSinceEpoch();
-	int64_t sold = cargo.Used();
+	int64_t income     = 0;
+	int     day        = date.DaysSinceEpoch();
+	int64_t sold       = cargo.Used();
 	int64_t totalBasis = 0;
-	double stored = 0.;
+	double  stored     = 0.;
 	if(sold)
 	{
 		for(const auto &commodity : cargo.Commodities())
@@ -2045,8 +2048,8 @@ bool PlayerInfo::TakeOff(UI &ui, const bool distributeCargo)
 			int64_t value = commodity.second * static_cast<int64_t>(system->Trade(commodity.first));
 			income += value;
 
-			int original = originalTotals[commodity.first];
-			auto it = costBasis.find(commodity.first);
+			int  original = originalTotals[commodity.first];
+			auto it       = costBasis.find(commodity.first);
 			if(!original || it == costBasis.end() || !it->second)
 				continue;
 
@@ -2214,7 +2217,7 @@ void PlayerInfo::RemoveSpecialLog(const string &category, const string &heading)
 	if(it == specialLogs.end())
 		return;
 	auto &nameMap = it->second;
-	auto eit = nameMap.find(heading);
+	auto  eit     = nameMap.find(heading);
 	if(eit != nameMap.end())
 		nameMap.erase(eit);
 }
@@ -2299,16 +2302,16 @@ void PlayerInfo::CacheMissionInformation(Mission &mission, const DistanceMap &he
 		// This is a traveling salesman problem. Estimate the minimum number
 		// of days that it would take to reach every point of interest by
 		// traveling to the next closest location after each step.
-		DistanceMap distance = here;
-		int systemCount = toVisit.size();
+		DistanceMap distance    = here;
+		int         systemCount = toVisit.size();
 		for(int i = 0; i < systemCount; ++i)
 		{
 			const System *closest;
-			int minimalDist = numeric_limits<int>::max();
+			int           minimalDist = numeric_limits<int>::max();
 			for(const System *sys : toVisit)
 				if(distance.Days(*sys) < minimalDist)
 				{
-					closest = sys;
+					closest     = sys;
 					minimalDist = distance.Days(*sys);
 				}
 			daysLeft -= distance.Days(*closest);
@@ -2498,8 +2501,7 @@ void PlayerInfo::SortAvailable()
 				return false;
 		}
 		// Tiebreaker fallback to keep sorting consistent is unique UUID:
-		default:
-			return lhs.UUID() < rhs.UUID();
+		default: return lhs.UUID() < rhs.UUID();
 		}
 	});
 
@@ -2603,7 +2605,7 @@ void PlayerInfo::CreateEnteringMissions()
 {
 	availableEnteringMissions.clear();
 
-	bool hasPriorityMissions = false;
+	bool     hasPriorityMissions = false;
 	unsigned nonBlockingMissions = 0;
 	for(const auto &[name, mission] : GameData::Missions())
 		if(mission.IsAtLocation(Mission::ENTERING) && mission.CanOffer(*this))
@@ -2627,7 +2629,7 @@ void PlayerInfo::CreateTransitionMissions()
 {
 	availableTransitionMissions.clear();
 
-	bool hasPriorityMissions = false;
+	bool     hasPriorityMissions = false;
 	unsigned nonBlockingMissions = 0;
 	for(const auto &[name, mission] : GameData::Missions())
 		if(mission.IsAtLocation(Mission::TRANSITION) && mission.CanOffer(*this))
@@ -2893,9 +2895,9 @@ void PlayerInfo::HandleEvent(const ShipEvent &event, UI &ui)
 	if(event.ActorGovernment() && event.ActorGovernment()->IsPlayer())
 		if((event.Type() & ShipEvent::DISABLE) && event.Target() && !event.Target()->IsYours())
 		{
-			auto &rating = conditions["combat rating"];
+			auto                &rating    = conditions["combat rating"];
 			static const int64_t maxRating = 2000000000;
-			rating = min(maxRating, rating + (event.Target()->Cost() + 250000) / 500000);
+			rating                         = min(maxRating, rating + (event.Target()->Cost() + 250000) / 500000);
 		}
 
 	for(Mission &mission : missions)
@@ -2949,20 +2951,20 @@ map<string, string> PlayerInfo::GetSubstitutions() const
 
 void PlayerInfo::AddPlayerSubstitutions(map<string, string> &subs) const
 {
-	subs["<first>"] = firstName;
-	subs["<last>"] = lastName;
+	subs["<first>"]          = firstName;
+	subs["<last>"]           = lastName;
 	subs["<original first>"] = originalFirstName;
-	subs["<original last>"] = originalLastName;
-	const Ship *flag = Flagship();
+	subs["<original last>"]  = originalLastName;
+	const Ship *flag         = Flagship();
 	if(flag)
 	{
-		subs["<ship>"] = flag->GivenName();
-		subs["<model>"] = flag->DisplayModelName();
-		subs["<flagship>"] = flag->GivenName();
+		subs["<ship>"]           = flag->GivenName();
+		subs["<model>"]          = flag->DisplayModelName();
+		subs["<flagship>"]       = flag->GivenName();
 		subs["<flagship model>"] = flag->DisplayModelName();
 	}
 
-	subs["<system>"] = system->DisplayName();
+	subs["<system>"]         = system->DisplayName();
 	subs["<current system>"] = system->DisplayName();
 	if(planet)
 		subs["<current planet>"] = planet->DisplayName();
@@ -2971,20 +2973,20 @@ void PlayerInfo::AddPlayerSubstitutions(map<string, string> &subs) const
 	if(previousPlanet)
 		subs["<previous planet>"] = previousPlanet->DisplayName();
 	subs["<date>"] = GetDate().ToString();
-	subs["<day>"] = GetDate().LongString();
+	subs["<day>"]  = GetDate().LongString();
 
 	// Information about how the player started the game.
 	subs["<start planet>"] = startData.GetPlanet().DisplayName();
 	subs["<start system>"] = startData.GetSystem().DisplayName();
 
-	const Date &date = startData.GetDate();
-	subs["<start date>"] = date.ToString();
+	const Date &date          = startData.GetDate();
+	subs["<start date>"]      = date.ToString();
 	subs["<start long date>"] = date.LongString();
 
-	const Account &account = startData.GetAccounts();
-	subs["<start credits>"] = to_string(account.Credits());
+	const Account &account       = startData.GetAccounts();
+	subs["<start credits>"]      = to_string(account.Credits());
 	subs["<start credit score>"] = to_string(account.CreditScore());
-	subs["<start debt>"] = to_string(account.TotalDebt(""));
+	subs["<start debt>"]         = to_string(account.TotalDebt(""));
 }
 
 
@@ -3031,7 +3033,9 @@ const map<const Planet *, int64_t> &PlayerInfo::GetTribute() const
 // Get the total sum of the tribute the player receives.
 int64_t PlayerInfo::GetTributeTotal() const
 {
-	return accumulate(tributeReceived.begin(), tributeReceived.end(), 0,
+	return accumulate(tributeReceived.begin(),
+	                  tributeReceived.end(),
+	                  0,
 	                  [](int64_t value, const map<const Planet *, int64_t>::value_type &tribute) {
 		                  return value + tribute.second;
 	                  });
@@ -3301,7 +3305,7 @@ void PlayerInfo::SelectNextSecondary()
 	}
 
 	// If no weapon was selected, then we scan from the beginning.
-	auto it = flagship->Outfits().begin();
+	auto it                      = flagship->Outfits().begin();
 	bool hadSingleWeaponSelected = (selectedWeapons.size() == 1);
 
 	// If a single weapon was selected, then move the iterator to the
@@ -3309,7 +3313,7 @@ void PlayerInfo::SelectNextSecondary()
 	if(hadSingleWeaponSelected)
 	{
 		auto selectedOutfit = *(selectedWeapons.begin());
-		it = flagship->Outfits().find(selectedOutfit);
+		it                  = flagship->Outfits().find(selectedOutfit);
 		if(it != flagship->Outfits().end())
 			++it;
 	}
@@ -3418,11 +3422,11 @@ void PlayerInfo::SelectShips(const vector<weak_ptr<Ship>> &stack, bool hasShift)
 
 	// If shift is not held down, then locate a new target for the flagship.
 	// If the given stack only contains a single ship, then that should become the new target.
-	bool hasNewTarget = hasShift;
-	shared_ptr<Ship> target = stack.size() > 1 ? flagship->GetTargetShip() : nullptr;
+	bool             hasNewTarget = hasShift;
+	shared_ptr<Ship> target       = stack.size() > 1 ? flagship->GetTargetShip() : nullptr;
 
 	// SelectEscort does not need to set the flagship target, as this function takes care of that.
-	bool first = false;
+	bool first   = false;
 	bool matched = false;
 	for(const weak_ptr<Ship> &ship : stack)
 	{
@@ -3435,7 +3439,7 @@ void PlayerInfo::SelectShips(const vector<weak_ptr<Ship>> &stack, bool hasShift)
 			// then the next available ship becomes the new target for the flagship.
 			if(!target || target->GetSprite() != shipPtr->GetSprite())
 			{
-				target = shipPtr;
+				target       = shipPtr;
 				hasNewTarget = true;
 			}
 			// If the current target is in the stack, then set the current target to null so that the next ship in
@@ -3544,7 +3548,7 @@ void PlayerInfo::SelectEscortGroup(int group, bool hasShift)
 
 void PlayerInfo::SetEscortGroup(int group, const set<Ship *> *newShips)
 {
-	int bit = (1 << group);
+	int bit  = (1 << group);
 	int mask = ~bit;
 	// First, remove any of your ships that are in the group.
 	for(const shared_ptr<Ship> &ship : ships)
@@ -3570,7 +3574,7 @@ void PlayerInfo::SetEscortGroup(int group, const set<Ship *> *newShips)
 
 set<Ship *> PlayerInfo::GetEscortGroup(int group)
 {
-	int bit = (1 << group);
+	int         bit = (1 << group);
 	set<Ship *> result;
 
 	for(const shared_ptr<Ship> &ship : ships)
@@ -3679,10 +3683,19 @@ bool PlayerInfo::HasScanner(int type) const
 
 int PlayerInfo::CanScan(const shared_ptr<const Ship> &target) const
 {
-	static const vector<int> SHIP_SCAN_TYPES = {
-	    ScanType::CARGO,    ScanType::OUTFIT, ScanType::TACTICAL, ScanType::STRATEGIC, ScanType::CREW,
-	    ScanType::FUEL,     ScanType::ENERGY, ScanType::THERMAL,  ScanType::MANEUVER,  ScanType::ACCELERATION,
-	    ScanType::VELOCITY, ScanType::WEAPON, ScanType::RANGE};
+	static const vector<int> SHIP_SCAN_TYPES = {ScanType::CARGO,
+	                                            ScanType::OUTFIT,
+	                                            ScanType::TACTICAL,
+	                                            ScanType::STRATEGIC,
+	                                            ScanType::CREW,
+	                                            ScanType::FUEL,
+	                                            ScanType::ENERGY,
+	                                            ScanType::THERMAL,
+	                                            ScanType::MANEUVER,
+	                                            ScanType::ACCELERATION,
+	                                            ScanType::VELOCITY,
+	                                            ScanType::WEAPON,
+	                                            ScanType::RANGE};
 	return CanScanTarget(target->Position(), SHIP_SCAN_TYPES, system, scanners);
 }
 
@@ -3740,7 +3753,7 @@ const pair<const System *, Point> &PlayerInfo::GetEscortDestination() const
 // Set (or clear) the stored escort travel destination.
 void PlayerInfo::SetEscortDestination(const System *system, Point pos)
 {
-	interstellarEscortDestination.first = system;
+	interstellarEscortDestination.first  = system;
 	interstellarEscortDestination.second = pos;
 }
 
@@ -3861,7 +3874,7 @@ void PlayerInfo::ValidateLoad()
 	if(!planet && !ships.empty())
 	{
 		string warning = "No planet specified for player";
-		auto it = find_if(ships.begin(), ships.end(), [](const shared_ptr<Ship> &ship) noexcept -> bool {
+		auto   it      = find_if(ships.begin(), ships.end(), [](const shared_ptr<Ship> &ship) noexcept -> bool {
 			return ship->GetPlanet() && ship->GetPlanet()->IsValid() && !ship->IsParked() && ship->CanBeFlagship();
 		});
 		if(it != ships.end())
@@ -3991,8 +4004,8 @@ void PlayerInfo::RegisterDerivedConditions()
 		return date.Year();
 	});
 	conditions["weekday: "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
-		string day = ce.NameWithoutPrefix();
-		int number = date.WeekdayNumberOffset();
+		string day    = ce.NameWithoutPrefix();
+		int    number = date.WeekdayNumberOffset();
 		if(day == "saturday")
 			return number == 0;
 		if(day == "sunday")
@@ -4055,7 +4068,7 @@ void PlayerInfo::RegisterDerivedConditions()
 	conditions["salary: "].ProvidePrefixed(
 	    [this](const ConditionEntry &ce) -> int64_t {
 		    const map<string, int64_t> &si = accounts.SalariesIncome();
-		    auto it = si.find(ce.NameWithoutPrefix());
+		    auto                        it = si.find(ce.NameWithoutPrefix());
 		    if(it == si.end())
 			    return 0;
 		    return it->second;
@@ -4200,8 +4213,8 @@ void PlayerInfo::RegisterDerivedConditions()
 
 	conditions["ship base attribute: "].ProvidePrefixed(
 	    [this, shipAttributeHelper](const ConditionEntry &ce) -> int64_t {
-		    string attribute = ce.NameWithoutPrefix();
-		    int64_t retVal = 0;
+		    string  attribute = ce.NameWithoutPrefix();
+		    int64_t retVal    = 0;
 		    for(const shared_ptr<Ship> &ship : ships)
 		    {
 			    // Destroyed and parked ships aren't checked.
@@ -4216,8 +4229,8 @@ void PlayerInfo::RegisterDerivedConditions()
 	    });
 	conditions["ship base attribute (all): "].ProvidePrefixed(
 	    [this, shipAttributeHelper](const ConditionEntry &ce) -> int64_t {
-		    string attribute = ce.NameWithoutPrefix();
-		    int64_t retVal = 0;
+		    string  attribute = ce.NameWithoutPrefix();
+		    int64_t retVal    = 0;
 		    for(const shared_ptr<Ship> &ship : ships)
 		    {
 			    if(ship->IsDestroyed())
@@ -4231,8 +4244,8 @@ void PlayerInfo::RegisterDerivedConditions()
 		    // If the player isn't landed then there can be no parked ships local to them.
 		    if(!planet)
 			    return 0;
-		    string attribute = ce.NameWithoutPrefix();
-		    int64_t retVal = 0;
+		    string  attribute = ce.NameWithoutPrefix();
+		    int64_t retVal    = 0;
 		    for(const shared_ptr<Ship> &ship : ships)
 		    {
 			    if(!ship->IsParked() || ship->GetPlanet() != planet)
@@ -4242,8 +4255,8 @@ void PlayerInfo::RegisterDerivedConditions()
 		    return retVal;
 	    });
 	conditions["ship attribute: "].ProvidePrefixed([this, shipAttributeHelper](const ConditionEntry &ce) -> int64_t {
-		string attribute = ce.NameWithoutPrefix();
-		int64_t retVal = 0;
+		string  attribute = ce.NameWithoutPrefix();
+		int64_t retVal    = 0;
 		for(const shared_ptr<Ship> &ship : ships)
 		{
 			// Destroyed and parked ships aren't checked.
@@ -4258,8 +4271,8 @@ void PlayerInfo::RegisterDerivedConditions()
 	});
 	conditions["ship attribute (all): "].ProvidePrefixed(
 	    [this, shipAttributeHelper](const ConditionEntry &ce) -> int64_t {
-		    string attribute = ce.NameWithoutPrefix();
-		    int64_t retVal = 0;
+		    string  attribute = ce.NameWithoutPrefix();
+		    int64_t retVal    = 0;
 		    for(const shared_ptr<Ship> &ship : ships)
 		    {
 			    if(ship->IsDestroyed())
@@ -4273,8 +4286,8 @@ void PlayerInfo::RegisterDerivedConditions()
 		    // If the player isn't landed then there can be no parked ships local to them.
 		    if(!planet)
 			    return 0;
-		    string attribute = ce.NameWithoutPrefix();
-		    int64_t retVal = 0;
+		    string  attribute = ce.NameWithoutPrefix();
+		    int64_t retVal    = 0;
 		    for(const shared_ptr<Ship> &ship : ships)
 		    {
 			    if(!ship->IsParked() || ship->GetPlanet() != planet)
@@ -4401,8 +4414,8 @@ void PlayerInfo::RegisterDerivedConditions()
 	// The number of active, present ships the player has of the given category
 	// (e.g. Heavy Warships).
 	conditions["ships: "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
-		int64_t retVal = 0;
-		string category = ce.NameWithoutPrefix();
+		int64_t retVal   = 0;
+		string  category = ce.NameWithoutPrefix();
 		for(const shared_ptr<Ship> &ship : ships)
 			if(!ship->IsParked() && !ship->IsDisabled() && ship->GetActualSystem() == system &&
 			   !category.compare(ship->Attributes().Category()))
@@ -4411,8 +4424,8 @@ void PlayerInfo::RegisterDerivedConditions()
 	});
 	// The number of ships the player has of the given category anywhere in their fleet.
 	conditions["ships (all): "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
-		int64_t retVal = 0;
-		string category = ce.NameWithoutPrefix();
+		int64_t retVal   = 0;
+		string  category = ce.NameWithoutPrefix();
 		for(const shared_ptr<Ship> &ship : ships)
 			if(!ship->IsDestroyed() && !category.compare(ship->Attributes().Category()))
 				++retVal;
@@ -4421,7 +4434,7 @@ void PlayerInfo::RegisterDerivedConditions()
 	// The number of ships the player has of the given model active and present.
 	conditions["ship model: "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		string model = ce.NameWithoutPrefix();
+		string  model  = ce.NameWithoutPrefix();
 		for(const shared_ptr<Ship> &ship : ships)
 			if(!ship->IsParked() && !ship->IsDisabled() && ship->GetActualSystem() == system &&
 			   !model.compare(ship->TrueModelName()))
@@ -4431,7 +4444,7 @@ void PlayerInfo::RegisterDerivedConditions()
 	// The number of ships that the player has of the given model anywhere in their fleet.
 	conditions["ship model (all): "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
 		int64_t retVal = 0;
-		string model = ce.NameWithoutPrefix();
+		string  model  = ce.NameWithoutPrefix();
 		for(const shared_ptr<Ship> &ship : ships)
 			if(!ship->IsDestroyed() && !model.compare(ship->TrueModelName()))
 				++retVal;
@@ -4800,7 +4813,7 @@ void PlayerInfo::RegisterDerivedConditions()
 	// Governments that have been bribed will not count as an enemy.
 	conditions["enemy: "].ProvidePrefixed([](const ConditionEntry &ce) -> int64_t {
 		string govName = ce.NameWithoutPrefix();
-		auto gov = GameData::Governments().Get(govName);
+		auto   gov     = GameData::Governments().Get(govName);
 		if(!gov)
 			return 0;
 		return gov->IsEnemy();
@@ -4810,14 +4823,14 @@ void PlayerInfo::RegisterDerivedConditions()
 	conditions["reputation: "].ProvidePrefixed(
 	    [](const ConditionEntry &ce) -> int64_t {
 		    string govName = ce.NameWithoutPrefix();
-		    auto gov = GameData::Governments().Get(govName);
+		    auto   gov     = GameData::Governments().Get(govName);
 		    if(!gov)
 			    return 0;
 		    return gov->Reputation();
 	    },
 	    [](ConditionEntry &ce, int64_t value) -> void {
 		    string govName = ce.NameWithoutPrefix();
-		    auto gov = GameData::Governments().Get(govName);
+		    auto   gov     = GameData::Governments().Get(govName);
 		    if(!gov)
 			    return;
 		    gov->SetReputation(value);
@@ -4834,7 +4847,7 @@ void PlayerInfo::RegisterDerivedConditions()
 	// calling "roll: max roll" would provide a value from the same range.
 	// Returns 0 if the input condition's value is <= 1.
 	conditions["roll: "].ProvidePrefixed([this](const ConditionEntry &ce) -> int64_t {
-		string input = ce.NameWithoutPrefix();
+		string  input = ce.NameWithoutPrefix();
 		int64_t value = 0;
 		if(DataNode::IsNumber(input))
 			value = static_cast<int64_t>(DataNode::Value(input));
@@ -4885,7 +4898,7 @@ void PlayerInfo::RegisterDerivedConditions()
 
 void PlayerInfo::TriggerEvent(GameEvent event, std::list<DataNode> &eventChanges)
 {
-	const string &name = event.TrueName();
+	const string  &name    = event.TrueName();
 	list<DataNode> changes = event.Apply(*this);
 	// If this is the first event that has triggered today that is named or
 	// has changes that must be applied to the universe, add a note to the
@@ -4929,8 +4942,8 @@ void PlayerInfo::CreateMissions()
 	availableTransitionMissions.clear();
 
 	// Check for available missions.
-	bool skipJobs = planet && !planet->GetPort().HasService(Port::ServicesType::JobBoard);
-	bool hasPriorityMissions = false;
+	bool     skipJobs            = planet && !planet->GetPort().HasService(Port::ServicesType::JobBoard);
+	bool     hasPriorityMissions = false;
 	unsigned nonBlockingMissions = 0;
 	for(const auto &[name, mission] : GameData::Missions())
 	{
@@ -4976,19 +4989,19 @@ void PlayerInfo::StepMissions(UI &ui)
 
 	// Check missions for status changes from landing.
 	string visitText;
-	int missionVisits = 0;
-	auto substitutions = map<string, string>{
-	    {"<first>", firstName},
-	    {"<last>", lastName},
+	int    missionVisits = 0;
+	auto   substitutions = map<string, string>{
+	    {         "<first>",         firstName},
+	    {          "<last>",          lastName},
 	    {"<original first>", originalFirstName},
-	    {"<original last>", originalLastName},
+	    { "<original last>",  originalLastName},
 	};
 	const Ship *flag = Flagship();
 	if(flag)
 	{
-		substitutions["<ship>"] = flag->GivenName();
-		substitutions["<model>"] = flag->DisplayModelName();
-		substitutions["<flagship>"] = flag->GivenName();
+		substitutions["<ship>"]           = flag->GivenName();
+		substitutions["<model>"]          = flag->DisplayModelName();
+		substitutions["<flagship>"]       = flag->GivenName();
 		substitutions["<flagship model>"] = flag->DisplayModelName();
 	}
 	substitutions["<current system>"] = system->DisplayName();
@@ -5081,7 +5094,7 @@ void PlayerInfo::StepMissionTimers(UI &ui)
 
 bool PlayerInfo::RecacheJumpRoutes()
 {
-	bool recache = recacheJumpRoutes;
+	bool recache      = recacheJumpRoutes;
 	recacheJumpRoutes = false;
 	return recache;
 }
@@ -5358,7 +5371,7 @@ void PlayerInfo::Save(DataWriter &out) const
 	for(const auto &it : scheduledEvents)
 	{
 		const ExclusiveItem<GameEvent> &event = it.event;
-		const Date &date = it.date;
+		const Date                     &date  = it.date;
 		if(!event->TrueName().empty())
 		{
 			out.Write("event", event->TrueName());
@@ -5616,7 +5629,7 @@ void PlayerInfo::AddStockShip(const Ship *model, const string &name)
 void PlayerInfo::ForgetGiftedShip(const Ship &oldShip, bool failsMissions)
 {
 	const EsUuid &id = oldShip.UUID();
-	auto shipToForget =
+	auto          shipToForget =
 	    find_if(giftedShips.begin(), giftedShips.end(), [&id](const pair<const string, EsUuid> &shipId) {
 		    return shipId.second == id;
 	    });
@@ -5646,29 +5659,29 @@ void PlayerInfo::CalculateScanners(const shared_ptr<Ship> &ship)
 {
 	const Outfit &attributes = ship->Attributes();
 
-	double cargo = attributes.Get("cargo scan power") * 10000.;
+	double cargo      = attributes.Get("cargo scan power") * 10000.;
 	double cargoSpeed = attributes.Get("cargo scan efficiency");
 	if(!cargoSpeed)
 		cargoSpeed = cargo;
 
-	double outfit = attributes.Get("outfit scan power") * 10000.;
+	double outfit      = attributes.Get("outfit scan power") * 10000.;
 	double outfitSpeed = attributes.Get("outfit scan efficiency");
 	if(!outfitSpeed)
 		outfitSpeed = outfit;
 
-	double asteroid = attributes.Get("asteroid scan power") * 10000.;
-	double tactical = attributes.Get("tactical scan power") * 10000.;
+	double asteroid  = attributes.Get("asteroid scan power") * 10000.;
+	double tactical  = attributes.Get("tactical scan power") * 10000.;
 	double strategic = attributes.Get("strategic scan power") * 10000.;
 
-	double crew = tactical + attributes.Get("crew scan power") * 10000.;
-	double fuel = tactical + attributes.Get("fuel scan power") * 10000.;
-	double energy = tactical + attributes.Get("energy scan power") * 10000.;
-	double thermal = tactical + attributes.Get("thermal scan power") * 10000.;
-	double maneuver = strategic + attributes.Get("maneuver scan power") * 10000.;
+	double crew         = tactical + attributes.Get("crew scan power") * 10000.;
+	double fuel         = tactical + attributes.Get("fuel scan power") * 10000.;
+	double energy       = tactical + attributes.Get("energy scan power") * 10000.;
+	double thermal      = tactical + attributes.Get("thermal scan power") * 10000.;
+	double maneuver     = strategic + attributes.Get("maneuver scan power") * 10000.;
 	double acceleration = strategic + attributes.Get("acceleration scan power") * 10000.;
-	double velocity = strategic + attributes.Get("velocity scan power") * 10000.;
-	double weapon = strategic + attributes.Get("weapon scan power") * 10000.;
-	bool range = attributes.Get("range finder power") > 0.;
+	double velocity     = strategic + attributes.Get("velocity scan power") * 10000.;
+	double weapon       = strategic + attributes.Get("weapon scan power") * 10000.;
+	bool   range        = attributes.Get("range finder power") > 0.;
 
 	if(cargo)
 		scanners[ScanType::CARGO][ship] = cargo;
@@ -5715,7 +5728,7 @@ void PlayerInfo::DoAccounting()
 {
 	// Check what salaries and tribute the player receives.
 	map<string, int64_t> income;
-	int64_t salariesIncome = accounts.SalariesIncomeTotal();
+	int64_t              salariesIncome = accounts.SalariesIncomeTotal();
 	if(salariesIncome)
 		income["salary"] = salariesIncome;
 	int64_t tributeIncome = GetTributeTotal();

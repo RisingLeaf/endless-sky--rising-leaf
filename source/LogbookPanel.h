@@ -51,7 +51,7 @@ private:
 	public:
 		Entry(const std::string &heading, const BookEntry &body);
 
-		std::string heading;
+		std::string      heading;
 		const BookEntry &body;
 	};
 
@@ -66,7 +66,7 @@ private:
 		{
 		}
 
-		PageType type;
+		PageType           type;
 		std::vector<Entry> entries;
 	};
 
@@ -102,14 +102,14 @@ private:
 	// The system from the selected entry that is currently being centered on.
 	const System *centeredSystem = nullptr;
 
-	std::vector<ClickZone<Selection>> selectionZones;
+	std::vector<ClickZone<Selection>>         selectionZones;
 	std::vector<ClickZone<const BookEntry *>> logZones;
 
 	Point hoverPoint;
 
 	// Current scroll:
-	double categoryScroll = 0.;
-	double scroll = 0.;
+	double         categoryScroll    = 0.;
+	double         scroll            = 0.;
 	mutable double maxCategoryScroll = 0.;
-	mutable double maxScroll = 0.;
+	mutable double maxScroll         = 0.;
 };

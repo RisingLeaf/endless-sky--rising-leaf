@@ -18,7 +18,7 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include <cassert>
 
 namespace {
-	Uint32 resize = -1;
+	Uint32 resize     = -1;
 	Uint32 adjustText = -1;
 } // namespace
 
@@ -26,7 +26,7 @@ namespace {
 
 void CustomEvents::Init()
 {
-	resize = SDL_RegisterEvents(2);
+	resize     = SDL_RegisterEvents(2);
 	adjustText = resize + 1;
 }
 

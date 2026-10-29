@@ -31,10 +31,20 @@ class Body : public Drawable {
 public:
 	// Constructors.
 	Body() = default;
-	Body(const Sprite *sprite, Point position, Point velocity = Point(), Angle facing = Angle(), double zoom = 1.,
-	     Point scale = Point(1., 1.), double alpha = 1.);
-	Body(const Drawable &other, Point position, Point velocity = Point(), Angle facing = Angle(), double zoom = 1.,
-	     Point scale = Point(1., 1.), double alpha = 1.);
+	Body(const Sprite *sprite,
+	     Point         position,
+	     Point         velocity = Point(),
+	     Angle         facing   = Angle(),
+	     double        zoom     = 1.,
+	     Point         scale    = Point(1., 1.),
+	     double        alpha    = 1.);
+	Body(const Drawable &other,
+	     Point           position,
+	     Point           velocity = Point(),
+	     Angle           facing   = Angle(),
+	     double          zoom     = 1.,
+	     Point           scale    = Point(1., 1.),
+	     double          alpha    = 1.);
 
 	// Get the sprite mask for the given time step.
 	const Mask &GetMask(int step = -1) const;
@@ -42,9 +52,9 @@ public:
 	// Positional attributes.
 	const Point &Position() const;
 	const Point &Velocity() const;
-	Point Center() const;
+	Point        Center() const;
 	const Angle &Facing() const;
-	Point Unit() const;
+	Point        Unit() const;
 
 	// Check if this object is marked for removal from the game.
 	bool ShouldBeRemoved() const;
@@ -57,7 +67,7 @@ public:
 	// dependent on the position of the body relative to the center of the screen.
 	double Alpha(const Point &drawCenter) const;
 	double DistanceAlpha(const Point &drawCenter) const;
-	bool IsVisible(const Point &drawCenter) const;
+	bool   IsVisible(const Point &drawCenter) const;
 
 
 protected:
@@ -78,7 +88,7 @@ protected:
 	Point rotatedCenter;
 
 	// The maximum distance at which the body is visible, and at which it becomes invisible again.
-	double distanceVisible = 0.;
+	double distanceVisible   = 0.;
 	double distanceInvisible = 0.;
 
 	// Government, for use in collision checks.

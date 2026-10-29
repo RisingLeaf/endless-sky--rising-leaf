@@ -58,12 +58,12 @@ const string &Date::ToString() const
 	// cached value is discarded if the date or date format is changed.
 	if(date && str.empty())
 	{
-		int day = Day();
+		int day   = Day();
 		int month = Month();
-		int year = Year();
+		int year  = Year();
 
-		static const string MONTH[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-		                               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+		static const string MONTH[] = {
+		    "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 		const string &monthStr = MONTH[month - 1];
 
@@ -86,7 +86,7 @@ string Date::LongString() const
 	if(!date)
 		return string();
 
-	int day = Day();
+	int    day       = Day();
 	string dayString = to_string(day);
 	// All numbers in the teens add in "th", as do any numbers ending in 0 or in
 	// 4 through 9. Special endings are used for "1st", "2nd", and "3rd."
@@ -100,12 +100,22 @@ string Date::LongString() const
 		dayString += "rd";
 
 	// Write out the month name instead of abbreviating it.
-	static const string MONTH[] = {"January", "February", "March",     "April",   "May",      "June",
-	                               "July",    "August",   "September", "October", "November", "December"};
-	const string &month = MONTH[Month() - 1];
+	static const string MONTH[] = {"January",
+	                               "February",
+	                               "March",
+	                               "April",
+	                               "May",
+	                               "June",
+	                               "July",
+	                               "August",
+	                               "September",
+	                               "October",
+	                               "November",
+	                               "December"};
+	const string       &month   = MONTH[Month() - 1];
 
 	Preferences::DateFormat dateFormat = Preferences::GetDateFormat();
-	string result;
+	string                  result;
 	if(dateFormat == Preferences::DateFormat::YMD || dateFormat == Preferences::DateFormat::MDY)
 		result = month + " " + dayString;
 	else if(dateFormat == Preferences::DateFormat::DMY)
@@ -158,12 +168,12 @@ Date Date::operator+(int days) const
 	if(!date || !days)
 		return *this;
 
-	int day = Day();
+	int day   = Day();
 	int month = Month();
-	int year = Year();
+	int year  = Year();
 
 	day += days;
-	int leap = !(year % 4) - !(year % 100) + !(year % 400);
+	int leap    = !(year % 4) - !(year % 100) + !(year % 400);
 	int MDAYS[] = {31, 28 + leap, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 	while(day > MDAYS[month - 1])
 	{
@@ -254,8 +264,8 @@ int Date::DaysSinceEpoch() const
 	if(date && !daysSinceEpoch)
 	{
 		daysSinceEpoch = Day();
-		int month = Month();
-		int year = Year();
+		int month      = Month();
+		int year       = Year();
 
 		daysSinceEpoch += MDAYS[month - 1];
 		// Add in a leap day if this is a leap year and it is after February.
@@ -332,9 +342,9 @@ int Date::Year() const
 
 int Date::WeekdayNumberOffset() const
 {
-	int day = Day();
+	int day   = Day();
 	int month = Month();
-	int year = Year();
+	int year  = Year();
 
 	// Zeller's congruence.
 	if(month < 3)

@@ -166,8 +166,8 @@ DialogSettings::DialogLine::DialogLine(const string &text, const ConditionSet &c
 
 DialogSettings::DialogLine::DialogLine(const DataNode &node, const ConditionsStore *playerConditions)
 {
-	const string &key = node.Token(0);
-	bool hasValue = node.Size() >= 2;
+	const string &key      = node.Token(0);
+	bool          hasValue = node.Size() >= 2;
 	if(key == "phrase")
 	{
 		// Handle named phrases

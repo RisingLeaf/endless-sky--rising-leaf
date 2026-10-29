@@ -29,7 +29,10 @@ class FogShader {
 public:
 	static void Init(const GraphicsTypes::GraphicsInstance *graphics_instance);
 	static void Redraw();
-	static void Draw(const GraphicsTypes::GraphicsInstance *graphics_instance, GraphicsTypes::CommandBufferInstance *cb,
-	                 const Point &center, double zoom, const PlayerInfo &player);
+	static void Draw(const GraphicsTypes::GraphicsInstance *graphics_instance,
+	                 GraphicsTypes::CommandBufferInstance  *cb,
+	                 const Point                           &center,
+	                 double                                 zoom,
+	                 const PlayerInfo                      &player);
 	static void Clear();
 };

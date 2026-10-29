@@ -44,19 +44,19 @@ namespace {
 
 
 	std::unique_ptr<GraphicsTypes::ShaderInstance> shader;
-	ShaderInfo info;
+	ShaderInfo                                     info;
 
-	graphics_layer::ObjectHandle geometry;
+	graphics_layer::ObjectHandle  geometry;
 	graphics_layer::TextureHandle texture;
 
 	// Keep track of the previous frame's view so that if it is unchanged we can
 	// skip regenerating the mask.
-	double previousZoom = 0.;
-	double previousLeft = 0.;
-	double previousTop = 0.;
-	int previousColumns = 0;
-	int previousRows = 0;
-	Point previousCenter;
+	double previousZoom    = 0.;
+	double previousLeft    = 0.;
+	double previousTop     = 0.;
+	int    previousColumns = 0;
+	int    previousRows    = 0;
+	Point  previousCenter;
 } // namespace
 
 
@@ -89,16 +89,19 @@ void FogShader::Redraw()
 
 
 
-void FogShader::Draw(const GraphicsTypes::GraphicsInstance *graphics_instance, GraphicsTypes::CommandBufferInstance *cb,
-                     const Point &center, const double zoom, const PlayerInfo &player)
+void FogShader::Draw(const GraphicsTypes::GraphicsInstance *graphics_instance,
+                     GraphicsTypes::CommandBufferInstance  *cb,
+                     const Point                           &center,
+                     const double                           zoom,
+                     const PlayerInfo                      &player)
 {
 	// Generate a scaled-down mask image that represents the entire screen plus
 	// enough pixels beyond the screen to include any systems that may be off
 	// screen but close enough to "illuminate" part of the on-screen map.
-	const double left = Screen::Left() - GRID * PAD * zoom + fmod(center.X(), GRID) * zoom;
-	const double top = Screen::Top() - GRID * PAD * zoom + fmod(center.Y(), GRID) * zoom;
-	int columns = ceil(Screen::Width() / (GRID * zoom)) + 1 + 2 * PAD;
-	int rows = ceil(Screen::Height() / (GRID * zoom)) + 1 + 2 * PAD;
+	const double left    = Screen::Left() - GRID * PAD * zoom + fmod(center.X(), GRID) * zoom;
+	const double top     = Screen::Top() - GRID * PAD * zoom + fmod(center.Y(), GRID) * zoom;
+	int          columns = ceil(Screen::Width() / (GRID * zoom)) + 1 + 2 * PAD;
+	int          rows    = ceil(Screen::Height() / (GRID * zoom)) + 1 + 2 * PAD;
 	// Round up to a multiple of 4 so the rows will be 32-bit aligned.
 	columns = (columns + 3) & ~3;
 
@@ -112,12 +115,12 @@ void FogShader::Draw(const GraphicsTypes::GraphicsInstance *graphics_instance, G
 	if(shouldRegenerate)
 	{
 		// Remember the current viewport attributes.
-		previousZoom = zoom;
-		previousCenter = center;
-		previousLeft = left;
-		previousTop = top;
+		previousZoom    = zoom;
+		previousCenter  = center;
+		previousLeft    = left;
+		previousTop     = top;
 		previousColumns = columns;
-		previousRows = rows;
+		previousRows    = rows;
 
 		// This buffer will hold the mask image.
 		auto buffer = vector<unsigned char>(static_cast<size_t>(rows) * columns, LIMIT);
@@ -159,23 +162,30 @@ void FogShader::Draw(const GraphicsTypes::GraphicsInstance *graphics_instance, G
 		const void *data = &buffer.front();
 
 		// Set up the OpenGL texture if it doesn't exist yet.
-		texture = graphics_layer::TextureHandle(
-		    graphics_instance, "fog", {data}, columns, rows, 1, GraphicsTypes::TextureType::TYPE_2D,
-		    GraphicsTypes::ImageFormat::R, GraphicsTypes::TextureTarget::READ,
-		    GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE, GraphicsTypes::TextureFilter::LINEAR);
+		texture = graphics_layer::TextureHandle(graphics_instance,
+		                                        "fog",
+		                                        {data},
+		                                        columns,
+		                                        rows,
+		                                        1,
+		                                        GraphicsTypes::TextureType::TYPE_2D,
+		                                        GraphicsTypes::ImageFormat::R,
+		                                        GraphicsTypes::TextureTarget::READ,
+		                                        GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
+		                                        GraphicsTypes::TextureFilter::LINEAR);
 	}
 
 	cb->BindShader(shader.get());
 
 	graphics_layer::QuickBindTextures(cb, {texture.GetTexture()});
 
-	const gm::vec2 corner = {static_cast<float>(left - .5 * GRID * zoom) / (0.5f * Screen::Width()),
-	                         static_cast<float>(top - .5 * GRID * zoom) / (-0.5f * Screen::Height())};
+	const gm::vec2 corner     = {static_cast<float>(left - .5 * GRID * zoom) / (0.5f * Screen::Width()),
+	                             static_cast<float>(top - .5 * GRID * zoom) / (-0.5f * Screen::Height())};
 	const gm::vec2 dimensions = {GRID * static_cast<float>(zoom) * (columns + 1.0f) / (0.5f * Screen::Width()),
 	                             GRID * static_cast<float>(zoom) * (rows + 1.0f) / (-0.5f * Screen::Height())};
 
 	std::vector<unsigned char> data_cp(info.GetUniformSize());
-	int i = -1;
+	int                        i = -1;
 	info.CopyUniformEntryToBuffer(data_cp.data(), &corner, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &dimensions, ++i);
 	cb->BindBufferDynamic(data_cp, GraphicsTypes::UBOBindPoint::Specific);

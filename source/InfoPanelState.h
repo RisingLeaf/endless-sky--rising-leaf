@@ -33,29 +33,29 @@ public:
 
 	explicit InfoPanelState(PlayerInfo &player);
 
-	int SelectedIndex() const;
+	int  SelectedIndex() const;
 	void SetSelectedIndex(int newSelectedIndex);
 
 	const std::set<int> &AllSelected() const;
-	void SetSelected(std::set<int> selected);
-	void Select(int index);
-	void SelectOnly(int index);
-	void SelectMany(int start, int end);
-	bool Deselect(int index);
-	void DeselectAll();
-	void Disown(std::vector<std::shared_ptr<Ship>>::const_iterator it);
+	void                 SetSelected(std::set<int> selected);
+	void                 Select(int index);
+	void                 SelectOnly(int index);
+	void                 SelectMany(int start, int end);
+	bool                 Deselect(int index);
+	void                 DeselectAll();
+	void                 Disown(std::vector<std::shared_ptr<Ship>>::const_iterator it);
 
 	bool CanEdit() const;
 
-	int Scroll() const;
+	int  Scroll() const;
 	void SetScroll(int newScroll);
 
-	std::vector<std::shared_ptr<Ship>> &Ships();
+	std::vector<std::shared_ptr<Ship>>       &Ships();
 	const std::vector<std::shared_ptr<Ship>> &Ships() const;
-	bool ReorderShipsTo(int toIndex);
+	bool                                      ReorderShipsTo(int toIndex);
 
 	ShipComparator *CurrentSort() const;
-	void SetCurrentSort(ShipComparator *s);
+	void            SetCurrentSort(ShipComparator *s);
 
 
 private:

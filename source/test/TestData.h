@@ -31,10 +31,11 @@ class System;
 class TestData {
 public:
 	const std::string &Name() const;
-	void Load(const DataNode &node, const std::filesystem::path &sourceDataFilePath);
+	void               Load(const DataNode &node, const std::filesystem::path &sourceDataFilePath);
 	// Function to inject the test-data into the game or into the game's
 	// environment.
-	bool Inject(const ConditionsStore *playerConditions, const std::set<const System *> *visitedSystems,
+	bool Inject(const ConditionsStore          *playerConditions,
+	            const std::set<const System *> *visitedSystems,
 	            const std::set<const Planet *> *visitedPlanets) const;
 
 	// Types of datafiles that can be stored.
@@ -49,7 +50,8 @@ private:
 	bool InjectSavegame() const;
 
 	// Loads a mission stored in testdata into a Mission through GameData.
-	bool InjectMission(const ConditionsStore *playerConditions, const std::set<const System *> *visitedSystems,
+	bool InjectMission(const ConditionsStore          *playerConditions,
+	                   const std::set<const System *> *visitedSystems,
 	                   const std::set<const Planet *> *visitedPlanets) const;
 
 

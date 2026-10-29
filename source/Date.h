@@ -34,11 +34,11 @@ public:
 
 	// Check if this date has been initialized.
 	explicit operator bool() const;
-	bool operator!() const;
+	bool     operator!() const;
 
 	// Move the date forward one day.
 	Date &operator++();
-	Date operator++(int);
+	Date  operator++(int);
 	// Get the date this number of days in the future.
 	Date operator+(int days) const;
 	// Get the number of days between two dates.
@@ -76,6 +76,6 @@ private:
 	// compare dates.
 	int date = 0;
 	// Cached values of complex operations.
-	mutable int daysSinceEpoch = 0;
+	mutable int         daysSinceEpoch = 0;
 	mutable std::string str;
 };

@@ -50,8 +50,10 @@ using namespace std;
 
 
 
-StartConditionsPanel::StartConditionsPanel(PlayerInfo &player, UI &gamePanels, const StartConditionsList &allScenarios,
-                                           const Panel *parent)
+StartConditionsPanel::StartConditionsPanel(PlayerInfo                &player,
+                                           UI                        &gamePanels,
+                                           const StartConditionsList &allScenarios,
+                                           const Panel               *parent)
     : player(player), gamePanels(gamePanels), parent(parent), gamerules(GameData::DefaultGamerules()),
       bright(*GameData::Colors().Get("bright")), medium(*GameData::Colors().Get("medium")),
       selectedBackground(*GameData::Colors().Get("faint"))
@@ -73,14 +75,14 @@ StartConditionsPanel::StartConditionsPanel(PlayerInfo &player, UI &gamePanels, c
 		// However, we'd need a way to specify arbitrarily extensible lists there.
 		// We also would need to a way to specify truncation for such a list.
 		// Such a list would also have to be scrollable.
-		descriptionBox = startConditionsMenu->GetBox("start description");
+		descriptionBox   = startConditionsMenu->GetBox("start description");
 		entriesContainer = startConditionsMenu->GetBox("start entry list");
-		entryBox = startConditionsMenu->GetBox("start entry item bounds");
+		entryBox         = startConditionsMenu->GetBox("start entry item bounds");
 		entryTextPadding = startConditionsMenu->GetBox("start entry text padding").Dimensions();
 	}
 
 	const Rectangle firstRectangle = Rectangle::FromCorner(entriesContainer.TopLeft(), entryBox.Dimensions());
-	const auto startCount = scenarios.size();
+	const auto      startCount     = scenarios.size();
 	startConditionsClickZones.reserve(startCount);
 	for(size_t i = 0; i < startCount; ++i)
 		startConditionsClickZones.emplace_back(firstRectangle + Point(0, i * entryBox.Height()), scenarios.begin() + i);
@@ -115,8 +117,8 @@ void StartConditionsPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 
 	// Rather than blink list items in & out of existence, fade them in/out over half the entry height.
 	const double fadeDistance = .5 * entryBox.Height();
-	const double fadeInY = entriesContainer.Top() - fadeDistance + entryTextPadding.Y();
-	const double fadeOutY = fadeInY + entriesContainer.Height();
+	const double fadeInY      = entriesContainer.Top() - fadeDistance + entryTextPadding.Y();
+	const double fadeOutY     = fadeInY + entriesContainer.Height();
 
 	// Start at the top left of the list and offset by the text margins and scroll.
 	auto pos = entriesContainer.TopLeft() - Point(0., entriesScroll);
@@ -131,8 +133,8 @@ void StartConditionsPanel::Draw(GraphicsTypes::CommandBufferInstance *cb)
 
 		// Partially visible entries should fade in or out.
 		double opacity = entriesContainer.Contains(zone)
-		                     ? 1.
-		                     : min(1., max(0., min(pos.Y() - fadeInY, fadeOutY - pos.Y()) / fadeDistance));
+		                   ? 1.
+		                   : min(1., max(0., min(pos.Y() - fadeInY, fadeOutY - pos.Y()) / fadeDistance));
 
 		bool isHighlighted = it == startIt || (hasHover && zone.Contains(hoverPoint));
 		if(it == startIt)
@@ -223,7 +225,7 @@ bool StartConditionsPanel::Click(int x, int y, MouseButton button, int /* clicks
 
 bool StartConditionsPanel::Hover(int x, int y)
 {
-	hasHover = true;
+	hasHover   = true;
 	hoverPoint = Point(x, y);
 	return true;
 }
@@ -282,9 +284,9 @@ void StartConditionsPanel::OnConversationEnd(int)
 void StartConditionsPanel::ScrollToSelected()
 {
 	// If there are fewer starts than there are displayable starts, never scroll.
-	const double entryHeight = entryBox.Height();
-	const int maxDisplayedRows = entriesContainer.Height() / entryHeight;
-	const auto startCount = scenarios.size();
+	const double entryHeight      = entryBox.Height();
+	const int    maxDisplayedRows = entriesContainer.Height() / entryHeight;
+	const auto   startCount       = scenarios.size();
 	if(static_cast<int>(startCount) < maxDisplayedRows)
 	{
 		entriesScroll = 0.;
@@ -294,10 +296,10 @@ void StartConditionsPanel::ScrollToSelected()
 	// brings the scrolled-to edge within view.
 	const auto countBefore = static_cast<size_t>(distance(scenarios.begin(), startIt));
 
-	const double maxScroll = (startCount - maxDisplayedRows) * entryHeight;
-	const double pageScroll = maxDisplayedRows * entryHeight;
+	const double maxScroll     = (startCount - maxDisplayedRows) * entryHeight;
+	const double pageScroll    = maxDisplayedRows * entryHeight;
 	const double desiredScroll = countBefore * entryHeight;
-	const double bottomOfPage = entriesScroll + pageScroll;
+	const double bottomOfPage  = entriesScroll + pageScroll;
 	if(desiredScroll < entriesScroll)
 	{
 		// Scroll upwards.

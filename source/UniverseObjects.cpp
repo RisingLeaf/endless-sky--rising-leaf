@@ -37,9 +37,11 @@ using namespace std;
 
 
 
-shared_future<void> UniverseObjects::Load(TaskQueue &queue, const vector<filesystem::path> &sources,
-                                          const PlayerInfo &player, const ConditionsStore *globalConditions,
-                                          bool debugMode)
+shared_future<void> UniverseObjects::Load(TaskQueue                      &queue,
+                                          const vector<filesystem::path> &sources,
+                                          const PlayerInfo               &player,
+                                          const ConditionsStore          *globalConditions,
+                                          bool                            debugMode)
 {
 	progress = 0.;
 
@@ -109,7 +111,8 @@ void UniverseObjects::FinishLoading()
 	for(auto &&it : startConditions)
 		it.FinishLoading();
 	// Remove any invalid starting conditions, so the game does not use incomplete data.
-	startConditions.erase(remove_if(startConditions.begin(), startConditions.end(),
+	startConditions.erase(remove_if(startConditions.begin(),
+	                                startConditions.end(),
 	                                [](const StartConditions &it) noexcept -> bool {
 		                                return !it.IsValid();
 	                                }),
@@ -141,12 +144,12 @@ void UniverseObjects::FinishLoading()
 // Apply the given change to the universe.
 void UniverseObjects::Change(const DataNode &node, PlayerInfo &player)
 {
-	const ConditionsStore *playerConditions = &player.Conditions();
-	const set<const System *> *visitedSystems = &player.VisitedSystems();
-	const set<const Planet *> *visitedPlanets = &player.VisitedPlanets();
+	const ConditionsStore     *playerConditions = &player.Conditions();
+	const set<const System *> *visitedSystems   = &player.VisitedSystems();
+	const set<const Planet *> *visitedPlanets   = &player.VisitedPlanets();
 
-	const string &key = node.Token(0);
-	bool hasValue = node.Size() >= 2;
+	const string &key      = node.Token(0);
+	bool          hasValue = node.Size() >= 2;
 	if(key == "fleet" && hasValue)
 		fleets.Get(node.Token(1))->Load(node);
 	else if(key == "galaxy" && hasValue)
@@ -173,8 +176,8 @@ void UniverseObjects::Change(const DataNode &node, PlayerInfo &player)
 		wormholes.Get(node.Token(1))->Load(node);
 	else if(key == "event" && hasValue)
 	{
-		GameEvent eventCopy = *events.Get(node.Token(1));
-		list<DataNode> changes = eventCopy.Apply(player, true);
+		GameEvent      eventCopy = *events.Get(node.Token(1));
+		list<DataNode> changes   = eventCopy.Apply(player, true);
 		for(const DataNode &eventNode : changes)
 			Change(eventNode, player);
 	}
@@ -360,8 +363,10 @@ void UniverseObjects::DrawMenuBackground(GraphicsTypes::CommandBufferInstance *c
 
 
 
-void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &player,
-                               const ConditionsStore *globalConditions, bool debugMode)
+void UniverseObjects::LoadFile(const filesystem::path &path,
+                               const PlayerInfo       &player,
+                               const ConditionsStore  *globalConditions,
+                               bool                    debugMode)
 {
 	// This is an ordinary file. Check to see if it is an image.
 	if(path.extension() != ".txt")
@@ -371,9 +376,9 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 	if(debugMode)
 		Logger::Log("Parsing: " + path.string(), Logger::Level::INFO);
 
-	const ConditionsStore *playerConditions = &player.Conditions();
-	const set<const System *> *visitedSystems = &player.VisitedSystems();
-	const set<const Planet *> *visitedPlanets = &player.VisitedPlanets();
+	const ConditionsStore     *playerConditions = &player.Conditions();
+	const set<const System *> *visitedSystems   = &player.VisitedSystems();
+	const set<const Planet *> *visitedPlanets   = &player.VisitedPlanets();
 	// If at any point an "overwrite" node is encountered, that means that the next
 	// loaded node must have its previous definition cleared before loading the new values.
 	// For some root nodes, this doesn't require any special handling, as a duplicate
@@ -381,8 +386,8 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 	bool overwrite = false;
 	for(const DataNode &node : data)
 	{
-		const string &key = node.Token(0);
-		bool hasValue = node.Size() >= 2;
+		const string &key      = node.Token(0);
+		bool          hasValue = node.Size() >= 2;
 		if(key == "overwrite")
 		{
 			// Set overwrite mode for the next encountered node.
@@ -536,7 +541,7 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 		{
 			// Allow multiple named variants of the same ship model.
 			const string &name = node.Token((node.Size() > 2) ? 2 : 1);
-			Ship *ship = ships.Get(name);
+			Ship         *ship = ships.Get(name);
 			if(overwrite)
 				*ship = Ship();
 			ship->Load(node, playerConditions);
@@ -556,11 +561,12 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 				startConditions.emplace_back(node, globalConditions, playerConditions);
 			else
 			{
-				const string &identifier = node.Token(1);
-				auto existingStart = find_if(startConditions.begin(), startConditions.end(),
-				                             [&identifier](const StartConditions &it) noexcept -> bool {
+				const string &identifier    = node.Token(1);
+				auto          existingStart = find_if(startConditions.begin(),
+				                                      startConditions.end(),
+				                                      [&identifier](const StartConditions &it) noexcept -> bool {
 					                             return it.Identifier() == identifier;
-				                             });
+				                                      });
 				if(existingStart != startConditions.end())
 				{
 					if(overwrite)
@@ -637,10 +643,12 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 		}
 		else if(key == "category" && hasValue)
 		{
-			static const map<string, CategoryType> category = {{"ship", CategoryType::SHIP},
-			                                                   {"bay type", CategoryType::BAY},
-			                                                   {"outfit", CategoryType::OUTFIT},
-			                                                   {"series", CategoryType::SERIES}};
+			static const map<string, CategoryType> category = {
+			    {    "ship",   CategoryType::SHIP},
+			    {"bay type",    CategoryType::BAY},
+			    {  "outfit", CategoryType::OUTFIT},
+			    {  "series", CategoryType::SERIES}
+            };
 			auto it = category.find(node.Token(1));
 			if(it == category.end())
 				node.PrintTrace("Skipping unrecognized category type:");
@@ -714,7 +722,7 @@ void UniverseObjects::LoadFile(const filesystem::path &path, const PlayerInfo &p
 		else if(key == "disable" && hasValue)
 		{
 			static const set<string> canDisable = {"mission", "event", "person"};
-			const string &category = node.Token(1);
+			const string            &category   = node.Token(1);
 			if(canDisable.contains(category))
 			{
 				if(overwrite)

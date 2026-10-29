@@ -71,7 +71,7 @@ DamageDealt DamageProfile::CalculateDamage() const
 	const Weapon &weapon = GetWeapon();
 	const Entity &entity = GetEntity();
 
-	double shieldFraction = 0.;
+	double      shieldFraction = 0.;
 	DamageDealt damage(weapon, scaling);
 
 	// Lambda for returning the damage scale that a damage type should
@@ -90,8 +90,8 @@ DamageDealt DamageProfile::CalculateDamage() const
 		double piercing =
 		    max(0., min(1., (weapon.Piercing() / entity.PiercingProtection()) - entity.PiercingResistance()));
 		double highPermeability = entity.HighShieldPermeability();
-		double lowPermeability = entity.LowShieldPermeability();
-		double permeability = entity.Cloaking() * entity.CloakedShieldPermeability();
+		double lowPermeability  = entity.LowShieldPermeability();
+		double permeability     = entity.Cloaking() * entity.CloakedShieldPermeability();
 		if(highPermeability || lowPermeability)
 		{
 			// Determine what portion of its maximum shields the entity is currently at.
@@ -103,7 +103,8 @@ DamageDealt DamageProfile::CalculateDamage() const
 
 		damage.levels.shields =
 		    (weapon.ShieldDamage() + weapon.RelativeShieldDamage() * entity.MaxShields()) *
-		    ScaleType(0., 0.,
+		    ScaleType(0.,
+			          0.,
 			          entity.DamageProtection().shields + (entity.IsCloaked() ? entity.CloakedShieldProtection() : 0.));
 		if(damage.levels.shields > shields)
 			shieldFraction = min(shieldFraction, shields / damage.levels.shields);
@@ -116,11 +117,11 @@ DamageDealt DamageProfile::CalculateDamage() const
 	damage.levels.shields *= shieldFraction;
 	double totalHullProtection = (ScaleType(
 	    1., 0., entity.DamageProtection().hull + (entity.IsCloaked() ? entity.CloakedHullProtection() : 0.)));
-	bool isMinable = entity.EntityType() == Entity::Type::MINABLE;
-	double hullDamage = isMinable ? weapon.MinableDamage() : weapon.HullDamage();
-	double relativeHullDamage = isMinable ? weapon.RelativeMinableDamage() : weapon.RelativeHullDamage();
-	damage.levels.hull = (hullDamage + relativeHullDamage * entity.MaxHull()) * totalHullProtection;
-	double hull = entity.HullLevelUntilDisabled();
+	bool   isMinable           = entity.EntityType() == Entity::Type::MINABLE;
+	double hullDamage          = isMinable ? weapon.MinableDamage() : weapon.HullDamage();
+	double relativeHullDamage  = isMinable ? weapon.RelativeMinableDamage() : weapon.RelativeHullDamage();
+	damage.levels.hull         = (hullDamage + relativeHullDamage * entity.MaxHull()) * totalHullProtection;
+	double hull                = entity.HullLevelUntilDisabled();
 	if(damage.levels.hull > hull)
 	{
 		double hullFraction = hull / damage.levels.hull;
@@ -130,25 +131,25 @@ DamageDealt DamageProfile::CalculateDamage() const
 	}
 	damage.levels.energy = (weapon.EnergyDamage() + weapon.RelativeEnergyDamage() * entity.MaxEnergy()) *
 	                       ScaleType(.5, 0., entity.DamageProtection().energy);
-	damage.levels.heat = (weapon.HeatDamage() + weapon.RelativeHeatDamage() * entity.MaxHeat()) *
-	                     ScaleType(.5, 0., entity.DamageProtection().heat);
-	damage.levels.fuel = (weapon.FuelDamage() + weapon.RelativeFuelDamage() * entity.MaxFuel()) *
-	                     ScaleType(.5, 0., entity.DamageProtection().fuel);
+	damage.levels.heat   = (weapon.HeatDamage() + weapon.RelativeHeatDamage() * entity.MaxHeat()) *
+	                       ScaleType(.5, 0., entity.DamageProtection().heat);
+	damage.levels.fuel   = (weapon.FuelDamage() + weapon.RelativeFuelDamage() * entity.MaxFuel()) *
+	                       ScaleType(.5, 0., entity.DamageProtection().fuel);
 
 	// DoT damage types with an instantaneous analog.
 	// Ion and burn damage are blocked 50% by shields.
 	// Corrosion and leak damage are blocked 100%.
 	// Discharge damage is blocked 50% by the absence of shields.
-	damage.levels.discharge = weapon.DischargeDamage() * ScaleType(0., .5, entity.DamageProtection().discharge);
-	damage.levels.corrosion = weapon.CorrosionDamage() * ScaleType(1., 0., entity.DamageProtection().corrosion);
+	damage.levels.discharge  = weapon.DischargeDamage() * ScaleType(0., .5, entity.DamageProtection().discharge);
+	damage.levels.corrosion  = weapon.CorrosionDamage() * ScaleType(1., 0., entity.DamageProtection().corrosion);
 	damage.levels.ionization = weapon.IonDamage() * ScaleType(.5, 0., entity.DamageProtection().ionization);
-	damage.levels.burning = weapon.BurnDamage() * ScaleType(.5, 0., entity.DamageProtection().burning);
-	damage.levels.leakage = weapon.LeakDamage() * ScaleType(1., 0., entity.DamageProtection().leakage);
+	damage.levels.burning    = weapon.BurnDamage() * ScaleType(.5, 0., entity.DamageProtection().burning);
+	damage.levels.leakage    = weapon.LeakDamage() * ScaleType(1., 0., entity.DamageProtection().leakage);
 
 	// Unique special damage types.
 	// Slowing and scrambling are blocked 50% by shields.
 	// Disruption is blocked 50% by the absence of shields.
-	damage.levels.slowness = weapon.SlowingDamage() * ScaleType(.5, 0., entity.DamageProtection().slowness);
+	damage.levels.slowness   = weapon.SlowingDamage() * ScaleType(.5, 0., entity.DamageProtection().slowness);
 	damage.levels.scrambling = weapon.ScramblingDamage() * ScaleType(.5, 0., entity.DamageProtection().scrambling);
 	damage.levels.disruption = weapon.DisruptionDamage() * ScaleType(0., .5, entity.DamageProtection().disruption);
 
@@ -156,7 +157,7 @@ DamageDealt DamageProfile::CalculateDamage() const
 	double hitForce = weapon.HitForce() * ScaleType(0., 0., entity.ForceProtection());
 	if(hitForce)
 	{
-		Point d = entity.Position() - position;
+		Point  d        = entity.Position() - position;
 		double distance = d.Length();
 		if(distance)
 			damage.forcePoint = (hitForce / distance) * d;
@@ -185,8 +186,8 @@ void DamageProfile::CalculateScaling()
 		// scale = (1 + (tr / (2 * br))^2) / (1 + r^4)^2
 		double blastRadius = max(1., weapon->BlastRadius());
 		double radiusRatio = weapon->TriggerRadius() / blastRadius;
-		double k = !radiusRatio ? 1. : (1. + .25 * radiusRatio * radiusRatio);
-		double rSquared = 1. / (blastRadius * blastRadius);
+		double k           = !radiusRatio ? 1. : (1. + .25 * radiusRatio * radiusRatio);
+		double rSquared    = 1. / (blastRadius * blastRadius);
 
 		// Rather than exactly compute the distance between the explosion and
 		// the closest point on the entity, estimate it using the mask's Radius.

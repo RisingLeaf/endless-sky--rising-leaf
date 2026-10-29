@@ -34,9 +34,9 @@ public:
 		void Deactivate();
 
 	private:
-		bool valid = false;
-		int oldWidth = 0;
-		int oldHeight = 0;
+		bool valid     = false;
+		int  oldWidth  = 0;
+		int  oldHeight = 0;
 	};
 
 
@@ -46,12 +46,12 @@ public:
 	// Zoom level as specified by the user.
 	static int UserZoom();
 	// Effective zoom level, as restricted by the current resolution / window size.
-	static int Zoom();
+	static int  Zoom();
 	static void SetZoom(int percent, bool noEvent = false);
 
 	static Point Dimensions();
-	static int Width();
-	static int Height();
+	static int   Width();
+	static int   Height();
 
 	static int RawWidth();
 	static int RawHeight();

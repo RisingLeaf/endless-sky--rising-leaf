@@ -60,8 +60,8 @@ namespace {
 
 	// Take a set of items and a set of sales and print a list of each item followed by the sales it appears in.
 	template <class Type>
-	void PrintItemSales(const Set<Type> &items, const Set<Shop<Type>> &sales, const string &itemNoun,
-	                    const string &saleNoun)
+	void
+	PrintItemSales(const Set<Type> &items, const Set<Shop<Type>> &sales, const string &itemNoun, const string &saleNoun)
 	{
 		cout << DataWriter::Quote(itemNoun) << ',' << DataWriter::Quote(saleNoun) << '\n';
 		map<string, set<string>> itemSales;
@@ -115,7 +115,7 @@ namespace {
 		{
 			cout << DataWriter::Quote(it.first);
 			const Type &object = it.second;
-			int index = 0;
+			int         index  = 0;
 			for(const string &attribute : object.Attributes())
 				cout << (index++ ? ';' : ',') << DataWriter::Quote(attribute);
 			cout << '\n';
@@ -192,7 +192,7 @@ namespace {
 				cout << attributes.Get("engine capacity") << ',';
 
 				int numTurrets = 0;
-				int numGuns = 0;
+				int numGuns    = 0;
 				for(auto &hardpoint : ship.Weapons())
 				{
 					if(hardpoint.IsTurret())
@@ -203,7 +203,7 @@ namespace {
 				cout << numGuns << ',' << numTurrets << ',';
 
 				int numFighters = ship.BaysTotal("Fighter");
-				int numDrones = ship.BaysTotal("Drone");
+				int numDrones   = ship.BaysTotal("Drone");
 				cout << numFighters << ',' << numDrones << '\n';
 			}
 		};
@@ -285,7 +285,7 @@ namespace {
 				cout << 60. * ship.HeatDissipation() * ship.MaxHeat() << ',';
 
 				int numTurrets = 0;
-				int numGuns = 0;
+				int numGuns    = 0;
 				for(auto &hardpoint : ship.Weapons())
 				{
 					if(hardpoint.IsTurret())
@@ -296,7 +296,7 @@ namespace {
 				cout << numGuns << ',' << numTurrets << ',';
 
 				int numFighters = ship.BaysTotal("Fighter");
-				int numDrones = ship.BaysTotal("Drone");
+				int numDrones   = ship.BaysTotal("Drone");
 				cout << numFighters << ',' << numDrones << ',';
 
 				double deterrence = 0.;
@@ -328,10 +328,10 @@ namespace {
 			}
 		};
 
-		bool loaded = false;
+		bool loaded   = false;
 		bool variants = false;
-		bool sales = false;
-		bool list = false;
+		bool sales    = false;
+		bool list     = false;
 
 		for(const char *const *it = argv + 2; *it; ++it)
 		{
@@ -440,7 +440,7 @@ namespace {
 				double strength = weapon->MissileStrength() + weapon->AntiMissile();
 				cout << strength << ',';
 
-				double damage = weapon->ShieldDamage() + weapon->HullDamage();
+				double damage     = weapon->ShieldDamage() + weapon->HullDamage();
 				double deterrence = .12 * damage / weapon->Reload();
 				cout << deterrence << '\n';
 			}
@@ -541,9 +541,9 @@ namespace {
 
 		bool weapons = false;
 		bool engines = false;
-		bool power = false;
-		bool sales = false;
-		bool all = false;
+		bool power   = false;
+		bool sales   = false;
+		bool all     = false;
 
 		for(const char *const *it = argv + 1; *it; ++it)
 		{
@@ -576,7 +576,7 @@ namespace {
 
 	void Sales(const char *const *argv)
 	{
-		bool ships = false;
+		bool ships   = false;
 		bool outfits = false;
 
 		for(const char *const *it = argv + 2; *it; ++it)
@@ -590,7 +590,7 @@ namespace {
 
 		if(!(ships || outfits))
 		{
-			ships = true;
+			ships   = true;
 			outfits = true;
 		}
 		if(ships)
@@ -620,7 +620,7 @@ namespace {
 			map<int, int> indentation;
 			for(const StellarObject &object : system.Objects())
 			{
-				string indent = "\t";
+				string indent               = "\t";
 				indentation[object.Index()] = object.Parent() >= 0 ? indentation[object.Parent()] + 1 : 0;
 				for(int i = 0; i < indentation[object.Index()]; ++i)
 					indent += "\t";
@@ -652,7 +652,7 @@ namespace {
 			{
 				for(const char *const *sit = it + 1; *sit; ++sit)
 				{
-					name = *sit;
+					name                 = *sit;
 					const System *system = GameData::Systems().Find(name);
 					if(!system)
 					{
@@ -684,8 +684,8 @@ namespace {
 		};
 
 		bool descriptions = false;
-		bool attributes = false;
-		bool byAttribute = false;
+		bool attributes   = false;
+		bool byAttribute  = false;
 
 		for(const char *const *it = argv + 2; *it; ++it)
 		{
@@ -709,7 +709,7 @@ namespace {
 
 	void Systems(const char *const *argv)
 	{
-		bool attributes = false;
+		bool attributes  = false;
 		bool byAttribute = false;
 
 		for(const char *const *it = argv + 2; *it; ++it)
@@ -731,8 +731,8 @@ namespace {
 	void LocationFilterMatches(const char *const *argv, PlayerInfo &player)
 	{
 		StellarObject::UsingMatchesCommand();
-		DataFile file(cin);
-		LocationFilter filter;
+		DataFile                   file(cin);
+		LocationFilter             filter;
 		const set<const System *> *visitedSystems = &player.VisitedSystems();
 		const set<const Planet *> *visitedPlanets = &player.VisitedPlanets();
 		for(const DataNode &node : file)
@@ -786,8 +786,8 @@ namespace {
 				continue;
 			for(const DataNode &change : node)
 			{
-				const string &key = change.Token(0);
-				bool hasValue = change.Size() > 1;
+				const string &key      = change.Token(0);
+				bool          hasValue = change.Size() > 1;
 				if(key == "event" && hasValue)
 				{
 					const GameEvent *event = GameData::Events().Get(change.Token(1));
@@ -808,11 +808,24 @@ namespace {
 
 
 	const set<string> OUTFIT_ARGS = {
-	    "-w", "--weapons", "-e", "--engines", "--power", "-o", "--outfits",
+	    "-w",
+	    "--weapons",
+	    "-e",
+	    "--engines",
+	    "--power",
+	    "-o",
+	    "--outfits",
 	};
 
 	const set<string> OTHER_VALID_ARGS = {
-	    "-s", "--ships", "--sales", "--orbits", "--planets", "--systems", "--matches", "--changes",
+	    "-s",
+	    "--ships",
+	    "--sales",
+	    "--orbits",
+	    "--planets",
+	    "--systems",
+	    "--matches",
+	    "--changes",
 	};
 } // namespace
 

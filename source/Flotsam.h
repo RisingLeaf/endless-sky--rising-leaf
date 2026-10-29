@@ -69,8 +69,8 @@ public:
 	const Government *SourceGovernment() const;
 	// This is what the flotsam contains:
 	const std::string &CommodityType() const;
-	const Outfit *OutfitType() const;
-	int Count() const;
+	const Outfit      *OutfitType() const;
+	int                Count() const;
 	// This is how big one "unit" of the flotsam is (in tons). If a ship has
 	// less than this amount of space, it can't pick up anything here.
 	double UnitSize() const;
@@ -87,13 +87,13 @@ public:
 
 
 private:
-	Angle spin;
-	int lifetime = 0;
-	double drag = 0.999;
+	Angle  spin;
+	int    lifetime = 0;
+	double drag     = 0.999;
 
-	const Ship *source = nullptr;
-	std::string commodity;
-	const Outfit *outfit = nullptr;
-	int count = 0;
+	const Ship       *source = nullptr;
+	std::string       commodity;
+	const Outfit     *outfit           = nullptr;
+	int               count            = 0;
 	const Government *sourceGovernment = nullptr;
 };

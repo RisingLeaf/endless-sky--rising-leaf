@@ -24,8 +24,8 @@ using namespace std;
 // Handle keys used for clipboard operations on inputBuffer. Return false if the keys
 // don't have any functionality assigned to them. Optionally, size limit of the input buffer
 // and a set of forbidden characters can be provided.
-bool Clipboard::KeyDown(string &inputBuffer, SDL_Keycode key, Uint16 mod, size_t maxSize,
-                        const std::function<bool(char32_t)> &forbidden)
+bool Clipboard::KeyDown(
+    string &inputBuffer, SDL_Keycode key, Uint16 mod, size_t maxSize, const std::function<bool(char32_t)> &forbidden)
 {
 	if(!(mod & SDL_KMOD_CTRL))
 		return false;
@@ -62,8 +62,8 @@ string Clipboard::Get(size_t maxSize, const function<bool(char32_t)> &forbidden)
 		return {};
 
 	string clipboardString;
-	char *clipboardBuffer = SDL_GetClipboardText();
-	size_t i = 0;
+	char  *clipboardBuffer = SDL_GetClipboardText();
+	size_t i               = 0;
 	for(char *c = clipboardBuffer; *c && i < maxSize; ++c, ++i)
 		if(*c >= ' ' && *c <= '~' && (!forbidden || !forbidden(*c)))
 			clipboardString += *c;

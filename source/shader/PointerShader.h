@@ -29,11 +29,21 @@ class PointerShader {
 public:
 	static void Init(const GraphicsTypes::GraphicsInstance *graphics_instance);
 
-	static void Draw(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &angle, float width,
-	                 float height, float offset, const Color &color);
+	static void Draw(GraphicsTypes::CommandBufferInstance *cb,
+	                 const Point                          &center,
+	                 const Point                          &angle,
+	                 float                                 width,
+	                 float                                 height,
+	                 float                                 offset,
+	                 const Color                          &color);
 
 	static void Bind(GraphicsTypes::CommandBufferInstance *cb);
-	static void Add(GraphicsTypes::CommandBufferInstance *cb, const Point &center, const Point &angle, float width,
-	                float height, float offset, const Color &color);
+	static void Add(GraphicsTypes::CommandBufferInstance *cb,
+	                const Point                          &center,
+	                const Point                          &angle,
+	                float                                 width,
+	                float                                 height,
+	                float                                 offset,
+	                const Color                          &color);
 	static void Clear();
 };

@@ -101,10 +101,10 @@ const string &CoreStartData::Identifier() const noexcept
 
 bool CoreStartData::LoadChild(const DataNode &child, bool isAdd)
 {
-	const string &key = child.Token(isAdd ? 1 : 0);
-	int valueIndex = isAdd ? 2 : 1;
-	bool hasValue = (child.Size() > valueIndex);
-	const string &value = child.Token(hasValue ? valueIndex : 0);
+	const string &key        = child.Token(isAdd ? 1 : 0);
+	int           valueIndex = isAdd ? 2 : 1;
+	bool          hasValue   = (child.Size() > valueIndex);
+	const string &value      = child.Token(hasValue ? valueIndex : 0);
 
 	if(key == "date" && child.Size() >= valueIndex + 3)
 		date = Date(child.Value(valueIndex), child.Value(valueIndex + 1), child.Value(valueIndex + 2));

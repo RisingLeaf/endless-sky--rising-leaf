@@ -129,8 +129,8 @@ double ShipyardPanel::ButtonPanelHeight() const
 
 double ShipyardPanel::DrawDetails(GraphicsTypes::CommandBufferInstance *cb, const Point &center)
 {
-	string selectedItem = "No Ship Selected";
-	const Font &font = FontSet::Get(14);
+	string      selectedItem = "No Ship Selected";
+	const Font &font         = FontSet::Get(14);
 
 	double heightOffset = 20.;
 
@@ -139,8 +139,8 @@ double ShipyardPanel::DrawDetails(GraphicsTypes::CommandBufferInstance *cb, cons
 		shipInfo.Update(*selectedShip, player, hasFleetCapacity, collapsed.contains(DESCRIPTION), true);
 		selectedItem = selectedShip->DisplayModelName();
 
-		const Point spriteCenter(center.X(), center.Y() + 20 + TileSize() / 2);
-		const Point startPoint(center.X() - INFOBAR_WIDTH / 2 + 20, center.Y() + 20 + TileSize());
+		const Point   spriteCenter(center.X(), center.Y() + 20 + TileSize() / 2);
+		const Point   startPoint(center.X() - INFOBAR_WIDTH / 2 + 20, center.Y() + 20 + TileSize());
 		const Sprite *background = SpriteSet::Get("ui/shipyard selected");
 		SpriteShader::Draw(cb, background, spriteCenter);
 
@@ -148,8 +148,8 @@ double ShipyardPanel::DrawDetails(GraphicsTypes::CommandBufferInstance *cb, cons
 		if(shipSprite)
 		{
 			const float spriteScale = min(1.f, (INFOBAR_WIDTH - 60.f) / max(shipSprite->Width(), shipSprite->Height()));
-			const Swizzle *swizzle = selectedShip->CustomSwizzle() ? selectedShip->CustomSwizzle()
-			                                                       : GameData::PlayerGovernment()->GetSwizzle();
+			const Swizzle *swizzle  = selectedShip->CustomSwizzle() ? selectedShip->CustomSwizzle()
+			                                                        : GameData::PlayerGovernment()->GetSwizzle();
 			DrawThumbnail(cb, *selectedShip, true, spriteCenter, spriteScale, swizzle);
 		}
 
@@ -173,8 +173,8 @@ double ShipyardPanel::DrawDetails(GraphicsTypes::CommandBufferInstance *cb, cons
 			}
 
 			// Calculate the ClickZone for the description and add it.
-			const Point descriptionDimensions(INFOBAR_WIDTH, descriptionOffset);
-			const Point descriptionCenter(center.X(), startPoint.Y() + descriptionOffset / 2);
+			const Point             descriptionDimensions(INFOBAR_WIDTH, descriptionOffset);
+			const Point             descriptionCenter(center.X(), startPoint.Y() + descriptionOffset / 2);
 			const ClickZone<string> collapseDescription =
 			    ClickZone<string>(descriptionCenter, descriptionDimensions, DESCRIPTION);
 			categoryZones.emplace_back(collapseDescription);
@@ -190,8 +190,13 @@ double ShipyardPanel::DrawDetails(GraphicsTypes::CommandBufferInstance *cb, cons
 
 	// Draw this string representing the selected ship (if any), centered in the details side panel.
 	const Color &bright = *GameData::Colors().Get("bright");
-	const Point selectedPoint(center.X() - INFOBAR_WIDTH / 2, center.Y());
-	font.Draw(cb, {selectedItem, {INFOBAR_WIDTH, Alignment::CENTER, Truncate::MIDDLE}}, selectedPoint, bright);
+	const Point  selectedPoint(center.X() - INFOBAR_WIDTH / 2, center.Y());
+	font.Draw(cb,
+	          {
+	              selectedItem, {INFOBAR_WIDTH, Alignment::CENTER, Truncate::MIDDLE}
+    },
+	          selectedPoint,
+	          bright);
 
 	return heightOffset;
 }
@@ -203,29 +208,36 @@ void ShipyardPanel::DrawButtons(GraphicsTypes::CommandBufferInstance *cb)
 	// There will be two rows of buttons:
 	//  [    Buy    ] [    Sell    ] [ Sell Hull ]
 	//    Quantity [Dropdown]        [   Leave   ]
-	const double rowOffsetY = BUTTON_HEIGHT + BUTTON_ROW_PAD;
-	const double rowBaseY = Screen::BottomRight().Y() - rowOffsetY - .5 * BUTTON_HEIGHT - BUTTON_ROW_START_PAD;
+	const double rowOffsetY    = BUTTON_HEIGHT + BUTTON_ROW_PAD;
+	const double rowBaseY      = Screen::BottomRight().Y() - rowOffsetY - .5 * BUTTON_HEIGHT - BUTTON_ROW_START_PAD;
 	const double buttonOffsetX = BUTTON_WIDTH + BUTTON_COL_PAD;
 	const double buttonCenterX = Screen::Right() - SIDEBAR_WIDTH / 2 - 1.;
-	const Point buttonSize{BUTTON_WIDTH, BUTTON_HEIGHT};
+	const Point  buttonSize{BUTTON_WIDTH, BUTTON_HEIGHT};
 
 	// Draw the button panel (shop side panel footer).
-	const Point buttonPanelSize(SIDEBAR_WIDTH, ButtonPanelHeight());
+	const Point     buttonPanelSize(SIDEBAR_WIDTH, ButtonPanelHeight());
 	const Rectangle buttonsFooter(Screen::BottomRight() - .5 * buttonPanelSize, buttonPanelSize);
 	FillShader::Fill(cb, buttonsFooter, *GameData::Colors().Get("shop side panel background"));
-	FillShader::Fill(cb, Point(Screen::Right() - SIDEBAR_WIDTH / 2, Screen::Bottom() - ButtonPanelHeight()),
-	                 Point(SIDEBAR_WIDTH, 1), *GameData::Colors().Get("shop side panel footer"));
+	FillShader::Fill(cb,
+	                 Point(Screen::Right() - SIDEBAR_WIDTH / 2, Screen::Bottom() - ButtonPanelHeight()),
+	                 Point(SIDEBAR_WIDTH, 1),
+	                 *GameData::Colors().Get("shop side panel footer"));
 
 	// Set up font size and colors for the credits.
-	const Font &font = FontSet::Get(14);
+	const Font  &font   = FontSet::Get(14);
 	const Color &bright = *GameData::Colors().Get("bright");
-	const Color &dim = *GameData::Colors().Get("medium");
+	const Color &dim    = *GameData::Colors().Get("medium");
 
 	// Draw the row for credits display.
 	const Point creditsPoint(Screen::Right() - SIDEBAR_WIDTH + 10, Screen::Bottom() - ButtonPanelHeight() + 10);
 	font.Draw(cb, "You have:", creditsPoint, dim);
 	const string credits = Format::CreditString(player.Accounts().Credits());
-	font.Draw(cb, {credits, {SIDEBAR_WIDTH - 20, Alignment::RIGHT}}, creditsPoint, bright);
+	font.Draw(cb,
+	          {
+	              credits, {SIDEBAR_WIDTH - 20, Alignment::RIGHT}
+    },
+	          creditsPoint,
+	          bright);
 
 	// Draw the row for your fleet capacity.
 	if(hasFleetCapacity)
@@ -234,23 +246,43 @@ void ShipyardPanel::DrawButtons(GraphicsTypes::CommandBufferInstance *cb)
 		font.Draw(cb, "Fleet Capacity:", fleetCapPoint, dim);
 		string limit =
 		    Format::AbbreviatedNumber(player.FleetCost()) + " / " + Format::AbbreviatedNumber(player.FleetCapacity());
-		font.Draw(cb, {limit, {SIDEBAR_WIDTH - 20, Alignment::RIGHT}}, fleetCapPoint, bright);
+		font.Draw(cb,
+		          {
+		              limit, {SIDEBAR_WIDTH - 20, Alignment::RIGHT}
+        },
+		          fleetCapPoint,
+		          bright);
 	}
 
 	// Clear the buttonZones, they will be populated again as buttons are drawn.
 	buttonZones.clear();
 
 	// Row 1
-	DrawButton(cb, "_Buy", Rectangle(Point(buttonCenterX + buttonOffsetX * -1, rowBaseY + rowOffsetY * 0), buttonSize),
-	           static_cast<bool>(CanDoBuyButton()), hoverButton == 'b', 'b');
-	DrawButton(cb, "_Sell", Rectangle(Point(buttonCenterX + buttonOffsetX * 0, rowBaseY + rowOffsetY * 0), buttonSize),
-	           static_cast<bool>(playerShips.size()), hoverButton == 's', 's');
-	DrawButton(cb, "Sell H_ull",
+	DrawButton(cb,
+	           "_Buy",
+	           Rectangle(Point(buttonCenterX + buttonOffsetX * -1, rowBaseY + rowOffsetY * 0), buttonSize),
+	           static_cast<bool>(CanDoBuyButton()),
+	           hoverButton == 'b',
+	           'b');
+	DrawButton(cb,
+	           "_Sell",
+	           Rectangle(Point(buttonCenterX + buttonOffsetX * 0, rowBaseY + rowOffsetY * 0), buttonSize),
+	           static_cast<bool>(playerShips.size()),
+	           hoverButton == 's',
+	           's');
+	DrawButton(cb,
+	           "Sell H_ull",
 	           Rectangle(Point(buttonCenterX + buttonOffsetX * 1, rowBaseY + rowOffsetY * 0), buttonSize),
-	           static_cast<bool>(playerShips.size()), hoverButton == 'r', 'r');
+	           static_cast<bool>(playerShips.size()),
+	           hoverButton == 'r',
+	           'r');
 	// Row 2
-	DrawButton(cb, "_Leave", Rectangle(Point(buttonCenterX + buttonOffsetX * 1, rowBaseY + rowOffsetY * 1), buttonSize),
-	           true, hoverButton == 'l', 'l');
+	DrawButton(cb,
+	           "_Leave",
+	           Rectangle(Point(buttonCenterX + buttonOffsetX * 1, rowBaseY + rowOffsetY * 1), buttonSize),
+	           true,
+	           hoverButton == 'l',
+	           'l');
 
 	font.Draw(cb, "Quantity:", Screen::BottomRight() - Point(SIDEBAR_WIDTH - 10, 33), dim);
 
@@ -375,7 +407,7 @@ void ShipyardPanel::DoBuyButton()
 		return;
 
 	const string &quantity = selectedQuantity->Text();
-	modifier = quantity.empty() ? 1 : stoi(quantity);
+	modifier               = quantity.empty() ? 1 : stoi(quantity);
 	string message;
 	if(licenseCost)
 		message = "Note: you will need to pay " + Format::CreditString(licenseCost) +
@@ -399,14 +431,14 @@ void ShipyardPanel::Sell(bool storeOutfits)
 {
 	static const int MAX_LIST = 20;
 
-	int count = playerShips.size();
-	int initialCount = count;
+	int    count        = playerShips.size();
+	int    initialCount = count;
 	string message;
 
 	if(storeOutfits && !planet->HasOutfitter())
 	{
-		message = "WARNING: This planet has no Outfitter. "
-		          "There is no way to retain the outfits in storage.\n";
+		message      = "WARNING: This planet has no Outfitter. "
+		               "There is no way to retain the outfits in storage.\n";
 		storeOutfits = false;
 	}
 	// Never allow keeping outfits where they cannot be retrieved.
@@ -536,17 +568,17 @@ void ShipyardPanel::SellShip(bool storeOutfits)
 
 int ShipyardPanel::FindItem(const string &text) const
 {
-	int bestIndex = 9999;
-	int bestItem = -1;
-	auto it = zones.begin();
+	int  bestIndex = 9999;
+	int  bestItem  = -1;
+	auto it        = zones.begin();
 	for(unsigned int i = 0; i < zones.size(); ++i, ++it)
 	{
-		const Ship *ship = it->GetShip();
-		int index = Format::Search(ship->DisplayModelName(), text);
+		const Ship *ship  = it->GetShip();
+		int         index = Format::Search(ship->DisplayModelName(), text);
 		if(index >= 0 && index < bestIndex)
 		{
 			bestIndex = index;
-			bestItem = i;
+			bestItem  = i;
 			if(!index)
 				return i;
 		}

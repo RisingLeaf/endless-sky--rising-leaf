@@ -37,8 +37,10 @@ public:
 
 public:
 	OutfitInfoDisplay() = default;
-	OutfitInfoDisplay(const Outfit &outfit, const PlayerInfo &player, bool canSell = false,
-	                  bool descriptionCollapsed = true);
+	OutfitInfoDisplay(const Outfit     &outfit,
+	                  const PlayerInfo &player,
+	                  bool              canSell              = false,
+	                  bool              descriptionCollapsed = true);
 
 	// Call this every time the ship changes.
 	void Update(const Outfit &outfit, const PlayerInfo &player, bool canSell = false, bool descriptionCollapsed = true);
@@ -65,5 +67,5 @@ private:
 private:
 	std::vector<std::string> requirementLabels;
 	std::vector<std::string> requirementValues;
-	int requirementsHeight = 0;
+	int                      requirementsHeight = 0;
 };

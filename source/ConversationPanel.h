@@ -41,9 +41,12 @@ class System;
 // the panel closes, to report the outcome of the conversation.
 class ConversationPanel : public Panel {
 public:
-	ConversationPanel(PlayerInfo &player, const Conversation &conversation, const Mission *caller = nullptr,
-	                  const System *system = nullptr, const std::shared_ptr<Ship> &ship = nullptr,
-	                  bool useTransactions = false);
+	ConversationPanel(PlayerInfo                  &player,
+	                  const Conversation          &conversation,
+	                  const Mission               *caller          = nullptr,
+	                  const System                *system          = nullptr,
+	                  const std::shared_ptr<Ship> &ship            = nullptr,
+	                  bool                         useTransactions = false);
 
 	virtual ~ConversationPanel() override;
 
@@ -98,11 +101,11 @@ private:
 		// Draw this paragraph at the given point, and return the point that the
 		// next paragraph below this one should be drawn at.
 		Point Draw(GraphicsTypes::CommandBufferInstance *cb, Point point, const Color &color) const;
-		void UpdateTextDisplay();
+		void  UpdateTextDisplay();
 
 	private:
 		const Sprite *scene = nullptr;
-		WrappedText wrap;
+		WrappedText   wrap;
 		// Special case: if this is the very first paragraph and it begins with
 		// a "scene" image, there is no need for padding above the image.
 		bool isFirst = false;
@@ -136,7 +139,7 @@ private:
 	std::list<Paragraph> text;
 	// The current choices being presented to you, and their indices:
 	std::list<std::pair<Paragraph, int>> choices;
-	int choice = 0;
+	int                                  choice = 0;
 	// Flicker time, set if the player enters invalid input for a pilot's name.
 	int flickerTime = 0;
 
@@ -158,7 +161,7 @@ private:
 	std::shared_ptr<Ship> ship;
 
 	// Whether the mouse moved in the current frame.
-	bool isHovering = false;
+	bool  isHovering = false;
 	Point hoverPoint;
 };
 

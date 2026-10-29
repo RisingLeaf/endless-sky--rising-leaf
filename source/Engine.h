@@ -110,10 +110,19 @@ public:
 	{
 		return lastActiveCommands;
 	}
-	const std::list<std::shared_ptr<Ship>> &Ships() const { return ships; }
-	int GetStep() const { return step; }
+	const std::list<std::shared_ptr<Ship>> &Ships() const
+	{
+		return ships;
+	}
+	int GetStep() const
+	{
+		return step;
+	}
 
-	DrawList &GetDrawList() { return draw[currentDrawBuffer]; }
+	DrawList &GetDrawList()
+	{
+		return draw[currentDrawBuffer];
+	}
 
 
 private:
@@ -125,19 +134,19 @@ private:
 		}
 
 		const Sprite *sprite;
-		const Point position;
-		const Point unit;
-		const float frame;
-		const Color color;
+		const Point   position;
+		const Point   unit;
+		const float   frame;
+		const Color   color;
 	};
 
 	class Target {
 	public:
-		Point center;
-		Angle angle;
-		double radius;
+		Point        center;
+		Angle        angle;
+		double       radius;
 		const Color &color;
-		int count;
+		int          count;
 	};
 
 	class Status {
@@ -153,29 +162,35 @@ private:
 		};
 
 	public:
-		constexpr Status(const Point &position, double outer, double inner, double disabled, double radius, Type type,
-		                 float alpha, double angle = 0.)
+		constexpr Status(const Point &position,
+		                 double       outer,
+		                 double       inner,
+		                 double       disabled,
+		                 double       radius,
+		                 Type         type,
+		                 float        alpha,
+		                 double       angle = 0.)
 		    : position(position), outer(outer), inner(inner), disabled(disabled), radius(radius), type(type),
 		      alpha(alpha), angle(angle)
 		{
 		}
 
-		Point position;
+		Point  position;
 		double outer;
 		double inner;
 		double disabled;
 		double radius;
-		Type type;
-		float alpha;
+		Type   type;
+		float  alpha;
 		double angle;
 	};
 
 	class TurretOverlay {
 	public:
-		Point position;
-		Point angle;
+		Point  position;
+		Point  angle;
 		double scale;
-		bool isBlind;
+		bool   isBlind;
 	};
 
 	class Zoom {
@@ -203,9 +218,9 @@ private:
 		{
 		}
 
-		DamageProfile damage;
+		DamageProfile     damage;
 		const Government *gov;
-		bool provokable;
+		bool              provokable;
 	};
 
 
@@ -239,25 +254,27 @@ private:
 	void DoGrudge(const std::shared_ptr<Ship> &target, const Government *attacker);
 
 	void CreateStatusOverlays();
-	void EmplaceStatusOverlay(const std::shared_ptr<Ship> &ship, Preferences::OverlayState overlaySetting,
-	                          Status::Type type, double cloak);
+	void EmplaceStatusOverlay(const std::shared_ptr<Ship> &ship,
+	                          Preferences::OverlayState    overlaySetting,
+	                          Status::Type                 type,
+	                          double                       cloak);
 
 
 private:
 	PlayerInfo &player;
 
-	std::list<std::shared_ptr<Ship>> ships;
-	std::vector<Projectile> projectiles;
-	std::vector<Weather> activeWeather;
+	std::list<std::shared_ptr<Ship>>    ships;
+	std::vector<Projectile>             projectiles;
+	std::vector<Weather>                activeWeather;
 	std::list<std::shared_ptr<Flotsam>> flotsam;
-	std::vector<Visual> visuals;
-	AsteroidField asteroids;
+	std::vector<Visual>                 visuals;
+	AsteroidField                       asteroids;
 
 	// New objects created within the latest step:
-	std::list<std::shared_ptr<Ship>> newShips;
-	std::vector<Projectile> newProjectiles;
+	std::list<std::shared_ptr<Ship>>    newShips;
+	std::vector<Projectile>             newProjectiles;
 	std::list<std::shared_ptr<Flotsam>> newFlotsam;
-	std::vector<Visual> newVisuals;
+	std::vector<Visual>                 newVisuals;
 
 	// Track which ships currently have anti-missiles or
 	// tractor beams ready to fire.
@@ -273,34 +290,34 @@ private:
 	// To facilitate this, it uses two buffers for each list of things to draw - one for the next frame's calculations and
 	// one for rendering the current frame. A little synchronization is required to prevent mutable references to the
 	// currently rendering buffer.
-	size_t currentCalcBuffer = 0;
-	size_t currentDrawBuffer = 0;
-	DrawList draw[2];
+	size_t        currentCalcBuffer = 0;
+	size_t        currentDrawBuffer = 0;
+	DrawList      draw[2];
 	BatchDrawList batchDraw[2];
-	Radar radar[2];
+	Radar         radar[2];
 
-	bool wasActive = false;
-	bool isMouseHoldEnabled = false;
+	bool wasActive             = false;
+	bool isMouseHoldEnabled    = false;
 	bool isMouseTurningEnabled = false;
 
 	// Viewport camera.
 	Camera camera;
 	// Other information to display.
-	Information info;
+	Information         info;
 	std::vector<Target> targets;
-	Point targetVector;
-	Point targetUnit;
-	const Swizzle *targetSwizzle = nullptr;
+	Point               targetVector;
+	Point               targetUnit;
+	const Swizzle      *targetSwizzle = nullptr;
 	// Represents the state of the currently targeted ship when it was last seen,
 	// so the target display does not show updates to its state the player should not be aware of.
-	int lastTargetType = 0;
-	EscortDisplay escorts;
-	AmmoDisplay ammoDisplay;
-	std::vector<Outline> outlines;
-	std::vector<Status> statuses;
-	std::vector<PlanetLabel> labels;
-	std::vector<AlertLabel> missileLabels;
-	std::vector<TurretOverlay> turretOverlays;
+	int                                         lastTargetType = 0;
+	EscortDisplay                               escorts;
+	AmmoDisplay                                 ammoDisplay;
+	std::vector<Outline>                        outlines;
+	std::vector<Status>                         statuses;
+	std::vector<PlanetLabel>                    labels;
+	std::vector<AlertLabel>                     missileLabels;
+	std::vector<TurretOverlay>                  turretOverlays;
 	std::vector<std::pair<const Outfit *, int>> ammo;
 	// Flagship's hyperspace percentage converted to a [0, 1] double.
 	double hyperspacePercentage = 0.;
@@ -309,24 +326,24 @@ private:
 
 	int step = 0;
 	// Count steps for UI elements separately, because they shouldn't be affected by pausing.
-	mutable int uiStep = 0;
-	bool timePaused = false;
+	mutable int uiStep     = 0;
+	bool        timePaused = false;
 
 	std::list<ShipEvent> eventQueue;
 	std::list<ShipEvent> events;
 	// Keep track of who has asked for help in fighting whom.
 	std::map<const Government *, std::weak_ptr<const Ship>> grudge;
-	int grudgeTime = 0;
+	int                                                     grudgeTime = 0;
 
 	CollisionSet shipCollisions;
 
-	int alarmTime = 0;
-	int nukeAlarmTime = 0;
-	double flash = 0.;
-	bool doFlash = false;
-	bool doEnterLabels = false;
-	bool doEnter = false;
-	bool hadHostiles = false;
+	int    alarmTime     = 0;
+	int    nukeAlarmTime = 0;
+	double flash         = 0.;
+	bool   doFlash       = false;
+	bool   doEnterLabels = false;
+	bool   doEnter       = false;
+	bool   hadHostiles   = false;
 
 	// A timer preventing out-of-ammo sounds from triggering constantly every frame when the fire key is held.
 	std::vector<int> emptySoundsTimer;
@@ -341,20 +358,20 @@ private:
 	int keyInterval = 0;
 
 	// Inputs received from a mouse or other pointer device.
-	bool doClickNextStep = false;
-	bool doClick = false;
-	bool hasShift = false;
-	bool hasControl = false;
-	MouseButton mouseButton = MouseButton::NONE;
-	bool isRadarClick = false;
-	Point clickPoint;
-	Rectangle uiClickBox;
-	Rectangle clickBox;
-	int groupSelect = -1;
+	bool        doClickNextStep = false;
+	bool        doClick         = false;
+	bool        hasShift        = false;
+	bool        hasControl      = false;
+	MouseButton mouseButton     = MouseButton::NONE;
+	bool        isRadarClick    = false;
+	Point       clickPoint;
+	Rectangle   uiClickBox;
+	Rectangle   clickBox;
+	int         groupSelect = -1;
 
 	// Set of asteroids scanned in the current system.
 	std::set<std::string> asteroidsScanned;
-	bool isAsteroidCatalogComplete = false;
+	bool                  isAsteroidCatalogComplete = false;
 
 	Zoom zoom;
 	// Tracks the next zoom change so that objects aren't drawn at different zooms in a single frame.

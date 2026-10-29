@@ -28,11 +28,11 @@ class Galaxy {
 public:
 	void Load(const DataNode &node);
 
-	const Point &Position() const;
+	const Point  &Position() const;
 	const Sprite *GetSprite() const;
 
 
 private:
-	Point position;
+	Point         position;
 	const Sprite *sprite = nullptr;
 };

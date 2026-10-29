@@ -36,14 +36,14 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 using namespace std;
 
 namespace {
-	bool showUnderlines = false;
-	const int KERN = 2;
+	bool        showUnderlines   = false;
+	const int   KERN             = 2;
 	const float UNDERLINE_OFFSET = 2.f;
 
 	struct FontInstanceData {
 		gm::vec2 position;
-		int glyph;
-		float aspect;
+		int      glyph;
+		float    aspect;
 	};
 } // namespace
 
@@ -71,20 +71,22 @@ void Font::Load(const GraphicsTypes::GraphicsInstance *graphics_instance, const 
 
 
 
-void Font::Draw(GraphicsTypes::CommandBufferInstance *cb, const DisplayText &text, const Point &point,
-                const Color &color) const
+void Font::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                const DisplayText                    &text,
+                const Point                          &point,
+                const Color                          &color) const
 {
 	DrawAliased(cb, text, round(point.X()), round(point.Y()), color);
 }
 
 
 
-void Font::DrawAliased(GraphicsTypes::CommandBufferInstance *cb, const DisplayText &text, double x, double y,
-                       const Color &color) const
+void Font::DrawAliased(
+    GraphicsTypes::CommandBufferInstance *cb, const DisplayText &text, double x, double y, const Color &color) const
 {
-	int width = -1;
+	int          width     = -1;
 	const string truncText = TruncateText(text, width);
-	const auto &layout = text.GetLayout();
+	const auto  &layout    = text.GetLayout();
 	if(width >= 0)
 	{
 		if(layout.align == Alignment::CENTER)
@@ -97,16 +99,18 @@ void Font::DrawAliased(GraphicsTypes::CommandBufferInstance *cb, const DisplayTe
 
 
 
-void Font::Draw(GraphicsTypes::CommandBufferInstance *cb, const string &str, const Point &point,
-                const Color &color) const
+void Font::Draw(GraphicsTypes::CommandBufferInstance *cb,
+                const string                         &str,
+                const Point                          &point,
+                const Color                          &color) const
 {
 	DrawAliased(cb, str, round(point.X()), round(point.Y()), color);
 }
 
 
 
-void Font::DrawAliased(GraphicsTypes::CommandBufferInstance *cb, const string &str, double x, double y,
-                       const Color &color) const
+void Font::DrawAliased(
+    GraphicsTypes::CommandBufferInstance *cb, const string &str, double x, double y, const Color &color) const
 {
 	if(str.empty())
 		return;
@@ -114,19 +118,19 @@ void Font::DrawAliased(GraphicsTypes::CommandBufferInstance *cb, const string &s
 	// Update the scale, only if the screen size has changed.
 	if(Screen::Width() != screenWidth || Screen::Height() != screenHeight)
 	{
-		screenWidth = Screen::Width();
+		screenWidth  = Screen::Width();
 		screenHeight = Screen::Height();
-		scale[0] = 2.f / screenWidth;
-		scale[1] = -2.f / screenHeight;
+		scale[0]     = 2.f / screenWidth;
+		scale[1]     = -2.f / screenHeight;
 	}
 	const gm::vec2 glyphSize = {glyphWidth, glyphHeight};
 
-	gm::vec2 textPos = {static_cast<float>(x - 1.), static_cast<float>(y)};
-	int previous = 0;
-	bool isAfterSpace = true;
-	bool underlineChar = false;
-	bool doubleUnderlineChar = false;
-	constexpr int underscoreGlyph = max(0, min(GLYPHS - 1, '_' - 32));
+	gm::vec2      textPos             = {static_cast<float>(x - 1.), static_cast<float>(y)};
+	int           previous            = 0;
+	bool          isAfterSpace        = true;
+	bool          underlineChar       = false;
+	bool          doubleUnderlineChar = false;
+	constexpr int underscoreGlyph     = max(0, min(GLYPHS - 1, '_' - 32));
 
 	std::vector<FontInstanceData> letters;
 
@@ -177,15 +181,18 @@ void Font::DrawAliased(GraphicsTypes::CommandBufferInstance *cb, const string &s
 		return;
 
 	std::unique_ptr<GraphicsTypes::BufferInstance> instance_buffer;
-	GameWindow::GraphicsInstance()->CreateBuffer(instance_buffer, GraphicsTypes::BufferType::VERTEX,
-	                                             letters.size() * sizeof(FontInstanceData), letters.data(), str + "_instance_buffer");
+	GameWindow::GraphicsInstance()->CreateBuffer(instance_buffer,
+	                                             GraphicsTypes::BufferType::VERTEX,
+	                                             letters.size() * sizeof(FontInstanceData),
+	                                             letters.data(),
+	                                             str + "_instance_buffer");
 
 	cb->BindShader(shader.get());
 
 	graphics_layer::QuickBindTextures(cb, {texture.GetTexture()});
 
 	std::vector<unsigned char> data_cp(info.GetUniformSize());
-	int i = -1;
+	int                        i = -1;
 	info.CopyUniformEntryToBuffer(data_cp.data(), scale, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), &glyphSize, ++i);
 	info.CopyUniformEntryToBuffer(data_cp.data(), color.Get(), ++i);
@@ -205,7 +212,7 @@ int Font::Width(const string &str, char after) const
 
 int Font::FormattedWidth(const DisplayText &text, char after) const
 {
-	int width = -1;
+	int          width     = -1;
 	const string truncText = TruncateText(text, width);
 	return width < 0 ? WidthRawString(truncText.c_str(), after) : width;
 }
@@ -248,10 +255,17 @@ int Font::Glyph(char c, bool isAfterSpace) noexcept
 
 void Font::LoadTexture(const GraphicsTypes::GraphicsInstance *graphics_instance, ImageBuffer &image)
 {
-	texture = graphics_layer::TextureHandle(
-	    graphics_instance, "font", {image.Pixels()}, image.Width(), image.Height(), 1,
-	    GraphicsTypes::TextureType::TYPE_2D, GraphicsTypes::ImageFormat::RGBA, GraphicsTypes::TextureTarget::READ,
-	    GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE, GraphicsTypes::TextureFilter::LINEAR);
+	texture = graphics_layer::TextureHandle(graphics_instance,
+	                                        "font",
+	                                        {image.Pixels()},
+	                                        image.Width(),
+	                                        image.Height(),
+	                                        1,
+	                                        GraphicsTypes::TextureType::TYPE_2D,
+	                                        GraphicsTypes::ImageFormat::RGBA,
+	                                        GraphicsTypes::TextureTarget::READ,
+	                                        GraphicsTypes::TextureAddressMode::CLAMP_TO_EDGE,
+	                                        GraphicsTypes::TextureFilter::LINEAR);
 }
 
 
@@ -259,11 +273,11 @@ void Font::LoadTexture(const GraphicsTypes::GraphicsInstance *graphics_instance,
 void Font::CalculateAdvances(ImageBuffer &image)
 {
 	// Get the format and size of the surface.
-	int width = image.Width() / GLYPHS;
-	height = image.Height();
-	constexpr unsigned mask = 0xFF000000;
-	constexpr unsigned half = 0xC0000000;
-	const int pitch = image.Width();
+	int width                = image.Width() / GLYPHS;
+	height                   = image.Height();
+	constexpr unsigned mask  = 0xFF000000;
+	constexpr unsigned half  = 0xC0000000;
+	const int          pitch = image.Width();
 
 	// advance[previous * GLYPHS + next] is the x advance for each glyph pair.
 	// There is no advance if the previous value is 0, i.e. we are at the very
@@ -272,26 +286,26 @@ void Font::CalculateAdvances(ImageBuffer &image)
 	for(int previous = 1; previous < GLYPHS; ++previous)
 		for(int next = 0; next < GLYPHS; ++next)
 		{
-			int maxD = 0;
-			int glyphWidth = 0;
-			uint32_t *begin = image.Pixels();
+			int       maxD       = 0;
+			int       glyphWidth = 0;
+			uint32_t *begin      = image.Pixels();
 			for(int y = 0; y < height; ++y)
 			{
 				// Find the last non-empty pixel in the previous glyph.
 				uint32_t *pend = begin + previous * width;
-				uint32_t *pit = pend + width;
+				uint32_t *pit  = pend + width;
 				while(pit != pend && (*--pit & mask) < half)
 				{
 				}
 				int distance = (pit - pend) + 1;
-				glyphWidth = max(distance, glyphWidth);
+				glyphWidth   = max(distance, glyphWidth);
 
 				// Special case: if "next" is zero (i.e. end of line of text),
 				// calculate the full width of this character. Otherwise:
 				if(next)
 				{
 					// Find the first non-empty pixel in this glyph.
-					uint32_t *nit = begin + next * width;
+					uint32_t *nit  = begin + next * width;
 					uint32_t *nend = nit + width;
 					while(nit != nend && (*nit++ & mask) < half)
 					{
@@ -324,7 +338,7 @@ void Font::CalculateAdvances(ImageBuffer &image)
 
 void Font::SetUpShader(const GraphicsTypes::GraphicsInstance *graphics_instance, float glyphW, float glyphH)
 {
-	glyphWidth = glyphW * .5f;
+	glyphWidth  = glyphW * .5f;
 	glyphHeight = glyphH * .5f;
 
 	info.AddInput(GraphicsTypes::ShaderType::FLOAT2, 0, 0);
@@ -349,7 +363,7 @@ void Font::SetUpShader(const GraphicsTypes::GraphicsInstance *graphics_instance,
 	geometry = graphics_layer::ObjectHandle(graphics_instance, 4, 4 * sizeof(float), vertices, {}, "glyph");
 
 	// We must update the screen size next time we draw.
-	screenWidth = 0;
+	screenWidth  = 0;
 	screenHeight = 0;
 }
 
@@ -357,8 +371,8 @@ void Font::SetUpShader(const GraphicsTypes::GraphicsInstance *graphics_instance,
 
 int Font::WidthRawString(const char *str, char after) const noexcept
 {
-	int width = 0;
-	int previous = 0;
+	int  width        = 0;
+	int  previous     = 0;
 	bool isAfterSpace = true;
 
 	for(; *str; ++str)
@@ -387,24 +401,19 @@ int Font::WidthRawString(const char *str, char after) const noexcept
 // Param width will be set to the width of the return value, unless the layout width is negative.
 string Font::TruncateText(const DisplayText &text, int &width) const
 {
-	width = -1;
-	const auto &layout = text.GetLayout();
-	const string &str = text.GetText();
+	width                = -1;
+	const auto   &layout = text.GetLayout();
+	const string &str    = text.GetText();
 	if(layout.width < 0 || (layout.align == Alignment::LEFT && layout.truncate == Truncate::NONE))
 		return str;
 	width = layout.width;
 	switch(layout.truncate)
 	{
-	case Truncate::NONE:
-		width = WidthRawString(str.c_str());
-		return str;
-	case Truncate::FRONT:
-		return TruncateFront(str, width);
-	case Truncate::MIDDLE:
-		return TruncateMiddle(str, width);
+	case Truncate::NONE:   width = WidthRawString(str.c_str()); return str;
+	case Truncate::FRONT:  return TruncateFront(str, width);
+	case Truncate::MIDDLE: return TruncateMiddle(str, width);
 	case Truncate::BACK:
-	default:
-		return TruncateBack(str, width);
+	default:               return TruncateBack(str, width);
 	}
 }
 
@@ -437,8 +446,8 @@ string Font::TruncateMiddle(const string &str, int &width) const
 
 
 
-string Font::TruncateEndsOrMiddle(const string &str, int &width,
-                                  function<string(const string &, int)> getResultString) const
+string
+Font::TruncateEndsOrMiddle(const string &str, int &width, function<string(const string &, int)> getResultString) const
 {
 	int firstWidth = WidthRawString(str.c_str());
 	if(firstWidth <= width)

@@ -126,7 +126,7 @@ ConditionEntry &ConditionEntry::operator-=(int64_t val)
 
 void ConditionEntry::ProvidePrefixed(function<int64_t(const ConditionEntry &)> getFunction)
 {
-	this->getFunction = std::move(getFunction);
+	this->getFunction    = std::move(getFunction);
 	this->providingEntry = this;
 }
 
@@ -143,7 +143,7 @@ void ConditionEntry::ProvidePrefixed(function<int64_t(const ConditionEntry &)> g
 
 void ConditionEntry::ProvideNamed(function<int64_t(const ConditionEntry &)> getFunction)
 {
-	this->getFunction = std::move(getFunction);
+	this->getFunction    = std::move(getFunction);
 	this->providingEntry = nullptr;
 }
 

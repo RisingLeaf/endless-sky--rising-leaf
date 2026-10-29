@@ -23,10 +23,16 @@ using namespace std;
 
 namespace {
 	// Lookup table for matching special tokens to enumeration values.
-	map<string, int> TOKEN_INDEX = {{"accept", Endpoint::ACCEPT}, {"decline", Endpoint::DECLINE},
-	                                {"defer", Endpoint::DEFER},   {"launch", Endpoint::LAUNCH},
-	                                {"flee", Endpoint::FLEE},     {"depart", Endpoint::DEPART},
-	                                {"die", Endpoint::DIE},       {"explode", Endpoint::EXPLODE}};
+	map<string, int> TOKEN_INDEX = {
+	    { "accept",  Endpoint::ACCEPT},
+	    {"decline", Endpoint::DECLINE},
+	    {  "defer",   Endpoint::DEFER},
+	    { "launch",  Endpoint::LAUNCH},
+	    {   "flee",    Endpoint::FLEE},
+	    { "depart",  Endpoint::DEPART},
+	    {    "die",     Endpoint::DIE},
+	    {"explode", Endpoint::EXPLODE}
+    };
 } // namespace
 
 const int Endpoint::ACCEPT;

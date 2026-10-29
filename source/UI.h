@@ -113,7 +113,7 @@ private:
 
 	std::vector<std::shared_ptr<Panel>> stack;
 	std::vector<std::shared_ptr<Panel>> toPush;
-	std::vector<const Panel *> toPop;
+	std::vector<const Panel *>          toPop;
 
 	// Shared task queues that all panels can use.
 	// The sync queue will wait at the end of the step for all

@@ -38,15 +38,15 @@ public:
 		bool IsLoaded() const;
 
 		const std::string &TrueName() const;
-		const Color &MainColor() const;
-		const Color &LogColor() const;
+		const Color       &MainColor() const;
+		const Color       &LogColor() const;
 		DuplicatesStrategy MainDuplicatesStrategy() const;
-		bool AllowsLogDuplicates() const;
-		bool IsImportant() const;
-		bool LogOnly() const;
+		bool               AllowsLogDuplicates() const;
+		bool               IsImportant() const;
+		bool               LogOnly() const;
 
 	private:
-		bool isLoaded = false;
+		bool        isLoaded = false;
 		std::string name;
 		// The color used in the main panel.
 		ExclusiveItem<Color> mainColor;
@@ -72,21 +72,21 @@ public:
 	void Save(DataWriter &out) const;
 
 	const std::string &TrueName() const;
-	void SetTrueName(const std::string &name);
-	bool IsPhrase() const;
+	void               SetTrueName(const std::string &name);
+	bool               IsPhrase() const;
 	// Choose a message from the phrase if this message has one, or resolve substitutions
 	// on the raw text to get the final message string.
 	std::string Text() const;
 	// Get the final text with custom substitutions, assuming the message is not a phrase.
-	std::string Text(const std::map<std::string, std::string> &subs) const;
+	std::string     Text(const std::map<std::string, std::string> &subs) const;
 	const Category *GetCategory() const;
 
 
 private:
-	bool isLoaded = false;
+	bool        isLoaded = false;
 	std::string name;
 	// The text, or the name of the phrase used to generate the message.
-	std::string text;
-	bool isPhrase = false;
+	std::string     text;
+	bool            isPhrase = false;
 	const Category *category = nullptr;
 };

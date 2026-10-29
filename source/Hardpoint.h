@@ -49,8 +49,8 @@ public:
 		Side side = Side::OVER;
 		// Range over which the turret can turn, from leftmost position to rightmost position.
 		// (directional turret only)
-		Angle minArc;
-		Angle maxArc;
+		Angle                                minArc;
+		Angle                                maxArc;
 		std::vector<std::pair<Angle, Angle>> blindspots;
 		// This attribute is added to the turret turn multiplier of the ship.
 		double turnMultiplier;
@@ -162,9 +162,9 @@ private:
 	// Angle adjustment for convergence.
 	Angle angle;
 	// Reload timers and other attributes.
-	double reload = 0.;
+	double reload      = 0.;
 	double burstReload = 0.;
-	int burstCount = 0;
-	bool isFiring = false;
-	bool wasFiring = false;
+	int    burstCount  = 0;
+	bool   isFiring    = false;
+	bool   wasFiring   = false;
 };

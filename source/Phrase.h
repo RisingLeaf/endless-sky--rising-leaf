@@ -43,7 +43,7 @@ public:
 	bool IsEmpty() const;
 
 	const std::string &Name() const;
-	std::string Get() const;
+	std::string        Get() const;
 
 
 private:

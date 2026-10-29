@@ -76,9 +76,9 @@ public:
 		Bay(double x, double y, std::string category) : point(x * .5, y * .5), category(std::move(category))
 		{
 		}
-		Bay(Bay &&) = default;
+		Bay(Bay &&)            = default;
 		Bay &operator=(Bay &&) = default;
-		~Bay() = default;
+		~Bay()                 = default;
 
 		// Copying a bay does not copy the ship inside it.
 		Bay(const Bay &b)
@@ -90,14 +90,14 @@ public:
 			return *this = Bay(b);
 		}
 
-		Point point;
+		Point                 point;
 		std::shared_ptr<Ship> ship;
-		std::string category;
+		std::string           category;
 
-		uint8_t side = 0;
+		uint8_t              side   = 0;
 		static const uint8_t INSIDE = 0;
-		static const uint8_t OVER = 1;
-		static const uint8_t UNDER = 2;
+		static const uint8_t OVER   = 1;
+		static const uint8_t UNDER  = 2;
 
 		// The angle at which the carried ship will depart, relative to the carrying ship.
 		Angle facing;
@@ -112,23 +112,23 @@ public:
 		{
 		}
 
-		uint8_t side = 0;
+		uint8_t              side  = 0;
 		static const uint8_t UNDER = 0;
-		static const uint8_t OVER = 1;
+		static const uint8_t OVER  = 1;
 
-		uint8_t steering = 0;
-		static const uint8_t NONE = 0;
-		static const uint8_t LEFT = 1;
-		static const uint8_t RIGHT = 2;
+		uint8_t              steering = 0;
+		static const uint8_t NONE     = 0;
+		static const uint8_t LEFT     = 1;
+		static const uint8_t RIGHT    = 2;
 
 		double zoom;
-		Angle facing;
-		Angle gimbal;
+		Angle  facing;
+		Angle  gimbal;
 	};
 
 	enum class ThrustKind {
-		LEFT = 0,
-		RIGHT = 1,
+		LEFT    = 0,
+		RIGHT   = 1,
 		FORWARD = 2,
 		REVERSE = 3,
 	};
@@ -146,11 +146,11 @@ public:
 
 	enum PlacementActivity {
 		// The NONE value should be replaced with a default value if it wasn't replaced during loading.
-		NONE = 0u,
-		WHEN_ACTIVE = (1u << 0u),
-		WHEN_DISABLED = (1u << 1u),
+		NONE           = 0u,
+		WHEN_ACTIVE    = (1u << 0u),
+		WHEN_DISABLED  = (1u << 1u),
 		WHEN_EXPLODING = (1u << 2u),
-		ALWAYS_ON = WHEN_ACTIVE | WHEN_DISABLED | WHEN_EXPLODING,
+		ALWAYS_ON      = WHEN_ACTIVE | WHEN_DISABLED | WHEN_EXPLODING,
 	};
 
 	enum class DecorBehavior { STATIC = 0, ROTATING, MOVING, TARGETING };
@@ -162,16 +162,16 @@ public:
 		explicit Decor(const DataNode &node);
 		void Save(DataWriter &out) const;
 
-		Drawable sprite;
-		Point position;
-		Angle angle;
-		DecorBehavior behavior = DecorBehavior::STATIC;
-		PlacementSide side = PlacementSide::OVER;
-		unsigned activity = PlacementActivity::NONE;
-		double rotationSpeed = 0.;
-		bool synced = false;
-		int tick = 0;
-		int delay = 0;
+		Drawable      sprite;
+		Point         position;
+		Angle         angle;
+		DecorBehavior behavior      = DecorBehavior::STATIC;
+		PlacementSide side          = PlacementSide::OVER;
+		unsigned      activity      = PlacementActivity::NONE;
+		double        rotationSpeed = 0.;
+		bool          synced        = false;
+		int           tick          = 0;
+		int           delay         = 0;
 	};
 
 
@@ -211,10 +211,10 @@ public:
 
 	// Get the name of this particular ship.
 	const std::string &GivenName() const;
-	void SetGivenName(const std::string &name);
+	void               SetGivenName(const std::string &name);
 
 	// Set / Get the name of this model of ship.
-	void SetTrueModelName(const std::string &model);
+	void               SetTrueModelName(const std::string &model);
 	const std::string &TrueModelName() const;
 	const std::string &DisplayModelName() const;
 	const std::string &PluralModelName() const;
@@ -267,7 +267,7 @@ public:
 
 	// Access the ship's personality, which affects how the AI behaves.
 	const Personality &GetPersonality() const;
-	void SetPersonality(const Personality &other);
+	void               SetPersonality(const Personality &other);
 	// Access the ship's confusion.
 	const Confusion &GetConfusion() const;
 	// If this ship changes governments, its confusion also needs to be updated.
@@ -276,9 +276,9 @@ public:
 	// Get a random hail message, or set the object used to generate them. If no
 	// object is given the government's default will be used.
 	const Phrase *GetHailPhrase() const;
-	void SetHailPhrase(const Phrase &phrase);
-	std::string GetHail(std::map<std::string, std::string> &&subs) const;
-	bool CanSendHail(const PlayerInfo &player, bool allowUntranslated = false) const;
+	void          SetHailPhrase(const Phrase &phrase);
+	std::string   GetHail(std::map<std::string, std::string> &&subs) const;
+	bool          CanSendHail(const PlayerInfo &player, bool allowUntranslated = false) const;
 
 	// Access the ship's AI cache, containing the range and expected AI behavior for this ship.
 	const ShipAICache &GetAICache() const;
@@ -287,9 +287,9 @@ public:
 	void UpdateCaches(bool massLessChange = false);
 
 	// Set the commands for this ship to follow this timestep.
-	void SetCommands(const Command &command);
-	void SetCommands(const FireCommand &firingCommand);
-	const Command &Commands() const;
+	void               SetCommands(const Command &command);
+	void               SetCommands(const FireCommand &firingCommand);
+	const Command     &Commands() const;
 	const FireCommand &FiringCommands() const noexcept;
 	// Move this ship. A ship may create effects as it moves, in particular if
 	// it is in the process of blowing up.
@@ -300,8 +300,12 @@ public:
 	// Provide a nullopt visuals optional to the second function for drawing a ship in the UI.
 	void Draw(DrawList &draw, std::vector<Visual> &visuals) const;
 	// TODO: std::reference_wrapper<T> can be replaced with T& in C++26.
-	void Draw(DrawList &draw, std::optional<std::reference_wrapper<std::vector<Visual>>> visuals, const Point &pos,
-	          const Angle &facing, float zoom, std::optional<double> parentCloakState = std::nullopt) const;
+	void Draw(DrawList                                                  &draw,
+	          std::optional<std::reference_wrapper<std::vector<Visual>>> visuals,
+	          const Point                                               &pos,
+	          const Angle                                               &facing,
+	          float                                                      zoom,
+	          std::optional<double>                                      parentCloakState = std::nullopt) const;
 
 	// Launch any ships that are ready to launch.
 	void Launch(std::list<std::shared_ptr<Ship>> &ships, std::vector<Visual> &visuals);
@@ -337,14 +341,14 @@ public:
 	const Planet *GetPlanet() const;
 
 	// Check the status of this ship.
-	bool IsCapturable() const;
+	bool         IsCapturable() const;
 	virtual bool IsTargetable() const override;
-	bool IsOverheated() const;
-	bool IsIonized() const;
+	bool         IsOverheated() const;
+	bool         IsIonized() const;
 	virtual bool IsDisabled() const override;
-	bool IsBoarding() const;
-	bool IsLanding() const;
-	bool IsFleeing() const;
+	bool         IsBoarding() const;
+	bool         IsLanding() const;
+	bool         IsFleeing() const;
 	// Check if this ship is currently able to begin landing on its target.
 	bool CanLand() const;
 	// What kind of action this is we are trying to do.
@@ -355,7 +359,7 @@ public:
 	// Get the degree to which this ship is cloaked. 1 means fully cloaked; 0 means fully visible.
 	// Depending on its "cloaking ..." attributes the ship will be unable to shoot, will not be seen on radar...
 	double Cloaking() const override;
-	bool IsCloaked() const override;
+	bool   IsCloaked() const override;
 	// If this ship is capable of cloaking, make it fully cloaked.
 	void SetCloaked();
 	// The amount of cloaking this ship can do, per frame.
@@ -366,7 +370,7 @@ public:
 	bool IsEnteringHyperspace() const;
 	// Check if this ship is entering or leaving hyperspace.
 	bool IsHyperspacing() const;
-	int GetHyperspacePercentage() const;
+	int  GetHyperspacePercentage() const;
 	// Check if this ship is hyperspacing, specifically via a jump drive.
 	bool IsUsingJumpDrive() const;
 	// Fuel already used for ongoing hyperspace movement.
@@ -378,7 +382,7 @@ public:
 	// Check if this ship is allowed to enter this system, accounting for its personality.
 	bool IsRestrictedFrom(const System &system) const;
 	// Get this ship's custom swizzle.
-	const Swizzle *CustomSwizzle() const;
+	const Swizzle     *CustomSwizzle() const;
 	const std::string &CustomSwizzleName() const;
 
 	// Check if the ship is thrusting. If so, the engine sound should be played.
@@ -429,7 +433,7 @@ public:
 	// This depends on how much fuel it has and what sort of hyperdrive it uses.
 	// This does not show accurate number of jumps remaining beyond 1.
 	// If followParent is false, this ship will not follow the parent.
-	int JumpsRemaining(bool followParent = true) const;
+	int  JumpsRemaining(bool followParent = true) const;
 	bool NeedsFuel(bool followParent = true) const;
 	// Checks whether this ship needs energy to function.
 	bool NeedsEnergy() const;
@@ -454,7 +458,7 @@ public:
 	int RequiredCrew() const;
 	// Get the reputational value of this ship's crew, which depends
 	// on its crew size and "crew equivalent" attribute.
-	int CrewValue() const;
+	int  CrewValue() const;
 	void AddCrew(int count);
 	// Check if this is a ship that can be used as a flagship.
 	bool CanBeFlagship() const;
@@ -477,7 +481,7 @@ public:
 	// The ship's current speed right now
 	double CurrentSpeed() const;
 
-	double ThrustHeldFraction(ThrustKind kind) const;
+	double  ThrustHeldFraction(ThrustKind kind) const;
 	uint8_t ThrustHeldFrames(ThrustKind kind) const;
 
 	// Apply a force to this ship, accelerating it. This might be from a weapon
@@ -509,7 +513,7 @@ public:
 	bool PositionFighters() const;
 
 	// Get cargo information.
-	CargoHold &Cargo();
+	CargoHold       &Cargo();
 	const CargoHold &Cargo() const;
 	// Display box effects from jettisoning cargo or installed outfits.
 	void Jettison(const std::string &commodity, int tons, bool wasAppeasing = false);
@@ -527,7 +531,7 @@ public:
 	int AddOutfit(const Outfit *outfit, int count);
 
 	// Get the list of weapons.
-	Armament &GetArmament();
+	Armament                     &GetArmament();
 	const std::vector<Hardpoint> &Weapons() const;
 	// Check if we are able to fire the given weapon (i.e. there is enough
 	// energy, ammo, and fuel to fire it).
@@ -541,12 +545,12 @@ public:
 	// land on) and a target ship (to move to, and attack if hostile).
 	std::shared_ptr<Ship> GetTargetShip() const;
 	std::shared_ptr<Ship> GetShipToAssist() const;
-	const StellarObject *GetTargetStellar() const;
+	const StellarObject  *GetTargetStellar() const;
 	// Get ship's target system (it should always be one jump / wormhole pass away).
 	const System *GetTargetSystem() const;
 	// Mining target.
-	std::shared_ptr<Minable> GetTargetAsteroid() const;
-	std::shared_ptr<Flotsam> GetTargetFlotsam() const;
+	std::shared_ptr<Minable>         GetTargetAsteroid() const;
+	std::shared_ptr<Flotsam>         GetTargetFlotsam() const;
 	const std::set<const Flotsam *> &GetTractorFlotsam() const;
 	// Pattern to use when flying in a formation.
 	const FormationPattern *GetFormationPattern() const;
@@ -555,7 +559,7 @@ public:
 	const std::vector<std::weak_ptr<Ship>> &GetShipsTargetingThis() const;
 	// Get and update the total ship strength targeting this ship.
 	double GetTargeterStrength() const;
-	void UpdateTargeterStrength();
+	void   UpdateTargeterStrength();
 
 	// Mark this ship as fleeing.
 	void SetFleeing(bool fleeing = true);
@@ -577,8 +581,8 @@ public:
 	// Manage escorts. When you set this ship's parent, it will automatically
 	// register itself as an escort of that ship, and unregister itself from any
 	// previous parent it had.
-	void SetParent(const std::shared_ptr<Ship> &ship);
-	std::shared_ptr<Ship> GetParent() const;
+	void                                    SetParent(const std::shared_ptr<Ship> &ship);
+	std::shared_ptr<Ship>                   GetParent() const;
 	const std::vector<std::weak_ptr<Ship>> &GetEscorts() const;
 
 	// How many AI steps has this ship been lingering?
@@ -594,8 +598,8 @@ public:
 	double OutfitScanPower() const;
 	double AsteroidScanPower() const;
 	double AtmosphereScan() const;
-	bool Inscrutable() const;
-	bool CanCommunicateWhileCloaked() const;
+	bool   Inscrutable() const;
+	bool   CanCommunicateWhileCloaked() const;
 
 	double ReverseThrust() const;
 	// Whether this ship has an afterburner installed and it can be used. Does not consider
@@ -606,17 +610,16 @@ public:
 	bool SilentJumps() const;
 
 	double CloakFuelCost() const;
-	bool HasFuelForCloak() const;
-	bool CanRecoverHullWhileCloaked() const;
-	bool CanRecoverShieldsWhileCloaked() const;
+	bool   HasFuelForCloak() const;
+	bool   CanRecoverHullWhileCloaked() const;
+	bool   CanRecoverShieldsWhileCloaked() const;
 
 	double TurretTurnMultiplier() const;
 
 
 protected:
 	void CacheAttributes() override;
-	int DoTakeDamage(const DamageDealt &damage, const Government *hitBy, bool wasDisabled,
-	                         bool wasDestroyed) override;
+	int  DoTakeDamage(const DamageDealt &damage, const Government *hitBy, bool wasDisabled, bool wasDestroyed) override;
 
 
 private:
@@ -630,11 +633,11 @@ private:
 		}
 
 		const Effect *effect = nullptr;
-		Point location;
-		Angle angle;
-		int openPeriod = 60;
-		int closePeriod = 60;
-		unsigned activity = PlacementActivity::NONE;
+		Point         location;
+		Angle         angle;
+		int           openPeriod  = 60;
+		int           closePeriod = 60;
+		unsigned      activity    = PlacementActivity::NONE;
 	};
 
 	// A live spark is an effect which periodically appears over the surface of a ship.
@@ -643,14 +646,14 @@ private:
 		explicit LiveSpark(const DataNode &node);
 		void Save(DataWriter &out) const;
 
-		const Effect *effect = nullptr;
-		int period = 1;
-		int random = 0;
-		double amount = 1;
-		PlacementSide side = PlacementSide::OVER;
-		unsigned activity = PlacementActivity::NONE;
+		const Effect *effect   = nullptr;
+		int           period   = 1;
+		int           random   = 0;
+		double        amount   = 1;
+		PlacementSide side     = PlacementSide::OVER;
+		unsigned      activity = PlacementActivity::NONE;
 
-		int tick = 0;
+		int tick  = 0;
 		int delay = 0;
 	};
 
@@ -661,15 +664,15 @@ private:
 		void Save(DataWriter &out) const;
 
 		const Effect *effect = nullptr;
-		Point position;
-		Angle angle;
-		int period = 1;
-		int random = 0;
-		int amount = 1;
-		PlacementSide side = PlacementSide::OVER;
-		unsigned activity = PlacementActivity::NONE;
+		Point         position;
+		Angle         angle;
+		int           period   = 1;
+		int           random   = 0;
+		int           amount   = 1;
+		PlacementSide side     = PlacementSide::OVER;
+		unsigned      activity = PlacementActivity::NONE;
 
-		int tick = 0;
+		int tick  = 0;
 		int delay = 0;
 	};
 
@@ -684,7 +687,7 @@ private:
 	bool StepFlags();
 	// Step ship destruction logic. Returns 1 if the ship has been destroyed, -1 if it is being
 	// destroyed, or 0 otherwise.
-	int StepDestroyed(std::vector<Visual> &visuals, std::list<std::shared_ptr<Flotsam>> &flotsam);
+	int  StepDestroyed(std::vector<Visual> &visuals, std::list<std::shared_ptr<Flotsam>> &flotsam);
 	void StepLeaks(PlacementActivity state);
 	void StepLiveEffects();
 	void StepDecorations(PlacementActivity state);
@@ -726,49 +729,49 @@ private:
 
 private:
 	// Characteristics of the chassis:
-	bool isDefined = false;
-	const Ship *base = nullptr;
+	bool        isDefined = false;
+	const Ship *base      = nullptr;
 	std::string trueModelName;
 	std::string displayModelName;
 	std::string pluralModelName;
 	std::string variantName;
 	std::string variantMapShopName;
 	std::string noun;
-	Paragraphs description;
-	Drawable thumbnail;
+	Paragraphs  description;
+	Drawable    thumbnail;
 	// Characteristics of this particular ship:
-	EsUuid uuid;
+	EsUuid      uuid;
 	std::string givenName;
-	bool canBeCarried = false;
+	bool        canBeCarried = false;
 
 	bool isInSystem = true;
 	// "Special" ships cannot be forgotten, and if they land on a planet, they
 	// continue to exist and refuel instead of being deleted.
-	bool isSpecial = false;
-	bool isYours = false;
-	bool isParked = false;
-	bool shouldDeploy = false;
-	bool forceDeployed = false;
-	bool isOverheated = false;
-	bool isBoarding = false;
-	bool hasBoarded = false;
-	bool isFleeing = false;
-	bool isThrusting = false;
-	bool isReversing = false;
-	bool isSteering = false;
-	double steeringDirection = 0.;
-	bool isCapturable = true;
-	bool isInvisible = false;
-	const Swizzle *customSwizzle = nullptr;
-	std::string customSwizzleName;
-	double cloak = 0.;
-	double cloakDisruption = 0.;
+	bool           isSpecial         = false;
+	bool           isYours           = false;
+	bool           isParked          = false;
+	bool           shouldDeploy      = false;
+	bool           forceDeployed     = false;
+	bool           isOverheated      = false;
+	bool           isBoarding        = false;
+	bool           hasBoarded        = false;
+	bool           isFleeing         = false;
+	bool           isThrusting       = false;
+	bool           isReversing       = false;
+	bool           isSteering        = false;
+	double         steeringDirection = 0.;
+	bool           isCapturable      = true;
+	bool           isInvisible       = false;
+	const Swizzle *customSwizzle     = nullptr;
+	std::string    customSwizzleName;
+	double         cloak           = 0.;
+	double         cloakDisruption = 0.;
 	// Cached values for figuring out when anti-missiles or tractor beams are in range.
 	double antiMissileRange = 0.;
 	double tractorBeamRange = 0.;
-	double weaponRadius = 0.;
+	double weaponRadius     = 0.;
 	// Cargo and outfit scanning takes time.
-	double cargoScan = 0.;
+	double cargoScan  = 0.;
 	double outfitScan = 0.;
 
 	double attraction = 0.;
@@ -777,24 +780,24 @@ private:
 	// Number of AI steps this ship has spent lingering
 	int lingerSteps = 0;
 
-	Command commands;
+	Command     commands;
 	FireCommand firingCommands;
 
-	Personality personality;
-	Confusion confusion;
+	Personality   personality;
+	Confusion     confusion;
 	const Phrase *hail = nullptr;
 
-	ShipAICache aiCache;
+	ShipAICache        aiCache;
 	ShipAttributeCache cache;
 	ShipJumpNavigation navigation;
 
 	// Installed outfits, cargo, etc.:
-	Outfit baseAttributes;
-	bool addAttributes = false;
-	const Weapon *explosionWeapon = nullptr;
-	std::map<const Outfit *, int> outfits;
-	CargoHold cargo;
-	std::list<std::shared_ptr<Flotsam>> jettisoned;
+	Outfit                                                 baseAttributes;
+	bool                                                   addAttributes   = false;
+	const Weapon                                          *explosionWeapon = nullptr;
+	std::map<const Outfit *, int>                          outfits;
+	CargoHold                                              cargo;
+	std::list<std::shared_ptr<Flotsam>>                    jettisoned;
 	std::list<std::pair<std::shared_ptr<Flotsam>, size_t>> jettisonedFromBay;
 
 	std::vector<Bay> bays;
@@ -804,11 +807,11 @@ private:
 	std::vector<EnginePoint> enginePoints;
 	std::vector<EnginePoint> reverseEnginePoints;
 	std::vector<EnginePoint> steeringEnginePoints;
-	Armament armament;
+	Armament                 armament;
 
 	// Delays for shield generation and hull repair.
 	int shieldDelay = 0;
-	int hullDelay = 0;
+	int hullDelay   = 0;
 	// Timer for a disabled ship to repair itself.
 	int disabledRecoveryCounter = 0;
 	// Number of frames the damage overlay should be displayed, if any.
@@ -819,9 +822,9 @@ private:
 	std::array<uint8_t, 4> thrustHeldFrames = {};
 
 	std::optional<int> administrativeCost;
-	int crew = 0;
-	int pilotError = 0;
-	int pilotOkay = 0;
+	int                crew       = 0;
+	int                pilotError = 0;
+	int                pilotOkay  = 0;
 
 	// Current status of this particular ship:
 	const System *currentSystem = nullptr;
@@ -829,49 +832,49 @@ private:
 	// hyperspacing, and exploding. Each one must track some special counters:
 	const Planet *landingPlanet = nullptr;
 
-	int hyperspaceCount = 0;
-	const System *hyperspaceSystem = nullptr;
-	bool isUsingJumpDrive = false;
-	double hyperspaceFuelCost = 0.;
-	Point hyperspaceOffset;
+	int           hyperspaceCount    = 0;
+	const System *hyperspaceSystem   = nullptr;
+	bool          isUsingJumpDrive   = false;
+	double        hyperspaceFuelCost = 0.;
+	Point         hyperspaceOffset;
 
 	std::vector<Leak> leaks;
 	std::vector<Leak> activeLeaks;
 
-	bool syncedEffects = false;
-	std::vector<LiveSpark> liveSparks;
+	bool                    syncedEffects = false;
+	std::vector<LiveSpark>  liveSparks;
 	std::vector<LiveEffect> liveEffects;
-	std::vector<Decor> decorations;
+	std::vector<Decor>      decorations;
 
 	// Explosions that happen when the ship is dying:
 	std::map<const Effect *, int> explosionEffects;
-	unsigned explosionRate = 0;
-	unsigned explosionCount = 0;
-	unsigned explosionTotal = 0;
+	unsigned                      explosionRate  = 0;
+	unsigned                      explosionCount = 0;
+	unsigned                      explosionTotal = 0;
 	std::map<const Effect *, int> finalExplosions;
 
 	// Target ships, planets, systems, etc.
-	std::weak_ptr<Ship> targetShip;
-	std::weak_ptr<Ship> shipToAssist;
-	const StellarObject *targetPlanet = nullptr;
-	const System *targetSystem = nullptr;
-	std::weak_ptr<Minable> targetAsteroid;
-	std::weak_ptr<Flotsam> targetFlotsam;
+	std::weak_ptr<Ship>       targetShip;
+	std::weak_ptr<Ship>       shipToAssist;
+	const StellarObject      *targetPlanet = nullptr;
+	const System             *targetSystem = nullptr;
+	std::weak_ptr<Minable>    targetAsteroid;
+	std::weak_ptr<Flotsam>    targetFlotsam;
 	std::set<const Flotsam *> tractorFlotsam;
-	const FormationPattern *formationPattern = nullptr;
+	const FormationPattern   *formationPattern = nullptr;
 
 	// Links between escorts and parents.
 	std::vector<std::weak_ptr<Ship>> escorts;
-	std::weak_ptr<Ship> parent;
+	std::weak_ptr<Ship>              parent;
 
 	// List of enemy ships targeting this one.
 	std::vector<std::weak_ptr<Ship>> targetingList;
-	double targeterStrength = 0.;
+	double                           targeterStrength = 0.;
 
 	bool removeBays = false;
 
 	// If this ship is disabled or dies as a result of something like corrosion damage,
 	// attribute the event to the last government that hit this ship.
-	const Government *lastHitBy = nullptr;
+	const Government    *lastHitBy = nullptr;
 	std::list<ShipEvent> unhandledEvents;
 };

@@ -39,10 +39,10 @@ private:
 	FLAC__StreamDecoderReadStatus read_callback(FLAC__byte buffer[], size_t *bytes) override;
 
 	/// Seeking is not supported, and shouldn't be called in runtime.
-	FLAC__StreamDecoderSeekStatus seek_callback(FLAC__uint64 absolute_byte_offset) override;
-	FLAC__StreamDecoderTellStatus tell_callback(FLAC__uint64 *absolute_byte_offset) override;
+	FLAC__StreamDecoderSeekStatus   seek_callback(FLAC__uint64 absolute_byte_offset) override;
+	FLAC__StreamDecoderTellStatus   tell_callback(FLAC__uint64 *absolute_byte_offset) override;
 	FLAC__StreamDecoderLengthStatus length_callback(FLAC__uint64 *stream_length) override;
-	bool eof_callback() override;
+	bool                            eof_callback() override;
 
 	/// This is the entry point for the decoding thread.
 	void Decode() override;

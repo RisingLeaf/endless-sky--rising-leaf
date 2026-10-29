@@ -56,9 +56,9 @@ private:
 
 
 private:
-	int step = 0;
+	int    step = 0;
 	double zoom = 1.;
-	Point center;
+	Point  center;
 
 	// Each sprite consists of six vertices (four vertices to form a quad and
 	// two dummy vertices to mark the break in between them). Each of those

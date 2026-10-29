@@ -45,62 +45,62 @@ using namespace std;
 
 namespace {
 	// Gamerule display names.
-	const string DEPRECIATION_MIN = "Minimum value";
-	const string DEPRECIATION_GRACE_PERIOD = "Grace period";
-	const string DEPRECIATION_MAX_AGE = "Maximum age";
-	const string DEPRECIATION_DAILY = "Daily depreciation";
-	const string PERSON_SPAWN_PERIOD = "Spawn attempt period";
-	const string NO_PERSON_SPAWN_WEIGHT = "No spawn weight";
-	const string NPC_MAX_MINING_TIME = "NPC max mining time";
-	const string UNIVERSAL_FRUGAL_THRESHOLD = "Universal frugal threshold";
-	const string UNIVERSAL_RAMSCOOP = "Universal ramscoop";
-	const string SYSTEM_DEPARTURE_MIN = "Minimum departure distance";
-	const string SYSTEM_ARRIVAL_MIN = "Minimum arrival distance";
+	const string DEPRECIATION_MIN                 = "Minimum value";
+	const string DEPRECIATION_GRACE_PERIOD        = "Grace period";
+	const string DEPRECIATION_MAX_AGE             = "Maximum age";
+	const string DEPRECIATION_DAILY               = "Daily depreciation";
+	const string PERSON_SPAWN_PERIOD              = "Spawn attempt period";
+	const string NO_PERSON_SPAWN_WEIGHT           = "No spawn weight";
+	const string NPC_MAX_MINING_TIME              = "NPC max mining time";
+	const string UNIVERSAL_FRUGAL_THRESHOLD       = "Universal frugal threshold";
+	const string UNIVERSAL_RAMSCOOP               = "Universal ramscoop";
+	const string SYSTEM_DEPARTURE_MIN             = "Minimum departure distance";
+	const string SYSTEM_ARRIVAL_MIN               = "Minimum arrival distance";
 	const string HABITABLE_BASED_ARRIVAL_DISTANCE = "Habitable arrival distance";
-	const string HABITABLE_ARRIVAL_MIN = "   Minimum distance";
-	const string HABITABLE_ARRIVAL_MAX = "   Maximum distance";
-	const string FLEET_MULTIPLIER = "Fleet multiplier";
-	const string LOCK_GAMERULES = "Lock gamerules";
-	const string FIGHTERS_HIT_WHEN_DISABLED = "Fighter crossfire immunity";
-	const string UNIVERSAL_AMMO_STOCKING = "Universal ammo stocking";
-	const string SPAWN_RAID_FLEETS = "Spawn raid fleets";
-	const string FLEET_SIZE_LIMITATION = "Fleet size limitation";
-	const string MAX_ESCORT_COUNT = "Default max escort count";
-	const string MAX_ESCORT_CREW = "Default max escort crew";
-	const string ADMIN_CAP = "Default admin cap";
-	const string PERMADEATH_MODE = "Permadeath";
-	const string SINGLE_SAVE_FILE = "Single save file";
-	const string RESTRICTED_SAVE_LOADING = "Restricted save loading";
+	const string HABITABLE_ARRIVAL_MIN            = "   Minimum distance";
+	const string HABITABLE_ARRIVAL_MAX            = "   Maximum distance";
+	const string FLEET_MULTIPLIER                 = "Fleet multiplier";
+	const string LOCK_GAMERULES                   = "Lock gamerules";
+	const string FIGHTERS_HIT_WHEN_DISABLED       = "Fighter crossfire immunity";
+	const string UNIVERSAL_AMMO_STOCKING          = "Universal ammo stocking";
+	const string SPAWN_RAID_FLEETS                = "Spawn raid fleets";
+	const string FLEET_SIZE_LIMITATION            = "Fleet size limitation";
+	const string MAX_ESCORT_COUNT                 = "Default max escort count";
+	const string MAX_ESCORT_CREW                  = "Default max escort crew";
+	const string ADMIN_CAP                        = "Default admin cap";
+	const string PERMADEATH_MODE                  = "Permadeath";
+	const string SINGLE_SAVE_FILE                 = "Single save file";
+	const string RESTRICTED_SAVE_LOADING          = "Restricted save loading";
 
 	const string AMMO_RESTOCKING_NAME = "universal ammo restocking";
 
 	const auto DISPLAY_NAME_TO_RULE_NAME = map<string, string>{
-	    {DEPRECIATION_MIN, "depreciation min"},
-	    {DEPRECIATION_GRACE_PERIOD, "depreciation grace period"},
-	    {DEPRECIATION_MAX_AGE, "depreciation max age"},
-	    {DEPRECIATION_DAILY, "depreciation daily"},
-	    {PERSON_SPAWN_PERIOD, "person spawn period"},
-	    {NO_PERSON_SPAWN_WEIGHT, "no person spawn weight"},
-	    {NPC_MAX_MINING_TIME, "npc max mining time"},
-	    {UNIVERSAL_FRUGAL_THRESHOLD, "universal frugal threshold"},
-	    {UNIVERSAL_RAMSCOOP, "universal ramscoop"},
-	    {SYSTEM_DEPARTURE_MIN, "system departure min"},
-	    {SYSTEM_ARRIVAL_MIN, "system arrival min"},
-	    {HABITABLE_BASED_ARRIVAL_DISTANCE, "habitable based arrival distance"},
-	    {HABITABLE_ARRIVAL_MIN, "habitable arrival min"},
-	    {HABITABLE_ARRIVAL_MAX, "habitable arrival max"},
-	    {FLEET_MULTIPLIER, "fleet multiplier"},
-	    {LOCK_GAMERULES, "lock gamerules"},
-	    {FIGHTERS_HIT_WHEN_DISABLED, "disabled fighters avoid projectiles"},
-	    {UNIVERSAL_AMMO_STOCKING, AMMO_RESTOCKING_NAME},
-	    {SPAWN_RAID_FLEETS, "spawn raid fleets"},
-	    {FLEET_SIZE_LIMITATION, "fleet size limitation"},
-	    {MAX_ESCORT_COUNT, "default max escort count"},
-	    {MAX_ESCORT_CREW, "default max escort crew"},
-	    {ADMIN_CAP, "default admin cap"},
-	    {PERMADEATH_MODE, "permadeath mode"},
-	    {SINGLE_SAVE_FILE, "single save file"},
-	    {RESTRICTED_SAVE_LOADING, "restricted save loading"},
+	    {                DEPRECIATION_MIN,                    "depreciation min"},
+	    {       DEPRECIATION_GRACE_PERIOD,           "depreciation grace period"},
+	    {            DEPRECIATION_MAX_AGE,                "depreciation max age"},
+	    {              DEPRECIATION_DAILY,                  "depreciation daily"},
+	    {             PERSON_SPAWN_PERIOD,                 "person spawn period"},
+	    {          NO_PERSON_SPAWN_WEIGHT,              "no person spawn weight"},
+	    {             NPC_MAX_MINING_TIME,                 "npc max mining time"},
+	    {      UNIVERSAL_FRUGAL_THRESHOLD,          "universal frugal threshold"},
+	    {              UNIVERSAL_RAMSCOOP,                  "universal ramscoop"},
+	    {            SYSTEM_DEPARTURE_MIN,                "system departure min"},
+	    {              SYSTEM_ARRIVAL_MIN,                  "system arrival min"},
+	    {HABITABLE_BASED_ARRIVAL_DISTANCE,    "habitable based arrival distance"},
+	    {           HABITABLE_ARRIVAL_MIN,               "habitable arrival min"},
+	    {           HABITABLE_ARRIVAL_MAX,               "habitable arrival max"},
+	    {                FLEET_MULTIPLIER,                    "fleet multiplier"},
+	    {                  LOCK_GAMERULES,                      "lock gamerules"},
+	    {      FIGHTERS_HIT_WHEN_DISABLED, "disabled fighters avoid projectiles"},
+	    {         UNIVERSAL_AMMO_STOCKING,                  AMMO_RESTOCKING_NAME},
+	    {               SPAWN_RAID_FLEETS,                   "spawn raid fleets"},
+	    {           FLEET_SIZE_LIMITATION,               "fleet size limitation"},
+	    {                MAX_ESCORT_COUNT,            "default max escort count"},
+	    {                 MAX_ESCORT_CREW,             "default max escort crew"},
+	    {                       ADMIN_CAP,                   "default admin cap"},
+	    {                 PERMADEATH_MODE,                     "permadeath mode"},
+	    {                SINGLE_SAVE_FILE,                    "single save file"},
+	    {         RESTRICTED_SAVE_LOADING,             "restricted save loading"},
 	};
 
 	const int GAMERULES_PAGE_COUNT = 1;
@@ -110,9 +110,12 @@ namespace {
 
 GamerulesPanel::GamerulesPanel(Gamerules &gamerules, bool existingPilot)
     : gamerules(gamerules), existingPilot(existingPilot), gamerulesUi(GameData::Interfaces().Get("gamerules")),
-      presetUi(GameData::Interfaces().Get("gamerules presets")),
-      tooltip(270, Alignment::LEFT, Tooltip::Direction::DOWN_LEFT, Tooltip::Corner::TOP_LEFT,
-	          GameData::Colors().Get("tooltip background"), GameData::Colors().Get("medium")),
+      presetUi(GameData::Interfaces().Get("gamerules presets")), tooltip(270,
+	                                                                     Alignment::LEFT,
+	                                                                     Tooltip::Direction::DOWN_LEFT,
+	                                                                     Tooltip::Corner::TOP_LEFT,
+	                                                                     GameData::Colors().Get("tooltip background"),
+	                                                                     GameData::Colors().Get("medium")),
       selectedPreset(gamerules.Name())
 {
 	Rectangle presetListBox = presetUi->GetBox("preset list");
@@ -259,7 +262,7 @@ bool GamerulesPanel::Click(int x, int y, MouseButton button, int clicks)
 				if(zone.Contains(point) && selectedPreset != zone.Value())
 				{
 					selectedPreset = zone.Value();
-					selectedIndex = index;
+					selectedIndex  = index;
 					PreRenderCmd->Begin();
 					RenderPresetDescription(PreRenderCmd.get(), selectedPreset);
 					PreRenderCmd->End();
@@ -289,7 +292,7 @@ bool GamerulesPanel::Hover(int x, int y)
 		if(zone.Contains(hoverPoint))
 		{
 			hoverIndex = index;
-			hoverItem = zone.Value();
+			hoverItem  = zone.Value();
 			tooltip.SetZone(zone);
 		}
 	}
@@ -337,7 +340,7 @@ bool GamerulesPanel::Drag(double dx, double dy)
 {
 	if(page == 'p')
 	{
-		const Rectangle &presetBox = presetUi->GetBox("preset list");
+		const Rectangle &presetBox      = presetUi->GetBox("preset list");
 		const Rectangle &descriptionBox = presetUi->GetBox("preset description");
 
 		if(presetBox.Contains(hoverPoint))
@@ -376,8 +379,8 @@ void GamerulesPanel::Resize()
 
 void GamerulesPanel::DrawGamerules(GraphicsTypes::CommandBufferInstance *cb)
 {
-	const Color &back = *GameData::Colors().Get("faint");
-	const Color &dim = *GameData::Colors().Get("dim");
+	const Color &back   = *GameData::Colors().Get("faint");
+	const Color &dim    = *GameData::Colors().Get("dim");
 	const Color &medium = *GameData::Colors().Get("medium");
 	const Color &bright = *GameData::Colors().Get("bright");
 
@@ -387,7 +390,7 @@ void GamerulesPanel::DrawGamerules(GraphicsTypes::CommandBufferInstance *cb)
 		latestIndex = hoverIndex;
 
 	oldSelectedIndex = selectedIndex;
-	oldHoverIndex = hoverIndex;
+	oldHoverIndex    = hoverIndex;
 
 	Table table;
 	table.AddColumn(-115, {230, Alignment::LEFT});
@@ -452,7 +455,7 @@ void GamerulesPanel::DrawGamerules(GraphicsTypes::CommandBufferInstance *cb)
 	};
 
 	bool isCategory = true;
-	int page = 0;
+	int  page       = 0;
 	for(const string &gamerule : GAMERULES)
 	{
 		// Check if this is a page break.
@@ -496,7 +499,7 @@ void GamerulesPanel::DrawGamerules(GraphicsTypes::CommandBufferInstance *cb)
 		gameruleZones.emplace_back(table.GetCenterPoint(), table.GetRowSize(), gamerule);
 
 		// Setting "isOn" draws the gamerule "bright" (i.e. the gamerule is active).
-		bool isOn = true;
+		bool   isOn = true;
 		string text;
 		if(gamerule == DEPRECIATION_MIN)
 			text = Format::Percentage(gamerules.DepreciationMin(), 2);
@@ -551,15 +554,9 @@ void GamerulesPanel::DrawGamerules(GraphicsTypes::CommandBufferInstance *cb)
 		{
 			switch(gamerules.FightersHitWhenDisabled())
 			{
-			case Gamerules::FighterDodgePolicy::ALL:
-				text = "all";
-				break;
-			case Gamerules::FighterDodgePolicy::ONLY_PLAYER:
-				text = "player";
-				break;
-			case Gamerules::FighterDodgePolicy::NONE:
-				text = "none";
-				break;
+			case Gamerules::FighterDodgePolicy::ALL:         text = "all"; break;
+			case Gamerules::FighterDodgePolicy::ONLY_PLAYER: text = "player"; break;
+			case Gamerules::FighterDodgePolicy::NONE:        text = "none"; break;
 			}
 		}
 		else if(gamerule == UNIVERSAL_AMMO_STOCKING)
@@ -570,18 +567,10 @@ void GamerulesPanel::DrawGamerules(GraphicsTypes::CommandBufferInstance *cb)
 		{
 			switch(gamerules.GetFleetSizeLimitation())
 			{
-			case Gamerules::FleetSizeLimitation::NONE:
-				text = "none";
-				break;
-			case Gamerules::FleetSizeLimitation::SHIP_CAP:
-				text = "ship cap";
-				break;
-			case Gamerules::FleetSizeLimitation::CREW_CAP:
-				text = "crew cap";
-				break;
-			case Gamerules::FleetSizeLimitation::ADMIN_CAP:
-				text = "admin cap";
-				break;
+			case Gamerules::FleetSizeLimitation::NONE:      text = "none"; break;
+			case Gamerules::FleetSizeLimitation::SHIP_CAP:  text = "ship cap"; break;
+			case Gamerules::FleetSizeLimitation::CREW_CAP:  text = "crew cap"; break;
+			case Gamerules::FleetSizeLimitation::ADMIN_CAP: text = "admin cap"; break;
 			}
 		}
 		else if(gamerule == MAX_ESCORT_COUNT)
@@ -608,18 +597,10 @@ void GamerulesPanel::DrawGamerules(GraphicsTypes::CommandBufferInstance *cb)
 				text = "off";
 				isOn = false;
 				break;
-			case Gamerules::PermadeathMode::LOCK_ON_DEATH:
-				text = "lock on death";
-				break;
-			case Gamerules::PermadeathMode::DELETE_ON_DEATH:
-				text = "delete on death";
-				break;
-			case Gamerules::PermadeathMode::LOCK_ON_TAKEOFF:
-				text = "lock on takeoff";
-				break;
-			case Gamerules::PermadeathMode::DELETE_ON_TAKEOFF:
-				text = "delete on takeoff";
-				break;
+			case Gamerules::PermadeathMode::LOCK_ON_DEATH:     text = "lock on death"; break;
+			case Gamerules::PermadeathMode::DELETE_ON_DEATH:   text = "delete on death"; break;
+			case Gamerules::PermadeathMode::LOCK_ON_TAKEOFF:   text = "lock on takeoff"; break;
+			case Gamerules::PermadeathMode::DELETE_ON_TAKEOFF: text = "delete on takeoff"; break;
 			}
 		}
 		else if(gamerule == SINGLE_SAVE_FILE)
@@ -652,7 +633,7 @@ void GamerulesPanel::DrawGamerules(GraphicsTypes::CommandBufferInstance *cb)
 
 void GamerulesPanel::DrawPresets(GraphicsTypes::CommandBufferInstance *cb)
 {
-	const Color &back = *GameData::Colors().Get("faint");
+	const Color &back   = *GameData::Colors().Get("faint");
 	const Color &medium = *GameData::Colors().Get("medium");
 	const Color &bright = *GameData::Colors().Get("bright");
 
@@ -677,8 +658,8 @@ void GamerulesPanel::DrawPresets(GraphicsTypes::CommandBufferInstance *cb)
 
 		for(const auto &it : GameData::GamerulesPresets())
 		{
-			const auto &preset = it.second;
-			const string &name = preset.Name();
+			const auto   &preset = it.second;
+			const string &name   = preset.Name();
 			if(name.empty())
 				continue;
 
@@ -690,9 +671,9 @@ void GamerulesPanel::DrawPresets(GraphicsTypes::CommandBufferInstance *cb)
 
 			// If the player's current gamerules are an exact copy of a preset, then check that preset's box
 			// to show that it is what is currently active.
-			const Sprite *sprite = box[preset == gamerules];
-			const Point topLeft = table.GetRowBounds().TopLeft() - Point(sprite->Width(), 0.);
-			Rectangle spriteBounds = Rectangle::FromCorner(topLeft, Point(sprite->Width(), sprite->Height()));
+			const Sprite *sprite       = box[preset == gamerules];
+			const Point   topLeft      = table.GetRowBounds().TopLeft() - Point(sprite->Width(), 0.);
+			Rectangle     spriteBounds = Rectangle::FromCorner(topLeft, Point(sprite->Width(), sprite->Height()));
 			SpriteShader::Draw(cb, sprite, spriteBounds.Center());
 
 			Rectangle zoneBounds = spriteBounds + presetListBox.Center();
@@ -728,15 +709,15 @@ void GamerulesPanel::DrawPresets(GraphicsTypes::CommandBufferInstance *cb)
 		// Draw up and down pointers, mostly to indicate when scrolling
 		// is possible, but might as well make them clickable too.
 		Rectangle topRight({presetListBox.Right(), presetListBox.Top() + POINTER_OFFSET.Y()}, {20.0, 20.0});
-		PointerShader::Draw(cb, topRight.Center(), UP, 10.f, 10.f, 5.f,
-		                    Color(presetListScroll.IsScrollAtMin() ? .2f : .8f, 0.f));
+		PointerShader::Draw(
+		    cb, topRight.Center(), UP, 10.f, 10.f, 5.f, Color(presetListScroll.IsScrollAtMin() ? .2f : .8f, 0.f));
 		AddZone(topRight, [&]() {
 			presetListScroll.Scroll(-Preferences::ScrollSpeed());
 		});
 
 		Rectangle bottomRight(presetListBox.BottomRight() - POINTER_OFFSET, {20.0, 20.0});
-		PointerShader::Draw(cb, bottomRight.Center(), DOWN, 10.f, 10.f, 5.f,
-		                    Color(presetListScroll.IsScrollAtMax() ? .2f : .8f, 0.f));
+		PointerShader::Draw(
+		    cb, bottomRight.Center(), DOWN, 10.f, 10.f, 5.f, Color(presetListScroll.IsScrollAtMax() ? .2f : .8f, 0.f));
 		AddZone(bottomRight, [&]() {
 			presetListScroll.Scroll(Preferences::ScrollSpeed());
 		});
@@ -751,7 +732,9 @@ void GamerulesPanel::DrawPresets(GraphicsTypes::CommandBufferInstance *cb)
 		                                        presetDescriptionScroll.IsScrollAtMax() ? 0 : 20);
 
 		Rectangle descriptionBox = presetUi->GetBox("preset description");
-		presetDescriptionBuffer->Draw(cb, descriptionBox.Center(), descriptionBox.Dimensions(),
+		presetDescriptionBuffer->Draw(cb,
+		                              descriptionBox.Center(),
+		                              descriptionBox.Dimensions(),
 		                              Point(0, static_cast<int>(presetDescriptionScroll.AnimatedValue())));
 
 		if(presetDescriptionScroll.Scrollable())
@@ -760,14 +743,24 @@ void GamerulesPanel::DrawPresets(GraphicsTypes::CommandBufferInstance *cb)
 			// scrolling is possible, but might as well make them
 			// clickable too.
 			Rectangle topRight({descriptionBox.Right(), descriptionBox.Top() + POINTER_OFFSET.Y()}, {20.0, 20.0});
-			PointerShader::Draw(cb, topRight.Center(), UP, 10.f, 10.f, 5.f,
+			PointerShader::Draw(cb,
+			                    topRight.Center(),
+			                    UP,
+			                    10.f,
+			                    10.f,
+			                    5.f,
 			                    Color(presetDescriptionScroll.IsScrollAtMin() ? .2f : .8f, 0.f));
 			AddZone(topRight, [&]() {
 				presetDescriptionScroll.Scroll(-Preferences::ScrollSpeed());
 			});
 
 			Rectangle bottomRight(descriptionBox.BottomRight() - POINTER_OFFSET, {20.0, 20.0});
-			PointerShader::Draw(cb, bottomRight.Center(), DOWN, 10.f, 10.f, 5.f,
+			PointerShader::Draw(cb,
+			                    bottomRight.Center(),
+			                    DOWN,
+			                    10.f,
+			                    10.f,
+			                    5.f,
 			                    Color(presetDescriptionScroll.IsScrollAtMax() ? .2f : .8f, 0.f));
 			AddZone(bottomRight, [&]() {
 				presetDescriptionScroll.Scroll(Preferences::ScrollSpeed());
@@ -794,8 +787,8 @@ void GamerulesPanel::RenderPresetDescription(GraphicsTypes::CommandBufferInstanc
 void GamerulesPanel::RenderPresetDescription(GraphicsTypes::CommandBufferInstance *cb, const Gamerules &preset)
 {
 	const Color &medium = *GameData::Colors().Get("medium");
-	const Font &font = FontSet::Get(Preferences::GetFontSize());
-	Rectangle box = presetUi->GetBox("preset description");
+	const Font  &font   = FontSet::Get(Preferences::GetFontSize());
+	Rectangle    box    = presetUi->GetBox("preset description");
 
 	// We are resizing and redrawing the description buffer. Reset the scroll
 	// back to zero.
@@ -868,100 +861,106 @@ void GamerulesPanel::HandleGamerulesString(const string &str)
 {
 	if(str == DEPRECIATION_MIN)
 	{
-		string message = "Set the minimum deprecation value. (Decimal value between 0 and 1.)";
-		auto validate = [](double value) -> bool {
+		string message  = "Set the minimum deprecation value. (Decimal value between 0 and 1.)";
+		auto   validate = [](double value) -> bool {
 			return value >= 0.0 && value <= 1.0;
 		};
-		GetUI().Push(DialogPanel::RequestDoubleWithValidation(&gamerules, &Gamerules::SetDepreciationMin, validate,
-		                                                      message, gamerules.DepreciationMin()));
+		GetUI().Push(DialogPanel::RequestDoubleWithValidation(
+		    &gamerules, &Gamerules::SetDepreciationMin, validate, message, gamerules.DepreciationMin()));
 	}
 	else if(str == DEPRECIATION_GRACE_PERIOD)
 	{
-		string message = "Set the depreciation grace period. (Integer value greater than or equal to 0.)";
-		auto validate = [](int value) -> bool {
+		string message  = "Set the depreciation grace period. (Integer value greater than or equal to 0.)";
+		auto   validate = [](int value) -> bool {
 			return value >= 0;
 		};
-		GetUI().Push(DialogPanel::RequestIntegerWithValidation(&gamerules, &Gamerules::SetDepreciationGracePeriod,
-		                                                       validate, message, gamerules.DepreciationGracePeriod()));
+		GetUI().Push(DialogPanel::RequestIntegerWithValidation(&gamerules,
+		                                                       &Gamerules::SetDepreciationGracePeriod,
+		                                                       validate,
+		                                                       message,
+		                                                       gamerules.DepreciationGracePeriod()));
 	}
 	else if(str == DEPRECIATION_MAX_AGE)
 	{
-		string message = "Set the depreciation maximum age. (Integer value greater than or equal to 0.)";
-		auto validate = [](int value) -> bool {
+		string message  = "Set the depreciation maximum age. (Integer value greater than or equal to 0.)";
+		auto   validate = [](int value) -> bool {
 			return value >= 0;
 		};
-		GetUI().Push(DialogPanel::RequestIntegerWithValidation(&gamerules, &Gamerules::SetDepreciationMaxAge, validate,
-		                                                       message, gamerules.DepreciationMaxAge()));
+		GetUI().Push(DialogPanel::RequestIntegerWithValidation(
+		    &gamerules, &Gamerules::SetDepreciationMaxAge, validate, message, gamerules.DepreciationMaxAge()));
 	}
 	else if(str == DEPRECIATION_DAILY)
 	{
-		string message = "Set the daily deprecation value. (Decimal value between 0 and 1.)";
-		auto validate = [](double value) -> bool {
+		string message  = "Set the daily deprecation value. (Decimal value between 0 and 1.)";
+		auto   validate = [](double value) -> bool {
 			return value >= 0.0 && value <= 1.0;
 		};
-		GetUI().Push(DialogPanel::RequestDoubleWithValidation(&gamerules, &Gamerules::SetDepreciationDaily, validate,
-		                                                      message, gamerules.DepreciationDaily()));
+		GetUI().Push(DialogPanel::RequestDoubleWithValidation(
+		    &gamerules, &Gamerules::SetDepreciationDaily, validate, message, gamerules.DepreciationDaily()));
 	}
 	else if(str == PERSON_SPAWN_PERIOD)
 	{
-		string message = "Set the person ship spawn attempt period. (Integer value greater than or equal to 1.)";
-		auto validate = [](int value) -> bool {
+		string message  = "Set the person ship spawn attempt period. (Integer value greater than or equal to 1.)";
+		auto   validate = [](int value) -> bool {
 			return value >= 1;
 		};
-		GetUI().Push(DialogPanel::RequestIntegerWithValidation(&gamerules, &Gamerules::SetPersonSpawnPeriod, validate,
-		                                                       message, gamerules.PersonSpawnPeriod()));
+		GetUI().Push(DialogPanel::RequestIntegerWithValidation(
+		    &gamerules, &Gamerules::SetPersonSpawnPeriod, validate, message, gamerules.PersonSpawnPeriod()));
 	}
 	else if(str == NO_PERSON_SPAWN_WEIGHT)
 	{
-		string message = "Set the no person ship spawn weight. (Integer value greater than or equal to 0.)";
-		auto validate = [](int value) -> bool {
+		string message  = "Set the no person ship spawn weight. (Integer value greater than or equal to 0.)";
+		auto   validate = [](int value) -> bool {
 			return value >= 0;
 		};
-		GetUI().Push(DialogPanel::RequestIntegerWithValidation(&gamerules, &Gamerules::SetNoPersonSpawnWeight, validate,
-		                                                       message, gamerules.NoPersonSpawnWeight()));
+		GetUI().Push(DialogPanel::RequestIntegerWithValidation(
+		    &gamerules, &Gamerules::SetNoPersonSpawnWeight, validate, message, gamerules.NoPersonSpawnWeight()));
 	}
 	else if(str == NPC_MAX_MINING_TIME)
 	{
-		string message = "Set the NPC max mining time. (Integer value greater than or equal to 0.)";
-		auto validate = [](int value) -> bool {
+		string message  = "Set the NPC max mining time. (Integer value greater than or equal to 0.)";
+		auto   validate = [](int value) -> bool {
 			return value >= 0;
 		};
-		GetUI().Push(DialogPanel::RequestIntegerWithValidation(&gamerules, &Gamerules::SetNPCMaxMiningTime, validate,
-		                                                       message, gamerules.NPCMaxMiningTime()));
+		GetUI().Push(DialogPanel::RequestIntegerWithValidation(
+		    &gamerules, &Gamerules::SetNPCMaxMiningTime, validate, message, gamerules.NPCMaxMiningTime()));
 	}
 	else if(str == UNIVERSAL_FRUGAL_THRESHOLD)
 	{
-		string message = "Set the universal frugal threshold. (Decimal value between 0 and 1.)";
-		auto validate = [](double value) -> bool {
+		string message  = "Set the universal frugal threshold. (Decimal value between 0 and 1.)";
+		auto   validate = [](double value) -> bool {
 			return value >= 0.0 && value <= 1.0;
 		};
-		GetUI().Push(DialogPanel::RequestDoubleWithValidation(&gamerules, &Gamerules::SetUniversalFrugalThreshold,
-		                                                      validate, message, gamerules.UniversalFrugalThreshold()));
+		GetUI().Push(DialogPanel::RequestDoubleWithValidation(&gamerules,
+		                                                      &Gamerules::SetUniversalFrugalThreshold,
+		                                                      validate,
+		                                                      message,
+		                                                      gamerules.UniversalFrugalThreshold()));
 	}
 	else if(str == UNIVERSAL_RAMSCOOP)
 		gamerules.SetUniversalRamscoopActive(!gamerules.UniversalRamscoopActive());
 	else if(str == SYSTEM_DEPARTURE_MIN)
 	{
-		string message = "Set the minimum system departure distance. (Decimal value greater than or equal to 0.)";
-		auto validate = [](double value) -> bool {
+		string message  = "Set the minimum system departure distance. (Decimal value greater than or equal to 0.)";
+		auto   validate = [](double value) -> bool {
 			return value >= 0.0;
 		};
-		GetUI().Push(DialogPanel::RequestDoubleWithValidation(&gamerules, &Gamerules::SetSystemDepartureMin, validate,
-		                                                      message, gamerules.SystemDepartureMin()));
+		GetUI().Push(DialogPanel::RequestDoubleWithValidation(
+		    &gamerules, &Gamerules::SetSystemDepartureMin, validate, message, gamerules.SystemDepartureMin()));
 	}
 	else if(str == SYSTEM_ARRIVAL_MIN)
 	{
 		string message = "Set the minimum system arrival distance. (Any decimal value.)";
-		GetUI().Push(OptionalInputDialogPanel::RequestDouble(&gamerules, &Gamerules::SetSystemArrivalMin, message,
-		                                                     gamerules.SystemArrivalMin()));
+		GetUI().Push(OptionalInputDialogPanel::RequestDouble(
+		    &gamerules, &Gamerules::SetSystemArrivalMin, message, gamerules.SystemArrivalMin()));
 	}
 	else if(str == HABITABLE_BASED_ARRIVAL_DISTANCE)
 		gamerules.SetHabitableBasedArrivalDistance(!gamerules.HabitableBasedArrivalDistance());
 	else if(str == HABITABLE_ARRIVAL_MIN)
 	{
-		string message = "Set the minimum system arrival distance when the arrival distance is based on the "
-		                 "habitable distance of the system. (Decimal value greater than or equal to 0.)";
-		auto validate = [](double value) -> bool {
+		string message  = "Set the minimum system arrival distance when the arrival distance is based on the "
+		                  "habitable distance of the system. (Decimal value greater than or equal to 0.)";
+		auto   validate = [](double value) -> bool {
 			return value >= 0.0;
 		};
 		GetUI().Push(OptionalInputDialogPanel::RequestDoubleWithValidation(
@@ -969,9 +968,9 @@ void GamerulesPanel::HandleGamerulesString(const string &str)
 	}
 	else if(str == HABITABLE_ARRIVAL_MAX)
 	{
-		string message = "Set the maximum system arrival distance when the arrival distance is based on the "
-		                 "habitable distance of the system. (Decimal value greater than or equal to 0.)";
-		auto validate = [](double value) -> bool {
+		string message  = "Set the maximum system arrival distance when the arrival distance is based on the "
+		                  "habitable distance of the system. (Decimal value greater than or equal to 0.)";
+		auto   validate = [](double value) -> bool {
 			return value >= 0.0;
 		};
 		GetUI().Push(OptionalInputDialogPanel::RequestDoubleWithValidation(
@@ -979,12 +978,12 @@ void GamerulesPanel::HandleGamerulesString(const string &str)
 	}
 	else if(str == FLEET_MULTIPLIER)
 	{
-		string message = "Set the fleet spawn multiplier. (Decimal value greater than or equal to 0.)";
-		auto validate = [](double value) -> bool {
+		string message  = "Set the fleet spawn multiplier. (Decimal value greater than or equal to 0.)";
+		auto   validate = [](double value) -> bool {
 			return value >= 0.0;
 		};
-		GetUI().Push(DialogPanel::RequestDoubleWithValidation(&gamerules, &Gamerules::SetFleetMultiplier, validate,
-		                                                      message, gamerules.FleetMultiplier()));
+		GetUI().Push(DialogPanel::RequestDoubleWithValidation(
+		    &gamerules, &Gamerules::SetFleetMultiplier, validate, message, gamerules.FleetMultiplier()));
 	}
 	else if(str == LOCK_GAMERULES)
 		gamerules.SetLockGamerules(!gamerules.LockGamerules());
@@ -1018,8 +1017,8 @@ void GamerulesPanel::HandleGamerulesString(const string &str)
 	}
 	else if(str == MAX_ESCORT_COUNT)
 	{
-		string message = "Set the default max escort count. (Integer value greater than or equal to 0.)";
-		auto validate = [](int value) -> bool {
+		string message  = "Set the default max escort count. (Integer value greater than or equal to 0.)";
+		auto   validate = [](int value) -> bool {
 			return value >= 0;
 		};
 		GetUI().Push(DialogPanel::RequestIntegerWithValidation(
@@ -1027,21 +1026,21 @@ void GamerulesPanel::HandleGamerulesString(const string &str)
 	}
 	else if(str == MAX_ESCORT_CREW)
 	{
-		string message = "Set the default max escort crew. (Integer value greater than or equal to 0.)";
-		auto validate = [](int value) -> bool {
+		string message  = "Set the default max escort crew. (Integer value greater than or equal to 0.)";
+		auto   validate = [](int value) -> bool {
 			return value >= 0;
 		};
-		GetUI().Push(DialogPanel::RequestIntegerWithValidation(&gamerules, &Gamerules::SetDefaultMaxEscortCrew,
-		                                                       validate, message, gamerules.GetDefaultMaxEscortCrew()));
+		GetUI().Push(DialogPanel::RequestIntegerWithValidation(
+		    &gamerules, &Gamerules::SetDefaultMaxEscortCrew, validate, message, gamerules.GetDefaultMaxEscortCrew()));
 	}
 	else if(str == ADMIN_CAP)
 	{
-		string message = "Set the default administrative capacity. (Integer value greater than or equal to 0.)";
-		auto validate = [](int value) -> bool {
+		string message  = "Set the default administrative capacity. (Integer value greater than or equal to 0.)";
+		auto   validate = [](int value) -> bool {
 			return value >= 0;
 		};
-		GetUI().Push(DialogPanel::RequestIntegerWithValidation(&gamerules, &Gamerules::SetDefaultAdminCap, validate,
-		                                                       message, gamerules.GetDefaultAdminCap()));
+		GetUI().Push(DialogPanel::RequestIntegerWithValidation(
+		    &gamerules, &Gamerules::SetDefaultAdminCap, validate, message, gamerules.GetDefaultAdminCap()));
 	}
 	else if(str == PERMADEATH_MODE)
 	{
@@ -1094,16 +1093,13 @@ void GamerulesPanel::HandleUp(GraphicsTypes::CommandBufferInstance *cb)
 	selectedIndex = max(0, selectedIndex - 1);
 	switch(page)
 	{
-	case 'g':
-		selectedItem = gameruleZones.at(selectedIndex).Value();
-		break;
+	case 'g': selectedItem = gameruleZones.at(selectedIndex).Value(); break;
 	case 'p':
 		selectedPreset = presetZones.at(selectedIndex).Value();
 		RenderPresetDescription(cb, selectedPreset);
 		ScrollSelectedPreset();
 		break;
-	default:
-		break;
+	default: break;
 	}
 }
 
@@ -1115,16 +1111,15 @@ void GamerulesPanel::HandleDown(GraphicsTypes::CommandBufferInstance *cb)
 	{
 	case 'g':
 		selectedIndex = min(selectedIndex + 1, static_cast<int>(gameruleZones.size() - 1));
-		selectedItem = gameruleZones.at(selectedIndex).Value();
+		selectedItem  = gameruleZones.at(selectedIndex).Value();
 		break;
 	case 'p':
-		selectedIndex = min(selectedIndex + 1, static_cast<int>(presetZones.size() - 1));
+		selectedIndex  = min(selectedIndex + 1, static_cast<int>(presetZones.size() - 1));
 		selectedPreset = presetZones.at(selectedIndex).Value();
 		RenderPresetDescription(cb, selectedPreset);
 		ScrollSelectedPreset();
 		break;
-	default:
-		break;
+	default: break;
 	}
 }
 
@@ -1134,14 +1129,9 @@ void GamerulesPanel::HandleConfirm()
 {
 	switch(page)
 	{
-	case 'g':
-		HandleGamerulesString(selectedItem);
-		break;
-	case 'p':
-		SelectPreset(selectedPreset);
-		break;
-	default:
-		break;
+	case 'g': HandleGamerulesString(selectedItem); break;
+	case 'p': SelectPreset(selectedPreset); break;
+	default:  break;
 	}
 }
 

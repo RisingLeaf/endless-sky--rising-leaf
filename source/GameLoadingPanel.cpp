@@ -31,8 +31,8 @@ this program. If not, see <https://www.gnu.org/licenses/>.
 #include "shader/StarField.h"
 
 
-GameLoadingPanel::GameLoadingPanel(PlayerInfo &player, TaskQueue &queue, const Conversation &conversation,
-                                   UI &gamePanels, bool &finishedLoading)
+GameLoadingPanel::GameLoadingPanel(
+    PlayerInfo &player, TaskQueue &queue, const Conversation &conversation, UI &gamePanels, bool &finishedLoading)
     : player(player), queue(queue), conversation(conversation), gamePanels(gamePanels),
       finishedLoading(finishedLoading), loadingCircle(140.f, 60)
 {
