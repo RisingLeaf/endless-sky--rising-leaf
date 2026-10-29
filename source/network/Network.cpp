@@ -38,9 +38,7 @@ namespace {
 	constexpr std::size_t MAX_QUEUED_EVENTS = 4096;
 	constexpr std::size_t MAX_DRAWABLES     = 2048;
 
-	constexpr asl::uint8 ALL_FIELD_MASK = Network::FIELD_SPRITE | Network::FIELD_FRAME | Network::FIELD_POSITION |
-	                                      Network::FIELD_ANGLE | Network::FIELD_ALPHA | Network::FIELD_SWIZZLE |
-	                                      Network::FIELD_SCALE;
+	constexpr asl::uint8 ALL_FIELD_MASK = 255;
 
 	void LogMessage(const std::string_view text)
 	{
@@ -154,6 +152,20 @@ namespace {
 		offset += sizeof(Type);
 
 		return true;
+	}
+
+	// Applies an operation for every entry in BodyInfo that has a flag group annotation
+	template <class F>
+	void OperateOnBodyEntries(F &&rule)
+	{
+		template for(constexpr auto entry : asl::nonstatic_members<Network::BodyInfo>())
+		{
+			if constexpr (asl::has_annotation<Network::BodyInfoFlagGroup, entry>())
+			{
+				constexpr auto flag_group = asl::unique_annotation_of_type<Network::BodyInfoFlagGroup, entry>().Group;
+				rule.template operator()<entry>(flag_group);
+			}
+		}
 	}
 } // namespace
 
@@ -467,8 +479,9 @@ asl::uint16 Network::Server::PackSwizzle(const BodyInfo &info)
 	return swizzlePacked;
 }
 
-Network::Event
-Network::Server::GenerateBodyEvent(const asl::uint64 spriteID, const BodyInfo &info, const asl::uint8 mask)
+Network::Event Network::Server::GenerateBodyEvent(const asl::uint64 spriteID,
+                                                  const BodyInfo   &info,
+                                                  const asl::uint8  mask)
 {
 	Event updateBodyEvent;
 	updateBodyEvent.Type = EventType::SET_DRAWABLE;
@@ -477,26 +490,22 @@ Network::Server::GenerateBodyEvent(const asl::uint64 spriteID, const BodyInfo &i
 
 	WriteSerialized(updateBodyEvent.Data, info.Index);
 
-	if(mask & FIELD_SPRITE)
-		WriteSerialized(updateBodyEvent.Data, spriteID);
-	if(mask & FIELD_FRAME)
-		WriteSerialized(updateBodyEvent.Data, info.frame);
-	if(mask & FIELD_POSITION)
-	{
-		WriteSerialized(updateBodyEvent.Data, info.xpos);
-		WriteSerialized(updateBodyEvent.Data, info.ypos);
-	}
-	if(mask & FIELD_ANGLE)
-		WriteSerialized(updateBodyEvent.Data, info.angle);
-	if(mask & FIELD_ALPHA)
-		WriteSerialized(updateBodyEvent.Data, info.alpha);
-	if(mask & FIELD_SWIZZLE)
-		WriteSerialized(updateBodyEvent.Data, PackSwizzle(info));
-	if(mask & FIELD_SCALE)
-	{
-		WriteSerialized(updateBodyEvent.Data, info.xscale);
-		WriteSerialized(updateBodyEvent.Data, info.yscale);
-	}
+	OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group) {
+		if(mask & (1 << flag_group))
+		{
+			if constexpr(entry == ^^BodyInfo::sprite)
+			{
+				WriteSerialized(updateBodyEvent.Data, spriteID);
+			}
+			else if constexpr(entry == ^^BodyInfo::swizzle)
+			{
+				WriteSerialized(updateBodyEvent.Data, PackSwizzle(info));
+			}
+			else
+				WriteSerialized(updateBodyEvent.Data, info.[:entry:]);
+		}
+	});
+
 	return updateBodyEvent;
 }
 
@@ -517,6 +526,8 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 	              .frame  = body.GetFrame(step),
 	              .xpos   = static_cast<asl::float32>(position.X()),
 	              .ypos   = static_cast<asl::float32>(position.Y()),
+	              .xvel   = static_cast<asl::float32>(body.Velocity().X()),
+	              .yvel   = static_cast<asl::float32>(body.Velocity().Y()),
 	              .angle  = body.Facing().Raw(),
 	              .alpha  = static_cast<float>(1.0 - cloak),
 	              .xscale = static_cast<float>(0.5 * body.Zoom() * body.Scale().X()),
@@ -536,20 +547,12 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 		// Reserve mask space upfront
 		asl::uint8 mask = 0;
 
-		if(info.sprite != existing.sprite)
-			mask |= FIELD_SPRITE;
-		if(info.frame != existing.frame)
-			mask |= FIELD_FRAME;
-		if(info.xpos != existing.xpos || info.ypos != existing.ypos)
-			mask |= FIELD_POSITION;
-		if(info.angle != existing.angle)
-			mask |= FIELD_ANGLE;
-		if(info.alpha != existing.alpha)
-			mask |= FIELD_ALPHA;
-		if(info.swizzle != existing.swizzle)
-			mask |= FIELD_SWIZZLE;
-		if(info.xscale != existing.xscale || info.yscale != existing.yscale)
-			mask |= FIELD_SCALE;
+		OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group) {
+			if(info.[:entry:] != existing.[:entry:])
+			{
+				mask |= 1 << flag_group;
+			}
+		});
 
 		updateBodyEvent = GenerateBodyEvent(spriteID, info, mask);
 
@@ -828,49 +831,41 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 		asl::uint64 spriteID = 0;
 		asl::uint16 swizzlePacked;
 
-		if(mask & FIELD_SPRITE)
-		{
-			if(!ReadSerialized(event.Data, offset, spriteID))
-				return true;
-			if(spriteID >= SpriteByID.size())
-				return true;
-			info.sprite = SpriteByID[spriteID];
-		}
-		if(mask & FIELD_FRAME && !ReadSerialized(event.Data, offset, info.frame))
-			return true;
-		if(mask & FIELD_POSITION)
-		{
-			if(!ReadSerialized(event.Data, offset, info.xpos) || !ReadSerialized(event.Data, offset, info.ypos))
-				return true;
+		bool success = true;
+		OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group){
+			if(mask & (1 << flag_group))
+			{
+				if constexpr(std::meta::type_of(entry) == ^^const Sprite *)
+				{
+					if(!ReadSerialized(event.Data, offset, spriteID))
+						success = false;
+					if(spriteID >= SpriteByID.size())
+						success = false;
+					info.sprite = SpriteByID[spriteID];
+				}
+				else if constexpr(std::meta::type_of(entry) == ^^std::array<bool, 16>)
+				{
+					if(!ReadSerialized(event.Data, offset, swizzlePacked))
+						success = false;
+					for(int i = 0; i < 16; ++i)
+						info.swizzle[i] = (swizzlePacked & (asl::uint16{1} << i)) != 0;
+				}
+				else
+				{
+					if(!ReadSerialized(event.Data, offset, info.[:entry:]))
+						success = false;
+				}
+			}
+		});
 
-			if(!std::isfinite(info.xpos) || !std::isfinite(info.ypos))
-				return true;
-		}
-		if(mask & FIELD_ANGLE && !ReadSerialized(event.Data, offset, info.angle))
+		if(!success)
 			return true;
-		if(mask & FIELD_ALPHA && !ReadSerialized(event.Data, offset, info.alpha))
-			return true;
-		if(mask & FIELD_SWIZZLE)
-		{
-			if(!ReadSerialized(event.Data, offset, swizzlePacked))
-				return true;
-			for(int i = 0; i < 16; ++i)
-				info.swizzle[i] = (swizzlePacked & (asl::uint16{1} << i)) != 0;
-		}
-		if(mask & FIELD_SCALE)
-		{
-			if(!ReadSerialized(event.Data, offset, info.xscale) || !ReadSerialized(event.Data, offset, info.yscale))
-				return true;
 
-			if(!std::isfinite(info.xscale) || !std::isfinite(info.yscale))
-				return true;
-		}
 		if(offset != event.Data.size())
 		{
 			LogMessage("Drawable update contains trailing data.");
 			return true;
 		}
-
 
 		{
 			std::lock_guard guard(BodyMutex);
@@ -917,30 +912,15 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 				return true;
 			}
 
-			if(mask & FIELD_SPRITE)
-				body.sprite = info.sprite;
-			if(mask & FIELD_FRAME)
-				body.frame = info.frame;
 
-			if(mask & FIELD_POSITION)
-			{
-				body.xpos = info.xpos;
-				body.ypos = info.ypos;
-			}
-			if(mask & FIELD_ANGLE)
-				body.angle = info.angle;
-			if(mask & FIELD_ALPHA)
-				body.alpha = info.alpha;
-			if(mask & FIELD_SWIZZLE)
-			{
-				body.swizzle    = info.swizzle;
-				Swizzles[index] = Swizzle(body.swizzle);
-			}
-			if(mask & FIELD_SCALE)
-			{
-				body.xscale = info.xscale;
-				body.yscale = info.yscale;
-			}
+			OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group){
+				if(mask & (1 << flag_group))
+				{
+					body.[:entry:] = info.[:entry:];
+					if constexpr (entry == ^^BodyInfo::swizzle)
+						Swizzles[index] = Swizzle(body.swizzle);
+				}
+			});
 		}
 
 		return true;

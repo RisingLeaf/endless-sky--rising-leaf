@@ -1,5 +1,6 @@
 add_library(EndlessSkyLib OBJECT)
 set_target_properties(EndlessSkyLib PROPERTIES ${ES_CXX_OPTIONS})
+target_compile_options(EndlessSkyLib PUBLIC -freflection)
 
 # Set the appropriate compiler flags.
 target_include_directories(EndlessSkyLib PUBLIC "${LIBMAD_INCLUDE_DIR}")

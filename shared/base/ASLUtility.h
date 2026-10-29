@@ -139,23 +139,25 @@ namespace asl
 
     const auto ProcessParameters = [&]<uint32... Indices>(std::index_sequence<Indices...>)
     {
-      ([&]
-      {
-        if(!success)
-          return;
+      (
+          [&]
+          {
+            if(!success)
+              return;
 
-        using Type  = std::tuple_element_t<Indices, std::tuple<Types...>>;
-        auto parsed = ParseArgument<Type>(argv[Indices + 1]);
+            using Type  = std::tuple_element_t<Indices, std::tuple<Types...>>;
+            auto parsed = ParseArgument<Type>(argv[Indices + 1]);
 
-        if(!parsed)
-        {
-          success = false;
-          error   = parsed.error();
-          return;
-        }
+            if(!parsed)
+            {
+              success = false;
+              error   = parsed.error();
+              return;
+            }
 
-        std::get<Indices>(result) = std::move(*parsed);
-      }(), ...);
+            std::get<Indices>(result) = std::move(*parsed);
+          }(),
+          ...);
     };
     ProcessParameters(std::index_sequence_for<Types...>{});
 
@@ -170,10 +172,39 @@ namespace asl
   {
     auto *result = dynamic_cast<T>(ptr);
     ASLM_DEBUG_ONLY_STATEMENT(
-      if(!result)
-        throw std::runtime_error(std::string("class mismatch, expected ") + typeid(T).name() + ", got " + typeid(*ptr).name());
-    )
+        if(!result) throw std::runtime_error(std::string("class mismatch, expected ") + typeid(T).name() + ", got " + typeid(*ptr).name());)
     return result;
+  }
+
+  // Returns a static array of nonstatic members of T, default access context is current
+  template <class T>
+  consteval auto nonstatic_members(const std::meta::access_context ctx = std::meta::access_context::current())
+  {
+    return std::define_static_array(std::meta::nonstatic_data_members_of(^^T, ctx));
+  }
+
+  // Checks if entry has annotations of type T
+  template <class T, auto entry>
+  consteval bool has_annotation()
+  {
+    constexpr auto annotations = std::define_static_array(std::meta::annotations_of_with_type(entry, ^^T));
+    return !annotations.empty();
+  }
+
+  // Returns an extracted annotation of entry with type T, throws error if annotation was not found or there are more than one
+  template <class T, auto entry>
+  consteval T unique_annotation_of_type()
+  {
+    constexpr auto annotations = std::define_static_array(std::meta::annotations_of_with_type(entry, ^^T));
+    if constexpr(annotations.size() == 1)
+    {
+      constexpr auto annotation = std::meta::extract<T>(annotations[0]);
+      return annotation;
+    }
+    if constexpr(annotations.size() > 1)
+      throw std::invalid_argument("More than one annotation found.");
+
+    throw std::invalid_argument("Annotation not found.");
   }
 
 

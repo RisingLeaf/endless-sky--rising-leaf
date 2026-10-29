@@ -181,3 +181,4 @@ find_package(TBB REQUIRED)
 target_link_libraries(${ASL_LIB_NAME} PRIVATE ${CMAKE_DL_LIBS} TBB::tbb stblib)
 
 set_target_properties(${ASL_LIB_NAME} PROPERTIES ${ASL_CXX_OPTIONS})
+target_compile_options(${ASL_LIB_NAME} PUBLIC -freflection)

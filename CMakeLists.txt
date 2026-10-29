@@ -15,7 +15,7 @@ option(BUILD_TESTING "" ON)
 set(CMAKE_CONFIGURATION_TYPES "Debug" "Release" CACHE STRING "" FORCE)
 
 set(ES_CXX_OPTIONS
-		CXX_STANDARD 23
+		CXX_STANDARD 26
 		CXX_STANDARD_REQUIRED YES
 		CXX_EXTENSIONS NO
 		CMAKE_CXX_EXTENSIONS OFF
@@ -172,6 +172,7 @@ target_link_libraries(EndlessSky PRIVATE ExternalLibraries EndlessSkyLib)
 add_dependencies(EndlessSky Shaders)
 
 set_target_properties(EndlessSky PROPERTIES ${ES_CXX_OPTIONS})
+target_compile_options(EndlessSky PRIVATE -freflection)
 
 if(MINGW AND WIN32)
 	foreach(FILE_PATH ${MINGW_RUNTIME})

@@ -106,24 +106,27 @@ namespace Network {
 		std::queue<Event>         IncomingEvents;
 	};
 
-	constexpr asl::uint8 FIELD_SPRITE   = 1 << 0;
-	constexpr asl::uint8 FIELD_FRAME    = 1 << 1;
-	constexpr asl::uint8 FIELD_POSITION = 1 << 2;
-	constexpr asl::uint8 FIELD_ANGLE    = 1 << 3;
-	constexpr asl::uint8 FIELD_ALPHA    = 1 << 4;
-	constexpr asl::uint8 FIELD_SWIZZLE  = 1 << 5;
-	constexpr asl::uint8 FIELD_SCALE    = 1 << 6;
+
+	struct BodyInfoFlagGroup {
+		const asl::uint8 Group;
+		explicit consteval BodyInfoFlagGroup(const asl::uint8 group) : Group(group)
+		{
+			if(group > 7)
+				throw std::invalid_argument("Flag group must be less than 8");
+		}
+	};
 	struct BodyInfo {
 		bool                 Active = false;
 		std::size_t          Index  = 0;
-		const Sprite        *sprite = nullptr;
-		asl::float32         frame  = 0;
-		asl::float32         xpos = 0, ypos = 0;
-		asl::int32           angle = 0;
-		asl::float32         alpha = 0;
-		std::array<bool, 16> swizzle{}; // We assume a simple swizzle matrix for sake of bandwidth
-		asl::float32         xscale = 0;
-		asl::float32         yscale = 0;
+		[[=BodyInfoFlagGroup(0)]] const Sprite        *sprite = nullptr;
+		[[=BodyInfoFlagGroup(1)]] asl::float32         frame  = 0;
+		[[=BodyInfoFlagGroup(2)]] asl::float32         xpos = 0, ypos = 0;
+		[[=BodyInfoFlagGroup(2)]] asl::float32         xvel = 0, yvel = 0;
+		[[=BodyInfoFlagGroup(3)]] asl::int32           angle = 0;
+		[[=BodyInfoFlagGroup(4)]] asl::float32         alpha = 0;
+		[[=BodyInfoFlagGroup(5)]] std::array<bool, 16> swizzle{}; // We assume a simple swizzle matrix for sake of bandwidth
+		[[=BodyInfoFlagGroup(6)]] asl::float32         xscale = 0;
+		[[=BodyInfoFlagGroup(6)]] asl::float32         yscale = 0;
 	};
 
 	class Server final : public NetworkInterface {

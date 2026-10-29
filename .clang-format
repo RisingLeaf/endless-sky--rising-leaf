@@ -48,6 +48,8 @@ IndentGotoLabels: false
 IndentAccessModifiers: false
 AccessModifierOffset: -4
 
+BreakAfterReturnType: None
+PenaltyReturnTypeOnItsOwnLine: 1000
 
 IndentPPDirectives: None
 
