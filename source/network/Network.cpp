@@ -248,7 +248,6 @@ void Network::NetworkInterface::Stop()
 		EventLoop.join();
 	}
 }
-
 bool Network::NetworkInterface::SendEvent(const Event &event, const bool reliable)
 {
 	if(!Running.load())
@@ -257,7 +256,7 @@ bool Network::NetworkInterface::SendEvent(const Event &event, const bool reliabl
 	if(event.Type == EventType::INVALID)
 		return false;
 
-	if(event.Data.size() + 1 > MAX_PACKET_SIZE)
+	if(event.Data.size() >= MAX_PACKET_SIZE)
 		return false;
 
 	std::lock_guard lock(EventMutex);
@@ -482,26 +481,30 @@ asl::uint16 Network::Server::PackSwizzle(const BodyInfo &info)
 	return swizzlePacked;
 }
 
-void Network::Server::GenerateBodyEvent(const asl::uint64 spriteID, const BodyInfo &info, const asl::uint8 mask)
+void Network::Server::GenerateBodyEvent(std::vector<unsigned char> &destination,
+                                        std::size_t                &count,
+                                        const asl::uint64           spriteID,
+                                        const BodyInfo             &info,
+                                        const asl::uint8            mask)
 {
 	if(mask == 0)
 		return;
-	WriteSerialized(BodyDataToSend, mask);
-	WriteSerialized(BodyDataToSend, info.Index);
+	WriteSerialized(destination, mask);
+	WriteSerialized(destination, info.Index);
 
 	OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group) {
 		if(mask & (1 << flag_group))
 		{
 			if constexpr(entry == ^^BodyInfo::sprite)
-				WriteSerialized(BodyDataToSend, spriteID);
+				WriteSerialized(destination, spriteID);
 			else if constexpr(entry == ^^BodyInfo::swizzle)
-				WriteSerialized(BodyDataToSend, PackSwizzle(info));
+				WriteSerialized(destination, PackSwizzle(info));
 			else
-				WriteSerialized(BodyDataToSend, info.[:entry:]);
+				WriteSerialized(destination, info.[:entry:]);
 		}
 	});
 
-	++BodyCount;
+	++count;
 }
 
 void Network::Server::PushBody(const Body &body, Point position, double cloak, const int step)
@@ -528,7 +531,8 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 	              .xscale = static_cast<float>(0.5 * body.Zoom() * body.Scale().X()),
 	              .yscale = static_cast<float>(0.5 * body.Zoom() * body.Scale().Y())};
 	for(int i = 0; i < 16; i++)
-		info.swizzle[i] = body.GetSwizzle()->MatrixPtr()[i] != 0.0;
+		info.swizzle[i] = body.GetSwizzle()->IsIdentity() ? Swizzle::IDENTITY_MATRIX[i] != 0.0
+		                                                  : body.GetSwizzle()->MatrixPtr()[i] != 0.0;
 
 	if(const auto it = Bodies.find(&body); it != Bodies.end())
 	{
@@ -547,7 +551,7 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 				mask |= 1 << flag_group;
 		});
 
-		GenerateBodyEvent(spriteID, info, mask);
+		GenerateBodyEvent(BodyDataToSend, BodyCount, spriteID, info, mask);
 
 		it->second = info;
 	}
@@ -560,7 +564,7 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 
 		Bodies[&body] = info;
 
-		GenerateBodyEvent(spriteID, info, ALL_FIELD_MASK);
+		GenerateBodyEvent(BodyDataToSend, BodyCount, spriteID, info, ALL_FIELD_MASK);
 	}
 }
 
@@ -570,7 +574,7 @@ void Network::Server::SendToClient()
 	sendBodies.Type = EventType::SET_DRAWABLE;
 	WriteSerialized(sendBodies.Data, BodyCount);
 	sendBodies.Data.append_range(BodyDataToSend);
-	SendEvent(sendBodies);
+	SendEvent(sendBodies, true);
 
 	Event freeUnusedBodies;
 	freeUnusedBodies.Type = EventType::FREE_DRAWABLES;
@@ -610,8 +614,16 @@ void Network::Server::OnPeerConnected(ENetPeer *connectedPeer)
 	for(const auto sprite : SpriteByID)
 		SendSprite(sprite);
 
+
+	std::vector<unsigned char> existing_bodies;
+	std::size_t                existing_count = 0;
 	for(const auto &info : Bodies | std::views::values)
-		GenerateBodyEvent(SpriteIDs[info.sprite], info, ALL_FIELD_MASK);
+		GenerateBodyEvent(existing_bodies, existing_count, SpriteIDs[info.sprite], info, ALL_FIELD_MASK);
+	Event sendBodies;
+	sendBodies.Type = EventType::SET_DRAWABLE;
+	WriteSerialized(sendBodies.Data, existing_count);
+	sendBodies.Data.append_range(existing_bodies);
+	SendEvent(sendBodies, true);
 }
 
 void Network::Server::OnPeerDisconnected(ENetPeer *disconnectedPeer)
@@ -800,12 +812,17 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 	if(event.Type == EventType::SET_DRAWABLE)
 	{
 		std::size_t offset = 0;
-
-		std::size_t count = 0;
+		std::size_t count  = 0;
 
 		if(!ReadSerialized(event.Data, offset, count))
 		{
 			LogMessage("Malformed drawable update header.");
+			return true;
+		}
+
+		if(count > MAX_PACKET_SIZE)
+		{
+			LogMessage("Invalid drawable update count.");
 			return true;
 		}
 
@@ -866,7 +883,7 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 			{
 				std::lock_guard guard(BodyMutex);
 
-				if(index > MAX_DRAWABLES)
+				if(index >= MAX_DRAWABLES)
 				{
 					LogMessage("Drawable index is out of range.");
 					continue;
@@ -894,14 +911,13 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 						continue;
 					}
 
-					if(spriteID >= SpriteByID.size())
+					if(spriteID >= SpriteByID.size() || !info.sprite)
 					{
 						LogMessage("Drawable references an unknown sprite.");
 						continue;
 					}
 
-					body = info;
-
+					body          = info;
 					body.BaseStep = CurrentStep;
 
 					Swizzles[index] = Swizzle(body.swizzle);
@@ -909,7 +925,6 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 					body.Active = true;
 					continue;
 				}
-
 
 				OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group) {
 					if(mask & (1 << flag_group))
@@ -924,24 +939,60 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 			}
 		}
 
+		if(offset != event.Data.size())
+			LogMessage("Unexpected trailing data in drawable update event.");
+
 		return true;
 	}
 	if(event.Type == EventType::FREE_DRAWABLES)
 	{
 		std::size_t offset = 0;
-		std::size_t count;
+		std::size_t count  = 0;
 
 		if(!ReadSerialized(event.Data, offset, count))
 			return true;
 
-		for(std::size_t i = 0; i < count; i++)
+		if(count > MAX_DRAWABLES)
+		{
+			LogMessage("Invalid free drawable count.");
+			return true;
+		}
+
+		std::vector<std::size_t> indices;
+		indices.reserve(count);
+
+		for(std::size_t i = 0; i < count; ++i)
 		{
 			std::size_t indexToFree = 0;
 			if(!ReadSerialized(event.Data, offset, indexToFree))
+			{
+				LogMessage("Malformed free drawable event.");
 				return true;
-			if(indexToFree >= Bodies.size())
-				continue;
-			Bodies[indexToFree].Active = false;
+			}
+
+			if(indexToFree >= MAX_DRAWABLES)
+			{
+				LogMessage("Free drawable index is out of range.");
+				return true;
+			}
+
+			indices.emplace_back(indexToFree);
+		}
+
+		if(offset != event.Data.size())
+		{
+			LogMessage("Unexpected trailing data in free drawable event.");
+			return true;
+		}
+
+		{
+			std::lock_guard guard(BodyMutex);
+
+			for(const std::size_t index : indices)
+			{
+				if(index < Bodies.size())
+					Bodies[index].Active = false;
+			}
 		}
 
 		return true;

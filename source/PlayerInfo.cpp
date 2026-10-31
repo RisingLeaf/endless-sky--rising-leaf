@@ -2306,7 +2306,7 @@ void PlayerInfo::CacheMissionInformation(Mission &mission, const DistanceMap &he
 		int         systemCount = toVisit.size();
 		for(int i = 0; i < systemCount; ++i)
 		{
-			const System *closest;
+			const System *closest = nullptr;
 			int           minimalDist = numeric_limits<int>::max();
 			for(const System *sys : toVisit)
 				if(distance.Days(*sys) < minimalDist)

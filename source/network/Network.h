@@ -148,7 +148,7 @@ namespace Network {
 
 		static asl::uint16 PackSwizzle(const BodyInfo &info);
 
-		void GenerateBodyEvent(asl::uint64 spriteID, const BodyInfo &info, asl::uint8 mask);
+		static void GenerateBodyEvent(std::vector<unsigned char>&destination, size_t&count, asl::uint64 spriteID,const BodyInfo &info,asl::uint8 mask);
 
 		asl::uint64 PushSprite(const Sprite *sprite);
 		void        MarkUnused();
