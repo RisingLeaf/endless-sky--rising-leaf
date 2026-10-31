@@ -38,7 +38,7 @@ namespace {
 	constexpr std::size_t MAX_QUEUED_EVENTS = 4096;
 	constexpr std::size_t MAX_DRAWABLES     = 2048;
 
-	constexpr asl::uint8 ALL_FIELD_MASK = 255;
+	constexpr asl::uint8 ALL_FIELD_MASK = ~0;
 
 	void LogMessage(const std::string_view text)
 	{
@@ -160,10 +160,10 @@ namespace {
 	{
 		template for(constexpr auto entry : asl::nonstatic_members<Network::BodyInfo>())
 		{
-			if constexpr (asl::has_annotation<Network::BodyInfoFlagGroup, entry>())
+			if constexpr(asl::has_annotation<Network::BodyInfoFlagGroup, entry>())
 			{
 				constexpr auto flag_group = asl::unique_annotation_of_type<Network::BodyInfoFlagGroup, entry>().Group;
-				rule.template operator()<entry>(flag_group);
+				rule.template  operator()<entry>(flag_group);
 			}
 		}
 	}
@@ -448,7 +448,7 @@ void Network::Server::SendSprite(const Sprite *const sprite)
 	for(const char c : sprite->Name())
 		WriteSerialized(pushSpriteEvent.Data, c);
 
-	SendEvent(pushSpriteEvent);
+	SendEvent(pushSpriteEvent, true);
 }
 
 asl::uint64 Network::Server::PushSprite(const Sprite *const sprite)
@@ -469,6 +469,9 @@ void Network::Server::MarkUnused()
 {
 	for(auto &info : Bodies | std::views::values)
 		info.Active = false;
+
+	BodyCount = 0;
+	BodyDataToSend.clear();
 }
 
 asl::uint16 Network::Server::PackSwizzle(const BodyInfo &info)
@@ -479,34 +482,26 @@ asl::uint16 Network::Server::PackSwizzle(const BodyInfo &info)
 	return swizzlePacked;
 }
 
-Network::Event Network::Server::GenerateBodyEvent(const asl::uint64 spriteID,
-                                                  const BodyInfo   &info,
-                                                  const asl::uint8  mask)
+void Network::Server::GenerateBodyEvent(const asl::uint64 spriteID, const BodyInfo &info, const asl::uint8 mask)
 {
-	Event updateBodyEvent;
-	updateBodyEvent.Type = EventType::SET_DRAWABLE;
-
-	updateBodyEvent.Data.emplace_back(mask);
-
-	WriteSerialized(updateBodyEvent.Data, info.Index);
+	if(mask == 0)
+		return;
+	WriteSerialized(BodyDataToSend, mask);
+	WriteSerialized(BodyDataToSend, info.Index);
 
 	OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group) {
 		if(mask & (1 << flag_group))
 		{
 			if constexpr(entry == ^^BodyInfo::sprite)
-			{
-				WriteSerialized(updateBodyEvent.Data, spriteID);
-			}
+				WriteSerialized(BodyDataToSend, spriteID);
 			else if constexpr(entry == ^^BodyInfo::swizzle)
-			{
-				WriteSerialized(updateBodyEvent.Data, PackSwizzle(info));
-			}
+				WriteSerialized(BodyDataToSend, PackSwizzle(info));
 			else
-				WriteSerialized(updateBodyEvent.Data, info.[:entry:]);
+				WriteSerialized(BodyDataToSend, info.[:entry:]);
 		}
 	});
 
-	return updateBodyEvent;
+	++BodyCount;
 }
 
 void Network::Server::PushBody(const Body &body, Point position, double cloak, const int step)
@@ -549,16 +544,12 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 
 		OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group) {
 			if(info.[:entry:] != existing.[:entry:])
-			{
 				mask |= 1 << flag_group;
-			}
 		});
 
-		updateBodyEvent = GenerateBodyEvent(spriteID, info, mask);
+		GenerateBodyEvent(spriteID, info, mask);
 
-		// TODO: Accumulate events instead
-		if(mask == 0 || SendEvent(updateBodyEvent, false))
-			it->second = info;
+		it->second = info;
 	}
 	else
 	{
@@ -569,14 +560,18 @@ void Network::Server::PushBody(const Body &body, Point position, double cloak, c
 
 		Bodies[&body] = info;
 
-		const Event updateBodyEvent = GenerateBodyEvent(spriteID, info, ALL_FIELD_MASK);
-
-		SendEvent(updateBodyEvent, true);
+		GenerateBodyEvent(spriteID, info, ALL_FIELD_MASK);
 	}
 }
 
-void Network::Server::FreeUnused()
+void Network::Server::SendToClient()
 {
+	Event sendBodies;
+	sendBodies.Type = EventType::SET_DRAWABLE;
+	WriteSerialized(sendBodies.Data, BodyCount);
+	sendBodies.Data.append_range(BodyDataToSend);
+	SendEvent(sendBodies);
+
 	Event freeUnusedBodies;
 	freeUnusedBodies.Type = EventType::FREE_DRAWABLES;
 
@@ -615,13 +610,8 @@ void Network::Server::OnPeerConnected(ENetPeer *connectedPeer)
 	for(const auto sprite : SpriteByID)
 		SendSprite(sprite);
 
-
 	for(const auto &info : Bodies | std::views::values)
-	{
-		const Event updateBodyEvent = GenerateBodyEvent(SpriteIDs[info.sprite], info, ALL_FIELD_MASK);
-
-		SendEvent(updateBodyEvent, true);
-	}
+		GenerateBodyEvent(SpriteIDs[info.sprite], info, ALL_FIELD_MASK);
 }
 
 void Network::Server::OnPeerDisconnected(ENetPeer *disconnectedPeer)
@@ -751,8 +741,9 @@ std::optional<std::string_view> Network::Client::Connect(const std::string_view 
 	return future.get();
 }
 
-void Network::Client::AddGhosts(DrawList &draws)
+void Network::Client::AddGhosts(DrawList &draws, const int engine_step)
 {
+	CurrentStep = engine_step;
 	std::lock_guard guard(BodyMutex);
 
 	for(const auto &body : Bodies)
@@ -762,8 +753,8 @@ void Network::Client::AddGhosts(DrawList &draws)
 
 		draws.PushRaw(body.sprite,
 		              body.frame,
-		              body.xpos,
-		              body.ypos,
+		              body.xpos + static_cast<asl::float32>(CurrentStep - body.BaseStep) * body.xvel,
+		              body.ypos + static_cast<asl::float32>(CurrentStep - body.BaseStep) * body.yvel,
 		              Angle::FromRaw(body.angle),
 		              body.alpha * 0.1f,
 		              Point(body.xscale, body.yscale),
@@ -810,117 +801,127 @@ bool Network::Client::InterceptEvent(ENetPeer *, const Event &event)
 	{
 		std::size_t offset = 0;
 
-		asl::uint8  mask  = 0;
-		asl::uint64 index = 0;
+		std::size_t count = 0;
 
-		if(!ReadSerialized(event.Data, offset, mask) || !ReadSerialized(event.Data, offset, index))
+		if(!ReadSerialized(event.Data, offset, count))
 		{
 			LogMessage("Malformed drawable update header.");
 			return true;
 		}
 
-		if(mask == 0 || (mask & ~ALL_FIELD_MASK) != 0)
+		for(std::size_t i = 0; i < count; i++)
 		{
-			LogMessage(std::format("Invalid drawable update mask, {}", static_cast<int>(mask)));
-			return true;
-		}
+			asl::uint8  mask  = 0;
+			asl::uint64 index = 0;
 
-		// Decode the fields before acquiring the mutex.
-		BodyInfo info{.Active = true};
-
-		asl::uint64 spriteID = 0;
-		asl::uint16 swizzlePacked;
-
-		bool success = true;
-		OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group){
-			if(mask & (1 << flag_group))
+			if(!ReadSerialized(event.Data, offset, mask) || !ReadSerialized(event.Data, offset, index))
 			{
-				if constexpr(std::meta::type_of(entry) == ^^const Sprite *)
-				{
-					if(!ReadSerialized(event.Data, offset, spriteID))
-						success = false;
-					if(spriteID >= SpriteByID.size())
-						success = false;
-					info.sprite = SpriteByID[spriteID];
-				}
-				else if constexpr(std::meta::type_of(entry) == ^^std::array<bool, 16>)
-				{
-					if(!ReadSerialized(event.Data, offset, swizzlePacked))
-						success = false;
-					for(int i = 0; i < 16; ++i)
-						info.swizzle[i] = (swizzlePacked & (asl::uint16{1} << i)) != 0;
-				}
-				else
-				{
-					if(!ReadSerialized(event.Data, offset, info.[:entry:]))
-						success = false;
-				}
-			}
-		});
-
-		if(!success)
-			return true;
-
-		if(offset != event.Data.size())
-		{
-			LogMessage("Drawable update contains trailing data.");
-			return true;
-		}
-
-		{
-			std::lock_guard guard(BodyMutex);
-
-			if(index > MAX_DRAWABLES)
-			{
-				LogMessage("Drawable index is out of range.");
+				LogMessage("Malformed drawable update header.");
 				return true;
 			}
 
-			if(index >= Bodies.size())
+			if(mask == 0)
 			{
-				Bodies.resize(index, {.Active = false});
-				Swizzles.resize(index);
-			}
-
-			if(index == Bodies.size())
-			{
-				Bodies.emplace_back(BodyInfo{.Active = false});
-				Swizzles.emplace_back();
-			}
-
-			auto &body = Bodies[index];
-
-			if(!body.Active)
-			{
-				if((mask & ALL_FIELD_MASK) != ALL_FIELD_MASK)
-				{
-					LogMessage("Incomplete initial drawable state.");
-					return true;
-				}
-
-				if(spriteID >= SpriteByID.size())
-				{
-					LogMessage("Drawable references an unknown sprite.");
-					return true;
-				}
-
-				body = info;
-
-				Swizzles[index] = Swizzle(body.swizzle);
-
-				body.Active = true;
+				LogMessage(std::format("Invalid drawable update mask, {}", static_cast<int>(mask)));
 				return true;
 			}
 
+			// Decode the fields before acquiring the mutex.
+			BodyInfo info{.Active = true};
 
-			OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group){
+			asl::uint64 spriteID      = 0;
+			asl::uint16 swizzlePacked = 0;
+
+			bool success = true;
+			OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group) {
 				if(mask & (1 << flag_group))
 				{
-					body.[:entry:] = info.[:entry:];
-					if constexpr (entry == ^^BodyInfo::swizzle)
-						Swizzles[index] = Swizzle(body.swizzle);
+					if constexpr(entry == ^^BodyInfo::sprite)
+					{
+						if(!ReadSerialized(event.Data, offset, spriteID) || spriteID >= SpriteByID.size())
+							success = false;
+						else
+							info.sprite = SpriteByID[spriteID];
+					}
+					else if constexpr(entry == ^^BodyInfo::swizzle)
+					{
+						if(!ReadSerialized(event.Data, offset, swizzlePacked))
+							success = false;
+						else
+							for(int j = 0; j < 16; ++j)
+								info.swizzle[j] = (swizzlePacked & (asl::uint16{1} << j)) != 0;
+					}
+					else
+					{
+						if(!ReadSerialized(event.Data, offset, info.[:entry:]))
+							success = false;
+					}
 				}
 			});
+
+			if(!success)
+				return true;
+
+
+			{
+				std::lock_guard guard(BodyMutex);
+
+				if(index > MAX_DRAWABLES)
+				{
+					LogMessage("Drawable index is out of range.");
+					continue;
+				}
+
+				if(index >= Bodies.size())
+				{
+					Bodies.resize(index, {.Active = false});
+					Swizzles.resize(index);
+				}
+
+				if(index == Bodies.size())
+				{
+					Bodies.emplace_back(BodyInfo{.Active = false});
+					Swizzles.emplace_back();
+				}
+
+				auto &body = Bodies[index];
+
+				if(!body.Active)
+				{
+					if((mask & ALL_FIELD_MASK) != ALL_FIELD_MASK)
+					{
+						LogMessage("Incomplete initial drawable state.");
+						continue;
+					}
+
+					if(spriteID >= SpriteByID.size())
+					{
+						LogMessage("Drawable references an unknown sprite.");
+						continue;
+					}
+
+					body = info;
+
+					body.BaseStep = CurrentStep;
+
+					Swizzles[index] = Swizzle(body.swizzle);
+
+					body.Active = true;
+					continue;
+				}
+
+
+				OperateOnBodyEntries([&]<auto entry>(const asl::uint8 flag_group) {
+					if(mask & (1 << flag_group))
+					{
+						body.[:entry:] = info.[:entry:];
+						if constexpr(entry == ^^BodyInfo::swizzle)
+							Swizzles[index] = Swizzle(body.swizzle);
+						if constexpr(entry == ^^BodyInfo::xpos || entry == ^^BodyInfo::ypos)
+							body.BaseStep = CurrentStep;
+					}
+				});
+			}
 		}
 
 		return true;

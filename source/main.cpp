@@ -518,38 +518,42 @@ void GameLoop(
 			// Tell all the panels to step forward, then draw them.
 			((!isDebugPaused && menuPanels.IsEmpty()) ? gamePanels : menuPanels).StepAll();
 
-			MainPanel *mainPanel = static_cast<MainPanel *>(gamePanels.Root().get());
-			if(server)
+			auto mainPanel = static_cast<MainPanel *>(gamePanels.Root().get());
+			if(mainPanel)
 			{
-				while(auto event = server->PollEvent())
+				auto &engine = mainPanel->GetEngine();
+				if(server)
 				{
-					if(event->Type == Network::EventType::TEXT)
-						Messages::Add({std::format("Received message length {}", event->Data.size()),
-						               GameData::MessageCategories().Get("normal")});
+					while(auto event = server->PollEvent())
+					{
+						if(event->Type == Network::EventType::TEXT)
+							Messages::Add({std::format("Received message length {}", event->Data.size()),
+										   GameData::MessageCategories().Get("normal")});
+					}
+
+					server->MarkUnused();
+					for(const auto &ship : engine.Ships())
+						server->PushBody(*ship.get(), ship->Position(), ship->Cloaking(), engine.GetStep());
+					server->SendToClient();
+
+					for(const auto &[Identifier, CurrentInput] : server->GetPeerStates())
+					{
+						engine.GiveCommand(CurrentInput);
+					}
 				}
 
-				server->MarkUnused();
-				for(const auto &ship : mainPanel->GetEngine().Ships())
-					server->PushBody(*ship.get(), ship->Position(), ship->Cloaking(), mainPanel->GetEngine().GetStep());
-				server->FreeUnused();
-
-				for(const auto &[Identifier, CurrentInput] : server->GetPeerStates())
+				if(client)
 				{
-					mainPanel->GetEngine().GiveCommand(CurrentInput);
-				}
-			}
+					while(auto e = client->PollEvent())
+					{
+						if(e->Type == Network::EventType::TEXT)
+							Messages::Add({std::format("Received message length {}", e->Data.size()),
+										   GameData::MessageCategories().Get("normal")});
+					}
+					client->SendEvent(Network::SerializeCommand(engine.ActiveCommands()), false);
 
-			if(client)
-			{
-				while(auto e = client->PollEvent())
-				{
-					if(e->Type == Network::EventType::TEXT)
-						Messages::Add({std::format("Received message length {}", e->Data.size()),
-						               GameData::MessageCategories().Get("normal")});
+					client->AddGhosts(engine.GetDrawList(), engine.GetStep());
 				}
-				client->SendEvent(Network::SerializeCommand(mainPanel->GetEngine().ActiveCommands()), false);
-
-				client->AddGhosts(mainPanel->GetEngine().GetDrawList());
 			}
 
 			// Caps lock slows the frame rate in debug mode.

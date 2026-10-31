@@ -116,8 +116,9 @@ namespace Network {
 		}
 	};
 	struct BodyInfo {
-		bool                 Active = false;
-		std::size_t          Index  = 0;
+		bool                 Active   = false;
+		std::size_t          Index    = 0;
+		int                  BaseStep = 0;
 		[[=BodyInfoFlagGroup(0)]] const Sprite        *sprite = nullptr;
 		[[=BodyInfoFlagGroup(1)]] asl::float32         frame  = 0;
 		[[=BodyInfoFlagGroup(2)]] asl::float32         xpos = 0, ypos = 0;
@@ -146,12 +147,13 @@ namespace Network {
 		void                   SendSprite(const Sprite *sprite);
 
 		static asl::uint16 PackSwizzle(const BodyInfo &info);
-		static Event       GenerateBodyEvent(asl::uint64 spriteID, const BodyInfo &info, asl::uint8 mask);
+
+		void GenerateBodyEvent(asl::uint64 spriteID, const BodyInfo &info, asl::uint8 mask);
 
 		asl::uint64 PushSprite(const Sprite *sprite);
 		void        MarkUnused();
 		void        PushBody(const Body &body, Point position, double cloak, int step);
-		void        FreeUnused();
+		void        SendToClient();
 
 	protected:
 		void OnPeerConnected(ENetPeer *connectedPeer) override;
@@ -161,6 +163,9 @@ namespace Network {
 
 	private:
 		void RunEventLoop();
+
+		size_t BodyCount = 0;
+		std::vector<unsigned char> BodyDataToSend;
 
 		mutable std::mutex                        PeersMutex;
 		std::unordered_map<ENetPeer *, PeerState> Peers;
@@ -182,7 +187,7 @@ namespace Network {
 		static std::expected<std::unique_ptr<Client>, std::string_view> CreateClient();
 		std::optional<std::string_view>                                 Connect(std::string_view address);
 
-		void AddGhosts(DrawList &draws);
+		void AddGhosts(DrawList &draws, int engine_step);
 
 	protected:
 		struct ConnectCommand {
@@ -208,6 +213,8 @@ namespace Network {
 		std::vector<const Sprite *> SpriteByID;
 		std::vector<BodyInfo>       Bodies;
 		std::vector<Swizzle>        Swizzles;
+
+		std::atomic<int> CurrentStep = 0;
 	};
 } // namespace Network
 
